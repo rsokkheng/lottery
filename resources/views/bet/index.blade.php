@@ -73,7 +73,7 @@
         <div class="overflow-auto w-full mx-auto">
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                <tr class="bg-blue-600">
+                <tr class="bg-blue-600 text-white">
                     <th class="border border-gray-300 p-2">No</th>
                     <th class="border border-gray-300 p-2">Number</th>
                     <th class="border border-gray-300 p-2">Digit</th>
