@@ -48,6 +48,9 @@ Route::prefix('oauth/')->group(function(){
     });
 });
 
+Route::get('/lotto_vn/bet',function () {
+    return view('bet.index');
+});
 
 
 // Auth routes
