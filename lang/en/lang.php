@@ -9,5 +9,5 @@ return [
     ],
     'mien-nam' => 'Mien Nam',
     'mien-trung' => 'Mien Trung',
-    'mien-bac' => 'Mien Bac',
+    'mien-bac' => 'Mien Bac & Dien Toan',
 ];

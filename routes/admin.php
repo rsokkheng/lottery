@@ -11,6 +11,7 @@ use App\Http\Controllers\SubCateoryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\LotteryResultController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard',[ProfileController::class,'dashboard'])->name('dashboard');
@@ -30,8 +31,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('/remove-external-img/{id}',[ProductController::class,'removeImage'])->name('remove.image');
 
 
-        Route::resource('lottery-result',\App\Http\Controllers\LotteryResultController::class);
-
+        Route::resource('lottery-result',LotteryResultController::class);
+        Route::get('result/create-mien-nam',[LotteryResultController::class, 'createMienNam'])->name('result.create-mien-nam');
+        Route::get('result/create-mien-trung',[LotteryResultController::class, 'createMienTrung'])->name('result.create-mien-trung');
+        Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
 
 
         # <Language>

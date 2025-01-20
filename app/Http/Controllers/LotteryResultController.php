@@ -64,4 +64,53 @@ class LotteryResultController extends Controller
     {
         //
     }
+
+    public function createMienNam()
+    {
+        $createType = 'mien-nam';
+        $data = [
+            'Giai tam',
+            'Giai bay',
+            'Giai sau',
+            'Giai nam',
+            'Giai tu',
+            'Giai ba',
+            'Giai nhi',
+            'Giai nhat',
+            'Giai Dac Biet'
+        ];
+        return view('admin.lottery-result.create', compact('data','createType'));
+    }
+    public function createMienTrung()
+    {
+        $createType = 'mien-trung';
+        $data = [
+            'Giai tam',
+            'Giai bay',
+            'Giai sau',
+            'Giai nam',
+            'Giai tu',
+            'Giai ba',
+            'Giai nhi',
+            'Giai nhat',
+            'Giai Dac Biet'
+        ];
+        return view('admin.lottery-result.create', compact('data','createType'));
+    }
+    public function createMienBac()
+    {
+        $createType = 'mien-bac';
+        $data = [
+            'Giai tam',
+            'Giai bay',
+            'Giai sau',
+            'Giai nam',
+            'Giai tu',
+            'Giai ba',
+            'Giai nhi',
+            'Giai nhat',
+            'Giai Dac Biet'
+        ];
+        return view('admin.lottery-result.create', compact('data','createType'));
+    }
 }
