@@ -48,9 +48,7 @@ Route::prefix('oauth/')->group(function(){
     });
 });
 
-Route::get('/lotto_vn/bet',function () {
-    return view('bet.index');
-});
+Route::get('/lotto_vn/bet', \App\Livewire\LottoBet::class);
 
 
 // Auth routes
