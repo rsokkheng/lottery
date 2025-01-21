@@ -1,6 +1,4 @@
 <div>
-
-
     <body class="bg-gray-900 p-4 ">
     <div class="grid grid-cols-[20%_78%] gap-4 mx-4 mx-auto bg-white shadow-md py-4 rounded-lg">
         <div class="w-full px-2">
@@ -144,14 +142,16 @@
                         <!--Number-->
                         <td class="border border-gray-300 p-2">
                             <input
-                                    type="number"
+                                    type="text"
                                     id="number"
                                     wire:model.defer="number"
+                                    wire:input="handleInputNumber"
                                     class="w-full h-8 rounded"
+{{--                                    oninput="formatNumberInput(this)"--}}
                             >
                         </td>
                         <!--Digit-->
-                        <td class="border border-gray-300 p-2">-</td>
+                        <td class="border border-gray-300 p-2">{{$digit??"-"}}</td>
                         <!--A-->
                         <td class="border border-gray-300 p-2 ">
                             <div class="flex justify-center items-center">
@@ -159,13 +159,16 @@
                                         type="number"
                                         id="chanelA"
                                         wire:model.defer="chanelA"
-                                        class="w-full h-8 rounded"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="w-full h-8 rounded {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkA"
                                         wire:model.defer="checkA"
-                                        class="rounded-sm h-3 w-3"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                 >
                             </div>
                         </td>
@@ -176,13 +179,17 @@
                                         type="number"
                                         id="chanelB"
                                         wire:model.defer="chanelB"
-                                        class="w-full h-8 rounded"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="w-full h-8 rounded {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkB"
                                         wire:model.defer="checkB"
-                                        class="rounded-sm h-3 w-3"
+                                        :disabled="{{!$enableChanelB}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                             </div>
                         </td>
@@ -193,13 +200,17 @@
                                         type="number"
                                         id="chanelAB"
                                         wire:model.defer="chanelAB"
-                                        class="w-full h-8 rounded"
+                                        :disabled="{{!$enableChanelAB}}"
+                                        class="w-full h-8 rounded {{ $enableChanelAB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkAB"
                                         wire:model.defer="checkAB"
-                                        class="rounded-sm h-3 w-3"
+                                        :disabled="{{!$enableChanelAB}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelAB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                             </div>
                         </td>
@@ -210,12 +221,16 @@
                                         type="number"
                                         id="chanelRoll"
                                         wire:model.defer="chanelRoll"
-                                        class="w-full h-8 rounded"
+                                        :disabled="{{!$enableChanelRoll}}"
+                                        class="w-full h-8 rounded {{ $enableChanelRoll ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input type="checkbox"
                                        id="checkRoll"
                                        wire:model.defer="checkRoll"
-                                       class="rounded-sm h-3 w-3"
+                                       :disabled="{{!$enableChanelRoll}}"
+                                       class="rounded-sm h-3 w-3 {{ $enableChanelRoll ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                             </div>
                         </td>
@@ -226,13 +241,17 @@
                                         type="number"
                                         id="chanelRoll7"
                                         wire:model.defer="chanelRoll7"
-                                        class="w-full h-8 rounded"
+                                        :disabled="{{!$enableChanelRoll7}}"
+                                        class="w-full h-8 rounded {{ $enableChanelRoll7 ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkRoll7"
                                         wire:model.defer="checkRoll7"
-                                        class="rounded-sm h-3 w-3"
+                                        :disabled="{{!$enableChanelRoll7}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelRoll7 ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                             </div>
                         </td>
@@ -360,5 +379,24 @@
     </div>
     </body>
 </div>
+<script>
+    // function formatNumberInput(input) {
+    //     console.log(input);
+    //     let value = input.value.replace(/\D/g, ''); // Remove any non-numeric characters
+    //
+    //     // Split the value into pairs of digits
+    //     let formattedValue = '';
+    //
+    //     for (let i = 0; i < value.length; i += 2) {
+    //         if (i > 0) {
+    //             formattedValue += '#'; // Add separator after every two digits
+    //         }
+    //         formattedValue += value.substr(i, 2); // Add the next pair of digits
+    //     }
+    //
+    //     input.value = formattedValue; // Update input with formatted value
+    // }
+
+</script>
 
 
