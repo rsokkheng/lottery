@@ -1,10 +1,4 @@
-<x-app-layout>
-    {{--    <x-slot name="header">--}}
-    {{--        <h2 class="font-semibold text-xl text-gray-800 leading-tight">--}}
-    {{--            {{ __('Bet') }}--}}
-    {{--        </h2>--}}
-    {{--    </x-slot>--}}
-
+<div>
     <body class="bg-gray-900 p-4 ">
     <div class="grid grid-cols-[20%_78%] gap-4 mx-4 mx-auto bg-white shadow-md py-4 rounded-lg">
         <div class="w-full px-2">
@@ -142,96 +136,240 @@
                 <tbody>
                 @for ($i = 1; $i <= 15; $i++)
                     <tr class="text-center">
+                        <!--No-->
                         <td class="border border-gray-300 p-2">{{ sprintf('%02d', $i) }}</td>
+
+                        <!--Number-->
                         <td class="border border-gray-300 p-2">
-                            <input type="number" class="w-full h-8 rounded">
+                            <input
+                                    type="text"
+                                    id="number"
+                                    wire:model.defer="number"
+                                    wire:input="handleInputNumber"
+                                    class="w-full h-8 rounded"
+{{--                                    oninput="formatNumberInput(this)"--}}
+                            >
                         </td>
-                        <td class="border border-gray-300 p-2">-</td>
+                        <!--Digit-->
+                        <td class="border border-gray-300 p-2">{{$digit??"-"}}</td>
+                        <!--A-->
                         <td class="border border-gray-300 p-2 ">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelA"
+                                        wire:model.defer="chanelA"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="w-full h-8 rounded {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
+                                <input
+                                        type="checkbox"
+                                        id="checkA"
+                                        wire:model.defer="checkA"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                >
                             </div>
                         </td>
+                        <!--B-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelB"
+                                        wire:model.defer="chanelB"
+                                        :disabled="{{!$enableChanelA}}"
+                                        class="w-full h-8 rounded {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
+                                <input
+                                        type="checkbox"
+                                        id="checkB"
+                                        wire:model.defer="checkB"
+                                        :disabled="{{!$enableChanelB}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
                             </div>
                         </td>
+                        <!--A+B-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelAB"
+                                        wire:model.defer="chanelAB"
+                                        :disabled="{{!$enableChanelAB}}"
+                                        class="w-full h-8 rounded {{ $enableChanelAB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
+                                <input
+                                        type="checkbox"
+                                        id="checkAB"
+                                        wire:model.defer="checkAB"
+                                        :disabled="{{!$enableChanelAB}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelAB ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
                             </div>
                         </td>
+                        <!--Roll-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelRoll"
+                                        wire:model.defer="chanelRoll"
+                                        :disabled="{{!$enableChanelRoll}}"
+                                        class="w-full h-8 rounded {{ $enableChanelRoll ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
+                                <input type="checkbox"
+                                       id="checkRoll"
+                                       wire:model.defer="checkRoll"
+                                       :disabled="{{!$enableChanelRoll}}"
+                                       class="rounded-sm h-3 w-3 {{ $enableChanelRoll ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
                             </div>
                         </td>
+                        <!--Roll 7-->
                         <td class="border border-gray-300 p-2 bg-yellow-200">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelRoll7"
+                                        wire:model.defer="chanelRoll7"
+                                        :disabled="{{!$enableChanelRoll7}}"
+                                        class="w-full h-8 rounded {{ $enableChanelRoll7 ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
+                                <input
+                                        type="checkbox"
+                                        id="checkRoll7"
+                                        wire:model.defer="checkRoll7"
+                                        :disabled="{{!$enableChanelRoll7}}"
+                                        class="rounded-sm h-3 w-3 {{ $enableChanelRoll7 ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
+                                >
                             </div>
                         </td>
+                        <!--Roll Parlay-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input type="number" class="w-full h-8 rounded">
-                                <input type="checkbox" class="rounded-sm h-3 w-3">
+                                <input
+                                        type="number"
+                                        id="chanelRollParlay"
+                                        wire:model.defer="chanelRollParlay"
+                                        class="w-full h-8 rounded"
+                                >
+                                <input
+                                        type="checkbox"
+                                        id="checkRollParlay"
+                                        wire:model.defer="checkRollParlay"
+                                        class="rounded-sm h-3 w-3"
+                                >
                             </div>
                         </td>
+                        <!--HN-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkHN"
+                                        wire:model.defer="checkHN"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('HN')}}
                             </div>
                         </td>
+                        <!--TP-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkTP"
+                                        wire:model.defer="checkTP"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('TP')}}
                             </div>
                         </td>
+                        <!--LA-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkLA"
+                                        wire:model.defer="checkLA"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('LA')}}
                             </div>
                         </td>
+                        <!--BP-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkBP"
+                                        wire:model.defer="checkBP"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('BP')}}
                             </div>
                         </td>
+                        <!--HG-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkHG"
+                                        wire:model.defer="checkHG"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('HG')}}
                             </div>
                         </td>
+                        <!--DNA-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkDNA"
+                                        wire:model.defer="checkDNA"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('DNA')}}
                             </div>
                         </td>
+                        <!--QNG-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkQNG"
+                                        wire:model.defer="checkQNG"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 {{__('QNG')}}
                             </div>
                         </td>
+                        <!--DNO-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        id="checkDNO"
+                                        wire:model.defer="checkDNO"
+                                        class="h-3 w-3 rounded-sm"
+                                >
                                 <p> {{__('DNO')}}</p>
                             </div>
 
                         </td>
+                        <!--Total Amount-->
                         <td class="border border-gray-300 p-2">0</td>
                     </tr>
                 @endfor
@@ -240,4 +378,25 @@
         </div>
     </div>
     </body>
-</x-app-layout>
+</div>
+<script>
+    // function formatNumberInput(input) {
+    //     console.log(input);
+    //     let value = input.value.replace(/\D/g, ''); // Remove any non-numeric characters
+    //
+    //     // Split the value into pairs of digits
+    //     let formattedValue = '';
+    //
+    //     for (let i = 0; i < value.length; i += 2) {
+    //         if (i > 0) {
+    //             formattedValue += '#'; // Add separator after every two digits
+    //         }
+    //         formattedValue += value.substr(i, 2); // Add the next pair of digits
+    //     }
+    //
+    //     input.value = formattedValue; // Update input with formatted value
+    // }
+
+</script>
+
+
