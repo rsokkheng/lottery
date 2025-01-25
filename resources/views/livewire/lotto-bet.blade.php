@@ -147,7 +147,7 @@
                                     wire:model.defer="number"
                                     wire:input="handleInputNumber"
                                     class="w-full h-8 rounded"
-{{--                                    oninput="formatNumberInput(this)"--}}
+                                    oninput="formatNumberInput(this)"
                             >
                         </td>
                         <!--Digit-->
@@ -380,22 +380,15 @@
     </body>
 </div>
 <script>
-    // function formatNumberInput(input) {
-    //     console.log(input);
-    //     let value = input.value.replace(/\D/g, ''); // Remove any non-numeric characters
-    //
-    //     // Split the value into pairs of digits
-    //     let formattedValue = '';
-    //
-    //     for (let i = 0; i < value.length; i += 2) {
-    //         if (i > 0) {
-    //             formattedValue += '#'; // Add separator after every two digits
-    //         }
-    //         formattedValue += value.substr(i, 2); // Add the next pair of digits
-    //     }
-    //
-    //     input.value = formattedValue; // Update input with formatted value
-    // }
+    function formatNumberInput(input) {
+        let value = input.value.replace(/[^0-9#]/g, '');
+        let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
+        if (!validFormat.test(value)) {
+            value = value.slice(0, -1);
+         }
+
+        input.value = value;
+    }
 
 </script>
 
