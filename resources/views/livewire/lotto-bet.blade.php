@@ -5,33 +5,34 @@
             <div class="mb-6">
                 <div class="w-full max-w-md mx-auto  rounded-lg">
                     <div class="text-center font-bold py-2">
-                        Day 18 Month 01 Year 2025
+                       {{__('Day 18 Month 01 Year 2025')}}
                     </div>
                     <table class="w-full text-sm border-collapse">
                         <thead>
                         <tr>
-                            <th class="border border-gray-500 px-4 py-2 text-left">Number</th>
-                            <th class="border border-gray-500 px-4 py-2 text-left">Channel</th>
-                            <th class="border border-gray-500 px-4 py-2 text-left">Amount</th>
+                            <th class="border border-gray-500 px-4 py-2 text-left">{{__('Number')}}</th>
+                            <th class="border border-gray-500 px-4 py-2 text-left">{{__('Channel')}}</th>
+                            <th class="border border-gray-500 px-4 py-2 text-left">{{__('Amount')}}</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr>
                             <td colspan="3" class="border border-gray-500 px-4 py-2 text-center">
-                                Không Có Số
+                              {{__('Không Có Số')}}
                             </td>
                         </tr>
                         <tr>
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-                                Total Amount
+                                {{__('Total Amount')}}
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">0 (VND)</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">{{__('0 (VND)')}}</td>
                         </tr>
                         <tr>
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-                                Total Due
+
+                                {{__('Total Due')}}
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">0 (VND)</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">{{__('0 (VND)')}}</td>
                         </tr>
                         </tbody>
                     </table>
@@ -43,12 +44,12 @@
                 <div class="flex pb-2 items-center">
                     <div class="px-2 text-[12px]">Chi Chu:</div>
                     <div>
-                        <span class="border border-gray-500 text-[12px]  px-1 py-1">2so x 75</span>
-                        <span class="border border-gray-500 text-[12px]  px-1 py-1">3so x 650</span>
-                        <span class="border border-gray-500 text-[12px]  px-1 py-1">4so x 6000</span>
+                        <span class="border border-gray-500 text-[12px]  px-1 py-1">{{__('2so x 75')}}</span>
+                        <span class="border border-gray-500 text-[12px]  px-1 py-1">{{__('3so x 650')}}</span>
+                        <span class="border border-gray-500 text-[12px]  px-1 py-1">{{__('4so x 6000')}}</span>
                     </div>
                 </div>
-                <p class="text-[12px] pb-2 text-center font-bold">LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY</p>
+                <p class="text-[12px] pb-2 text-center font-bold">{{__('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY')}}</p>
                 <!-- Print Button -->
                 <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -68,15 +69,15 @@
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
                 <tr class="bg-blue-600 text-white">
-                    <th class="border border-gray-300 p-2">No</th>
-                    <th class="border border-gray-300 p-2">Number</th>
-                    <th class="border border-gray-300 p-2">Digit</th>
-                    <th class="border border-gray-300 p-2">A</th>
-                    <th class="border border-gray-300 p-2">B</th>
-                    <th class="border border-gray-300 p-2">A+B</th>
-                    <th class="border border-gray-300 p-2">Roll</th>
-                    <th class="border border-gray-300 p-2">Roll 7</th>
-                    <th class="border border-gray-300 p-2">Roll Parlay</th>
+                    <th class="border border-gray-300 p-2">{{__('No')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('Number')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('Digit')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('A')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('B')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('A+B')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('Roll')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('Roll 7')}}</th>
+                    <th class="border border-gray-300 p-2">{{__('Roll Parlay')}}</th>
                     <th class="border border-gray-300 p-2">
                         <div class="flex-column">
                             <input type="checkbox" class="h-3 w-3 rounded-sm">
@@ -158,7 +159,7 @@
                                 <input
                                         type="number"
                                         id="chanelA"
-                                        wire:model.defer="chanelA"
+                                        wire:model="chanelA.{{ $i }}"
                                         :disabled="{{!$enableChanelA}}"
                                         class="w-full h-8 rounded {{ $enableChanelA ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
@@ -380,12 +381,13 @@
     </body>
 </div>
 <script>
-    function formatNumberInput(input) {
-        let value = input.value.replace(/[^0-9#]/g, '');
-        let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
+    const formatNumberInput = (input) => {
+        let value = input.value.replace(/[^0-9#*]/g, '');
+        let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2})|(\*)|(\*\d{1})|(\*\d{2})|(\d{1})|(\d{2})|(\d{2}\*)|(\*\d{3})|(\d{3}\*))$/;
+
         if (!validFormat.test(value)) {
             value = value.slice(0, -1);
-         }
+        }
 
         input.value = value;
     }
