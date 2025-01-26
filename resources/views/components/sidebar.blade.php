@@ -43,33 +43,46 @@
                     </p>
                 </a>
             </li>
+
             <li class="nav-item">
-                <a href="{{ route('admin.subcategory.index') }}"
-                    class="nav-link {{ Route::is('admin.subcategory.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-list"></i>
-                    <p>Sub Category
-                        <span class="badge badge-secondary right">{{ $SubCategoryCount }}</span>
+                <a href="{{ route('admin.lottery-result.index') }}"
+                   class="nav-link {{ Route::is('admin.lottery-result.index') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-list-alt"></i>
+                    <p>
+                        {{__('lang.menu.lottery-result')}}
+                        <span class="badge badge-warning right">0</span>
                     </p>
                 </a>
             </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.collection.index') }}"
-                    class="nav-link {{ Route::is('admin.collection.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-file-pdf"></i>
-                    <p>Collection
-                        <span class="badge badge-primary right">{{ $CollectionCount }}</span>
-                    </p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('admin.product.index') }}"
-                    class="nav-link {{ Route::is('admin.product.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-th"></i>
-                    <p>Products
-                        <span class="badge badge-warning right">{{ $ProductCount }}</span>
-                    </p>
-                </a>
-            </li>
+
+
+{{--            <li class="nav-item">--}}
+{{--                <a href="{{ route('admin.subcategory.index') }}"--}}
+{{--                    class="nav-link {{ Route::is('admin.subcategory.index') ? 'active' : '' }}">--}}
+{{--                    <i class="nav-icon fas fa-list"></i>--}}
+{{--                    <p>Sub Category--}}
+{{--                        <span class="badge badge-secondary right">{{ $SubCategoryCount }}</span>--}}
+{{--                    </p>--}}
+{{--                </a>--}}
+{{--            </li>--}}
+{{--            <li class="nav-item">--}}
+{{--                <a href="{{ route('admin.collection.index') }}"--}}
+{{--                    class="nav-link {{ Route::is('admin.collection.index') ? 'active' : '' }}">--}}
+{{--                    <i class="nav-icon fas fa-file-pdf"></i>--}}
+{{--                    <p>Collection--}}
+{{--                        <span class="badge badge-primary right">{{ $CollectionCount }}</span>--}}
+{{--                    </p>--}}
+{{--                </a>--}}
+{{--            </li>--}}
+{{--            <li class="nav-item">--}}
+{{--                <a href="{{ route('admin.product.index') }}"--}}
+{{--                    class="nav-link {{ Route::is('admin.product.index') ? 'active' : '' }}">--}}
+{{--                    <i class="nav-icon fas fa-th"></i>--}}
+{{--                    <p>Products--}}
+{{--                        <span class="badge badge-warning right">{{ $ProductCount }}</span>--}}
+{{--                    </p>--}}
+{{--                </a>--}}
+{{--            </li>--}}
         @endrole
         <li class="nav-item">
             <a href="{{ route('admin.profile.edit') }}"

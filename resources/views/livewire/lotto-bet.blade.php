@@ -5,7 +5,7 @@
             <div class="mb-6">
                 <div class="w-full max-w-md mx-auto  rounded-lg">
                     <div class="text-center font-bold py-2">
-                       {{__('Day 18 Month 01 Year 2025')}}
+                        {{__('Day 18 Month 01 Year 2025')}}
                     </div>
                     <table class="w-full text-sm border-collapse">
                         <thead>
@@ -18,7 +18,7 @@
                         <tbody>
                         <tr>
                             <td colspan="3" class="border border-gray-500 px-4 py-2 text-center">
-                              {{__('Không Có Số')}}
+                                {{__('Không Có Số')}}
                             </td>
                         </tr>
                         <tr>
@@ -381,16 +381,49 @@
     </body>
 </div>
 <script>
-    const formatNumberInput = (input) => {
-        let value = input.value.replace(/[^0-9#*]/g, '');
-        let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2})|(\*)|(\*\d{1})|(\*\d{2})|(\d{1})|(\d{2})|(\d{2}\*)|(\*\d{3})|(\d{3}\*))$/;
+    // const formatNumberInput = (input) => {
+    //     let value = input.value.replace(/[^0-9#*]/g, '');
+    //     let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2})|(\*)|(\*\d{1})|(\*\d{2})|(\d{1})|(\d{2})|(\d{2}\*)|(\*\d{3})|(\d{3}\*))$/;
+    //
+    //     if (!validFormat.test(value)) {
+    //         value = value.slice(0, -1);
+    //     }
+    //
+    //     input.value = value;
+    // }
 
-        if (!validFormat.test(value)) {
-            value = value.slice(0, -1);
+    function formatNumberInput(input) {
+        let value = input.value;
+
+        if (value.includes("#")) {
+            // Allow patterns with # as specified
+            value = value.replace(/[^0-9#]/g, ''); // Remove invalid characters
+            let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
+            if (!validFormat.test(value)) {
+                value = value.slice(0, -1); // Remove the last character if invalid
+            }
+        } else if (value.startsWith("*")) {
+            value = value.replace(/[^0-9\*]/g, ''); // Remove invalid characters
+            // Ensure it starts with * followed by 1 to 3 digits
+            if (!/^\*([0-9]{1,3})?$/.test(value)) {
+                value = value.slice(0, -1); // Remove the last character if invalid
+            }
+        } else if (value.startsWith("*") || value.endsWith("*")) {
+            const validFormat = /^\*?\d{1,3}\*?$/;
+            if (!validFormat.test(value)) {
+                value = value.slice(0, -1); // Remove the last character if invalid
+            }
+        } else {
+            // Fallback for other cases, allow only numbers
+            value = value.replace(/[^0-9]/g, ''); // Remove invalid characters
+            if (value.length > 4) {
+                value = value.slice(0, 4); // Restrict to 4 digits
+            }
         }
 
-        input.value = value;
+        input.value = value; // Update the input value
     }
+
 
 </script>
 
