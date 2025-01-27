@@ -1,45 +1,50 @@
 <x-admin>
     @section('title',__('lang.menu.lottery-result'))
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link {{$createType=='mien-nam' ? 'active' : ''}}" href="{{ route('admin.result.create-mien-nam') }}">{{__('lang.mien-nam')}}</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{$createType=='mien-trung' ? 'active' : ''}}" href="{{ route('admin.result.create-mien-trung') }}">{{__('lang.mien-trung')}}</a>
-        </li>
-        <li class="nav-item {{$createType=='mien-bac' ? 'active' : ''}}">
-            <a class="nav-link" href="{{ route('admin.result.create-mien-bac') }}">{{__('lang.mien-bac')}}</a>
-        </li>
-    </ul>
+    @include('admin.lottery-result.navbar', ['data' => $data])
 
     <!-- Tab panes -->
     <div class="tab-content">
         <div id="home" class="container tab-pane active"><br>
             <div class="px-5" style="width: 100%">
                 <table class="table table-bordered text-center table-striped">
-                <thead class="bg-white">
+                <thead class="bg-white rounded">
                     <tr>
-                        <th class="text-primary text-bold">C.N</th>
-                        <th class="text-primary text-bold">Tien Giang</th>
-                        <th class="text-primary text-bold">Kien Giang</th>
-                        <th class="text-primary text-bold">Da Lat</th>
+                        <th class="text-primary text-bold">{{ $data['current_date'] }}</th>
+                        @foreach($data['lottery_schedule'] as $val)
+                            <th class="text-primary text-bold">{{ $val['province'] }}</th>
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="text-bold">20/01/2025</td>
-                        <td class="text-bold">L: TG-C1</td>
-                        <td class="text-bold">L: 1K3</td>
-                        <td class="text-bold">L: DL1K1</td>
+                        <td class="text-primary">Gian Tam </td>
+                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
+                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
+                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
                     </tr>
-                    @foreach($data as $val)
+                    @foreach($data['form_result'] as $row)
                         <tr>
-                            <td>{{$val}}</td>
-                            <td><input type="text" class="form-control"></td>
-                            <td><input type="text" class="form-control"></td>
-                            <td><input type="text" class="form-control"></td>
+                            <td class="text-primary">{{$row['label']}}</td>
+                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
+                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
+                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
                         </tr>
                     @endforeach
+
+
+{{--                    @foreach($data['lottery_schedule'] as $val)--}}
+{{--                        <td class="text-primary">{{ $val['code'] }}</td>--}}
+{{--                    @endforeach--}}
+
+
+{{--                    @foreach($data as $val)--}}
+{{--                        <tr>--}}
+{{--                            <td>{{$val}}</td>--}}
+{{--                            <td><input type="text" class="form-control"></td>--}}
+{{--                            <td><input type="text" class="form-control"></td>--}}
+{{--                            <td><input type="text" class="form-control"></td>--}}
+{{--                        </tr>--}}
+{{--                    @endforeach--}}
 
                 </tbody>
             </table>

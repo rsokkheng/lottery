@@ -371,7 +371,7 @@
 
                         </td>
                         <!--Total Amount-->
-                        <td class="border border-gray-300 p-2">{{$totalAmounnt}}</td>
+                        <td class="border border-gray-300 p-2">{{$totalAmount}}</td>
                     </tr>
                 @endfor
                 </tbody>

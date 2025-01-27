@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -8,21 +7,22 @@ class LottoBet extends Component
 {
     public $number = [];
     public $digit = [];
-    public $chanelA= [];
-    public $chanelB= [];
-    public $chanelAB= [];
-    public $chanelRoll= [];
-    public $chanelRoll7= [];
-    public $chanelRollParlay= [];
+    public $chanelA = [];
+    public $chanelB = [];
+    public $chanelAB = [];
+    public $chanelRoll = [];
+    public $chanelRoll7 = [];
+    public $chanelRollParlay = [];
 
-//    check chanel
+    // check chanel
     public $checkA = [];
     public $checkB = [];
-    public $checkAB =[];
+    public $checkAB = [];
     public $checkRoll = [];
     public $checkRoll7 = [];
     public $checkRollParlay = [];
-//    check location
+
+    // check location
     public $checkHN = [];
     public $checkTP = [];
     public $checkLA = [];
@@ -31,7 +31,8 @@ class LottoBet extends Component
     public $checkDNA = [];
     public $checkQNG = [];
     public $checkDNO = [];
-    public $totalAmounnt = 0;
+
+    public $totalAmount = 0;
     public $enableChanelA = [];
     public $enableChanelB = [];
     public $enableChanelAB = [];
@@ -41,7 +42,7 @@ class LottoBet extends Component
 
     public function mount()
     {
-
+        // Initialization logic if needed
     }
 
     public function render()
@@ -51,61 +52,34 @@ class LottoBet extends Component
 
     public function handleInputNumber()
     {
-
+        // Loop over each element in the $this->number array
         foreach ($this->number as $key => $value) {
+            // Normalize each number by removing spaces
             $this->number[$key] = str_replace(' ', '', (string)$value);
 
-            $this->handleSimpleBet($this->number[$key], $key);
+            // Now, handle the normalized number for each element individually
+            $normalizedNumber = $this->number[$key];
+
+            // Validate the input number
+            if ($this->isInvalidInput($normalizedNumber)) {
+                $this->resetChanelValues(); // Reset all channel-related values on invalid input
+                return; // Stop processing invalid input
+            }
+
+            if (strpos($normalizedNumber, '#') !== false) {
+                // Handle complex bets with '#' separator
+                $this->handleComplexBet($normalizedNumber, $key);
+            } else {
+                // Handle simple bets
+                $this->handleSimpleBet($normalizedNumber, $key);
+            }
         }
-        
-//    $normalizedNumber = str_replace(' ', '', (string)$this->number);
-//        // Validate input based on specific rules
-//        if ($this->isInvalidInput($normalizedNumber)) {
-//            $this->digit = null;
-//            $this->enableChanelA = false;
-//            $this->enableChanelB = false;
-//            $this->enableChanelAB = false;
-//            $this->enableChanelRoll = false;
-//            $this->enableChanelRoll7 = false;
-//            return; // Stop processing invalid input
-//        }
-//
-//        if (strpos($normalizedNumber, '#') !== false) {
-//            // Handle complex bets with '#' separator
-//            $parts = explode('#', $normalizedNumber);
-//            $length = count($parts);
-//
-//            $this->digit = "RP" . $length;
-//
-//            if ($length >= 2 && $length <= 4) {
-//                $this->enableChanelA = true;
-//                $this->enableChanelB = true;
-//                $this->enableChanelAB = true;
-//                $this->enableChanelRoll = true;
-//                $this->enableChanelRoll7 = false;
-//            } else {
-//                $this->digit = null;
-//                $this->enableChanelA = false;
-//                $this->enableChanelB = false;
-//                $this->enableChanelAB = false;
-//                $this->enableChanelRoll = false;
-//                $this->enableChanelRoll7 = false;
-//            }
-//        } else {
-//            // Handle simple bets without '#' separator
-//            $this->handleSimpleBet($normalizedNumber);
-//        }
     }
 
     private function isInvalidInput($number)
     {
-        // Check if the number is a single digit
-        if (strlen($number) == 1 && is_numeric($number)) {
-            return true;
-        }
-
-        // Check if the number is a five-digit number
-        if (strlen($number) == 5 && ctype_digit($number)) {
+        // Check if the number is a single digit or five digits
+        if (strlen($number) == 1 || (strlen($number) == 5 && ctype_digit($number))) {
             return true;
         }
 
@@ -129,41 +103,83 @@ class LottoBet extends Component
         return false;
     }
 
-    private function handleSimpleBet($number, $index)
+    private function handleSimpleBet($number, $key)
     {
-        // Handle simple bets (2D, 3D, 4D)
         $length = strlen($number);
 
-        if ($length == 2) {
-            $this->digit[$index] = "2D";
-            $this->enableChanelA[$index] = true;
-            $this->enableChanelB[$index] = true;
-            $this->enableChanelAB[$index] = true;
-            $this->enableChanelRoll[$index] = true;
-            $this->enableChanelRoll7[$index] = false;
-        } elseif ($length == 3) {
-            $this->digit[$index] = "3D";
-            $this->enableChanelA[$index] = false;
-            $this->enableChanelB[$index] = false;
-            $this->enableChanelAB[$index] = true;
-            $this->enableChanelRoll[$index] = true;
-            $this->enableChanelRoll7[$index] = true;
-        } elseif ($length == 4) {
-            $this->digit[$index] = "4D";
-            $this->enableChanelA[$index] = false;
-            $this->enableChanelB[$index] = false;
-            $this->enableChanelAB[$index] = false;
-            $this->enableChanelRoll[$index] = true;
-            $this->enableChanelRoll7[$index] = false;
-        } else {
-            $this->digit[$index] = null;
-            $this->enableChanelA[$index] = false;
-            $this->enableChanelB[$index] = false;
-            $this->enableChanelAB[$index] = false;
-            $this->enableChanelRoll[$index] = false;
-            $this->enableChanelRoll7[$index] = false;
+        // Handle bet based on length of the number (2D, 3D, or 4D)
+        switch ($length) {
+            case 2:
+                $this->setBetType($key, "2D", true, true, true, true, false);
+                break;
+            case 3:
+                $this->setBetType($key, "3D", false, false, true, true, true);
+                break;
+            case 4:
+                $this->setBetType($key, "4D", false, false, false, true, false);
+                break;
+            default:
+                $this->resetBetType($key);
         }
     }
 
+    private function handleComplexBet($normalizedNumber, $key)
+    {
+        // Split the normalized number based on the '#' character
+        $parts = explode('#', $normalizedNumber);
+        $length = count($parts);
 
+        // Set bet type based on number of parts
+        $this->digit[$key] = "RP" . $length;
+
+        if ($length >= 2 && $length <= 4) {
+            $this->setBetTypeForComplex($key);
+        } else {
+            $this->resetChanelValues(); // Reset if the number of parts is not valid
+        }
+    }
+
+    private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7)
+    {
+        // Assign bet type and enable/disable channel values for a specific key
+        $this->digit[$key] = $digit;
+        $this->enableChanelA[$key] = $enableA;
+        $this->enableChanelB[$key] = $enableB;
+        $this->enableChanelAB[$key] = $enableAB;
+        $this->enableChanelRoll[$key] = $enableRoll;
+        $this->enableChanelRoll7[$key] = $enableRoll7;
+    }
+
+    private function setBetTypeForComplex($key)
+    {
+        // Enable channels for complex bets for the given index/key
+        $this->enableChanelA[$key] = true;
+        $this->enableChanelB[$key] = true;
+        $this->enableChanelAB[$key] = true;
+        $this->enableChanelRoll[$key] = true;
+        $this->enableChanelRoll7[$key] = false;
+    }
+
+    private function resetBetType($key)
+    {
+        // Reset all bet type values for a specific index/key
+        $this->digit[$key] = null;
+        $this->enableChanelA[$key] = false;
+        $this->enableChanelB[$key] = false;
+        $this->enableChanelAB[$key] = false;
+        $this->enableChanelRoll[$key] = false;
+        $this->enableChanelRoll7[$key] = false;
+        $this->enableChanelRoll7[$key] = false;
+    }
+
+    private function resetChanelValues()
+    {
+        // Reset all channel-related values to their default states
+        $this->enableChanelA = [];
+        $this->enableChanelB = [];
+        $this->enableChanelAB = [];
+        $this->enableChanelRoll = [];
+        $this->enableChanelRoll7 = [];
+        $this->enableChanelRollParlay = [];
+    }
 }
