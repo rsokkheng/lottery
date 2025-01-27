@@ -78,57 +78,14 @@
                     <th class="border border-gray-300 p-2">{{__('Roll')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll 7')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll Parlay')}}</th>
+                    @foreach ($province as $item)
                     <th class="border border-gray-300 p-2">
                         <div class="flex-column">
                             <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('HN')}}
+                            {{ $item['code'] }}
                         </div>
                     </th>
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('TP')}}
-                        </div>
-                    </th>
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('LA')}}
-                        </div>
-                    </th>
-
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('BP')}}
-                        </div>
-                    </th>
-
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('HG')}}
-                        </div>
-                    </th>
-
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('DNA')}}
-                        </div>
-                    </th>
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('QNG')}}
-                        </div>
-                    </th>
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{__('DNO')}}
-                        </div>
-                    </th>
+                    @endforeach
                     <th class="border border-gray-300 p-2">
                         {{__('Total Amount')}}
                     </th>
@@ -273,7 +230,7 @@
                                 >
                             </div>
                         </td>
-                        <!--HN-->
+                        @foreach ($province as $item)
                         <td class="border border-gray-300 p-2">
                             <div class="flex-column">
                                 <input
@@ -282,94 +239,10 @@
                                         wire:model.defer="checkH.{{$i}}"
                                         class="h-3 w-3 rounded-sm"
                                 >
-                                {{__('HN')}}
+                                {{$item['code']}}
                             </div>
                         </td>
-                        <!--TP-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkTP"
-                                        wire:model.defer="checkTP.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('TP')}}
-                            </div>
-                        </td>
-                        <!--LA-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkLA"
-                                        wire:model.defer="checkLA.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('LA')}}
-                            </div>
-                        </td>
-                        <!--BP-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkBP"
-                                        wire:model.defer="checkBP.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('BP')}}
-                            </div>
-                        </td>
-                        <!--HG-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkHG"
-                                        wire:model.defer="checkHG.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('HG')}}
-                            </div>
-                        </td>
-                        <!--DNA-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkDNA"
-                                        wire:model.defer="checkDNA.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('DNA')}}
-                            </div>
-                        </td>
-                        <!--QNG-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkQNG"
-                                        wire:model.defer="checkQNG.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{__('QNG')}}
-                            </div>
-                        </td>
-                        <!--DNO-->
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkDNO"
-                                        wire:model.defer="checkDNO.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                <p> {{__('DNO')}}</p>
-                            </div>
-
-                        </td>
+                        @endforeach
                         <!--Total Amount-->
                         <td class="border border-gray-300 p-2">{{$totalAmount}}</td>
                     </tr>
