@@ -45,8 +45,8 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.lottery-result.index') }}"
-                   class="nav-link {{ Route::is('admin.lottery-result.index') ? 'active' : '' }}">
+                <a href="{{ route('admin.result.index-mien-nam') }}"
+                   class="nav-link {{ Route::is('admin.result.index-mien-nam') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-list-alt"></i>
                     <p>
                         {{__('lang.menu.lottery-result')}}

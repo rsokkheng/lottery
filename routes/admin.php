@@ -32,8 +32,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 
 
         Route::resource('lottery-result',LotteryResultController::class);
+
+        Route::get('result/index-mien-nam',[LotteryResultController::class, 'indexMienNam'])->name('result.index-mien-nam');
         Route::get('result/create-mien-nam',[LotteryResultController::class, 'createMienNam'])->name('result.create-mien-nam');
+
+        Route::get('result/index-mien-trung',[LotteryResultController::class, 'indexMienTrung'])->name('result.index-mien-trung');
         Route::get('result/create-mien-trung',[LotteryResultController::class, 'createMienTrung'])->name('result.create-mien-trung');
+
+        Route::get('result/index-mien-bac',[LotteryResultController::class, 'indexMienBac'])->name('result.index-mien-bac');
         Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
 
 
