@@ -25,14 +25,7 @@ class LottoBet extends Component
     public $checkRollParlay = [];
 
     // check location
-    public $checkHN = [];
-    public $checkTP = [];
-    public $checkLA = [];
-    public $checkBP = [];
-    public $checkHG = [];
-    public $checkDNA = [];
-    public $checkQNG = [];
-    public $checkDNO = [];
+    public $location =[];
 
     public $totalAmount = 0;
     public $enableChanelA = [];
@@ -42,10 +35,11 @@ class LottoBet extends Component
     public $enableChanelRoll7 = [];
     public $enableChanelRollParlay = [];
 
-    public $province;
+    public $province=[];
     public $currentDay;
     public $currentTime;
     public $betLotteryScheduleModel;
+
 
     public function mount()
     {
@@ -53,7 +47,6 @@ class LottoBet extends Component
         $this->betLotteryScheduleModel = new BetLotterySchedule();
         $this->currentDay = Carbon::now()->format('l');
         $this->currentTime = Carbon::now()->format('H:i:s');
-        logger($this->currentTime);
     }
 
     public function render()
@@ -69,6 +62,7 @@ class LottoBet extends Component
 
     public function handleInputNumber()
     {
+        dump($this->location);
         // Loop over each element in the $this->number array
         foreach ($this->number as $key => $value) {
             // Normalize each number by removing spaces

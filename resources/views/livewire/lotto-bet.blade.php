@@ -79,13 +79,14 @@
                     <th class="border border-gray-300 p-2">{{__('Roll 7')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll Parlay')}}</th>
                     @foreach ($province as $item)
-                    <th class="border border-gray-300 p-2">
-                        <div class="flex-column">
-                            <input type="checkbox" class="h-3 w-3 rounded-sm">
-                            {{ $item['code'] }}
-                        </div>
-                    </th>
+                        <th class="border border-gray-300 p-2">
+                            <div class="flex-column">
+                                <input type="checkbox" wire:model="location.{{$item['id']}}" class="h-3 w-3 rounded-sm">
+                                {{ $item['code'] }}
+                            </div>
+                        </th>
                     @endforeach
+
                     <th class="border border-gray-300 p-2">
                         {{__('Total Amount')}}
                     </th>
@@ -137,7 +138,7 @@
                                         type="number"
                                         id="chanelB{{$i}}"
                                         wire:model.defer="chanelB.{{$i}}"
-                                        :disabled ="{{!(isset($enableChanelB[$i]) && $enableChanelB[$i]) ?? true }}"
+                                        :disabled="{{!(isset($enableChanelB[$i]) && $enableChanelB[$i]) ?? true }}"
                                         class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
                                 >
@@ -231,17 +232,16 @@
                             </div>
                         </td>
                         @foreach ($province as $item)
-                        <td class="border border-gray-300 p-2">
-                            <div class="flex-column">
-                                <input
-                                        type="checkbox"
-                                        id="checkHN"
-                                        wire:model.defer="checkH.{{$i}}"
-                                        class="h-3 w-3 rounded-sm"
-                                >
-                                {{$item['code']}}
-                            </div>
-                        </td>
+                            <td class="border border-gray-300 p-2">
+                                <div class="flex-column">
+                                    <input
+                                            type="checkbox"
+{{--                                            wire:model.defer="checkH.{{$i}}"--}}
+                                            class="h-3 w-3 rounded-sm"
+                                    >
+                                    {{$item['code']}}
+                                </div>
+                            </td>
                         @endforeach
                         <!--Total Amount-->
                         <td class="border border-gray-300 p-2">{{$totalAmount}}</td>
