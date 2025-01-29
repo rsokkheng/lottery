@@ -135,19 +135,32 @@ class LottoBet extends Component
 
     private function handleComplexBet($normalizedNumber, $key)
     {
-        // Split the normalized number based on the '#' character
         $parts = explode('#', $normalizedNumber);
-        $length = count($parts);
+        $length = count($parts); // Number of parts
 
-        // Set bet type based on number of parts
-        $this->digit[$key] = "RP" . $length;
-
+        // Check if all four parts are identical
+        if ($length === 4 && count(array_unique($parts)) === 1) {
+            $this->digit[$key] = '-'; // Set to '-' if fully identical
+            $this->checkRollParlay[$key] = false; // Uncheck the checkbox
+            return;
+        }
+        if ($length === 4 && count(array_unique($parts)) === 4) {
+            dd( $key);
+            $this->checkRollParlay[$key] = true; // Uncheck the checkbox
+        }
+        // Ensure enableChanelRollParlay is set to true
+        $this->enableChanelRollParlay[$key] = true;
+        // Validate complex bet length (allow RP2, RP3, RP4)
         if ($length >= 2 && $length <= 4) {
+            $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
         } else {
-            $this->resetChanelValues(); // Reset if the number of parts is not valid
+            $this->digit[$key] = '-'; // Invalid case
+            $this->checkRollParlay[$key] = false; // Uncheck the checkbox
+            $this->resetChanelValues();
         }
     }
+
 
     private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7,$chanelRollParlay)
     {
@@ -163,7 +176,6 @@ class LottoBet extends Component
 
     private function setBetTypeForComplex($key)
     {
-        // Enable channels for complex bets for the given index/key
         $this->enableChanelA[$key] = false;
         $this->enableChanelB[$key] = false;
         $this->enableChanelAB[$key] = false;

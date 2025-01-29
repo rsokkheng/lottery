@@ -102,6 +102,7 @@
                         <td class="border border-gray-300 p-2">
                             <input
                                     type="text"
+                                    autocomplete="off"
                                     id="number{{$i}}"
                                     wire:model.defer="number.{{$i}}"
                                     wire:input="handleInputNumber"
@@ -218,19 +219,18 @@
                                         type="number"
                                         id="chanelRollParlay"
                                         wire:model.defer="chanelRollParlay.{{$i}}"
-                                        {{isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ?'': 'disabled'}}
-                                        class="w-full h-8 rounded {{ isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                       {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
+                                        class="w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
                                 >
                                 <input
-                                        type="checkbox"
-                                        id="checkRollParlay"
-                                        wire:model.defer="checkRollParlay.{{$i}}"
-                                        {{isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ?'': 'disabled'}}
-                                        class="rounded-sm h-3 w-3 {{ isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i]? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                type="checkbox"
+                                id="checkRollParlay"
+                                wire:model.defer="checkRollParlay.{{$i}}"
+                                {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
+                                class="rounded-sm h-3 w-3 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                            >
 
-                                >
-                              
                             </div>
                         </td>
                         @foreach ($province as $item)
