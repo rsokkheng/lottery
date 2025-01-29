@@ -120,13 +120,13 @@ class LottoBet extends Component
         // Handle bet based on length of the number (2D, 3D, or 4D)
         switch ($length) {
             case 2:
-                $this->setBetType($key, "2D", true, true, true, true, false);
+                $this->setBetType($key, "2D", true, true, true, true, false,false);
                 break;
             case 3:
-                $this->setBetType($key, "3D", false, false, true, true, true);
+                $this->setBetType($key, "3D", false, false, true, true, true,false);
                 break;
             case 4:
-                $this->setBetType($key, "4D", false, false, false, true, false);
+                $this->setBetType($key, "4D", false, false, false, true, false,false);
                 break;
             default:
                 $this->resetBetType($key);
@@ -149,7 +149,7 @@ class LottoBet extends Component
         }
     }
 
-    private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7)
+    private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7,$chanelRollParlay)
     {
         // Assign bet type and enable/disable channel values for a specific key
         $this->digit[$key] = $digit;
@@ -158,16 +158,18 @@ class LottoBet extends Component
         $this->enableChanelAB[$key] = $enableAB;
         $this->enableChanelRoll[$key] = $enableRoll;
         $this->enableChanelRoll7[$key] = $enableRoll7;
+        $this->enableChanelRollParlay[$key] = $chanelRollParlay;
     }
 
     private function setBetTypeForComplex($key)
     {
         // Enable channels for complex bets for the given index/key
-        $this->enableChanelA[$key] = true;
-        $this->enableChanelB[$key] = true;
-        $this->enableChanelAB[$key] = true;
-        $this->enableChanelRoll[$key] = true;
+        $this->enableChanelA[$key] = false;
+        $this->enableChanelB[$key] = false;
+        $this->enableChanelAB[$key] = false;
+        $this->enableChanelRoll[$key] = false;
         $this->enableChanelRoll7[$key] = false;
+        $this->enableChanelRollParlay[$key] = true;
     }
 
     private function resetBetType($key)
@@ -179,7 +181,7 @@ class LottoBet extends Component
         $this->enableChanelAB[$key] = false;
         $this->enableChanelRoll[$key] = false;
         $this->enableChanelRoll7[$key] = false;
-        $this->enableChanelRoll7[$key] = false;
+        $this->enableChanelRollParlay[$key] = false;
     }
 
     private function resetChanelValues()

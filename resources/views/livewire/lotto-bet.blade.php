@@ -134,23 +134,20 @@
                         <!--B-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input
-                                        type="number"
-                                        id="chanelB{{$i}}"
-                                        wire:model.defer="chanelB.{{$i}}"
-                                        :disabled="{{!(isset($enableChanelB[$i]) && $enableChanelB[$i]) ?? true }}"
-                                        class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                            <input
+                                type="number"
+                                id="chanelB{{$i}}"
+                                wire:model.defer="chanelB.{{$i}}"
+                                :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
+                                class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
-                                >
-                                <input
-                                        type="checkbox"
-                                        id="checkB{{$i}}"
-                                        wire:model.defer="checkB.{{$i}}"
-                                        {{isset($enableChanelB[$i]) && $enableChanelB[$i] ? '':'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                            <input
+                                type="checkbox"
+                                id="checkB{{$i}}"
+                                wire:model.defer="checkB.{{$i}}"
+                                :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
+                                class="rounded-sm h-3 w-3 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
-                                >
-                            </div>
                         </td>
                         <!--A+B-->
                         <td class="border border-gray-300 p-2">
@@ -217,18 +214,23 @@
                         <!--Roll Parlay-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
-                                <input
+                            <input
                                         type="number"
                                         id="chanelRollParlay"
                                         wire:model.defer="chanelRollParlay.{{$i}}"
-                                        class="w-full h-8 rounded"
+                                        {{isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ?'': 'disabled'}}
+                                        class="w-full h-8 rounded {{ isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
                                 <input
                                         type="checkbox"
-                                        id="checkRollParlay.{{$i}}"
-                                        wire:model.defer="checkRollParlay"
-                                        class="rounded-sm h-3 w-3"
+                                        id="checkRollParlay"
+                                        wire:model.defer="checkRollParlay.{{$i}}"
+                                        {{isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i] ?'': 'disabled'}}
+                                        class="rounded-sm h-3 w-3 {{ isset($enablechanelRollParlay[$i]) && $enablechanelRollParlay[$i]? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+
                                 >
+                              
                             </div>
                         </td>
                         @foreach ($province as $item)
