@@ -145,7 +145,7 @@ class LottoBet extends Component
             return;
         }
         if ($length === 4 && count(array_unique($parts)) === 4) {
-            dd( $key);
+            //TODO: auto checked 
             $this->checkRollParlay[$key] = true; // Uncheck the checkbox
         }
         // Ensure enableChanelRollParlay is set to true
