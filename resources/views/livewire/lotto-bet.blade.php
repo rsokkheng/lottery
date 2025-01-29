@@ -116,19 +116,20 @@
                         <td class="border border-gray-300 p-2 ">
                             <div class="flex justify-center items-center">
                                 <input
-                                        type="number"
+                                        type="text"
                                         id="chanelA{{$i}}"
+                                        wire:input="handleInputNumber"
                                         wire:model="chanelA.{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
-
+                                        oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkA{{$i}}"
                                         wire:model.defer="checkA.{{$i}}"
                                         {{ isset($enableChanelA[$i]) && !$enableChanelA[$i] ? 'disabled' : '' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="rounded-sm h-5 w-5 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                 >
                             </div>
                         </td>
@@ -136,37 +137,38 @@
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
                             <input
-                                type="number"
+                               type="text"
                                 id="chanelB{{$i}}"
                                 wire:model.defer="chanelB.{{$i}}"
                                 :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
-                                class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                oninput="formatNumberValue(this)">
 
                             <input
                                 type="checkbox"
                                 id="checkB{{$i}}"
                                 wire:model.defer="checkB.{{$i}}"
                                 :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
-                                class="rounded-sm h-3 w-3 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                class="rounded-sm h-5 w-5 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
                         </td>
                         <!--A+B-->
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
                                 <input
-                                        type="number"
+                                       type="text"
                                         id="chanelAB{{$i}}"
                                         wire:model.defer="chanelAB.{{$i}}"
                                         {{isset($enableChanelAB[$i]) && $enableChanelAB[$i] ?'':'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i]  ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
-
+                                        oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkAB.{{$i}}"
                                         wire:model.defer="checkAB.{{$i}}"
                                         {{isset($enableChanelAB[$i]) && $enableChanelAB[$i] ?'': 'disabled'}}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="rounded-sm h-5 w-5 {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
                                 >
                             </div>
@@ -175,18 +177,18 @@
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
                                 <input
-                                        type="number"
+                                       type="text"
                                         id="chanelRoll"
                                         wire:model.defer="chanelRoll.{{$i}}"
                                         {{isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ?'': 'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
-
+                                        oninput="formatNumberValue(this)"
                                 >
                                 <input type="checkbox"
                                        id="checkRoll"
                                        wire:model.defer="checkRoll.{{$i}}"
                                        {{isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ?'': 'disabled'}}
-                                       class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                       class="rounded-sm h-5 w-5 {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
                                 >
                             </div>
@@ -195,19 +197,19 @@
                         <td class="border border-gray-300 p-2 bg-yellow-200">
                             <div class="flex justify-center items-center">
                                 <input
-                                        type="number"
+                                       type="text"
                                         id="chanelRoll7"
                                         wire:model.defer="chanelRoll7.{{$i}}"
                                         {{isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ?'': 'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
-
+                                        oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
                                         id="checkRoll7"
                                         wire:model.defer="checkRoll7.{{$i}}"
                                         {{isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ?'': 'disabled'}}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i]? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="rounded-sm h-5 w-5 {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i]? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
                                 >
                             </div>
@@ -216,19 +218,19 @@
                         <td class="border border-gray-300 p-2">
                             <div class="flex justify-center items-center">
                             <input
-                                        type="number"
+                                       type="text"
                                         id="chanelRollParlay"
                                         wire:model.defer="chanelRollParlay.{{$i}}"
                                        {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
-
+                                        oninput="formatNumberValue(this)"
                                 >
                                 <input
                                 type="checkbox"
                                 id="checkRollParlay"
                                 wire:model.defer="checkRollParlay.{{$i}}"
                                 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
-                                class="rounded-sm h-3 w-3 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                class="rounded-sm h-5 w-5 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                             >
 
                             </div>
@@ -256,19 +258,13 @@
     </body>
 </div>
 <script>
-    // const formatNumberInput = (input) => {
-    //     let value = input.value.replace(/[^0-9#*]/g, '');
-    //     let validFormat = /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2})|(\*)|(\*\d{1})|(\*\d{2})|(\d{1})|(\d{2})|(\d{2}\*)|(\*\d{3})|(\d{3}\*))$/;
-    //
-    //     if (!validFormat.test(value)) {
-    //         value = value.slice(0, -1);
-    //     }
-    //     if (value.length > 4) {
-    //         value = value.slice(0, 4); // Restrict to 4 digits
-    //     }
-    //
-    //     input.value = value;
-    // }
+   const formatNumberValue = (input) => {
+        let value = input.value.replace(/[^0-9]/g, ''); // Allow only digits (0-9)
+        if (value.length > 5) {
+            value = value.slice(0, 5); // Restrict to 4 digits
+        }
+        input.value = value; // Update the input value with the formatted number
+    }
 
     function formatNumberInput(input) {
         let value = input.value;
