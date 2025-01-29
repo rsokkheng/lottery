@@ -62,7 +62,6 @@ class LottoBet extends Component
 
     public function handleInputNumber()
     {
-        dump($this->location);
         // Loop over each element in the $this->number array
         foreach ($this->number as $key => $value) {
             // Normalize each number by removing spaces
