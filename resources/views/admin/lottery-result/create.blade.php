@@ -4,56 +4,43 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div id="home" class="container tab-pane active"><br>
+        <div id="mien-nam" class="container tab-pane active">
             <div class="px-5" style="width: 100%">
-                <table class="table table-bordered text-center table-striped">
-                <thead class="bg-white rounded">
-                    <tr>
-                        <th class="text-primary text-bold">{{ $data['current_date'] }}</th>
-                        @foreach($data['lottery_schedule'] as $val)
-                            <th class="text-primary text-bold">{{ $val['province'] }}</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="text-primary">Gian Tam </td>
-                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
-                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
-                        <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
-                    </tr>
-                    @foreach($data['form_result'] as $row)
+                <h4 class="py-2">Entry result of {{$data['type']}}</h4>
+
+                <table class="table table-bordered rounded-lg text-center table-striped" style="width: 100%">
+                    <thead class="bg-dark">
                         <tr>
-                            <td class="text-primary">{{$row['label']}}</td>
-                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
-                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
-                            <td class="text-blue">GianTam-TG-Date-Number-Oder</td>
+                            <td class="text-white ">{{ $data['current_date'] }}</td>
+                            @foreach($data['form_result']['schedule'] as $val)
+                                    <td class="text-white ">{{ $val['province'] }}</td>
+                            @endforeach
                         </tr>
-                    @endforeach
+                    </thead>
+                    <tbody>
+                        @foreach($data['form_result']['result'] as $prize)
+                            <tr>
+                                <td class=" text-white">{{ $prize['prize_label'] }}</td>
+                                @foreach($prize['provinces'] as $province)
+                                    <td class="text-primary">
+                                        @foreach($province['row_result'] as $row)
+                                            <div class="p-2">
+                                                <input type="text" class="form-control" placeholder="{{ $row['result_order'] }}" aria-label="Winning number" >
+                                            </div>
+                                        @endforeach
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
 
-
-{{--                    @foreach($data['lottery_schedule'] as $val)--}}
-{{--                        <td class="text-primary">{{ $val['code'] }}</td>--}}
-{{--                    @endforeach--}}
-
-
-{{--                    @foreach($data as $val)--}}
-{{--                        <tr>--}}
-{{--                            <td>{{$val}}</td>--}}
-{{--                            <td><input type="text" class="form-control"></td>--}}
-{{--                            <td><input type="text" class="form-control"></td>--}}
-{{--                            <td><input type="text" class="form-control"></td>--}}
-{{--                        </tr>--}}
-{{--                    @endforeach--}}
-
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div id="menu1" class="container tab-pane fade"><br>
+        <div id="mien-trung" class="container tab-pane fade"><br>
             Create Mien Trung
         </div>
-        <div id="menu2" class="container tab-pane fade"><br>
+        <div id="mien-bac" class="container tab-pane fade"><br>
             Create Mien Bac
         </div>
     </div>

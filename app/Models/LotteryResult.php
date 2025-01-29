@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class LotteryResult extends Model
 {
     use HasFactory;
-    protected $table = 'lottery_results';
+    protected $table = 'bet_lottery_results';
     protected $guarded = '';
 }

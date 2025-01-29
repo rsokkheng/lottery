@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class LotterySchedule extends Model
 {
     use HasFactory;
-    protected $table = 'lottery_schedule';
+    protected $table = 'bet_lottery_schedule';
     protected $guarded = '';
 }

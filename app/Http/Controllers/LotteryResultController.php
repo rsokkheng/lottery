@@ -14,8 +14,8 @@ class LotteryResultController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public $currentDate;
-    public $currentDayName;
+    public string $currentDate;
+    public string $currentDayName;
     public function __construct()
     {
         $this->currentDate = Carbon::today()->format('d/m/Y');
@@ -142,28 +142,27 @@ class LotteryResultController extends Controller
         $result = [];
         foreach ($prizes as $key=>$prize) {
             foreach ($schedule as $item) {
-                $result[$key]['label'] = $prize['name'];
+                $result[$key]['prize_label'] = $prize['name'];
+                $result[$key]['provinces'][$item['code']]['province_code'] = $item['code'];
+                $result[$key]['provinces'][$item['code']]['province_name'] = $item['province'];
                 for($i=0; $i<$prize['order_count']; $i++){
-//                    $result[$key][$item['code']]['label'] = $item['province'];
-                    $result[$key][$item['code']][$i]['prize_level'] = $key;
-                    $result[$key][$item['code']][$i]['draw_date'] = $dateFormatted;
-                    $result[$key][$item['code']][$i]['result_order'] = $i+1;
-                    $result[$key][$item['code']][$i]['draw_date'] = $dateFormatted;
-                    $result[$key][$item['code']][$i]['province_code'] = $item['code'];
+                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['prize_level'] = $key;
+                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
+                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_order'] = $i+1;
+                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
                     if(!empty($getResult)){
                         foreach ($getResult as $val){
-                            if($val['result_order'] === $result[$key][$item['code']][$i]['result_order']){
-                                $result[$key][$item['code']][$i]['result_id'] = $val['result_id'];
-                                $result[$key][$item['code']][$i]['winning_number'] = $val['winning_number'];
+                            if($val['result_order'] === $i+1){
+                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id'];
+                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number'];
                             }
                         }
                     }
                 }
             }
         }
-//        dd($result);
-        return $result;
+        return ['result'=>$result, 'schedule'=>$schedule];
     }
 
     public function indexMienNam()
@@ -182,20 +181,17 @@ class LotteryResultController extends Controller
     public function createMienNam()
     {
         $formResult = $this->getMergeResult($this->currentDate, HelperEnum::MienNamSlug->value);
-//        dd($formResult);
-        $result = LotteryResult::query()->get()->toArray();
         $data = [
             'type' => HelperEnum::MienNamSlug->value,
             'url' => [
                 'create' => 'admin.result.create-mien-nam',
                 'index' => 'admin.result.index-mien-nam'
             ],
-            'lottery_schedule' => $this->getCurrentScheduleResultFilter($this->currentDayName, HelperEnum::MienNamSlug->value),
             'current_date'=> $this->currentDate,
             'form_result' => $formResult
         ];
-
-        return view('admin.lottery-result.create', compact('data','result'));
+//        dd($data);
+        return view('admin.lottery-result.create', compact('data'));
     }
 
     public function indexMienTrung()
@@ -212,24 +208,15 @@ class LotteryResultController extends Controller
     }
     public function createMienTrung()
     {
-        $getData = [
-            'Giai tam',
-            'Giai bay',
-            'Giai sau',
-            'Giai nam',
-            'Giai tu',
-            'Giai ba',
-            'Giai nhi',
-            'Giai nhat',
-            'Giai Dac Biet'
-        ];
+        $formResult = $this->getMergeResult($this->currentDate, HelperEnum::MienNamSlug->value);
         $data = [
             'type' => HelperEnum::MienTrungSlug->value,
             'url' => [
                 'create' => 'admin.result.create-mien-trung',
                 'index' => 'admin.result.index-mien-trung'
             ],
-            'data' => $getData
+            'current_date'=> $this->currentDate,
+            'form_result' => $formResult
         ];
         return view('admin.lottery-result.create', compact('data'));
     }
