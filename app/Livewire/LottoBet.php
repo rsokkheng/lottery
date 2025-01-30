@@ -67,7 +67,6 @@ class LottoBet extends Component
     public function handleCheckLocation($index)
     {
         $this->locationBody = array_replace($this->locationBody, [$index => true]);
-        dd($this->locationBody[$index]);
     }
 
     public function handleInputNumber()
