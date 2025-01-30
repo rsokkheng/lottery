@@ -15,7 +15,7 @@
                             <th class="border border-gray-500 px-4 py-2 text-left">{{__('Amount')}}</th>
                         </tr>
                         </thead>
-                        <tbody>
+                         <tbody>
                         <tr>
                             <td colspan="3" class="border border-gray-500 px-4 py-2 text-center">
                                 {{__('Không Có Số')}}
@@ -78,10 +78,14 @@
                     <th class="border border-gray-300 p-2">{{__('Roll')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll 7')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll Parlay')}}</th>
-                    @foreach ($province as $item)
+                    @foreach ($province as $key=>$item)
                         <th class="border border-gray-300 p-2">
                             <div class="flex-column">
-                                <input type="checkbox" wire:model="location.{{$item['id']}}" class="h-3 w-3 rounded-sm">
+                                <input
+                                        type="checkbox"
+                                        wire:click="handleCheckLocation({{ $key }})"
+                                        wire:model="location.{{$item['id']}}"
+                                        class="h-3 w-3 rounded-sm">
                                 {{ $item['code'] }}
                             </div>
                         </th>
@@ -235,12 +239,13 @@
 
                             </div>
                         </td>
-                        @foreach ($province as $item)
+
+                        @foreach ($province as $key => $item)
                             <td class="border border-gray-300 p-2">
                                 <div class="flex-column">
                                     <input
                                             type="checkbox"
-{{--                                            wire:model.defer="checkH.{{$i}}"--}}
+                                           wire:model.defer="$locationBody.{{$key}}"
                                             class="h-3 w-3 rounded-sm"
                                     >
                                     {{$item['code']}}

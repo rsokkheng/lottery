@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use App\Models\BetLotterySchedule;
@@ -25,7 +26,8 @@ class LottoBet extends Component
     public $checkRollParlay = [];
 
     // check location
-    public $location =[];
+    public $location = [];
+    public $locationBody = [];
 
     public $totalAmount = 0;
     public $enableChanelA = [];
@@ -35,7 +37,7 @@ class LottoBet extends Component
     public $enableChanelRoll7 = [];
     public $enableChanelRollParlay = [];
 
-    public $province=[];
+    public $province = [];
     public $currentDay;
     public $currentTime;
     public $betLotteryScheduleModel;
@@ -52,12 +54,20 @@ class LottoBet extends Component
     public function render()
     {
 
-       $this->province= $this->betLotteryScheduleModel
-           ->where('draw_day','=',$this->currentDay)
-           ->where('draw_time','>=',$this->currentTime)
-           ->get(['id','code']);
+        $this->province = $this->betLotteryScheduleModel
+            ->where('draw_day', '=', $this->currentDay)
+            ->where('draw_time', '>=', $this->currentTime)
+            ->get(['id', 'code']);
+    
 
+        $this->locationBody = array_fill(0, count($this->province), false);
         return view('livewire.lotto-bet');
+    }
+
+    public function handleCheckLocation($index)
+    {
+        $this->locationBody = array_replace($this->locationBody, [$index => true]);
+        dd($this->locationBody[$index]);
     }
 
     public function handleInputNumber()
@@ -120,13 +130,13 @@ class LottoBet extends Component
         // Handle bet based on length of the number (2D, 3D, or 4D)
         switch ($length) {
             case 2:
-                $this->setBetType($key, "2D", true, true, true, true, false,false);
+                $this->setBetType($key, "2D", true, true, true, true, false, false);
                 break;
             case 3:
-                $this->setBetType($key, "3D", false, false, true, true, true,false);
+                $this->setBetType($key, "3D", false, false, true, true, true, false);
                 break;
             case 4:
-                $this->setBetType($key, "4D", false, false, false, true, false,false);
+                $this->setBetType($key, "4D", false, false, false, true, false, false);
                 break;
             default:
                 $this->resetBetType($key);
@@ -162,7 +172,7 @@ class LottoBet extends Component
     }
 
 
-    private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7,$chanelRollParlay)
+    private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7, $chanelRollParlay)
     {
         // Assign bet type and enable/disable channel values for a specific key
         $this->digit[$key] = $digit;
@@ -206,4 +216,6 @@ class LottoBet extends Component
         $this->enableChanelRoll7 = [];
         $this->enableChanelRollParlay = [];
     }
+
+   
 }
