@@ -13,7 +13,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> @yield('title', 'Admin') | {{ config('app.name') }}</title>
+    <title>@yield('title', 'Admin') | {{ config('app.name') }}</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="{{ asset('admin/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     @yield('css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed {{ Auth::user()->mode }}-mode">
