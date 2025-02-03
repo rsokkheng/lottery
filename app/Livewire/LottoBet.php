@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\BetLotterySchedule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class LottoBet extends Component
@@ -49,10 +50,6 @@ class LottoBet extends Component
         $this->betLotteryScheduleModel = new BetLotterySchedule();
         $this->currentDay = Carbon::now()->format('l');
         $this->currentTime = Carbon::now()->format('H:i:s');
-    }
-
-    public function render()
-    {
 
         $this->province = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
@@ -61,12 +58,21 @@ class LottoBet extends Component
     
 
         $this->locationBody = array_fill(0, count($this->province), false);
+    }
+
+
+    public function render()
+    {
+
+        
         return view('livewire.lotto-bet');
     }
 
     public function handleCheckLocation($index)
     {
-        $this->locationBody = array_replace($this->locationBody, [$index => true]);
+    
+         $this->locationBody = array_replace($this->locationBody, [$index => true]);
+    
     }
 
     public function handleInputNumber()
@@ -216,5 +222,11 @@ class LottoBet extends Component
         $this->enableChanelRollParlay = [];
     }
 
+    public function handleSave()
+    {
+        foreach ($this->number as $key => $value) {
+            Log::info('Number: ' . $value);
+        }
+    }
    
 }
