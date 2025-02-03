@@ -42,6 +42,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('result/index-mien-bac',[LotteryResultController::class, 'indexMienBac'])->name('result.index-mien-bac');
         Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
 
+        Route::post('result/store-winning-result',[LotteryResultController::class, 'storeWinningResult'])->name('result.store-winning-result');
+
+
+        Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
+
 
         # <Language>
         Route::get('/set-lang/{locale}', function (string $locale) {
