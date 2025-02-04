@@ -1,6 +1,53 @@
+
 <div>
-    <body class="bg-gray-900 p-4 ">
-    <div class="grid grid-cols-[20%_78%] gap-4 mx-4 mx-auto bg-white shadow-md py-4 rounded-lg">
+   
+     {{-- Option 1: Using Alpine.js --}}
+{{-- <div x-data="{ checkboxA: false, checkboxB: false }">
+    <div class="mb-4">
+        <label class="inline-flex items-center">S
+            <input type="checkbox" 
+                   x-model="checkboxA"
+                   @change="if(checkboxA) checkboxB = true"
+                   class="form-checkbox">
+            <span class="ml-2">Checkbox A</span>
+        </label>
+    </div>
+
+    <div class="mb-4">
+        <label class="inline-flex items-center">
+            <input type="checkbox" 
+                   x-model="checkboxB"
+                   class="form-checkbox">
+            <span class="ml-2">Checkbox B</span>
+        </label>
+    </div>
+</div> --}}
+
+{{-- Option 2: Using Plain JavaScript --}}
+{{-- <div>
+    <div class="mb-4">
+        <label class="inline-flex items-center">
+            <input type="checkbox" 
+                   id="lheckboxA"
+                   onchange="document.getElementById('locationB').checked = this.checked"
+                   class="form-checkbox">
+            <span class="ml-2">Checkbox A</span>
+        </label>
+    </div>
+
+    <div class="mb-4">
+        <label class="inline-flex items-center">
+            <input type="checkbox" 
+                   id="locationB"
+                   class="form-checkbox">
+            <span class="ml-2">Checkbox B</span>
+        </label>
+    </div>
+</div>
+   --}}
+    
+
+    <div class="grid grid-cols-[20%_78%] gap-4 mx-auto bg-white shadow-md py-4 rounded-lg">
         <div class="w-full px-2">
             <div class="mb-6">
                 <div class="w-full max-w-md mx-auto  rounded-lg">
@@ -51,7 +98,7 @@
                 </div>
                 <p class="text-[12px] pb-2 text-center font-bold">{{__('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY')}}</p>
                 <!-- Print Button -->
-                <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <button wire:click="handleSave" class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                          stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -83,8 +130,10 @@
                             <div class="flex-column">
                                 <input
                                         type="checkbox"
+                                        id="locationA"
                                         wire:click="handleCheckLocation({{ $key }})"
-                                        wire:model="location.{{$item['id']}}"
+                                         {{-- onchange="document.getElementById('locationBody.{{ $key }}').checked = this.checked" --}}
+                                        wire:model="location.{{$key}}"
                                         class="h-3 w-3 rounded-sm">
                                 {{ $item['code'] }}
                             </div>
@@ -125,7 +174,7 @@
                                         wire:input="handleInputNumber"
                                         wire:model="chanelA.{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
-                                        class="w-full h-8 rounded {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input
@@ -239,19 +288,19 @@
 
                             </div>
                         </td>
-
                         @foreach ($province as $key => $item)
-                            <td class="border border-gray-300 p-2">
+                            <td  class="border border-gray-300 p-2">
                                 <div class="flex-column">
                                     <input
                                             type="checkbox"
-                                           wire:model.defer="$locationBody.{{$key}}"
+                                            wire:model="locationBody.{{$key}}"
                                             class="h-3 w-3 rounded-sm"
                                     >
                                     {{$item['code']}}
                                 </div>
                             </td>
                         @endforeach
+                    
                         <!--Total Amount-->
                         <td class="border border-gray-300 p-2">{{$totalAmount}}</td>
                     </tr>
@@ -262,6 +311,7 @@
     </div>
     </body>
 </div>
+
 <script>
    const formatNumberValue = (input) => {
         let value = input.value.replace(/[^0-9]/g, ''); // Allow only digits (0-9)
