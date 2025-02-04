@@ -14,7 +14,7 @@
                             <table class="table table-bordered rounded-lg text-center table-striped" style="width: 100%">
                                 <thead class="bg-dark">
                                     <tr>
-                                        <td class="text-white ">
+                                        <td class="text-white">
                                             {{ $data['current_date'] }}
                                             <input type="hidden" id="result-show-type" value="{{$data['type']}}">
                                             <input type="hidden" id="url-index-page" value="{{route($data['url']['index'])}}">
@@ -34,7 +34,8 @@
                                             @foreach($prize['provinces'] as $province)
                                                 <td class="text-primary">
                                                     @foreach($province['row_result'] as $row)
-                                                        <div class="p-1">
+                                                        <div class="p-1 d-flex">
+                                                            <p class="pr-2 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
                                                             <input type="text"
                                                                    name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                    value="{{ $row['winning_number']??''}}"
@@ -62,7 +63,6 @@
 
 
     @section('js')
-
         <script>
             $(function(){
 
@@ -115,7 +115,7 @@
                         }
                     });
                     if(isInvalid){
-                        alert('Invalid input data!');
+                        toastr.warning('Invalid input');
                         $("#btnSaveResult").prop("disabled",false);
                         return;
                     }
@@ -133,17 +133,17 @@
                         success: function (response) {
                             console.log(response)
                             if(response.success){
-                                alert('Data has been saved!');
+                                toastr.success('Save successfully!');
                                 setTimeout(()=>{
                                     window.location = $("#url-index-page").val();
                                 }, 800)
                             }else{
-                                alert('Data error input!');
+                                toastr.warning('Invalid input!');
                                 $("#btnSaveResult").prop("disabled",false);
                             }
                         },
                         error: function (xhr) {
-                            alert(xhr?.statusText);
+                            toastr.warning(xhr?.statusText);
                             $("#btnSaveResult").prop("disabled",false);
                         }
                     });
