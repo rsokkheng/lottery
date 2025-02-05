@@ -217,7 +217,7 @@ class LotteryResultController extends Controller
             ];
             return view('admin.lottery-result.create', compact('data'));
         }catch (\Exception $exception){
-            Log::error($exception->getMessage());
+            throwException($exception);
             return $exception->getMessage();
         }
     }
@@ -258,7 +258,6 @@ class LotteryResultController extends Controller
             ]);
         }catch (\Exception $e){
             DB::rollBack();
-//            dd($e->getMessage());
             throwException($e);
             return response()->json([
                 'success' => false,
@@ -281,21 +280,27 @@ class LotteryResultController extends Controller
     }
     public function createMienTrung(Request $request)
     {
-        $filterDate = $request['date']??$this->currentDate;
-        $formResult = $this->getMergeResult($filterDate, HelperEnum::MienTrungSlug->value);
-        $data = [
-            'type' => HelperEnum::MienTrungSlug->value,
-            'url' => [
-                'create' => 'admin.result.create-mien-trung',
-                'index' => 'admin.result.index-mien-trung'
-            ],
-            'current_date'=> $filterDate,
-            'form_result' => $formResult
-        ];
-        return view('admin.lottery-result.create', compact('data'));
+        try {
+            $filterDate = $request['date'] ?? $this->currentDate;
+            if (!$this->isValidDateRequest($filterDate)) {
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($filterDate, HelperEnum::MienTrungSlug->value);
+            $data = [
+                'type' => HelperEnum::MienTrungSlug->value,
+                'url' => [
+                    'create' => 'admin.result.create-mien-trung',
+                    'index' => 'admin.result.index-mien-trung'
+                ],
+                'current_date' => $filterDate,
+                'form_result' => $formResult
+            ];
+            return view('admin.lottery-result.create', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
-
-
 
     public function indexMienBac()
     {
@@ -311,18 +316,26 @@ class LotteryResultController extends Controller
     }
     public function createMienBac(Request $request)
     {
-        $filterDate = $request['date']??$this->currentDate;
-        $formResult = $this->getMergeResult($filterDate, HelperEnum::MienBacDienToanSlug->value);
-        $data = [
-            'type' => HelperEnum::MienBacDienToanSlug->value,
-            'url' => [
-                'create' => 'admin.result.create-mien-bac',
-                'index' => 'admin.result.index-mien-bac'
-            ],
-            'current_date'=> $filterDate,
-            'form_result' => $formResult
-        ];
-        return view('admin.lottery-result.create', compact('data'));
+        try {
+            $filterDate = $request['date'] ?? $this->currentDate;
+            if (!$this->isValidDateRequest($filterDate)) {
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($filterDate, HelperEnum::MienBacDienToanSlug->value);
+            $data = [
+                'type' => HelperEnum::MienBacDienToanSlug->value,
+                'url' => [
+                    'create' => 'admin.result.create-mien-bac',
+                    'index' => 'admin.result.index-mien-bac'
+                ],
+                'current_date' => $filterDate,
+                'form_result' => $formResult
+            ];
+            return view('admin.lottery-result.create', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
 
     public function getBetResultBy($date, $region)
