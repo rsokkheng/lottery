@@ -159,10 +159,7 @@ class LottoBet extends Component
             $this->checkRollParlay[$key] = false; // Uncheck the checkbox
             return;
         }
-        if ($length === 4 && count(array_unique($parts)) === 4) {
-            //TODO: auto checked 
-            $this->checkRollParlay[$key] = true; // Uncheck the checkbox
-        }
+     
         // Ensure enableChanelRollParlay is set to true
         $this->enableChanelRollParlay[$key] = true;
         // Validate complex bet length (allow RP2, RP3, RP4)
