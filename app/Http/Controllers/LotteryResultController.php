@@ -8,6 +8,7 @@ use App\Models\LotterySchedule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use function PHPUnit\Framework\throwException;
 
@@ -78,19 +79,32 @@ class LotteryResultController extends Controller
         //Hello world
     }
 
-    public function getPrizeLevel(): array
+    public function getPrizeLevel($region): array
     {
-        return [
-            "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2],
-            "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3],
-            "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4],
-            "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4],
-            "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5],
-            "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5],
-            "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5],
-            "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5],
-            "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6]
-        ];
+        if($region === HelperEnum::MienBacDienToanSlug->value){
+            return [
+                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1],
+                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1],
+                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5, "col_count"=>2, "row_count"=>1],
+                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5, "col_count"=>3, "row_count"=>2],
+                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>4, "input_length" => 4, "col_count"=>2, "row_count"=>2],
+                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>6, "input_length" => 4, "col_count"=>3, "row_count"=>2],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 3, "col_count"=>1, "row_count"=>1],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>4, "input_length" => 2, "col_count"=>1, "row_count"=>1],
+            ];
+        }else{
+            return [
+                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4],
+                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4],
+                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5],
+                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5],
+                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5],
+                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5],
+                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6]
+            ];
+        }
     }
 
     public function getCurrentScheduleResultFilter($day, $regionSlug, $provinceCode = null): array
@@ -126,8 +140,8 @@ class LotteryResultController extends Controller
 
     public function getMergeResult($date, $region): array
     {
-        $prizes = $this->getPrizeLevel();
 //        $region =  HelperEnum::MienNamSlug->value;
+        $prizes = $this->getPrizeLevel($region);
         $dateFormatted = Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
 //        $dateFormatted = '2025-01-16';
         $day = Carbon::parse($dateFormatted)->dayName;
@@ -145,6 +159,10 @@ class LotteryResultController extends Controller
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_order'] = $i+1;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['input_length'] = $prize['input_length'];
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
+                    if($region === HelperEnum::MienBacDienToanSlug->value){
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['col_count'] = $prize['col_count'];
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['row_count'] = $prize['row_count'];
+                    }
                     $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
                     if(count($getResult)>0){
                         foreach ($getResult as $val){
@@ -161,11 +179,11 @@ class LotteryResultController extends Controller
         return ['result'=>$result, 'schedule'=>$schedule];
     }
 
-    public function getListGroupResult($region){
-        $result = LotterySchedule::query()
-            ->where('region_slug',$region)->get();
-
+    public function isValidDateRequest($date) {
+        $carbonDate = Carbon::createFromFormat('d/m/Y', $date);
+        return $carbonDate && $carbonDate->format('d/m/Y') === $date;
     }
+
 
     public function indexMienNam()
     {
@@ -182,18 +200,26 @@ class LotteryResultController extends Controller
 
     public function createMienNam(Request $request)
     {
-        $filterDate = $request['date']??$this->currentDate;
-        $formResult = $this->getMergeResult($filterDate, HelperEnum::MienNamSlug->value);
-        $data = [
-            'type' => HelperEnum::MienNamSlug->value,
-            'url' => [
-                'create' => 'admin.result.create-mien-nam',
-                'index' => 'admin.result.index-mien-nam'
-            ],
-            'current_date'=> $filterDate,
-            'form_result' => $formResult
-        ];
-        return view('admin.lottery-result.create', compact('data'));
+        try {
+            $filterDate = $request['date'] ?? $this->currentDate;
+            if(!$this->isValidDateRequest($filterDate)){
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($filterDate, HelperEnum::MienNamSlug->value);
+            $data = [
+                'type' => HelperEnum::MienNamSlug->value,
+                'url' => [
+                    'create' => 'admin.result.create-mien-nam',
+                    'index' => 'admin.result.index-mien-nam'
+                ],
+                'current_date' => $filterDate,
+                'form_result' => $formResult
+            ];
+            return view('admin.lottery-result.create', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
 
     public function storeWinningResult(Request $request)
@@ -232,14 +258,12 @@ class LotteryResultController extends Controller
             ]);
         }catch (\Exception $e){
             DB::rollBack();
-//            dd($e->getMessage());
             throwException($e);
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
-
     }
 
     public function indexMienTrung()
@@ -256,21 +280,27 @@ class LotteryResultController extends Controller
     }
     public function createMienTrung(Request $request)
     {
-        $filterDate = $request['date']??$this->currentDate;
-        $formResult = $this->getMergeResult($filterDate, HelperEnum::MienTrungSlug->value);
-        $data = [
-            'type' => HelperEnum::MienTrungSlug->value,
-            'url' => [
-                'create' => 'admin.result.create-mien-trung',
-                'index' => 'admin.result.index-mien-trung'
-            ],
-            'current_date'=> $filterDate,
-            'form_result' => $formResult
-        ];
-        return view('admin.lottery-result.create', compact('data'));
+        try {
+            $filterDate = $request['date'] ?? $this->currentDate;
+            if (!$this->isValidDateRequest($filterDate)) {
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($filterDate, HelperEnum::MienTrungSlug->value);
+            $data = [
+                'type' => HelperEnum::MienTrungSlug->value,
+                'url' => [
+                    'create' => 'admin.result.create-mien-trung',
+                    'index' => 'admin.result.index-mien-trung'
+                ],
+                'current_date' => $filterDate,
+                'form_result' => $formResult
+            ];
+            return view('admin.lottery-result.create', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
-
-
 
     public function indexMienBac()
     {
@@ -284,28 +314,28 @@ class LotteryResultController extends Controller
         ];
         return view('admin.lottery-result.index',compact('data'));
     }
-    public function createMienBac()
+    public function createMienBac(Request $request)
     {
-        $getData = [
-            'Giai tam',
-            'Giai bay',
-            'Giai sau',
-            'Giai nam',
-            'Giai tu',
-            'Giai ba',
-            'Giai nhi',
-            'Giai nhat',
-            'Giai Dac Biet'
-        ];
-        $data = [
-            'type' => HelperEnum::MienBacDienToanSlug->value,
-            'url' => [
-                'create' => 'admin.result.create-mien-bac',
-                'index' => 'admin.result.index-mien-bac'
-            ],
-            'data' => $getData
-        ];
-        return view('admin.lottery-result.create', compact('data'));
+        try {
+            $filterDate = $request['date'] ?? $this->currentDate;
+            if (!$this->isValidDateRequest($filterDate)) {
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($filterDate, HelperEnum::MienBacDienToanSlug->value);
+            $data = [
+                'type' => HelperEnum::MienBacDienToanSlug->value,
+                'url' => [
+                    'create' => 'admin.result.create-mien-bac',
+                    'index' => 'admin.result.index-mien-bac'
+                ],
+                'current_date' => $filterDate,
+                'form_result' => $formResult
+            ];
+            return view('admin.lottery-result.create', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
 
     public function getBetResultBy($date, $region)
