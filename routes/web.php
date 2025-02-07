@@ -26,8 +26,9 @@ Route::prefix('/otp')->middleware( 'guest')->name('otp.')->controller(LoginWithO
     Route::post('login/verification','loginWithOtp')->name('loginWithOtp');
 });
 
-
-Route::get('/lotto_vn/bet', \App\Livewire\LottoBet::class);
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/lotto_vn/bet', \App\Livewire\LottoBet::class);
+});
 
 
 // Auth routes

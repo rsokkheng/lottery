@@ -115,7 +115,8 @@
         <div class="overflow-auto w-full mx-auto">
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                <tr class="bg-blue-600 text-white">
+                    <span><small>Time Left:</small> 10:11:36 (HN)08:08:36 (VL)08:13:37 (BD)08:05:37 (TV)09:10:37 (GL)09:10:37 (NT)</span>
+                <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
                     <th class="border border-gray-300 p-2">{{__('No')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Number')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Digit')}}</th>
