@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Bet;
 use App\Models\BetLotterySchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -9,28 +10,33 @@ use Livewire\Component;
 
 class LottoBet extends Component
 {
+    protected $betModel;
+    protected $betLotteryScheduleModel;
+
+    // set the total row to 15
+    public $totalRow = 15; 
+
+    // define properties
     public $number = [];
     public $digit = [];
-    public $chanelA = [];
-    public $chanelB = [];
-    public $chanelAB = [];
-    public $chanelRoll = [];
-    public $chanelRoll7 = [];
-    public $chanelRollParlay = [];
+    public $a_amount = [];
+    public $b_amount = [];
+    public $ab_amount = [];
+    public $roll_amount = [];
+    public $roll7_amount = [];
+    public $roll_parlay_amount = [];
+    public $total_amount = 0;
 
-    // check chanel
-    public $checkA = [];
-    public $checkB = [];
-    public $checkAB = [];
-    public $checkRoll = [];
-    public $checkRoll7 = [];
-    public $checkRollParlay = [];
+    public $a_check = [];
+    public $b_check = [];
+    public $ab_check = [];
+    public $roll_check = [];
+    public $roll7_check = [];
+    public $roll_parlay_check = [];
 
-    // check location
-    public $location = [];
-    public $locationBody = [];
+    public $province_check = [];
+    public $province_body_ckeck = [];
 
-    public $totalAmount = 0;
     public $enableChanelA = [];
     public $enableChanelB = [];
     public $enableChanelAB = [];
@@ -41,13 +47,14 @@ class LottoBet extends Component
     public $province = [];
     public $currentDay;
     public $currentTime;
-    public $betLotteryScheduleModel;
 
 
-    public function mount()
+
+    public function mount(Bet $betModel, BetLotterySchedule $betLotteryScheduleModel)
     {
         // Initialization logic if needed
-        $this->betLotteryScheduleModel = new BetLotterySchedule();
+        $this->betLotteryScheduleModel = $betLotteryScheduleModel;
+        $this->betModel = $betModel;
         $this->currentDay = Carbon::now()->format('l');
         $this->currentTime = Carbon::now()->format('H:i:s');
 
@@ -57,13 +64,12 @@ class LottoBet extends Component
             ->get(['id', 'code']);
     
 
-        $this->locationBody = array_fill(0, count($this->province), false);
+        $this->province_body_ckeck = array_fill(0, count($this->province), false);
     }
 
 
     public function render()
     {
-
         
         return view('livewire.lotto-bet');
     }
@@ -71,7 +77,7 @@ class LottoBet extends Component
     public function handleCheckLocation($index)
     {
     
-         $this->locationBody = array_replace($this->locationBody, [$index => true]);
+         $this->province_body_ckeck = array_replace($this->province_body_ckeck, [$index => true]);
     
     }
 
@@ -222,7 +228,17 @@ class LottoBet extends Component
     public function handleSave()
     {
         foreach ($this->number as $key => $value) {
-            Log::info('Number: ' . $value);
+            $data = [
+                'user_id' => '12',
+                'bet_schedule_id' => 1,
+                'bet_package_config_id' => 1,
+                'number_format' => $value,
+                'digit_format' => $this->digit[$key],
+                'total_amount' => $this->total_amount,
+
+            ];
+            $respone =Bet::create($data);
+        
         }
     }
    
