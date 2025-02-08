@@ -45,8 +45,9 @@
     </div>
 </div>
    --}}
-    
-
+ {{-- @foreach (range(1, $totalRow) as $index)
+     {{ $index }}
+ @endforeach --}}
     <div class="grid grid-cols-[20%_78%] gap-4 mx-auto bg-white shadow-md py-4 rounded-lg">
         <div class="w-full px-2">
             <div class="mb-6">
@@ -115,7 +116,8 @@
         <div class="overflow-auto w-full mx-auto">
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                <tr class="bg-blue-600 text-white">
+                    <span><small>Time Left:</small> 10:11:36 (HN)08:08:36 (VL)08:13:37 (BD)08:05:37 (TV)09:10:37 (GL)09:10:37 (NT)</span>
+                <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
                     <th class="border border-gray-300 p-2">{{__('No')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Number')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Digit')}}</th>
@@ -130,10 +132,10 @@
                             <div class="flex-column">
                                 <input
                                         type="checkbox"
-                                        id="locationA"
+                                        id="province_check_{{ $key }}"
                                         wire:click="handleCheckLocation({{ $key }})"
                                          {{-- onchange="document.getElementById('locationBody.{{ $key }}').checked = this.checked" --}}
-                                        wire:model="location.{{$key}}"
+                                        wire:model="province_check.{{$key}}"
                                         class="h-3 w-3 rounded-sm">
                                 {{ $item['code'] }}
                             </div>
@@ -146,7 +148,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                @for ($i = 1; $i <= 15; $i++)
+                @for ($i = 1; $i <= $totalRow; $i++)
                     <tr class="text-center">
                         <!--No-->
                         <td class="border border-gray-300 p-2">{{ sprintf('%02d', $i) }}</td>
@@ -156,7 +158,7 @@
                             <input
                                     type="text"
                                     autocomplete="off"
-                                    id="number{{$i}}"
+                                    id="number_{{$i}}"
                                     wire:model.defer="number.{{$i}}"
                                     wire:input="handleInputNumber"
                                     class="w-full h-8 rounded"
@@ -170,17 +172,17 @@
                             <div class="flex justify-center items-center">
                                 <input
                                         type="text"
-                                        id="chanelA{{$i}}"
+                                        id="a_amount_{{$i}}"
                                         wire:input="handleInputNumber"
-                                        wire:model="chanelA.{{ $i }}"
+                                        wire:model="a_amount.{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
-                                        id="checkA{{$i}}"
-                                        wire:model.defer="checkA.{{$i}}"
+                                        id="a_check_{{$i}}"
+                                        wire:model="a_check.{{$i}}"
                                         {{ isset($enableChanelA[$i]) && !$enableChanelA[$i] ? 'disabled' : '' }}
                                         class="rounded-sm h-5 w-5 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                 >
@@ -191,16 +193,16 @@
                             <div class="flex justify-center items-center">
                             <input
                                type="text"
-                                id="chanelB{{$i}}"
-                                wire:model.defer="chanelB.{{$i}}"
+                                id="b_amount_{{$i}}"
+                                wire:model.defer="b_amount.{{$i}}"
                                 :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                 class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                 oninput="formatNumberValue(this)">
 
                             <input
                                 type="checkbox"
-                                id="checkB{{$i}}"
-                                wire:model.defer="checkB.{{$i}}"
+                                id="b_check_{{$i}}"
+                                wire:model.defer="b_check.{{$i}}"
                                 :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                 class="rounded-sm h-5 w-5 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
@@ -210,16 +212,16 @@
                             <div class="flex justify-center items-center">
                                 <input
                                        type="text"
-                                        id="chanelAB{{$i}}"
-                                        wire:model.defer="chanelAB.{{$i}}"
+                                        id="ab_amount_{{$i}}"
+                                        wire:model.defer="ab_amount.{{$i}}"
                                         {{isset($enableChanelAB[$i]) && $enableChanelAB[$i] ?'':'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i]  ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
-                                        id="checkAB.{{$i}}"
-                                        wire:model.defer="checkAB.{{$i}}"
+                                        id="ab_check_{{$i}}"
+                                        wire:model.defer="ab_check.{{$i}}"
                                         {{isset($enableChanelAB[$i]) && $enableChanelAB[$i] ?'': 'disabled'}}
                                         class="rounded-sm h-5 w-5 {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
@@ -231,15 +233,15 @@
                             <div class="flex justify-center items-center">
                                 <input
                                        type="text"
-                                        id="chanelRoll"
-                                        wire:model.defer="chanelRoll.{{$i}}"
+                                        id="roll_amount_{{$i}}"
+                                        wire:model.defer="roll_amount.{{$i}}"
                                         {{isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ?'': 'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input type="checkbox"
-                                       id="checkRoll"
-                                       wire:model.defer="checkRoll.{{$i}}"
+                                       id="roll_check_{{$i}}"
+                                       wire:model.defer="roll_check.{{$i}}"
                                        {{isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ?'': 'disabled'}}
                                        class="rounded-sm h-5 w-5 {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
@@ -251,16 +253,16 @@
                             <div class="flex justify-center items-center">
                                 <input
                                        type="text"
-                                        id="chanelRoll7"
-                                        wire:model.defer="chanelRoll7.{{$i}}"
+                                        id="roll7_amount_{{$i}}"
+                                        wire:model.defer="roll7_amount.{{$i}}"
                                         {{isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ?'': 'disabled'}}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input
                                         type="checkbox"
-                                        id="checkRoll7"
-                                        wire:model.defer="checkRoll7.{{$i}}"
+                                        id="roll7_check_{{$i}}"
+                                        wire:model="roll7_check.{{$i}}"
                                         {{isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ?'': 'disabled'}}
                                         class="rounded-sm h-5 w-5 {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i]? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
 
@@ -272,16 +274,16 @@
                             <div class="flex justify-center items-center">
                             <input
                                        type="text"
-                                        id="chanelRollParlay"
-                                        wire:model.defer="chanelRollParlay.{{$i}}"
+                                        id="roll_parlay_amount_{{$i}}"
+                                        wire:model.defer="roll_parlay_amount.{{$i}}"
                                        {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)"
                                 >
                                 <input
                                 type="checkbox"
-                                id="checkRollParlay"
-                                wire:model.defer="checkRollParlay.{{$i}}"
+                                id="roll_parlay_check_{{$i}}"
+                                wire:model.defer="roll_parlay_check.{{$i}}"
                                 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                 class="rounded-sm h-5 w-5 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                             >
@@ -293,7 +295,8 @@
                                 <div class="flex-column">
                                     <input
                                             type="checkbox"
-                                            wire:model="locationBody.{{$key}}"
+                                            id="province_body_check_{{ $key }}"
+                                            wire:model="province_body_check.{{$key}}"
                                             class="h-3 w-3 rounded-sm"
                                     >
                                     {{$item['code']}}
@@ -302,7 +305,7 @@
                         @endforeach
                     
                         <!--Total Amount-->
-                        <td class="border border-gray-300 p-2">{{$totalAmount}}</td>
+                        <td class="border border-gray-300 p-2">{{$total_amount}}</td>
                     </tr>
                 @endfor
                 </tbody>
