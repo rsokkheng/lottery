@@ -131,7 +131,6 @@
                         data: formData,
                         dataType: 'json',
                         success: function (response) {
-                            console.log(response)
                             if(response.success){
                                 toastr.success('Save successfully!');
                                 setTimeout(()=>{

@@ -83,33 +83,32 @@ class LotteryResultController extends Controller
     {
         if($region === HelperEnum::MienBacDienToanSlug->value){
             return [
-                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1],
-                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1],
-                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5, "col_count"=>2, "row_count"=>1],
-                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5, "col_count"=>3, "row_count"=>2],
-                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>4, "input_length" => 4, "col_count"=>2, "row_count"=>2],
-                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>6, "input_length" => 4, "col_count"=>3, "row_count"=>2],
-                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 3, "col_count"=>1, "row_count"=>1],
-                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>4, "input_length" => 2, "col_count"=>1, "row_count"=>1],
+                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1, "class"=>'text-red h1'],
+                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "col_count"=>1, "row_count"=>1, "class"=>'text-black text-lg'],
+                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>2, "input_length" => 5, "col_count"=>2, "row_count"=>1, "class"=>'text-black text-lg'],
+                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>6, "input_length" => 5, "col_count"=>3, "row_count"=>2, "class"=>'text-black text-lg'],
+                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>4, "input_length" => 4, "col_count"=>2, "row_count"=>2, "class"=>'text-black text-lg'],
+                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>6, "input_length" => 4, "col_count"=>3, "row_count"=>2, "class"=>'text-black text-lg'],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 3, "col_count"=>3, "row_count"=>1, "class"=>'text-primary text-lg'],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>4, "input_length" => 2, "col_count"=>4, "row_count"=>1, "class"=>'text-danger text-xl'],
             ];
         }else{
             return [
-                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2],
-                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3],
-                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4],
-                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4],
-                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5],
-                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5],
-                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5],
-                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5],
-                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6]
+                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2, "class"=>'text-red text-xl'],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3, "class"=>'text-primary text-lg'],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4, "class"=>'text-black text-lg'],
+                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4, "class"=>'text-black text-lg'],
+                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5, "class"=>'text-black text-lg'],
+                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5, "class"=>'text-black text-lg'],
+                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5, "class"=>'text-black text-lg'],
+                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "class"=>'text-black text-lg'],
+                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6, "class"=>'text-red text-lg']
             ];
         }
     }
 
     public function getCurrentScheduleResultFilter($day, $regionSlug, $provinceCode = null): array
     {
-//        dd($day);
         return LotterySchedule::query()
             ->where('draw_day', $day)
             ->when($provinceCode!=null,function($q)use($provinceCode){
@@ -158,6 +157,7 @@ class LotteryResultController extends Controller
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_order'] = $i+1;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['input_length'] = $prize['input_length'];
+                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['class'] = $prize['class'];
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     if($region === HelperEnum::MienBacDienToanSlug->value){
                         $result[$key]['provinces'][$item['code']]['row_result'][$i]['col_count'] = $prize['col_count'];
@@ -236,6 +236,14 @@ class LotteryResultController extends Controller
                     ->pluck('id')
                     ->toArray();
                 $resultDate = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
+                if(strtotime(Carbon::today()->format('Y-m-d')) < strtotime($resultDate)){
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid result date!',
+                    ], 500);
+                }
+
                 $betResult->newQuery()
                     ->where('draw_date', $resultDate)
                     ->whereIn('lottery_schedule_id', $idSchedules)
@@ -338,9 +346,47 @@ class LotteryResultController extends Controller
         }
     }
 
-    public function getBetResultBy($date, $region)
+    public function getBetResultBy(Request $request)
     {
-//        dd($date, $region);
+        try {
+            $region = $request['region'] ?? HelperEnum::MienNamSlug->value;
+            if(!$this->validateRegion($region)){
+                return __('Invalid region request');
+            }
+            $showDate = $request['date'] ?? $this->currentDate;
+            if (!$this->isValidDateRequest($showDate)) {
+                return __('message.invalid-date-request');
+            }
+            $formResult = $this->getMergeResult($showDate, $region);
+            $data = [
+                'region' => $this->getRegionArray($region),
+                'type' => $region,
+                'date_show' => $showDate,
+                'form_result' => $formResult
+            ];
+            return view('bet.result-show', compact('data'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+
+    public function getRegionArray($slug): array
+    {
+        switch ($slug){
+            case HelperEnum::MienNamSlug->value:
+                return ['slug'=>HelperEnum::MienNamSlug->value, 'name'=> __('lang.mien-nam')];
+            case HelperEnum::MienTrungSlug->value:
+                return ['slug'=>HelperEnum::MienTrungSlug->value, 'name'=> __('lang.mien-trung')];
+            case HelperEnum::MienBacDienToanSlug->value:
+                return ['slug'=>HelperEnum::MienBacDienToanSlug->value, 'name'=> __('lang.mien-bac')];
+            default:
+                return [];
+        }
+    }
+
+    public function validateRegion($region){
+        return in_array($region,[HelperEnum::MienNamSlug->value, HelperEnum::MienTrungSlug->value, HelperEnum::MienBacDienToanSlug->value]);
     }
 
 }

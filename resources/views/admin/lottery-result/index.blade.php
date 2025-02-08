@@ -3,6 +3,14 @@
 {{--    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">--}}
     @section('title',__('lang.menu.lottery-result'))
     @include('admin.lottery-result.navbar', ['data' => $data])
+    <style>
+        .datepicker-days {
+            padding-top: 15px !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+
+    </style>
 
     <!-- Tab panes -->
     <div class="tab-content">
@@ -32,14 +40,15 @@
 
     @section('js')
 {{--        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>--}}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+{{--        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>--}}
 {{--        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>--}}
         <script>
             $(function(){
                 $('#selectDateResult').datepicker({
                     format: 'dd/mm/yyyy', // Customize the date format as needed
                     autoclose: true,
-                    todayHighlight: true
+                    todayHighlight: true,
+                    endDate: '+0d',
                 });
                 $("#selectDateResult").on('change', function(){
                     window.location = $("#btn-create-result").attr('href')+'?date='+$(this).val();

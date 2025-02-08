@@ -63,8 +63,6 @@ class LottoBet extends Component
 
     public function render()
     {
-
-        
         return view('livewire.lotto-bet');
     }
 

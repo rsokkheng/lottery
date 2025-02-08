@@ -156,6 +156,8 @@
 
     <script src="{{ asset('admin/plugins/toastr/js/toastr.min.js') }}"></script>
 {{--    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>--}}
+    <script src="{{ asset('admin/plugins/datepicker/js-1-7-1/datepicker.min.js') }}"></script>
+
 
     <script>
         // Example starter JavaScript for disabling form submissions if there are invalid fields

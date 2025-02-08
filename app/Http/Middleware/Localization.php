@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -17,8 +18,9 @@ class Localization
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = Session::get('locale') ?? 'en';
+        $locale = Session::get('locale') ?? 'vi';
         App::setLocale($locale);
+        Carbon::setLocale('en');
         return $next($request);
     }
 }

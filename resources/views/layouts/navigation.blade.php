@@ -1,6 +1,14 @@
+<style>
+    .active-menu {
+        color: blue !important;
+        font-weight: bold !important;
+    }
+</style>
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -14,9 +22,14 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
 {{--                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">--}}
-                    <x-nav-link>
+                    <x-nav-link class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}" >
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    <x-nav-link class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">
+                        {{ __('Result') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
