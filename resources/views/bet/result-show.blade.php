@@ -36,13 +36,13 @@
                 <div class="flex-column w-full">
                     <ul class="flex flex-wrap font-bold text-lg  text-center text-gray-500 border-b border-gray-400">
                         <li class="me-2">
-                            <a href="#" class="inline-block p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienNamSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienNamSlug->value}}')">{{__('lang.mien-nam')}}</a>
+                            <a class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienNamSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienNamSlug->value}}')">{{__('lang.mien-nam')}}</a>
                         </li>
                         <li class="me-2">
-                            <a href="#" class="inline-block p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienTrungSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienTrungSlug->value}}')">{{__('lang.mien-trung')}}</a>
+                            <a  class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienTrungSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienTrungSlug->value}}')">{{__('lang.mien-trung')}}</a>
                         </li>
                         <li class="me-2">
-                            <a href="#" class="inline-block p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienBacDienToanSlug->value}}')">{{__('lang.mien-bac')}}</a>
+                            <a class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value ? 'active-bar-tap':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienBacDienToanSlug->value}}')">{{__('lang.mien-bac')}}</a>
                         </li>
                     </ul>
                     <div class="flex w-full">
