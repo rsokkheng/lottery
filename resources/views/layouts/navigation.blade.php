@@ -1,9 +1,11 @@
 <style>
     .active-menu {
-        color: blue !important;
+        color: yellow !important;
         font-weight: bold !important;
+        font-size: 18px !important;
     }
 </style>
+
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100" style="background-color:rgb(37 99 235)">
     <!-- Primary Navigation Menu -->
     <div class="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,7 +17,7 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden sm:flex sm:ms-10 space-x-8">
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white {{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Receipt List') }}</x-nav-link>
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Bet List') }}</x-nav-link>
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Bet Number') }}</x-nav-link>
@@ -23,7 +25,7 @@
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Win Report') }}</x-nav-link>
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Daily Report') }}</x-nav-link>
                     <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Summary Report') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white {{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
+                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
                 </div>
 
             </div>
