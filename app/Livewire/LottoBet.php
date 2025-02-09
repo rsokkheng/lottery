@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Bet;
 use App\Models\BetLotterySchedule;
+use App\Models\BetNumber;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -14,7 +15,7 @@ class LottoBet extends Component
     protected $betLotteryScheduleModel;
 
     // set the total row to 15
-    public $totalRow = 15; 
+    public $totalRow = 15;
 
     // define properties
     public $number = [];
@@ -35,7 +36,7 @@ class LottoBet extends Component
     public $roll_parlay_check = [];
 
     public $province_check = [];
-    public $province_body_ckeck = [];
+    public $province_body_check = [];
 
     public $enableChanelA = [];
     public $enableChanelB = [];
@@ -47,7 +48,6 @@ class LottoBet extends Component
     public $province = [];
     public $currentDay;
     public $currentTime;
-
 
 
     public function mount(Bet $betModel, BetLotterySchedule $betLotteryScheduleModel)
@@ -62,23 +62,41 @@ class LottoBet extends Component
             ->where('draw_day', '=', $this->currentDay)
             ->where('draw_time', '>=', $this->currentTime)
             ->get(['id', 'code']);
-    
 
-        $this->province_body_ckeck = array_fill(0, count($this->province), false);
+
+        foreach ($this->province as $key => $pro) {
+            $this->province_body_check[$pro['id']] = array_fill(0, $this->totalRow, false);
+        }
+        $this->a_amount = array_fill(0, $this->totalRow, null);
+        $this->b_amount = array_fill(0, $this->totalRow, null);
+        $this->ab_amount = array_fill(0, $this->totalRow, null);
+        $this->roll_amount = array_fill(0, $this->totalRow, null);
+        $this->roll7_amount = array_fill(0, $this->totalRow, null);
+        $this->roll_parlay_amount = array_fill(0, $this->totalRow, null);
+        $this->a_check = array_fill(0, $this->totalRow, false);
+        $this->b_check = array_fill(0, $this->totalRow, false);
+        $this->ab_check = array_fill(0, $this->totalRow, false);
+        $this->roll_check = array_fill(0, $this->totalRow, false);
+        $this->roll7_check = array_fill(0, $this->totalRow, false);
+        $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
+        // $this->number = array_fill(0, $this->totalRow, null);
     }
 
 
     public function render()
     {
-        
+
         return view('livewire.lotto-bet');
     }
 
-    public function handleCheckLocation($index)
+    public function handleProvinceCheck($index)
     {
-    
-         $this->province_body_ckeck = array_replace($this->province_body_ckeck, [$index => true]);
-    
+
+        if (isset($this->province_check[$index]) && $this->province_check[$index]) {
+            $this->province_body_check[$index] = array_fill(0, 15, true);
+        } else {
+            $this->province_body_check[$index] = array_fill(0, 15, false);
+        }
     }
 
     public function handleInputNumber()
@@ -165,7 +183,7 @@ class LottoBet extends Component
             $this->checkRollParlay[$key] = false; // Uncheck the checkbox
             return;
         }
-     
+
         // Ensure enableChanelRollParlay is set to true
         $this->enableChanelRollParlay[$key] = true;
         // Validate complex bet length (allow RP2, RP3, RP4)
@@ -228,8 +246,8 @@ class LottoBet extends Component
     public function handleSave()
     {
         foreach ($this->number as $key => $value) {
-            $data = [
-                'user_id' => '12',
+            $betItem = [
+                'user_id' => '1',
                 'bet_schedule_id' => 1,
                 'bet_package_config_id' => 1,
                 'number_format' => $value,
@@ -237,9 +255,60 @@ class LottoBet extends Component
                 'total_amount' => $this->total_amount,
 
             ];
-            $respone =Bet::create($data);
-        
+
+            $respone = Bet::create($betItem);
+
+            $betNumber1 = [
+                'bet_id' => $respone->id,
+                'original_number' => $value,
+                'a_amount' => $this->a_amount[$key] ?? 0,
+                'b_amount' => $this->b_amount[$key] ?? 0,
+                'ab_amount' => $this->ab_amount[$key] ?? 0,
+                'roll_amount' => $this->roll_amount[$key]   ?? 0,
+                'roll7_amount' => $this->roll7_amount[$key] ?? 0,
+                'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
+                'a_check' => $this->a_check[$key],
+                'b_check' => $this->b_check[$key],
+                'ab_check' => $this->ab_check[$key],
+                'roll_check' => $this->roll_check[$key],
+                'roll7_check' => $this->roll7_check[$key],
+                'roll_parlay_check' => $this->roll_parlay_check[$key],
+            ];
+
+            if (strpos($value, '#') !== false) {
+                $parts = explode('#', $value);
+                foreach ($parts as $part) {
+                    $betNumber2 = [
+                        'generated_number' => $part,
+                        'digit_length' => strlen($part),
+                    ];
+
+                    $data = array_merge($betNumber1, $betNumber2);
+                    BetNumber::create($data);
+                }
+            } else if (strpos($value, '*') !== false) {
+
+                $num = trim($value, '*');
+
+                for ($i = 0; $i < 10; $i++) {
+                    $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
+                    $betNumber2 = [
+                        'generated_number' => $genNumber,
+                        'digit_length' => strlen($genNumber),
+                    ];
+
+                    $data = array_merge($betNumber1, $betNumber2);
+                    BetNumber::create($data);
+                }
+            } else {
+                $betNumber2 = [
+                    'generated_number' => $value,
+                    'digit_length' => strlen($value),
+                ];
+
+                $data = array_merge($betNumber1, $betNumber2);
+                BetNumber::create($data);
+            }
         }
     }
-   
 }

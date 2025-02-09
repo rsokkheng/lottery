@@ -128,14 +128,14 @@
                     <th class="border border-gray-300 p-2">{{__('Roll 7')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Roll Parlay')}}</th>
                     @foreach ($province as $key=>$item)
+                    
                         <th class="border border-gray-300 p-2">
                             <div class="flex-column">
                                 <input
                                         type="checkbox"
-                                        id="province_check_{{ $key }}"
-                                        wire:click="handleCheckLocation({{ $key }})"
-                                         {{-- onchange="document.getElementById('locationBody.{{ $key }}').checked = this.checked" --}}
-                                        wire:model="province_check.{{$key}}"
+                                        id="province_check_{{ $item['id'] }}"
+                                        wire:click="handleProvinceCheck({{ $item->id  }})"
+                                        wire:model="province_check.{{$item['id']}}"
                                         class="h-3 w-3 rounded-sm">
                                 {{ $item['code'] }}
                             </div>
@@ -148,10 +148,10 @@
                 </tr>
                 </thead>
                 <tbody>
-                @for ($i = 1; $i <= $totalRow; $i++)
+                @for ($i = 0; $i < $totalRow; $i++)
                     <tr class="text-center">
                         <!--No-->
-                        <td class="border border-gray-300 p-2">{{ sprintf('%02d', $i) }}</td>
+                        <td class="border border-gray-300 p-2">{{ sprintf('%02d', $i+1) }}</td>
 
                         <!--Number-->
                         <td class="border border-gray-300 p-2">
@@ -290,15 +290,17 @@
 
                             </div>
                         </td>
+                        
                         @foreach ($province as $key => $item)
                             <td  class="border border-gray-300 p-2">
                                 <div class="flex-column">
                                     <input
                                             type="checkbox"
-                                            id="province_body_check_{{ $key }}"
-                                            wire:model="province_body_check.{{$key}}"
+                                            :checked="{{ isset($province_check[$item['id']]) && $province_check[$item['id']] ? 'true' : 'false' }}"
+                                            wire:model="province_body_check.{{$item['id']}}{{$i}}"
                                             class="h-3 w-3 rounded-sm"
                                     >
+                                   
                                     {{$item['code']}}
                                 </div>
                             </td>
@@ -316,6 +318,7 @@
 </div>
 
 <script>
+
    const formatNumberValue = (input) => {
         let value = input.value.replace(/[^0-9]/g, ''); // Allow only digits (0-9)
         if (value.length > 5) {
