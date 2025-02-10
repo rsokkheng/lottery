@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\BetLotteryPackage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -12,11 +15,13 @@ class UserController extends Controller
     public function __construct()
     {
         $roles = Role::all();
+        $packages = BetLotteryPackage::all();
         view()->share('roles',$roles);
+        view()->share('packages', $packages);
     }
     public function index()
     {
-        $data = User::orderBy('id','DESC')->get();
+        $data = User::with('package')->orderBy('id','DESC')->get();
         return view('admin.user.index', compact('data'));
     }
     public function create()
@@ -25,16 +30,21 @@ class UserController extends Controller
     }
     public function store(Request $request)
     {
+        Log::info($request->all());
         $request->validate([
             'name' => 'required', 'string', 'max:255',
-            'email' => 'required', 'string', 'email', 'max:255', 'unique:'.User::class,
+            'username' => 'required', 'unique:'.User::class,
             'password' => 'required|max:255|min:6',
+            'package_id' => 'required',
+            'phonenumber' => 'required',
             'role' => 'required'
         ]);
-
         $user = User::create([
+            'package_id' => $request->package_id,
             'name' => $request->name,
-            'email' => $request->email,
+            'email' => 'lottery@gmail.com',
+            'username' => $request->username,
+            'phonenumber' => $request->phonenumber,
             'password' => bcrypt($request->password),
         ]);
         $user->assignRole($request->role);
@@ -49,12 +59,16 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'package_id' => ['required'],
+            'phonenumber' => ['required'],
+            'username' => ['required',  Rule::unique('users')->ignore($user->id)],
             'role' => ['required', 'string']
         ]); 
         $user = User::find($request->id);
         $user->name = $request->name;
-        $user->email = $request->email;
+        $user->package_id = $request->package_id;
+        $user->username = $request->username;
+        $user->phonenumber = $request->phonenumber;
         $user->save();
         $user->assignRole($request->role);
         return redirect()->route('admin.user.index')->with('success','User updated successfully.');

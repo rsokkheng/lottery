@@ -10,8 +10,10 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>UserName</th>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Package</th>
                         <th>Created</th>
                         <th>Action</th>
                         <th></th>
@@ -21,8 +23,10 @@
                     @foreach ($data as $user)
                         <tr>
                             <td>{{ $user->id }}</td>
+                            <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ $user->package->package_code }}</td>
                             <td>{{ $user->created_at }}</td>
                             <td>
                                 <a href="{{ route('admin.user.edit', encrypt($user->id)) }}"

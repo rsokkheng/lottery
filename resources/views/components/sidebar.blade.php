@@ -35,10 +35,10 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.category.index') }}"
-                    class="nav-link {{ Route::is('admin.category.index') ? 'active' : '' }}">
+                <a href="{{ route('admin.bet-lottery-package.index') }}"
+                    class="nav-link {{ Route::is('admin.bet-lottery-package.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-list-alt"></i>
-                    <p>Category
+                    <p>Lottery Package
                         <span class="badge badge-warning right">{{ $CategoryCount }}</span>
                     </p>
                 </a>

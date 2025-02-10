@@ -22,7 +22,7 @@
                 <div class="icon">
                     <i class="fas fa-list-alt"></i>
                 </div>
-                <a href="{{ route('admin.category.index') }}" class="small-box-footer">View <i
+                <a href="{{ route('admin.bet-lottery-package.index') }}" class="small-box-footer">View <i
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>

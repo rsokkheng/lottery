@@ -12,24 +12,32 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="name" class="form-label">Name:*</label>
-                            <input type="text" class="form-control" name="name" required
+                            <input type="text" class="form-control" autocomplete="off" name="name" required
                                 value="{{ old('name') }}">
                                 <x-error>name</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="Email" class="form-label">Email:*</label>
-                            <input type="email" class="form-control" name="email" required
-                                value="{{ old('email') }}">
-                                <x-error>email</x-error>
+                            <label for="Username" class="form-label">Username:*</label>
+                            <input type="username" class="form-control" autocomplete="off" name="username" required
+                                value="{{ old('username') }}">
+                                <x-error>username</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="Password" class="form-label">Password:*</label>
-                            <input type="password" class="form-control" name="password" required>
+                            <label for="Password"  class="form-label">Password:*</label>
+                            <input type="password" class="form-control" autocomplete="off" name="password" required>
                             <x-error>password</x-error>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="PhoneNumber" class="form-label">Phone Number:*</label>
+                            <input type="number" class="form-control"  autocomplete="off" name="phonenumber" required
+                                value="{{ old('phonenumber') }}">
+                                <x-error>phonenumber</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -43,6 +51,19 @@
                                 @endforeach
                             </select>
                             <x-error>role</x-error>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="package" class="form-label">Package:*</label>
+                            <select name="package_id" id="package_id" class="form-control" required>
+                                <option value="" selected disabled>selecte the Package</option>
+                                @foreach ($packages as $package)
+                                    <option value="{{ $package->id }}"
+                                        {{ $package->package_code == old('package') ? 'selected' : '' }}>{{ $package->package_code }}</option>
+                                @endforeach
+                            </select>
+                            <x-error>package</x-error>
                         </div>
                     </div>
                     <div class="col-lg-12">

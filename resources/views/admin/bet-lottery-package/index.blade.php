@@ -1,10 +1,10 @@
 <x-admin>
-    @section('title','Category')
+    @section('title','Lottery Package')
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Category Table</h3>
+            <h3 class="card-title">Lottery Package</h3>
             <div class="card-tools">
-                <a href="{{ route('admin.category.create') }}" class="btn btn-sm btn-info">New</a>
+                <a href="{{ route('admin.bet-lottery-package.create') }}" class="btn btn-sm btn-info">New</a>
             </div>
         </div>
         <div class="card-body">
@@ -20,10 +20,10 @@
                     @foreach ($data as $cat)
                         <tr>
                             <td>{{ $cat->name }}</td>
-                            <td><a href="{{ route('admin.category.edit', encrypt($cat->id)) }}"
+                            <td><a href="{{ route('admin.bet-lottery-package.edit', encrypt($cat->id)) }}"
                                     class="btn btn-sm btn-primary">Edit</a></td>
                             <td>
-                                <form action="{{ route('admin.category.destroy', encrypt($cat->id)) }}" method="POST"
+                                <form action="{{ route('admin.bet-lottery-package.destroy', encrypt($cat->id)) }}" method="POST"
                                     onsubmit="return confirm('Are sure want to delete?')">
                                     @method('DELETE')
                                     @csrf

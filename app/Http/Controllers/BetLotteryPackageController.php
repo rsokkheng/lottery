@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\BetLotteryPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class CategoryController extends Controller
+class BetLotteryPackageController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data = Category::orderBy('id','DESC')->get();
-        return view('admin.category.index',compact('data'));
+        $data = BetLotteryPackage::orderBy('id','DESC')->get();
+        return view('admin.bet-lottery-package.index',compact('data'));
     }
 
     /**
@@ -22,7 +22,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.category.create');
+        return view('admin.bet-lottery-package.create');
     }
 
     /**
@@ -36,21 +36,21 @@ class CategoryController extends Controller
         $baseSlug = Str::slug($request->name);
         $uniqueSlug = $baseSlug;
         $counter = 1;
-        while (Category::where('slug', $uniqueSlug)->exists()) {
+        while (BetLotteryPackage::where('slug', $uniqueSlug)->exists()) {
             $uniqueSlug = $baseSlug . '-' . $counter;
             $counter++;
         }
-        Category::create([
+        BetLotteryPackage::create([
             'name'=>$request->name,
             'slug'=>$uniqueSlug,
         ]);
-        return redirect()->route('admin.category.index')->with('success','Category created successfully.');
+        return redirect()->route('admin.bet-lottery-package.index')->with('success','Category created successfully.');
     }
 
     public function edit($category)
     {
-        $data = Category::where('id',decrypt($category))->first();
-        return view('admin.category.edit',compact('data'));
+        $data = BetLotteryPackage::where('id',decrypt($category))->first();
+        return view('admin.bet-lottery-package.edit',compact('data'));
     }
 
     /**
@@ -65,21 +65,21 @@ class CategoryController extends Controller
         $uniqueSlug = $baseSlug;
         $counter = 1;
         
-        while (Category::where('slug', $uniqueSlug)->where('id', '!=', $request->id)->exists()) {
+        while (BetLotteryPackage::where('slug', $uniqueSlug)->where('id', '!=', $request->id)->exists()) {
             $uniqueSlug = $baseSlug . '-' . $counter;
             $counter++;
         }
 
-        Category::where('id', $request->id)->update([
+        BetLotteryPackage::where('id', $request->id)->update([
             'name' => $request->name,
             'slug' => $uniqueSlug,
         ]);
-        return redirect()->route('admin.category.index')->with('info','Category updated successfully.');   
+        return redirect()->route('admin.bet-lottery-package.index')->with('info','Category updated successfully.');   
     }
 
     public function destroy($id)
     {
-        Category::where('id',decrypt($id))->delete();
-        return redirect()->route('admin.category.index')->with('error','Category deleted successfully.');   
+        BetLotteryPackage::where('id',decrypt($id))->delete();
+        return redirect()->route('admin.bet-lottery-package.index')->with('error','Category deleted successfully.');   
     }
 }

@@ -20,8 +20,8 @@ class Bet extends Model
         return $this->belongsTo(BetLotterySchedule::class, 'bet_schedule_id');
     }
     
-    public function betPackageConfiguration()
+    public function BetLotteryPackageConfiguration()
     {
-        return $this->belongsTo(BetPackageConfiguration::class, 'bet_package_config_id');
+        return $this->belongsTo(BetLotteryPackageConfiguration::class, 'bet_package_config_id');
     }
 }
