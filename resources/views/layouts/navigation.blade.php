@@ -1,10 +1,14 @@
 <style>
     .active-menu {
-        color: yellow !important;
+        color: #337ab7 !important;
         font-weight: bold !important;
         font-size: 18px !important;
+        background-color: #fff !important;  /* Change this to your desired background color */
+        padding: 8px 16px !important;  /* Adjust padding as needed */
+        border-radius: 4px;  /* Optional: Add border radius for rounded corners */
     }
 </style>
+
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100" style="background-color:rgb(37 99 235)">
     <!-- Primary Navigation Menu -->
@@ -17,26 +21,41 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden sm:flex sm:ms-10 space-x-8">
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Receipt List') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Bet List') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Bet Number') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Total Bet Number') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Win Report') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Daily Report') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Summary Report') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Receipt List') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Bet List') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Bet Number') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Total Bet Number') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Win Report') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Daily Report') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white">{{ __('Summary Report') }}</x-nav-link>
+                    <x-nav-link style="font-size: 18px;font-weight: bold; color:white" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
                 </div>
 
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="sm:flex sm:items-center sm:ms-6">
-                <div class="hidden space-x-8 sm:-my-px sm:ms-20 sm:flex">
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ Auth::user()->name ?? 'Guest' }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Change Password') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Change Language') }}</x-nav-link>
-                    <x-nav-link style="font-size: 16px;font-weight: 800; color:white">{{ __('Logout') }}</x-nav-link>
+            <div x-data="{ open: false }" class="flex justify-center sm:ms-6">
+                <button @click="open = !open" class="text-white font-bold text-lg flex items-center space-x-2">
+                    <span>{{ Auth::user()->name ?? 'Guest' }}</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+            
+                <!-- Dropdown Menu -->
+                <div x-show="open" @click.away="open = false" 
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50 border border-gray-200">
+                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                        {{ __('Change Password') }}
+                    </a>
+                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                        {{ __('Change Language') }}
+                    </a>
+                    <a :href="route('logout')" onclick="event.preventDefault();
+                                            this.closest('form').submit();" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t">
+                        {{ __('Logout') }}
+                    </a>
                 </div>
             </div>
 
@@ -52,46 +71,16 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-{{--            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">--}}
-            <x-responsive-nav-link >
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">
-                    {{__('Name user')}}}
-{{--                    {{ Auth::user()->name }}--}}
-                </div>
-                <div class="font-medium text-sm text-gray-500">
-                    {{__('Email User')}}
-{{--                    {{ Auth::user()->email }}--}}
-
-                </div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-{{--                <x-responsive-nav-link :href="route('profile.edit')">--}}
-                <x-responsive-nav-link>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                                           onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
+    <!-- Mobile Menu (collapsed on small screens) -->
+    <div x-show="open" class="sm:hidden flex flex-col space-y-2 px-4 py-2 bg-blue-500 text-white">
+        <x-nav-link style="font-size: 16px; font-weight: 800;" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Receipt List') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Bet List') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Bet Number') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Total Bet Number') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Win Report') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Daily Report') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" href="#">{{ __('Summary Report') }}</x-nav-link>
+        <x-nav-link style="font-size: 16px; font-weight: 800;" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
     </div>
 </nav>

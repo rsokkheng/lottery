@@ -49,6 +49,8 @@ class LottoBet extends Component
     public $currentDay;
     public $currentTime;
 
+    public $timeClose = [];
+
 
     public function mount(Bet $betModel, BetLotterySchedule $betLotteryScheduleModel)
     {
@@ -60,8 +62,15 @@ class LottoBet extends Component
 
         $this->province = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
-            ->where('draw_time', '>=', $this->currentTime)
+            ->where('time_close', '>=', $this->currentTime)
+            ->orderBy('time_close', 'asc')
             ->get(['id', 'code']);
+
+        $this->timeClose = $this->betLotteryScheduleModel
+            ->where('draw_day', '=', $this->currentDay)
+            ->where('time_close', '<=', $this->currentTime)
+            ->orderBy('time_close', 'asc')
+            ->get(['id','code', 'time_close']);
 
 
         foreach ($this->province as $key => $pro) {

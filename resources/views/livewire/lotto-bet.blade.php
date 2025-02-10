@@ -116,7 +116,14 @@
         <div class="overflow-auto w-full mx-auto">
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                    <span><small>Time Left:</small> 10:11:36 (HN)08:08:36 (VL)08:13:37 (BD)08:05:37 (TV)09:10:37 (GL)09:10:37 (NT)</span>
+                  <span><small style="color:black;font-size:18px;font-weight: bold;">Time Left:</small> 
+                  @foreach($timeClose as $time)
+                    <span style="font-size: 18px; font-weight: bold; margin-right: 10px;" 
+                        id="time-{{ $time->id }}">
+                        {{ $time->time_close }} ({{ $time->code }})
+                    </span>
+                @endforeach
+                 </span>
                 <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
                     <th class="border border-gray-300 p-2">{{__('No')}}</th>
                     <th class="border border-gray-300 p-2">{{__('Number')}}</th>
