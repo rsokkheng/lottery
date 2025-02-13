@@ -94,7 +94,7 @@ class LotteryResultController extends Controller
             ];
         }else{
             return [
-                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2, "tailwind_class" => "text-5xl text-red-600  "],
+                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2, "tailwind_class" => "text-5xl text-red-600 "],
                 "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3, "tailwind_class" => "text-5xl text-blue-800 "],
                 "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4, "tailwind_class" => "text-black text-4xl "],
                 "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4, "tailwind_class" => "text-black text-4xl "],
@@ -167,8 +167,8 @@ class LotteryResultController extends Controller
                     if(count($getResult)>0){
                         foreach ($getResult as $val){
                             if($val['result_order'] === $i+1){
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id'];
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number'];
+                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id']??0;
+                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number']??0;
                             }
                         }
                     }
