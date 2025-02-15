@@ -5,7 +5,7 @@
     <!-- Tab panes -->
     <div class="tab-content">
         <div id="content-of-mien-nam-{{$data['type']}}" class="container tab-pane active">
-            <div class="px-5 pb-5" style="width: 100%">
+            <div style="width: 100%">
                     @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-nam')}}</h4>@endif
                     @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-trung')}}</h4>@endif
                     @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-bac')}}</h4>@endif
@@ -35,29 +35,15 @@
                                                 {{ $prize['prize_label'] }}
                                             </td>
                                             @foreach($prize['provinces'] as $province)
-                                                <td class="text-primary">
-{{--                                                    @foreach($province['row_result'] as $row)--}}
-{{--                                                        <div class="p-1 d-flex">--}}
-{{--                                                            <p class="pr-2 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>--}}
-{{--                                                            <input type="text"--}}
-{{--                                                                   name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"--}}
-{{--                                                                   value="{{ $row['winning_number']??''}}"--}}
-{{--                                                                   data-max-length="{{$row['input_length']??0}}"--}}
-{{--                                                                   class="form-control class-only-input-win-number"--}}
-{{--                                                                   placeholder="0"--}}
-{{--                                                                   aria-label="Winning number"--}}
-{{--                                                            >--}}
-{{--                                                        </div>--}}
-{{--                                                    @endforeach--}}
-
+                                                <td class="text-primary p-1">
                                                     @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)
                                                         @php $c=1; $r=1; @endphp
                                                         @foreach($province['row_result'] as $key=>$row)
                                                             @if($c == 1)
                                                                 <div class="d-flex w-full p-1 justify-content-between">  <!-- open tag dev for new row -->
                                                                     @endif
-                                                                    <div class="d-flex w-full p-1 justify-center">
-                                                                        <p class="pr-2 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
+                                                                    <div class="d-flex w-full p-1 max-md:p-0 justify-center">
+                                                                        <p class="pr-1 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
                                                                         <input type="text"
                                                                                name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                                value="{{ $row['winning_number']??''}}"
@@ -75,8 +61,8 @@
                                                         @endforeach
                                                     @else
                                                         @foreach($province['row_result'] as $row)
-                                                            <div class="d-flex w-full justify-center p-1">
-                                                                <p class="pr-2 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
+                                                            <div class="d-flex w-full justify-center p-1 max-md:p-0">
+                                                                <p class="pr-1 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
                                                                 <input type="text"
                                                                        name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                        value="{{ $row['winning_number']??''}}"
