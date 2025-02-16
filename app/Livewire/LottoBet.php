@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Bet;
+use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
 use App\Models\BetNumber;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
@@ -13,6 +15,7 @@ class LottoBet extends Component
 {
     protected $betModel;
     protected $betLotteryScheduleModel;
+    public $betPackageConfiguration;
 
     // set the total row to 15
     public $totalRow = 15;
@@ -45,22 +48,31 @@ class LottoBet extends Component
     public $enableChanelRoll7 = [];
     public $enableChanelRollParlay = [];
 
-    public $province = [];
+    public $schedules = [];
+    public $currentDate;
     public $currentDay;
     public $currentTime;
+    public $user;
 
     public $timeClose = [];
+    public $invoices = [];
 
-
-    public function mount(Bet $betModel, BetLotterySchedule $betLotteryScheduleModel)
-    {
+    public function mount(
+        Bet $betModel,
+        BetLotterySchedule $betLotteryScheduleModel,
+        BetLotteryPackageConfiguration $betPackageConfiguration
+    ) {
         // Initialization logic if needed
         $this->betLotteryScheduleModel = $betLotteryScheduleModel;
         $this->betModel = $betModel;
+        $this->betPackageConfiguration = $betPackageConfiguration;
+
+        $this->currentDate = Carbon::now()->format('Y-m-d');
         $this->currentDay = Carbon::now()->format('l');
         $this->currentTime = Carbon::now()->format('H:i:s');
+        $this->user = Auth::user();
 
-        $this->province = $this->betLotteryScheduleModel
+        $this->schedules = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
@@ -70,14 +82,15 @@ class LottoBet extends Component
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '<=', $this->currentTime)
             ->orderBy('time_close', 'asc')
-            ->get(['id','code', 'time_close']);
+            ->get(['id', 'code', 'time_close']);
 
 
-        foreach ($this->province as $key => $pro) {
-            $this->province_body_check[$pro['id']] = array_fill(0, $this->totalRow, false);
+        foreach ($this->schedules as $key => $schedule) {
+            $this->province_check[$key] = false;
+            $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
         }
-        $this->a_amount = array_fill(0, $this->totalRow, null);
-        $this->b_amount = array_fill(0, $this->totalRow, null);
+        // $this->a_amount = array_fill(0, $this->totalRow, null);
+        // $this->b_amount = array_fill(0, $this->totalRow, null);
         $this->ab_amount = array_fill(0, $this->totalRow, null);
         $this->roll_amount = array_fill(0, $this->totalRow, null);
         $this->roll7_amount = array_fill(0, $this->totalRow, null);
@@ -94,7 +107,6 @@ class LottoBet extends Component
 
     public function render()
     {
-
         return view('livewire.lotto-bet');
     }
 
@@ -102,57 +114,104 @@ class LottoBet extends Component
     {
 
         if (isset($this->province_check[$index]) && $this->province_check[$index]) {
-            $this->province_body_check[$index] = array_fill(0, 15, true);
+            $this->province_body_check[$index] = array_fill(0, $this->totalRow, true);
         } else {
-            $this->province_body_check[$index] = array_fill(0, 15, false);
+            $this->province_body_check[$index] = array_fill(0, $this->totalRow, false);
         }
+    }
+
+    public function handleProvinceBodyCheck($key_sch, $key_num)
+    {
+
+        if ($this->province_body_check[$key_sch][$key_num]) {
+            $this->province_body_check[$key_sch][$key_num] = true;
+        } else {
+            $this->province_body_check[$key_sch][$key_num] = false;
+        }
+        log::info($this->province_body_check[$key_sch][$key_num]);
     }
 
     public function handleInputNumber()
     {
-        // Loop over each element in the $this->number array
-        foreach ($this->number as $key => $value) {
-            // Normalize each number by removing spaces
-            $this->number[$key] = str_replace(' ', '', (string)$value);
 
-            // Now, handle the normalized number for each element individually
+        foreach ($this->number as $key => $value) {
+            $this->number[$key] = str_replace(' ', '', (string)$value);
             $normalizedNumber = $this->number[$key];
 
-            // Validate the input number
             if ($this->isInvalidInput($normalizedNumber)) {
-                $this->resetChanelValues(); // Reset all channel-related values on invalid input
-                return; // Stop processing invalid input
+                $this->resetChanelValues();
+                return;
             }
 
             if (strpos($normalizedNumber, '#') !== false) {
-                // Handle complex bets with '#' separator
                 $this->handleComplexBet($normalizedNumber, $key);
             } else {
-                // Handle simple bets
                 $this->handleSimpleBet($normalizedNumber, $key);
             }
         }
     }
 
+    public function updated($propertyName)
+    {
+        if (count($this->number) > 0 && count($this->province_body_check) > 0) {
+            $updatedInvoices = [];
+
+            foreach ($this->number as $key => $num) {
+                if (!empty($this->number)) {
+                    $chanel = [];
+                    $amount = [];
+
+                    foreach ($this->schedules as $key_prov => $schedule) {
+                        if (!empty($this->province_body_check[$key_prov][$key])) {
+                            $chanel[] = $schedule->code;
+                        }
+                    }
+
+                    $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B");
+                    $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A");
+                    $this->addAmount($amount, $this->ab_amount[$key] ?? 0, $this->ab_check[$key] ?? false, "AB");
+                    $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R");
+                    $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7");
+                    $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP");
+
+                    if (!empty($chanel)) {
+                        $updatedInvoices[$key] = [
+                            'number' => $num,
+                            'chanel' => $chanel,
+                            'amount' => $amount
+                        ];
+                    }
+                }
+            }
+            $this->invoices = [];
+            $this->invoices = $updatedInvoices;
+        }
+    }
+
+    private function addAmount(&$amountArray, $value, $check, $label)
+    {
+        if ($value > 0) {
+            $amountArray[] = $value . ($check ? "({$label}x)" : "({$label})");
+        }
+    }
+
+
+
     private function isInvalidInput($number)
     {
-        // Check if the number is a single digit or five digits
         if (strlen($number) == 1 || (strlen($number) == 5 && ctype_digit($number))) {
             return true;
         }
 
-        // Check for invalid complex bet patterns
         if (strpos($number, '#') !== false) {
             $parts = explode('#', $number);
 
-            // Invalid if any part is empty or single-digit
             foreach ($parts as $part) {
                 if ($part === '' || strlen($part) == 1) {
                     return true;
                 }
             }
 
-            // Invalid if the number of parts is greater than 4
             if (count($parts) > 4) {
                 return true;
             }
@@ -165,7 +224,6 @@ class LottoBet extends Component
     {
         $length = strlen($number);
 
-        // Handle bet based on length of the number (2D, 3D, or 4D)
         switch ($length) {
             case 2:
                 $this->setBetType($key, "2D", true, true, true, true, false, false);
@@ -184,24 +242,21 @@ class LottoBet extends Component
     private function handleComplexBet($normalizedNumber, $key)
     {
         $parts = explode('#', $normalizedNumber);
-        $length = count($parts); // Number of parts
+        $length = count($parts);
 
-        // Check if all four parts are identical
         if ($length === 4 && count(array_unique($parts)) === 1) {
-            $this->digit[$key] = '-'; // Set to '-' if fully identical
-            $this->checkRollParlay[$key] = false; // Uncheck the checkbox
+            $this->digit[$key] = '-';
+            $this->checkRollParlay[$key] = false;
             return;
         }
 
-        // Ensure enableChanelRollParlay is set to true
         $this->enableChanelRollParlay[$key] = true;
-        // Validate complex bet length (allow RP2, RP3, RP4)
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
         } else {
-            $this->digit[$key] = '-'; // Invalid case
-            $this->checkRollParlay[$key] = false; // Uncheck the checkbox
+            $this->digit[$key] = '-';
+            $this->checkRollParlay[$key] = false;
             $this->resetChanelValues();
         }
     }
@@ -209,7 +264,6 @@ class LottoBet extends Component
 
     private function setBetType($key, $digit, $enableA, $enableB, $enableAB, $enableRoll, $enableRoll7, $chanelRollParlay)
     {
-        // Assign bet type and enable/disable channel values for a specific key
         $this->digit[$key] = $digit;
         $this->enableChanelA[$key] = $enableA;
         $this->enableChanelB[$key] = $enableB;
@@ -231,7 +285,6 @@ class LottoBet extends Component
 
     private function resetBetType($key)
     {
-        // Reset all bet type values for a specific index/key
         $this->digit[$key] = null;
         $this->enableChanelA[$key] = false;
         $this->enableChanelB[$key] = false;
@@ -243,7 +296,6 @@ class LottoBet extends Component
 
     private function resetChanelValues()
     {
-        // Reset all channel-related values to their default states
         $this->enableChanelA = [];
         $this->enableChanelB = [];
         $this->enableChanelAB = [];
@@ -254,69 +306,80 @@ class LottoBet extends Component
 
     public function handleSave()
     {
+
         foreach ($this->number as $key => $value) {
-            $betItem = [
-                'user_id' => '1',
-                'bet_schedule_id' => 1,
-                'bet_package_config_id' => 1,
-                'number_format' => $value,
-                'digit_format' => $this->digit[$key],
-                'total_amount' => $this->total_amount,
+            if (!empty($value)) {
+                $betPackageConId = $this->betPackageConfiguration::where('bet_type', '=', $this->digit[$key])->pluck('id')->first();
+                foreach ($this->schedules as $key_prov => $schedule) {
+                    if ($this->province_body_check[$key_prov][$key]) {
+                        //insert bet 
+                        $betItem = [
+                            'user_id' => $this->user->id ?? 0,
+                            'bet_schedule_id' => $schedule->id,
+                            'bet_package_config_id' => $betPackageConId,
+                            'number_format' => $value,
+                            'digit_format' => $this->digit[$key],
+                            'bet_date' => $this->currentDate,
+                            'total_amount' => $this->total_amount,
 
-            ];
+                        ];
 
-            $respone = Bet::create($betItem);
+                        $respone = Bet::create($betItem);
 
-            $betNumber1 = [
-                'bet_id' => $respone->id,
-                'original_number' => $value,
-                'a_amount' => $this->a_amount[$key] ?? 0,
-                'b_amount' => $this->b_amount[$key] ?? 0,
-                'ab_amount' => $this->ab_amount[$key] ?? 0,
-                'roll_amount' => $this->roll_amount[$key]   ?? 0,
-                'roll7_amount' => $this->roll7_amount[$key] ?? 0,
-                'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
-                'a_check' => $this->a_check[$key],
-                'b_check' => $this->b_check[$key],
-                'ab_check' => $this->ab_check[$key],
-                'roll_check' => $this->roll_check[$key],
-                'roll7_check' => $this->roll7_check[$key],
-                'roll_parlay_check' => $this->roll_parlay_check[$key],
-            ];
+                        //insert bet number
+                        $betNumber1 = [
+                            'bet_id' => $respone->id,
+                            'original_number' => $value,
+                            'a_amount' => $this->a_amount[$key] ?? 0,
+                            'b_amount' => $this->b_amount[$key] ?? 0,
+                            'ab_amount' => $this->ab_amount[$key] ?? 0,
+                            'roll_amount' => $this->roll_amount[$key]   ?? 0,
+                            'roll7_amount' => $this->roll7_amount[$key] ?? 0,
+                            'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
+                            'a_check' => $this->a_check[$key],
+                            'b_check' => $this->b_check[$key],
+                            'ab_check' => $this->ab_check[$key],
+                            'roll_check' => $this->roll_check[$key],
+                            'roll7_check' => $this->roll7_check[$key],
+                            'roll_parlay_check' => $this->roll_parlay_check[$key],
+                        ];
 
-            if (strpos($value, '#') !== false) {
-                $parts = explode('#', $value);
-                foreach ($parts as $part) {
-                    $betNumber2 = [
-                        'generated_number' => $part,
-                        'digit_length' => strlen($part),
-                    ];
+                        if (strpos($value, '#') !== false) {
+                            $parts = explode('#', $value);
+                            foreach ($parts as $part) {
+                                $betNumber2 = [
+                                    'generated_number' => $part,
+                                    'digit_length' => strlen($part),
+                                ];
 
-                    $data = array_merge($betNumber1, $betNumber2);
-                    BetNumber::create($data);
+                                $data = array_merge($betNumber1, $betNumber2);
+                                BetNumber::create($data);
+                            }
+                        } else if (strpos($value, '*') !== false) {
+
+                            $num = trim($value, '*');
+
+                            for ($i = 0; $i < 10; $i++) {
+                                $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
+                                $betNumber2 = [
+                                    'generated_number' => $genNumber,
+                                    'digit_length' => strlen($genNumber),
+                                ];
+
+                                $data = array_merge($betNumber1, $betNumber2);
+                                BetNumber::create($data);
+                            }
+                        } else {
+                            $betNumber2 = [
+                                'generated_number' => $value,
+                                'digit_length' => strlen($value),
+                            ];
+
+                            $data = array_merge($betNumber1, $betNumber2);
+                            BetNumber::create($data);
+                        }
+                    }
                 }
-            } else if (strpos($value, '*') !== false) {
-
-                $num = trim($value, '*');
-
-                for ($i = 0; $i < 10; $i++) {
-                    $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
-                    $betNumber2 = [
-                        'generated_number' => $genNumber,
-                        'digit_length' => strlen($genNumber),
-                    ];
-
-                    $data = array_merge($betNumber1, $betNumber2);
-                    BetNumber::create($data);
-                }
-            } else {
-                $betNumber2 = [
-                    'generated_number' => $value,
-                    'digit_length' => strlen($value),
-                ];
-
-                $data = array_merge($betNumber1, $betNumber2);
-                BetNumber::create($data);
             }
         }
     }
