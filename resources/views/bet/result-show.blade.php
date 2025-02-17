@@ -18,8 +18,8 @@
     </style>
 
 {{--    </x-slot>--}}
-    <div class="flex bg-white rounded-lg px-5 py-5">
-            <div class="flex w-auto">
+    <div class="flex max-md:flex-col bg-white rounded-lg px-5 py-5">
+            <div class="flex w-auto px-2 mb-4">
                     <div class="flex-column">
                         <a class="hidden" id="href_show_result" href="{{ route('bet.result-show') }}"></a>
                         <div class="flex py-1 justify-start">
@@ -36,29 +36,29 @@
             <div class="flex w-full px-2">
                 <input type="hidden" id="hidden_region" value="{{$data['region']['slug']??'mien-nam'}}">
                 <div class="flex-column w-full">
-                    <ul class="flex flex-wrap font-bold text-lg text-center text-gray-500 ">
+                    <ul class="flex flex-row font-bold text-lg max-md:text-sm text-center text-gray-500 ">
                         <li class="me-2">
-                            <a class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienNamSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienNamSlug->value}}')">{{__('lang.mien-nam')}}</a>
+                            <a  class="inline-block cursor-pointer p-2 max-md:p-1 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienNamSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienNamSlug->value}}')">{{__('lang.mien-nam')}}</a>
                         </li>
                         <li class="me-2">
-                            <a  class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienTrungSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienTrungSlug->value}}')">{{__('lang.mien-trung')}}</a>
+                            <a  class="inline-block cursor-pointer p-2 max-md:p-1 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienTrungSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienTrungSlug->value}}')">{{__('lang.mien-trung')}}</a>
                         </li>
                         <li class="me-2">
-                            <a class="inline-block cursor-pointer p-2 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienBacDienToanSlug->value}}')">{{__('lang.mien-bac')}}</a>
+                            <a class="inline-block cursor-pointer p-2 max-md:p-1 rounded-t-sm text-blue-800 {{$data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value ? 'active-bar-tap bg-blue-500 text-white font-bold border-t border-l border-r border-blue-600':''}}" onclick="goShowResult('{{\App\Enums\HelperEnum::MienBacDienToanSlug->value}}')">{{__('lang.mien-bac')}}</a>
                         </li>
                     </ul>
                     <div class="flex w-full border rounded-b border-gray-400 p-4">
                         <table class="w-full h-[82vh] border-collapse border border-blue-800 rounded-lg text-center">
                                 <thead class="bg-yellow-600">
                                     <tr class="border-gray-300">
-                                        <td class="border-2 py-2 text-lg text-white font-bold" >
+                                        <td class="border-2 py-2 text-lg max-md:text-sm text-white font-bold" >
                                             {{ $data['date_show'] }}
                                             <input type="hidden" value="{{$data['date_show']}}" id="date_result" name="date_result" />
                                         </td>
                                         @foreach($data['form_result']['schedule'] as $val)
                                             <td class="border-2  text-white font-bold">
                                                 <div class="flex-col w-full py-2">
-                                                    <div class="text-2xl">
+                                                    <div class="text-2xl max-md:text-lg">
                                                         {{ $val['province'] }}
                                                     </div>
                                                     <div class="text-lg">
@@ -72,7 +72,7 @@
                                 <tbody>
                                 @foreach($data['form_result']['result'] as $pKey => $prize)
                                     <tr>
-                                        <td class="border border-gray-300 text-black font-bold text-bold text-xl">
+                                        <td class="border border-gray-300 text-black font-bold text-bold text-xl max-md:text-md">
                                             {{ $prize['prize_label'] }}
                                         </td>
                                         @foreach($prize['provinces'] as $province)

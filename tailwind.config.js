@@ -24,6 +24,14 @@ export default {
         'text-8xl',
         'text-9xl',
         'text-10xl',
+        'max-md:text-4xl',
+        'max-md:text-3xl',
+        'max-md:text-2xl',
+        'max-md:text-xl',
+        'max-md:text-lg',
+        'max-md:text-md',
+        'max-md:p-0',
+
     ],
     theme: {
         extend: {
