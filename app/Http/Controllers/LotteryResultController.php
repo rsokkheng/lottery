@@ -226,16 +226,11 @@ class LotteryResultController extends Controller
     public function storeWinningResult(Request $request)
     {
         try {
-//            DB::beginTransaction();
+            DB::beginTransaction();
             $form = $request->all();
             $betResult = new LotteryResult();
-            $betResultSchedule = new LotterySchedule();
             if (isset($form['data']) && count($form['data'])) {
                 $resultRegion = $form['result_region']??'';
-                $idSchedules = $betResultSchedule->newQuery()
-                    ->where('region_slug', $resultRegion)
-                    ->pluck('id')
-                    ->toArray();
                 $resultDate = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
                 $dayName = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->dayName;
                 if(strtotime(Carbon::today()->format('Y-m-d')) < strtotime($resultDate)){
@@ -245,10 +240,18 @@ class LotteryResultController extends Controller
                         'message' => 'Invalid result date!',
                     ], 500);
                 }
-
+//                $date = '2025-02-23';
+//                $dayName = 'Sunday';
+//                $time = '16:30:00';
+                $resultTime = $this->getBetTime($resultRegion);
+                $scheduleIdsByCurrentBet = $this->getPluckIdSchedule($dayName, $resultTime);
+                BetWinningRecord::query()->whereHas('betLotteryResult', function ($query) use ($resultDate, $scheduleIdsByCurrentBet){
+                        $query->where('draw_date', $resultDate)
+                            ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet);
+                    })->forceDelete();
                 $betResult->newQuery()
                     ->where('draw_date', $resultDate)
-                    ->whereIn('lottery_schedule_id', $idSchedules)
+                    ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet)
                     ->forceDelete();
                 foreach ($form['data'] as $item) {
                     $betResult->newQuery()->create([
@@ -260,23 +263,17 @@ class LotteryResultController extends Controller
                         'lottery_schedule_id' => $item['schedule_id'],
                     ]);
                 }
-
-//                $date = '2025-02-23';
-//                $dayName = 'Sunday';
-//                $time = '16:30:00';
-                    $resultTime = $this->getBetTime($resultRegion);
-                    $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
-                    $getBetWin = $this->generateWinningNumbers($resultDate, $idSchedules);
-                    $this->insertWinningRecords($resultDate, $idSchedules, $getBetWin);
+                $insertBetWinRecords = $this->generateWinningNumbers($resultDate, $scheduleIdsByCurrentBet);
+                BetWinningRecord::insert($insertBetWinRecords);
             }
 
-//            DB::commit();
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'save success'
             ]);
         }catch (\Exception $e){
-//            DB::rollBack();
+            DB::rollBack();
             throwException($e);
             return response()->json([
                 'success' => false,
@@ -398,20 +395,14 @@ class LotteryResultController extends Controller
 
 
     public function callGenerateWinNumber(){
-        $getRecords = BetWinningRecord::whereHas('betResult', function ($q){
-            $q->where('draw_date', '2025-02-23');
-        })->get();
-
-        dd($getRecords);
-
 //       $today = Carbon::today()->format('Y-m-d');
-        $dayName = Carbon::today()->dayName;
-        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
-        $date = Carbon::today()->format('Y-m-d');
-        $scheduleIds = [20,21,22];
-        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
-        $getBetWin = $this->generateWinningNumbers($date, $idSchedules);
-        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
+//        $dayName = Carbon::today()->dayName;
+//        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
+//        $date = Carbon::today()->format('Y-m-d');
+//        $scheduleIds = [20,21,22];
+//        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
+//        $getBetWin = $this->generateWinningNumbers($date, $idSchedules);
+//        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
     }
 
     public function getBetTime($region): string
@@ -430,12 +421,10 @@ class LotteryResultController extends Controller
 
 
     public function insertWinningRecords($date, $scheduleIds ,$insertRecords){
-         BetWinningRecord::with(['betResult'])
-            ->whereHas('betResult', function ($query) use ($date, $scheduleIds){
+         BetWinningRecord::whereHas('betLotteryResult', function ($query) use ($date, $scheduleIds){
                 $query->where('draw_date', $date)
                     ->whereIn('lottery_schedule_id', $scheduleIds);
-            })->forceDelete();
-//        DB::select("DELETE FROM bet_winning_records WHERE exists(SELECT * FROM bet_lottery_results where result_id = bet_winning_records.result_id and draw_date = '".$date."')");
+            })->get();
         BetWinningRecord::insert($insertRecords);
     }
 
