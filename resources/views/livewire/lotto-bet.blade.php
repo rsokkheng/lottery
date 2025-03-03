@@ -236,14 +236,13 @@
                             @endforeach
 
                             <!--Total Amount-->
-                            <td class="border border-gray-300 p-2">{{ $total_amount }}</td>
+                            <td class="border border-gray-300 p-2">{{ $total_amount[$i] }}</td>
                         </tr>
                     @endfor
                 </tbody>
             </table>
         </div>
     </div>
-    </body>
 </div>
 
 <script>

@@ -29,7 +29,7 @@ class LottoBet extends Component
     public $roll_amount = [];
     public $roll7_amount = [];
     public $roll_parlay_amount = [];
-    public $total_amount = 0;
+    public $total_amount = [];
 
     public $a_check = [];
     public $b_check = [];
@@ -56,6 +56,8 @@ class LottoBet extends Component
 
     public $timeClose = [];
     public $invoices = [];
+    public $permutations = [];
+    public $permutationsLength = [];
 
     public function mount(
         Bet $betModel,
@@ -89,8 +91,9 @@ class LottoBet extends Component
             $this->province_check[$key] = false;
             $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
         }
-        // $this->a_amount = array_fill(0, $this->totalRow, null);
-        // $this->b_amount = array_fill(0, $this->totalRow, null);
+
+        $this->a_amount = array_fill(0, $this->totalRow, null);
+        $this->b_amount = array_fill(0, $this->totalRow, null);
         $this->ab_amount = array_fill(0, $this->totalRow, null);
         $this->roll_amount = array_fill(0, $this->totalRow, null);
         $this->roll7_amount = array_fill(0, $this->totalRow, null);
@@ -102,6 +105,8 @@ class LottoBet extends Component
         $this->roll7_check = array_fill(0, $this->totalRow, false);
         $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
         // $this->number = array_fill(0, $this->totalRow, null);
+        $this->total_amount = array_fill(0, $this->totalRow, 0);
+        $this->permutationsLength = array_fill(0, $this->totalRow, 0);
     }
 
 
@@ -128,7 +133,6 @@ class LottoBet extends Component
         } else {
             $this->province_body_check[$key_sch][$key_num] = false;
         }
-        log::info($this->province_body_check[$key_sch][$key_num]);
     }
 
     public function handleInputNumber()
@@ -147,6 +151,7 @@ class LottoBet extends Component
                 $this->handleComplexBet($normalizedNumber, $key);
             } else {
                 $this->handleSimpleBet($normalizedNumber, $key);
+                $this->generatePermutations($normalizedNumber, $key);
             }
         }
     }
@@ -154,10 +159,11 @@ class LottoBet extends Component
     public function updated($propertyName)
     {
         if (count($this->number) > 0 && count($this->province_body_check) > 0) {
+
             $updatedInvoices = [];
 
             foreach ($this->number as $key => $num) {
-                if (!empty($this->number)) {
+                if (intval($num) > 0) {
                     $chanel = [];
                     $amount = [];
 
@@ -166,15 +172,15 @@ class LottoBet extends Component
                             $chanel[] = $schedule->code;
                         }
                     }
+                    $this->calculateTotalAmount($key);
+                    $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
+                    $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A", $key);
+                    $this->addAmount($amount, $this->ab_amount[$key] ?? 0, $this->ab_check[$key] ?? false, "AB", $key);
+                    $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
+                    $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
+                    $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
 
-                    $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B");
-                    $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A");
-                    $this->addAmount($amount, $this->ab_amount[$key] ?? 0, $this->ab_check[$key] ?? false, "AB");
-                    $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R");
-                    $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7");
-                    $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP");
-
-                    if (!empty($chanel)) {
+                    if (!empty($chanel) && !empty($amount)) {
                         $updatedInvoices[$key] = [
                             'number' => $num,
                             'chanel' => $chanel,
@@ -188,14 +194,115 @@ class LottoBet extends Component
         }
     }
 
-    private function addAmount(&$amountArray, $value, $check, $label)
+    private function addAmount(&$amountArray, $value, $check, $label, $index)
     {
+
         if ($value > 0) {
             $amountArray[] = $value . ($check ? "({$label}x)" : "({$label})");
         }
     }
 
+    private function calculateTotalAmount($key)
+    {
+        $total = 0;
+        if ($this->a_amount[$key] > 0) {
+            if ($this->a_check[$key]) {
+                $total += $this->a_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->a_amount[$key];
+            }
+        }
 
+        if ($this->b_amount[$key] > 0) {
+            if ($this->b_check[$key]) {
+                $total += $this->b_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->b_amount[$key];
+            }
+        }
+
+        if ($this->ab_amount[$key] > 0) {
+            if ($this->ab_check[$key]) {
+                $total += $this->ab_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->ab_amount[$key];
+            }
+        }
+
+        if ($this->roll_amount[$key] > 0) {
+            if ($this->roll_check[$key]) {
+                $total += $this->roll_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll_amount[$key];
+            }
+        }
+
+        if ($this->roll7_amount[$key] > 0) {
+            if ($this->roll7_check[$key]) {
+                $total += $this->roll7_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll7_amount[$key];
+            }
+        }
+
+        if ($this->roll_parlay_amount[$key] > 0) {
+            if ($this->roll_parlay_check[$key]) {
+                $total += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll_parlay_amount[$key];
+            }
+        }
+
+        $this->total_amount[$key] = $total;
+    }
+
+    // Get langth of number
+    private function generatePermutations($number, $key)
+    {
+        // Convert number to array of digits
+        $digits = str_split((string)$number);
+
+        // Ensure it's a four-digit number
+        if (count($digits) > 10 || !is_numeric($number)) {
+            $this->permutations = ['Please enter a valid four-digit number'];
+            return;
+        }
+        // Generate all permutations using recursive helper
+        $this->permutations = $this->getPermutations($digits);
+
+
+        // Convert arrays back to strings
+        $this->permutations = array_map(function ($perm) {
+            return implode('', $perm);
+        }, $this->permutations);
+
+
+        // Remove duplicates if digits repeat (e.g., 1123)
+        $this->permutations = array_unique($this->permutations);
+        $this->permutationsLength[$key] = count($this->permutations);
+    }
+
+    private function getPermutations($array)
+    {
+        if (count($array) <= 1) {
+            return [$array];
+        }
+
+        $result = [];
+        for ($i = 0; $i < count($array); $i++) {
+            $current = $array[$i];
+            $remaining = array_merge(
+                array_slice($array, 0, $i),
+                array_slice($array, $i + 1)
+            );
+            $subPerms = $this->getPermutations($remaining);
+
+            foreach ($subPerms as $perm) {
+                $result[] = array_merge([$current], $perm);
+            }
+        }
+        return $result;
+    }
 
     private function isInvalidInput($number)
     {
