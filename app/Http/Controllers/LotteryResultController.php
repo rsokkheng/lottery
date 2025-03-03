@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\HelperEnum;
+use App\Models\BetWinningRecord;
 use App\Models\LotteryResult;
 use App\Models\LotterySchedule;
 use Carbon\Carbon;
@@ -228,14 +229,10 @@ class LotteryResultController extends Controller
             DB::beginTransaction();
             $form = $request->all();
             $betResult = new LotteryResult();
-            $betResultSchedule = new LotterySchedule();
             if (isset($form['data']) && count($form['data'])) {
                 $resultRegion = $form['result_region']??'';
-                $idSchedules = $betResultSchedule->newQuery()
-                    ->where('region_slug', $resultRegion)
-                    ->pluck('id')
-                    ->toArray();
                 $resultDate = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
+                $dayName = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->dayName;
                 if(strtotime(Carbon::today()->format('Y-m-d')) < strtotime($resultDate)){
                     DB::rollBack();
                     return response()->json([
@@ -243,10 +240,18 @@ class LotteryResultController extends Controller
                         'message' => 'Invalid result date!',
                     ], 500);
                 }
-
+//                $date = '2025-02-23';
+//                $dayName = 'Sunday';
+//                $time = '16:30:00';
+                $resultTime = $this->getBetTime($resultRegion);
+                $scheduleIdsByCurrentBet = $this->getPluckIdSchedule($dayName, $resultTime);
+                BetWinningRecord::query()->whereHas('betLotteryResult', function ($query) use ($resultDate, $scheduleIdsByCurrentBet){
+                        $query->where('draw_date', $resultDate)
+                            ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet);
+                    })->forceDelete();
                 $betResult->newQuery()
                     ->where('draw_date', $resultDate)
-                    ->whereIn('lottery_schedule_id', $idSchedules)
+                    ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet)
                     ->forceDelete();
                 foreach ($form['data'] as $item) {
                     $betResult->newQuery()->create([
@@ -258,7 +263,10 @@ class LotteryResultController extends Controller
                         'lottery_schedule_id' => $item['schedule_id'],
                     ]);
                 }
+                $insertBetWinRecords = $this->generateWinningNumbers($resultDate, $scheduleIdsByCurrentBet);
+                BetWinningRecord::insert($insertBetWinRecords);
             }
+
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -384,6 +392,127 @@ class LotteryResultController extends Controller
                 return [];
         }
     }
+
+
+    public function callGenerateWinNumber(){
+//       $today = Carbon::today()->format('Y-m-d');
+//        $dayName = Carbon::today()->dayName;
+//        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
+//        $date = Carbon::today()->format('Y-m-d');
+//        $scheduleIds = [20,21,22];
+//        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
+//        $getBetWin = $this->generateWinningNumbers($date, $idSchedules);
+//        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
+    }
+
+    public function getBetTime($region): string
+    {
+        switch ($region){
+            case HelperEnum::MienNamSlug->value:
+                return '16:30:00';
+            case HelperEnum::MienTrungSlug->value:
+                return '17:30:00';
+            case HelperEnum::MienBacDienToanSlug->value:
+                return '18:30:00';
+            default:
+                return '';
+        }
+    }
+
+
+    public function insertWinningRecords($date, $scheduleIds ,$insertRecords){
+         BetWinningRecord::whereHas('betLotteryResult', function ($query) use ($date, $scheduleIds){
+                $query->where('draw_date', $date)
+                    ->whereIn('lottery_schedule_id', $scheduleIds);
+            })->get();
+        BetWinningRecord::insert($insertRecords);
+    }
+
+
+    public function generateWinningNumbers($date, $idSchedules): array
+    {
+//        $date = '2025-02-23';
+//        $day = 'Sunday';
+//        $time = '16:30:00';
+        $getBetWinningNumber = [];
+        $groupRP = [];
+        $betId = 0;
+        DB::table('bets')
+             ->select(
+                 'bets.id as bet_id',
+                 'bet_numbers.generated_number',
+                 'bet_numbers.digit_length',
+                 DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
+                'pkg_con.price as pkg_price',
+                 'pkg_con.bet_type as bet_type',
+                 'bets.bet_schedule_id'
+             )
+             ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+             ->whereIn('bets.bet_schedule_id',$idSchedules)
+            ->orderBy('bets.id')
+            ->orderBy('bet_numbers.id')
+            ->lazy()
+            ->each(function ($bet) use (&$getBetWinningNumber, $date, &$betId) {
+               if(str_starts_with($bet->bet_type, 'RP')){
+                   if($betId){
+                       $betId = $bet->bet_id;
+                   }else{
+                       if($betId != $bet->bet_id){
+                           $betId = 0;
+                       }
+                   }
+                    $numberFormat = substr($bet->bet_type, -1);
+
+               }else{
+                   $getMatched = $this->matchWinNumberFromResult($date, $bet->bet_schedule_id, $bet->generated_number);
+                   if(count($getMatched)){
+                       $totalAmount = $bet->sum_bet_amount * $bet->pkg_price;
+                       foreach ($getMatched as $val){
+                           $getBetWinningNumber[] = [
+                               'bet_id' => $bet->bet_id,
+                               'result_id' => $val,
+                               'prize_amount' => $totalAmount
+                           ];
+                       }
+                   }
+               }
+
+            });
+//        dd($idSchedules, $getBetWinningNumber);
+        return $getBetWinningNumber;
+    }
+
+
+    public function getPluckIdSchedule($day, $drawTime): array
+    {
+        return LotterySchedule::query()
+            ->where('draw_day',$day)
+            ->where('draw_time',$drawTime)
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function getBetResultByScheduleIds($date, $ids): array
+    {
+        return LotteryResult::query()
+            ->select('result_id','winning_number','lottery_schedule_id')
+            ->where('draw_date', $date)
+            ->whereIn('lottery_schedule_id', $ids)
+            ->get()->toArray();
+    }
+
+    public function matchWinNumberFromResult($date, $scheduleId, $number): array
+    {
+        return DB::table('bet_lottery_results')
+            ->where('draw_date', $date)
+            ->where('lottery_schedule_id',$scheduleId)
+            ->where('winning_number', 'like', '%'.$number)
+            ->orderBy('result_id')
+            ->pluck('result_id')
+            ->toArray();
+    }
+
 
     public function validateRegion($region){
         return in_array($region,[HelperEnum::MienNamSlug->value, HelperEnum::MienTrungSlug->value, HelperEnum::MienBacDienToanSlug->value]);

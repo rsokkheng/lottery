@@ -428,7 +428,6 @@ class LottoBet extends Component
                             'digit_format' => $this->digit[$key],
                             'bet_date' => $this->currentDate,
                             'total_amount' => $this->total_amount,
-
                         ];
 
                         $respone = Bet::create($betItem);

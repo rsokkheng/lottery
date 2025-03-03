@@ -49,6 +49,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
 
 
+        Route::get('generate-win-result',[LotteryResultController::class, 'callGenerateWinNumber']);
+
+
         # <Language>
         Route::get('/set-lang/{locale}', function (string $locale) {
             try {
