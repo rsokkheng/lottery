@@ -82,7 +82,7 @@ class LottoBet extends Component
 
         $this->timeClose = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
-            ->where('time_close', '<=', $this->currentTime)
+            ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code', 'time_close']);
 
