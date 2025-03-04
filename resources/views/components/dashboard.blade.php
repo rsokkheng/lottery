@@ -17,12 +17,12 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>{{ $category }}</h3>
-                    <p>Total Categories</p>
+                    <p>Bets</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-list-alt"></i>
                 </div>
-                <a href="{{ route('admin.bet-lottery-package.index') }}" class="small-box-footer">View <i
+                <a href="{{ url('lotto_vn/bet') }}" class="small-box-footer">View <i
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>

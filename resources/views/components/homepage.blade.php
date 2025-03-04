@@ -116,7 +116,7 @@
         <!-- Lotto -->
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card">
-                <a href="#lottoLink">
+                <a href="{{ url('lotto_vn/bet') }}">
                     <img src="{{ asset('images/ad_intro_lotto.jpg') }}" class="card-img-top img-fluid" alt="Lotto">
                 </a>
                 <div class="card-body">

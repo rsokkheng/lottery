@@ -52,6 +52,9 @@
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                         {{ __('Change Language') }}
                     </a>
+                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                        {{ __('Manage Account') }}
+                    </a>
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                     <form method="POST" action="{{ route('logout') }}">
                     @csrf
