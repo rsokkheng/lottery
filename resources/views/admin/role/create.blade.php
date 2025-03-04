@@ -28,6 +28,38 @@
                                         <div class="invalid-feedback">Role name field is required.</div>
                                     </div>
                                 </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label for="permissions">Permissions</label>
+                                        <div class="row">
+                                            @foreach($permissions as $group => $groupPermissions)
+                                                <div class="col-md-4">
+                                                    <strong>{{ ucfirst($group) }}</strong> <!-- Display the group name -->
+                                                    
+                                                    <!-- Select All Checkbox -->
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input select-all" data-group="{{ $group }}" id="select_all_{{ $group }}">
+                                                        <label class="form-check-label" for="select_all_{{ $group }}">Select All</label>
+                                                    </div>
+
+                                                    <!-- Individual Permission Checkboxes -->
+                                                    <div class="checkbox">
+                                                        @foreach($groupPermissions as $permission)
+                                                            <div class="form-check">
+                                                                <input type="checkbox" name="permissions[]" value="{{ $permission->id }}" 
+                                                                    @if(isset($data) && $data->hasPermissionTo($permission->name)) checked @endif
+                                                                    class="form-check-input permission-checkbox" data-group="{{ $group }}">
+                                                                <label class="form-check-label">{{ $permission->name }}</label>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+
                             </div>
                         </div>
                         <!-- /.card-body -->
@@ -43,3 +75,23 @@
 
     </section>
 </x-admin>
+<script>
+    // When the "Select All" checkbox is clicked
+    $(document).on('change', '.select-all', function() {
+        var group = $(this).data('group'); // Get the group of the "Select All" checkbox
+        var isChecked = $(this).prop('checked'); // Check if "Select All" is checked
+
+        // Find all checkboxes in the same group and toggle their checked state
+        $('.permission-checkbox[data-group="' + group + '"]').prop('checked', isChecked);
+    });
+
+    // Optionally, check if all checkboxes in a group are selected and update the "Select All" checkbox
+    $(document).on('change', '.permission-checkbox', function() {
+        var group = $(this).data('group');
+        var allChecked = $('.permission-checkbox[data-group="' + group + '"]:checked').length === $('.permission-checkbox[data-group="' + group + '"]').length;
+
+        // Set the "Select All" checkbox to be checked if all individual checkboxes are selected
+        $('#select_all_' + group).prop('checked', allChecked);
+    });
+</script>
+

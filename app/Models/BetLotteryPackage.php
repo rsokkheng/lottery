@@ -11,8 +11,9 @@ class BetLotteryPackage extends Model
     use HasFactory;
     protected $table = 'bet_lottery_packages';
 
-    public function users()
+    public function packageConfiges()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(BetLotteryPackageConfiguration::class, 'package_id', 'id');
     }
+    
 }

@@ -21,10 +21,18 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="Email" class="form-label">Email:*</label>
-                            <input type="email" class="form-control" name="email" required
-                                value="{{ $user->email }}">
-                                <x-error>email</x-error>
+                            <label for="Username" class="form-label">Username:*</label>
+                            <input type="username" class="form-control" name="username" required
+                                value="{{ $user->username}}">
+                                <x-error>username</x-error>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="PhoneNumber" class="form-label">Phone Number:*</label>
+                            <input type="number" class="form-control" name="phonenumber" required
+                                value="{{ $user->phonenumber}}">
+                                <x-error>phonenumber</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -38,6 +46,19 @@
                                 @endforeach
                             </select>
                             <x-error>role</x-error>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="role" class="form-label">Package:*</label>
+                            <select name="package_id" id="package_id" class="form-control" required>
+                                <option value="" selected disabled>selecte the Package</option>
+                                @foreach ($packages as $package)
+                                    <option value="{{ $package->id }}"
+                                        {{ $user->package_id === $package->id ? 'selected' : '' }}>{{ $package->package_code }}</option>
+                                @endforeach
+                            </select>
+                            <x-error>package</x-error>
                         </div>
                     </div>
                     <div class="col-lg-12">

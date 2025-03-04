@@ -1,3 +1,6 @@
+@section('title')
+    {{ 'Log in' }}
+@endsection
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +45,7 @@
             <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
                 @csrf
                 <div class="d-flex flex-column me-2">
-                    <input id="email" class="form-control mb-2" type="email" placeholder="Username" name="email" required>
+                    <input id="username" class="form-control mb-2" type="username" placeholder="Username" name="username" required>
                     <input id="password" class="form-control mb-2" type="password" name="password" required placeholder="Password">
                     <div class="form-check"> <!-- Checkbox now properly placed below password -->
                         <input class="form-check-input" type="checkbox" id="remember" name="remember">

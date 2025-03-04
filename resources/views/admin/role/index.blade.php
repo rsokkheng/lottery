@@ -14,7 +14,6 @@
                         <th>Name</th>
                         <th>Created</th>
                         <th>Action</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -23,12 +22,9 @@
                             <td>{{ $role->name }}</td>
                             <td>{{ $role->created_at }}</td>
                             <td>
-                                <a href="{{ route('admin.role.edit',encrypt($role->id)) }}" class="btn btn-sm btn-secondary">
-                                    <i class="far fa-edit"></i>
-                                </a>
-                            </td>
-                            <td>
-                                <form action="{{ route('admin.role.destroy',encrypt($role->id)) }}" method="POST" onclick="confirm('Are you sure')">
+                                <a href="{{ route('admin.role.edit',encrypt($role->id)) }}" class="btn btn-sm btn-secondary "  style="display: inline-block; margin-right: 5px;">
+                                 Edit</a>
+                                <form action="{{ route('admin.role.destroy',encrypt($role->id)) }}" method="POST" onclick="confirm('Are you sure')" style="display: inline-block;">
                                     @method('DELETE')
                                     @csrf
                                     <button type="submit" class="btn btn-danger">
