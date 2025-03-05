@@ -155,7 +155,13 @@ class LottoBet extends Component
             }
         }
     }
-
+    public function handleCalculateTotal($key)
+    {
+        if($this->permutationsLength[$key]>0)
+        {
+            $this->calculateTotalAmount($key);
+        }
+    }
     public function updated($propertyName)
     {
         if (count($this->number) > 0 && count($this->province_body_check) > 0) {
@@ -169,6 +175,7 @@ class LottoBet extends Component
 
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if (!empty($this->province_body_check[$key_prov][$key])) {
+                            log::info(!empty($this->province_body_check[$key_prov][$key]));
                             $chanel[] = $schedule->code;
                         }
                     }
