@@ -11,26 +11,35 @@
             <table class="table table-striped" id="categoryTable">
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Package</th>
+                        <th>Bet Type</th>
+                        <th>Bet Term</th>
+                        <th>Rate</th>
+                        <th>Price</th>
                         <th>Action</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($data as $cat)
+                    @foreach ($cat->packageConfiges as $pack)
                         <tr>
-                            <td>{{ $cat->name }}</td>
+                            <td>{{ $cat->package_code }}</td>
+                            <td>{{ $pack->bet_type }}</td>
+                            <td>{{ $pack->bet_pattern }}</td>
+                            <td>{{ $pack->rate }}</td>
+                            <td>{{ $pack->price }}</td>
                             <td><a href="{{ route('admin.bet-lottery-package.edit', encrypt($cat->id)) }}"
-                                    class="btn btn-sm btn-primary">Edit</a></td>
-                            <td>
+                                    class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a>
                                 <form action="{{ route('admin.bet-lottery-package.destroy', encrypt($cat->id)) }}" method="POST"
-                                    onsubmit="return confirm('Are sure want to delete?')">
+                                    onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">
                                     @method('DELETE')
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                 </form>
                             </td>
                         </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>

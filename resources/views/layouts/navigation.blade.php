@@ -16,7 +16,7 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <div class="shrink-0 flex items-center">
-                    <a style="color:yellow;font-weight: 800;font-size: 26px;">HAPPY SPORT 888</a>
+                    <a style="color:yellow;font-weight: 800;font-size: 26px;">Happy Lottery 2888</a>
                 </div>
 
                 <!-- Navigation Links -->
@@ -52,9 +52,16 @@
                     <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                         {{ __('Change Language') }}
                     </a>
-                    <a :href="route('logout')" onclick="event.preventDefault();
-                                            this.closest('form').submit();" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 border-t">
-                        {{ __('Logout') }}
+                    <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                        {{ __('Manage Account') }}
+                    </a>
+                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <input type="submit" name="submit" value="Log out" class="btn btn-primary btn-sm">
+                    </form>
                     </a>
                 </div>
             </div>

@@ -42,7 +42,7 @@ class UserController extends Controller
         $user = User::create([
             'package_id' => $request->package_id,
             'name' => $request->name,
-            'email' => 'lottery@gmail.com',
+            'email' => 'lottery2888@gmail.com',
             'username' => $request->username,
             'phonenumber' => $request->phonenumber,
             'password' => bcrypt($request->password),

@@ -13,7 +13,7 @@ class BetLotteryPackageController extends Controller
      */
     public function index()
     {
-        $data = BetLotteryPackage::orderBy('id','DESC')->get();
+        $data = BetLotteryPackage::with('packageConfiges')->orderBy('id','DESC')->get();
         return view('admin.bet-lottery-package.index',compact('data'));
     }
 
