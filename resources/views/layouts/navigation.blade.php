@@ -16,7 +16,7 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <div class="shrink-0 flex items-center">
-                    <a style="color:yellow;font-weight: 800;font-size: 26px;">Happy Lottery 2888</a>
+                    <a style="color:yellow;font-weight: 800;font-size: 20px;">Lottery 2888</a>
                 </div>
 
                 <!-- Navigation Links -->
