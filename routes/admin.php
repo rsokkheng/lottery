@@ -1,13 +1,11 @@
 <?php
 
 use App\Http\Controllers\BetLotteryPackageController;
-use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SubCateoryController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
@@ -25,13 +23,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
         Route::resource('bet-lottery-package',BetLotteryPackageController::class);
-        Route::resource('subcategory',SubCateoryController::class);
-        Route::resource('collection',CollectionController::class);
-        Route::resource('product',ProductController::class);
-        Route::get('/get/subcategory',[ProductController::class,'getsubcategory'])->name('getsubcategory');
-        Route::get('/remove-external-img/{id}',[ProductController::class,'removeImage'])->name('remove.image');
-
-
+      
         Route::resource('lottery-result',LotteryResultController::class);
 
         Route::get('result/index-mien-nam',[LotteryResultController::class, 'indexMienNam'])->name('result.index-mien-nam');

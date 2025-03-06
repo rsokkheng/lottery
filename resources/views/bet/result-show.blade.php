@@ -1,8 +1,5 @@
 
 <x-app-layout>
-{{--    <x-slot name="header">--}}
-{{--        <link rel="stylesheet" href="{{ asset('admin/dist/css/adminlte.min.css') }}">--}}
-{{--        @vite(['resources/css/app.css', 'resources/js/app.js'])--}}
     <link href="{{ asset('admin/plugins/datepicker/css/bootstrap-datepicker-1-7-1.min.css') }}" rel="stylesheet"/>
     <style>
         .datepicker-days {

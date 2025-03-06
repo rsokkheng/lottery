@@ -1,8 +1,6 @@
 
 <x-app-layout>
     <x-slot name="header">
-{{--        <link rel="stylesheet" href="{{ asset('admin/dist/css/adminlte.min.css') }}">--}}
-{{--        @vite(['resources/css/app.css', 'resources/js/app.js'])--}}
         <style>
             .datepicker-days {
                 padding-left: 10px !important;

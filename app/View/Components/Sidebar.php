@@ -29,17 +29,8 @@ class Sidebar extends Component
         $PermissionCount = Permission::count();
         view()->share('PermissionCount',$PermissionCount);
         
-        $CategoryCount = Category::count();
-        view()->share('CategoryCount',$CategoryCount);
-        
-        $SubCategoryCount = SubCategory::count();
-        view()->share('SubCategoryCount',$SubCategoryCount);
-        
-        $CollectionCount = Collection::count();
-        view()->share('CollectionCount',$CollectionCount);
-        
-        $ProductCount = Product::count();
-        view()->share('ProductCount',$ProductCount);
+      
+        view()->share('ProductCount');
     }
 
     /**

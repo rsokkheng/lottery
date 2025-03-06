@@ -39,7 +39,7 @@
                     class="nav-link {{ Route::is('admin.bet-lottery-package.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-list-alt"></i>
                     <p>Lottery Package
-                        <span class="badge badge-warning right">{{ $CategoryCount }}</span>
+                       
                     </p>
                 </a>
             </li>
@@ -50,7 +50,7 @@
                     <i class="nav-icon fas fa-list-alt"></i>
                     <p>
                         {{__('lang.menu.lottery-result')}}
-                        <span class="badge badge-warning right">0</span>
+                       
                     </p>
                 </a>
             </li>

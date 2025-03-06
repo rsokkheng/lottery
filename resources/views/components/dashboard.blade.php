@@ -16,7 +16,7 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ $category }}</h3>
+                    <h3>Bets</h3>
                     <p>Bets</p>
                 </div>
                 <div class="icon">
@@ -26,31 +26,7 @@
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-primary">
-                <div class="inner">
-                    <h3>{{ $product }}</h3>
-                    <p>Total Products</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fas fa-th"></i>
-                </div>
-                <a href="{{ route('admin.product.index') }}" class="small-box-footer">View <i
-                        class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
-        <div class="col-lg-3 col-6">
-            <div class="small-box bg-secondary">
-                <div class="inner">
-                    <h3>{{ $collection }}</h3>
-                    <p>Total Collections</p>
-                </div>
-                <div class="icon">
-                    <i class="fas fas fa-file-pdf"></i>
-                </div>
-                <a href="{{ route('admin.collection.index') }}" class="small-box-footer">View <i
-                        class="fas fa-arrow-circle-right"></i></a>
-            </div>
-        </div>
+       
+       
     @endrole
 </div>
