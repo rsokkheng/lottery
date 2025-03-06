@@ -2,7 +2,7 @@
     .active-menu {
         color: #337ab7 !important;
         font-weight: bold !important;
-        font-size: 18px !important;
+        font-size: 15px !important;
         background-color: #fff !important;  /* Change this to your desired background color */
         padding: 8px 16px !important;  /* Adjust padding as needed */
         border-radius: 4px;  /* Optional: Add border radius for rounded corners */
