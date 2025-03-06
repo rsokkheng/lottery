@@ -59,6 +59,8 @@ class LottoBet extends Component
     public $permutations = [];
     public $permutationsLength = [];
 
+    public $totalInvoice =0;
+
     public function mount(
         Bet $betModel,
         BetLotterySchedule $betLotteryScheduleModel,
@@ -155,136 +157,19 @@ class LottoBet extends Component
             }
         }
     }
-    public function handleCalculateTotal($key)
-    {
-        if($this->permutationsLength[$key]>0)
-        {
-            $this->calculateTotalAmount($key);
-        }
-    }
-    public function updated($propertyName)
-    {
-        if (count($this->number) > 0 && count($this->province_body_check) > 0) {
-
-            $updatedInvoices = [];
-
-            foreach ($this->number as $key => $num) {
-                if (intval($num) > 0) {
-                    $chanel = [];
-                    $amount = [];
-
-                    foreach ($this->schedules as $key_prov => $schedule) {
-                        if (!empty($this->province_body_check[$key_prov][$key])) {
-                            log::info(!empty($this->province_body_check[$key_prov][$key]));
-                            $chanel[] = $schedule->code;
-                        }
-                    }
-                    $this->calculateTotalAmount($key);
-                    $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
-                    $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A", $key);
-                    $this->addAmount($amount, $this->ab_amount[$key] ?? 0, $this->ab_check[$key] ?? false, "AB", $key);
-                    $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
-                    $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
-                    $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
-
-                    if (!empty($chanel) && !empty($amount)) {
-                        $updatedInvoices[$key] = [
-                            'number' => $num,
-                            'chanel' => $chanel,
-                            'amount' => $amount
-                        ];
-                    }
-                }
-            }
-            $this->invoices = [];
-            $this->invoices = $updatedInvoices;
-        }
-    }
-
-    private function addAmount(&$amountArray, $value, $check, $label, $index)
-    {
-
-        if ($value > 0) {
-            $amountArray[] = $value . ($check ? "({$label}x)" : "({$label})");
-        }
-    }
-
-    private function calculateTotalAmount($key)
-    {
-        $total = 0;
-        if ($this->a_amount[$key] > 0) {
-            if ($this->a_check[$key]) {
-                $total += $this->a_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->a_amount[$key];
-            }
-        }
-
-        if ($this->b_amount[$key] > 0) {
-            if ($this->b_check[$key]) {
-                $total += $this->b_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->b_amount[$key];
-            }
-        }
-
-        if ($this->ab_amount[$key] > 0) {
-            if ($this->ab_check[$key]) {
-                $total += $this->ab_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->ab_amount[$key];
-            }
-        }
-
-        if ($this->roll_amount[$key] > 0) {
-            if ($this->roll_check[$key]) {
-                $total += $this->roll_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->roll_amount[$key];
-            }
-        }
-
-        if ($this->roll7_amount[$key] > 0) {
-            if ($this->roll7_check[$key]) {
-                $total += $this->roll7_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->roll7_amount[$key];
-            }
-        }
-
-        if ($this->roll_parlay_amount[$key] > 0) {
-            if ($this->roll_parlay_check[$key]) {
-                $total += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $total += $this->roll_parlay_amount[$key];
-            }
-        }
-
-        $this->total_amount[$key] = $total;
-    }
-
-    // Get langth of number
     private function generatePermutations($number, $key)
     {
-        // Convert number to array of digits
         $digits = str_split((string)$number);
-
-        // Ensure it's a four-digit number
         if (count($digits) > 10 || !is_numeric($number)) {
-            $this->permutations = ['Please enter a valid four-digit number'];
+            $this->permutations = [];
             return;
         }
-        // Generate all permutations using recursive helper
         $this->permutations = $this->getPermutations($digits);
 
-
-        // Convert arrays back to strings
         $this->permutations = array_map(function ($perm) {
             return implode('', $perm);
         }, $this->permutations);
 
-
-        // Remove duplicates if digits repeat (e.g., 1123)
         $this->permutations = array_unique($this->permutations);
         $this->permutationsLength[$key] = count($this->permutations);
     }
@@ -341,12 +226,32 @@ class LottoBet extends Component
         switch ($length) {
             case 2:
                 $this->setBetType($key, "2D", true, true, true, true, false, false);
+                $this->roll7_amount[$key]=null;
+                $this->roll_parlay_amount[$key]=null;
+                $this->roll7_check[$key]= false;
+                $this->roll_parlay_check[$key] = false;
                 break;
             case 3:
                 $this->setBetType($key, "3D", false, false, true, true, true, false);
+                $this->a_amount[$key]=null;
+                $this->b_amount[$key]=null;
+                $this->roll_parlay_amount[$key]=null;
+                $this->a_check[$key]= false;
+                $this->b_check[$key]= false;
+                $this->roll_parlay_check[$key] = false;
                 break;
             case 4:
                 $this->setBetType($key, "4D", false, false, false, true, false, false);
+                $this->a_amount[$key]=null;
+                $this->b_amount[$key]=null;
+                $this->ab_amount[$key] = null;
+                $this->roll7_amount[$key]= null;
+                $this->roll_parlay_amount[$key]=null;
+                $this->a_check[$key]= false;
+                $this->b_check[$key]= false;
+                $this->ab_check[$key] = false;
+                $this->roll7_check[$key]= false;
+                $this->roll_parlay_check[$key] = false;
                 break;
             default:
                 $this->resetBetType($key);
@@ -495,5 +400,135 @@ class LottoBet extends Component
                 }
             }
         }
+    }
+
+    public function handleCheckChanel($key, $name="")
+    {
+    }
+    public function handleInputAmount($key)
+    {
+    }
+    public function updated($propertyName)
+    {
+        if (count($this->number) > 0 && count($this->province_body_check) > 0) {
+            $updatedInvoices = [];
+
+            foreach ($this->number as $key => $num) {
+                if (intval($num) > 0) {
+                    $chanel = [];
+                    $amount = [];
+                    $countProvince =0;
+
+                    foreach ($this->schedules as $key_prov => $schedule) {
+                        if ($this->province_body_check[$key_prov][$key]==true) {
+                            $countProvince ++;
+                            $chanel[] = $schedule->code;
+                        }
+                        else{
+                            $this->total_amount[$key]=0;
+                            $this->totalInvoice=0;
+                            foreach ($this->total_amount as $total){
+                                $this->totalInvoice +=$total;
+                            }
+                        }
+                    }
+                    if($countProvince>0){
+                        $this->totalAmountNormalNumber($key, $countProvince);
+                    }
+                    $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
+                    $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A", $key);
+                    $this->addAmount($amount, $this->ab_amount[$key] ?? 0, $this->ab_check[$key] ?? false, "AB", $key);
+                    $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
+                    $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
+                    $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
+
+                    if (!empty($chanel) && !empty($amount)) {
+                        $updatedInvoices[$key] = [
+                            'number' => $num,
+                            'chanel' => $chanel,
+                            'amount' => $amount
+                        ];
+                    }
+                }
+            }
+            $this->invoices = [];
+            $this->invoices = $updatedInvoices;
+        }
+    }
+
+    private function addAmount(&$amountArray, $value, $check, $label, $index)
+    {
+
+        if ($value > 0) {
+            $amountArray[] = $value . ($check ? "({$label}x)" : "({$label})");
+        }
+    }
+    // calculate total
+    private function totalAmountNormalNumber($key, $countProvince): void
+    {
+        $total = 0;
+        if ($this->a_amount[$key] > 0) {
+            if ($this->a_check[$key]) {
+                $total += $this->a_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->a_amount[$key];
+            }
+        }
+
+        if ($this->b_amount[$key] > 0) {
+            if ($this->b_check[$key]) {
+                $total += $this->b_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->b_amount[$key];
+            }
+        }
+
+        if ($this->ab_amount[$key] > 0) {
+            if ($this->ab_check[$key]) {
+                $total += $this->ab_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->ab_amount[$key];
+            }
+        }
+
+        if ($this->roll_amount[$key] > 0) {
+            if ($this->roll_check[$key]) {
+                $total += $this->roll_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll_amount[$key];
+            }
+        }
+
+        if ($this->roll7_amount[$key] > 0) {
+            if ($this->roll7_check[$key]) {
+                $total += $this->roll7_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll7_amount[$key];
+            }
+        }
+
+        if ($this->roll_parlay_amount[$key] > 0) {
+            if ($this->roll_parlay_check[$key]) {
+                $total += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $total += $this->roll_parlay_amount[$key];
+            }
+        }
+
+        $this->total_amount[$key] = $total * $countProvince;
+        // invoice
+        $this->totalInvoice=0;
+        foreach ($this->total_amount as $total){
+            $this->totalInvoice +=$total;
+        }
+
+    }
+    private function totalAmountAsteriskNumber():void
+    {
+
+    }
+    private function totalAmountNumberSign():void
+    {
+
     }
 }
