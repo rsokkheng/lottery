@@ -42,7 +42,10 @@
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
                                 {{ __('Total Amount') }}
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">{{ __('0 (VND)') }}</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">
+
+                                {{ $totalInvoice }} (VND)
+                            </td>
                         </tr>
                         <tr>
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
@@ -149,13 +152,15 @@
                             <div class="flex justify-center items-center">
                                 <input
                                         type="text"
-                                        wire:input="handleCalculateTotal({{$i}})"
                                         wire:model="a_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
-                                <input type="checkbox" id="a_check_{{ $i }}"
+                                <input type="checkbox"
+                                       id="a_check_{{ $i }}"
                                        wire:model="a_check.{{ $i }}"
+                                       wire:click="handleCheckChanel({{$i}},'ACheck')"
                                        {{ isset($enableChanelA[$i]) && !$enableChanelA[$i] ? 'disabled' : '' }}
                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
                             </div>
@@ -166,6 +171,7 @@
                                 <input
                                         type="text"
                                         wire:model="b_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         wire:input="handleInputNumber"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                         class="w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -174,6 +180,7 @@
                                 <input
                                         type="checkbox"
                                         wire:model="b_check.{{ $i }}"
+                                        wire:click="handleCheckChanel({{$i}},'BCheck')"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                         class="rounded-sm h-3 w-3 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
                             </div>
@@ -184,12 +191,14 @@
                                 <input
                                         type="text"
                                         wire:model="ab_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
                                         wire:model="ab_check.{{ $i }}"
+                                        wire:click="handleCheckChanel({{$i}},'ABCheck')"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
                                         class="rounded-sm h-3 w-3 {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
                             </div>
@@ -201,12 +210,14 @@
                                         type="text"
                                         id="roll_amount_{{ $i }}"
                                         wire:model="roll_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
                                         wire:model="roll_check.{{ $i }}"
+                                        wire:click="handleCheckChanel({{$i}},'RCheck')"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
                                         class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
                             </div>
@@ -217,12 +228,14 @@
                                 <input
                                         type="text"
                                         wire:model="roll7_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
                                         wire:model="roll7_check.{{ $i }}"
+                                        wire:click="handleCheckChanel({{$i}},'R7Check')"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
                                         class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
                             </div>
@@ -233,12 +246,14 @@
                                 <input
                                         type="text"
                                         wire:model="roll_parlay_amount.{{ $i }}"
+                                        wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
                                         wire:model="roll_parlay_check.{{ $i }}"
+                                        wire:click="handleCheckChanel({{$i}},'RPCheck')"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="rounded-sm h-3 w-3 {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
@@ -251,8 +266,8 @@
                                     <input
                                             type="checkbox"
                                             wire:model="province_body_check.{{ $key }}.{{ $i }}"
-                                            :checked="{{ isset($province_check[$key]) && $province_check[$key] ? 'true' : 'false' }}"
                                             wire:click="handleProvinceBodyCheck({{ $key }},{{ $i }})"
+                                            :checked="{{ isset($province_check[$key]) && $province_check[$key] ? 'true' : 'false' }}"
                                             class="h-3 w-3 rounded-sm">
                                     {{ $item['code'] }}
                                 </div>
