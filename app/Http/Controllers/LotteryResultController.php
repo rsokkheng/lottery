@@ -436,7 +436,10 @@ class LotteryResultController extends Controller
 //        $time = '16:30:00';
         $getBetWinningNumber = [];
         $groupRP = [];
-        $betId = 0;
+        $originalNumber = '';
+        $duplicateRPNumber = [];
+        $originalNumberArr = [];
+        $notInResult = [];
         DB::table('bets')
              ->select(
                  'bets.id as bet_id',
@@ -445,7 +448,8 @@ class LotteryResultController extends Controller
                  DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
                 'pkg_con.price as pkg_price',
                  'pkg_con.bet_type as bet_type',
-                 'bets.bet_schedule_id'
+                 'bets.bet_schedule_id',
+                 'bets.number_format as original_number'
              )
              ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
              ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
@@ -453,19 +457,50 @@ class LotteryResultController extends Controller
             ->orderBy('bets.id')
             ->orderBy('bet_numbers.id')
             ->lazy()
-            ->each(function ($bet) use (&$getBetWinningNumber, $date, &$betId) {
-               if(str_starts_with($bet->bet_type, 'RP')){
-                   if($betId){
-                       $betId = $bet->bet_id;
-                   }else{
-                       if($betId != $bet->bet_id){
-                           $betId = 0;
-                       }
-                   }
-                    $numberFormat = substr($bet->bet_type, -1);
+            ->each(function ($bet) use (&$getBetWinningNumber, $date, &$groupRP, &$originalNumber, &$duplicateRPNumber, &$notInResult, &$originalNumberArr) {
+                if(str_starts_with($bet->bet_type, 'RP')){
+                    $getMatched = [];
+                    if(count($originalNumberArr) == 0){
+                        $originalNumberArr = explode("#", $bet->original_number);
+                        $countDuplicate = array_count_values($originalNumberArr);
+                        foreach ($countDuplicate as $number => $count) {
+                            if ($count > 1) {
+                                $duplicateRPNumber[] = $number;
+                            }
+                        }
+//                        dump($duplicateRPNumber);
+                    }
 
+                   if(count($duplicateRPNumber)){
+                       if(in_array($bet->generated_number, $duplicateRPNumber)){
+                           $resultId = $this->matchWinNumberFromResult($date, $bet->bet_schedule_id, $bet->generated_number, $notInResult);
+                           if($resultId){
+                               $getMatched[] = $resultId;
+                               $notInResult[] = $resultId;
+                           }
+                       }
+                   }else{
+                       $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
+                   }
+
+                   if(!$originalNumber){
+                       $originalNumber = $bet->original_number;
+                   }
+                   $groupRP[] = [
+                       'results' => $getMatched,
+                       'sum_bet_amount' => $bet->sum_bet_amount,
+                       'pkg_price' => $bet->pkg_price,
+                       'bet_id' => $bet->bet_id,
+                       'generated_number' => $bet->generated_number
+                   ];
+
+//                   if(count($duplicates)){
+//                       if(count($groupRP)>1){
+//                           dd($groupRP);
+//                       }
+//                   }
                }else{
-                   $getMatched = $this->matchWinNumberFromResult($date, $bet->bet_schedule_id, $bet->generated_number);
+                   $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
                    if(count($getMatched)){
                        $totalAmount = $bet->sum_bet_amount * $bet->pkg_price;
                        foreach ($getMatched as $val){
@@ -478,8 +513,46 @@ class LotteryResultController extends Controller
                    }
                }
 
+//                if(count($groupRP) && count($originalNumberArr) == count($groupRP)){
+//                    dump($groupRP);
+//                    $groupRP = [];
+//                    $originalNumberArr = [];
+//                    $duplicateRPNumber = [];
+//                    $notInResult = [];
+//                }
+
+               if(count($groupRP) && count($originalNumberArr) == count($groupRP)){
+                   $getMinLength = 0;
+                   foreach ($groupRP as $RP){
+                       if(!$getMinLength){
+                           $getMinLength = count($RP['results']);
+                       }else{
+                           if($getMinLength > count($RP['results'])){
+                               $getMinLength = count($RP['results']);
+                           }
+                       }
+                   }
+                   if($getMinLength){
+                       foreach ($groupRP as $RP){
+                           $totalAmount = $RP['sum_bet_amount'] * $RP['pkg_price'];
+                           foreach ($RP['results'] as $k => $val){
+                               if($k < $getMinLength){
+                                   $getBetWinningNumber[] = [
+                                       'bet_id' => $RP['bet_id'],
+                                       'result_id' => $val,
+                                       'prize_amount' => $totalAmount
+                                   ];
+                               }
+                           }
+                       }
+                   }
+                   $groupRP = [];
+                   $originalNumberArr = [];
+                   $duplicateRPNumber = [];
+                   $notInResult = [];
+               }
+
             });
-//        dd($idSchedules, $getBetWinningNumber);
         return $getBetWinningNumber;
     }
 
@@ -502,7 +575,7 @@ class LotteryResultController extends Controller
             ->get()->toArray();
     }
 
-    public function matchWinNumberFromResult($date, $scheduleId, $number): array
+    public function matchWinNumberFromResults($date, $scheduleId, $number): array
     {
         return DB::table('bet_lottery_results')
             ->where('draw_date', $date)
@@ -511,6 +584,17 @@ class LotteryResultController extends Controller
             ->orderBy('result_id')
             ->pluck('result_id')
             ->toArray();
+    }
+
+    public function matchWinNumberFromResult($date, $scheduleId, $number, $resultIds): int | null
+    {
+        return DB::table('bet_lottery_results')
+            ->where('draw_date', $date)
+            ->whereNotIn('result_id', $resultIds)
+            ->where('lottery_schedule_id',$scheduleId)
+            ->where('winning_number', 'like', '%'.$number)
+            ->orderBy('result_id')
+            ->first()?->result_id;
     }
 
 
