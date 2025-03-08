@@ -6,6 +6,7 @@ use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
 use App\Models\BetNumber;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,9 @@ class LottoBet extends Component
     public $permutationsLength = [];
 
     public $totalInvoice =0;
+    public $totalDue = 0;
+
+    public $packageRate =[];
 
     public function mount(
         Bet $betModel,
@@ -107,8 +111,10 @@ class LottoBet extends Component
         $this->roll7_check = array_fill(0, $this->totalRow, false);
         $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
         // $this->number = array_fill(0, $this->totalRow, null);
+        $this->digit = array_fill(0, $this->totalRow, "");
         $this->total_amount = array_fill(0, $this->totalRow, 0);
         $this->permutationsLength = array_fill(0, $this->totalRow, 0);
+        $this->packageRate = array_fill(0, $this->totalRow, 0);
     }
 
 
@@ -143,7 +149,6 @@ class LottoBet extends Component
         foreach ($this->number as $key => $value) {
             $this->number[$key] = str_replace(' ', '', (string)$value);
             $normalizedNumber = $this->number[$key];
-
             if ($this->isInvalidInput($normalizedNumber)) {
                 $this->resetChanelValues();
                 return;
@@ -290,6 +295,10 @@ class LottoBet extends Component
         $this->enableChanelRoll[$key] = $enableRoll;
         $this->enableChanelRoll7[$key] = $enableRoll7;
         $this->enableChanelRollParlay[$key] = $chanelRollParlay;
+
+        // get rate
+        $packageConfig = $this->betPackageConfiguration->where(['package_id'=>$this->user->package_id,'bet_type'=> $digit])->first();
+        $this->packageRate[$key] = $packageConfig->rate;
     }
 
     private function setBetTypeForComplex($key)
@@ -427,8 +436,14 @@ class LottoBet extends Component
                         else{
                             $this->total_amount[$key]=0;
                             $this->totalInvoice=0;
-                            foreach ($this->total_amount as $total){
-                                $this->totalInvoice +=$total;
+                            $this->totalDue=0;
+                            foreach ($this->total_amount as $key1=>$total){
+                                if($total>0) {
+                                    $this->totalInvoice += $total;
+                                    $this->totalDue += $total* intval($this->packageRate[$key1])/100;
+                                }
+
+
                             }
                         }
                     }
@@ -485,25 +500,25 @@ class LottoBet extends Component
 
         if ($this->ab_amount[$key] > 0) {
             if ($this->ab_check[$key]) {
-                $total += $this->ab_amount[$key] * $this->permutationsLength[$key];
+                $total += ($this->ab_amount[$key] *2)* $this->permutationsLength[$key];
             } else {
-                $total += $this->ab_amount[$key];
+                $total += $this->ab_amount[$key] *2;
             }
         }
 
         if ($this->roll_amount[$key] > 0) {
             if ($this->roll_check[$key]) {
-                $total += $this->roll_amount[$key] * $this->permutationsLength[$key];
+                $total += ($this->roll_amount[$key] *18) * $this->permutationsLength[$key];
             } else {
-                $total += $this->roll_amount[$key];
+                $total += $this->roll_amount[$key] *18;
             }
         }
 
         if ($this->roll7_amount[$key] > 0) {
             if ($this->roll7_check[$key]) {
-                $total += $this->roll7_amount[$key] * $this->permutationsLength[$key];
+                $total += ($this->roll7_amount[$key]*7) * $this->permutationsLength[$key];
             } else {
-                $total += $this->roll7_amount[$key];
+                $total += $this->roll7_amount[$key] *7;
             }
         }
 
@@ -518,8 +533,10 @@ class LottoBet extends Component
         $this->total_amount[$key] = $total * $countProvince;
         // invoice
         $this->totalInvoice=0;
-        foreach ($this->total_amount as $total){
+        $this->totalDue =0;
+        foreach ($this->total_amount as $key=>$total){
             $this->totalInvoice +=$total;
+            $this->totalDue += $total* intval($this->packageRate[$key])/100;
         }
 
     }

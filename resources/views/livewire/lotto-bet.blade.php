@@ -52,7 +52,7 @@
 
                                 {{ __('Total Due') }}
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">{{ __('0 (VND)') }}</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">{{ $totalDue }} (VND)</td>
                         </tr>
                         </tbody>
                     </table>
