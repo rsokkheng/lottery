@@ -29,6 +29,7 @@ Route::prefix('/otp')->middleware( 'guest')->name('otp.')->controller(LoginWithO
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lotto_vn/bet', \App\Livewire\LottoBet::class)->name('bet.input');
     Route::get('/lotto_vn/result', [\App\Http\Controllers\LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
+    Route::get('/lotto_vn/receipt-list', [\App\Http\Controllers\BetReceiptController::class, 'index'])->name('bet.receipt-list');
 
 });
 

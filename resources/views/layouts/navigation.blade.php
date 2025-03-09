@@ -22,7 +22,7 @@
                 <!-- Navigation Links -->
                 <div class="hidden sm:flex sm:ms-10 space-x-8">
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
-                    <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Receipt List') }}</x-nav-link>
+                    <x-nav-link style="font-size: 15px;font-weight: bold; color:white" class="{{ Route::is('bet.receipt-list') ? 'active-menu' :''}}" href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Bet List') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Bet Number') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Total Bet Number') }}</x-nav-link>
@@ -81,7 +81,7 @@
     <!-- Mobile Menu (collapsed on small screens) -->
     <div x-show="open" class="sm:hidden flex flex-col space-y-2 px-4 py-2 bg-blue-500 text-white">
         <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
-        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Receipt List') }}</x-nav-link>
+        <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.receipt-list') ? 'active-menu' :''}}" href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Bet List') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Bet Number') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Total Bet Number') }}</x-nav-link>

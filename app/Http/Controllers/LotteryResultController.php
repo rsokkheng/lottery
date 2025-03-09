@@ -95,15 +95,15 @@ class LotteryResultController extends Controller
             ];
         }else{
             return [
-                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2, "tailwind_class" => "text-5xl text-red-600 max-md:text-3xl"],
-                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3, "tailwind_class" => "text-5xl text-blue-800 max-md:text-3xl"],
-                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl"],
-                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6, "tailwind_class" => "text-red-600 text-5xl max-md:text-2xl"]
+                "GiaiTam" => ["name"=>"Giải tám", "order_count"=>1, "input_length" => 2, "tailwind_class" => "text-5xl text-red-600 max-md:text-3xl", "roll" => 'a'],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>1, "input_length" => 3, "tailwind_class" => "text-5xl text-blue-800 max-md:text-3xl", "roll" => 'a'],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 4, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiNam" => ["name"=>"Giải năm", "order_count"=>1, "input_length" => 4, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiTu" => ["name"=>"Giải tư", "order_count"=>7, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiBa" => ["name"=>"Giải ba", "order_count"=>2, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiNhi" => ["name"=>"Giải nhì", "order_count"=>1, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiNhat" => ["name"=>"Giải nhất", "order_count"=>1, "input_length" => 5, "tailwind_class" => "text-black text-4xl max-md:text-xl", "roll" => 'a'],
+                "GiaiDB" => ["name"=>"Giải Đặc Biệt", "order_count"=>1, "input_length" => 6, "tailwind_class" => "text-red-600 text-5xl max-md:text-2xl", "roll" => 'a']
             ];
         }
     }
@@ -398,10 +398,10 @@ class LotteryResultController extends Controller
 //       $today = Carbon::today()->format('Y-m-d');
 //        $dayName = Carbon::today()->dayName;
 //        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
-//        $date = Carbon::today()->format('Y-m-d');
-//        $scheduleIds = [20,21,22];
+        $date = Carbon::today()->format('Y-m-d');
+        $scheduleIds = [20,21,22];
 //        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
-//        $getBetWin = $this->generateWinningNumbers($date, $idSchedules);
+//         $this->generateWinningNumbersCustom($date, $scheduleIds);
 //        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
     }
 
@@ -478,6 +478,8 @@ class LotteryResultController extends Controller
                                $getMatched[] = $resultId;
                                $notInResult[] = $resultId;
                            }
+                       }else{
+                           $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
                        }
                    }else{
                        $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
@@ -555,6 +557,51 @@ class LotteryResultController extends Controller
             });
         return $getBetWinningNumber;
     }
+
+
+//    public function generateWinningNumbersCustom($date, $idSchedules): array
+//    {
+//        $date = '2025-02-23';
+//        $idSchedules = [20];
+////        $day = 'Sunday';
+////        $time = '16:30:00';
+//        $getBetWinningNumber = [];
+////        $groupRP = [];
+////        $originalNumber = '';
+////        $duplicateRPNumber = [];
+////        $originalNumberArr = [];
+////        $notInResult = [];
+//
+//        DB::table('bets')
+//            ->select(
+//                'bets.id as bet_id',
+//                'bet_numbers.*',
+//                DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
+//                'pkg_con.price as pkg_price',
+//                'pkg_con.bet_type as bet_type',
+//                'bets.bet_schedule_id',
+//                'bets.number_format as original_number'
+//            )
+//            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+//            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+//            ->whereIn('bets.bet_schedule_id',$idSchedules)
+//            ->orderBy('bets.id')
+//            ->orderBy('bet_numbers.id')
+//            ->lazy()
+//            ->each(function ($bet) {
+//                $total_amount = 0;
+//                if($bet->a_check){
+//                    $total_amount += $bet->a_amount;
+//                }
+//                if($bet->b_check){
+//                    $total_amount += $bet->b_amount;
+//                }
+//                if($bet->ab_check){
+//                    $total_amount += $bet->ab_amount;
+//                }
+//            });
+//        return $getBetWinningNumber;
+//    }
 
 
     public function getPluckIdSchedule($day, $drawTime): array
