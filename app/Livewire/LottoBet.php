@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Enums\MultiplierEnum;
+use App\Enums\MultiplierHNEnum;
 use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
@@ -62,6 +64,7 @@ class LottoBet extends Component
 
     public $totalInvoice =0;
     public $totalDue = 0;
+    public $totalProvisional=0;
 
     public $packageRate =[];
 
@@ -479,58 +482,130 @@ class LottoBet extends Component
         }
     }
     // calculate total
+
     private function totalAmountNormalNumber($key, $countProvince): void
     {
-        $total = 0;
+        $this->totalProvisional=0;
+        $isHN = false;
+        foreach ($this->schedules as $keys=>$schedule)
+        {
+            if($this->province_body_check[$keys][$key]){
+                if($schedule->code =="HN"){
+
+                }
+            }
+        }
+
         if ($this->a_amount[$key] > 0) {
             if ($this->a_check[$key]) {
-                $total += $this->a_amount[$key] * $this->permutationsLength[$key];
+                $this->totalProvisional += $this->a_amount[$key] * $this->permutationsLength[$key];
             } else {
-                $total += $this->a_amount[$key];
+                $this->totalProvisional += $this->a_amount[$key];
             }
         }
 
         if ($this->b_amount[$key] > 0) {
             if ($this->b_check[$key]) {
-                $total += $this->b_amount[$key] * $this->permutationsLength[$key];
+                $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
             } else {
-                $total += $this->b_amount[$key];
+                $this->totalProvisional += $this->b_amount[$key];
             }
         }
 
         if ($this->ab_amount[$key] > 0) {
             if ($this->ab_check[$key]) {
-                $total += ($this->ab_amount[$key] *2)* $this->permutationsLength[$key];
+                $this->totalProvisional += ($this->ab_amount[$key] * MultiplierEnum::AB)* $this->permutationsLength[$key];
             } else {
-                $total += $this->ab_amount[$key] *2;
+                $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB;
             }
         }
 
         if ($this->roll_amount[$key] > 0) {
             if ($this->roll_check[$key]) {
-                $total += ($this->roll_amount[$key] *18) * $this->permutationsLength[$key];
+                $this->totalProvisional += ($this->roll_amount[$key] * MultiplierEnum::ROLL) * $this->permutationsLength[$key];
             } else {
-                $total += $this->roll_amount[$key] *18;
+                $this->totalProvisional += $this->roll_amount[$key] * MultiplierEnum::ROLL;
             }
         }
 
         if ($this->roll7_amount[$key] > 0) {
             if ($this->roll7_check[$key]) {
-                $total += ($this->roll7_amount[$key]*7) * $this->permutationsLength[$key];
+                $this->totalProvisional += ($this->roll7_amount[$key] * MultiplierEnum::ROLL7) * $this->permutationsLength[$key];
             } else {
-                $total += $this->roll7_amount[$key] *7;
+                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
             }
         }
 
         if ($this->roll_parlay_amount[$key] > 0) {
             if ($this->roll_parlay_check[$key]) {
-                $total += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
+                $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
             } else {
-                $total += $this->roll_parlay_amount[$key];
+                $this->totalProvisional += $this->roll_parlay_amount[$key];
             }
         }
 
-        $this->total_amount[$key] = $total * $countProvince;
+        $this->total_amount[$key] = $this->totalProvisional * $countProvince;
+        // invoice
+        $this->totalInvoice=0;
+        $this->totalDue =0;
+        foreach ($this->total_amount as $key=>$total){
+            $this->totalInvoice +=$total;
+            $this->totalDue += $total* intval($this->packageRate[$key])/100;
+        }
+
+    }
+    private function totalAmountNormalForHN($key): void
+    {
+
+        if ($this->a_amount[$key] > 0) {
+            if ($this->a_check[$key]) {
+                $this->totalProvisional += $this->a_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->a_amount[$key];
+            }
+        }
+
+        if ($this->b_amount[$key] > 0) {
+            if ($this->b_check[$key]) {
+                $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->b_amount[$key];
+            }
+        }
+
+        if ($this->ab_amount[$key] > 0) {
+            if ($this->ab_check[$key]) {
+                $this->totalProvisional += ($this->ab_amount[$key] * MultiplierEnum::AB)* $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB;
+            }
+        }
+
+        if ($this->roll_amount[$key] > 0) {
+            if ($this->roll_check[$key]) {
+                $this->totalProvisional += ($this->roll_amount[$key] * MultiplierEnum::ROLL) * $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->roll_amount[$key] * MultiplierEnum::ROLL;
+            }
+        }
+
+        if ($this->roll7_amount[$key] > 0) {
+            if ($this->roll7_check[$key]) {
+                $this->totalProvisional += ($this->roll7_amount[$key] * MultiplierEnum::ROLL7) * $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
+            }
+        }
+
+        if ($this->roll_parlay_amount[$key] > 0) {
+            if ($this->roll_parlay_check[$key]) {
+                $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
+            } else {
+                $this->totalProvisional += $this->roll_parlay_amount[$key];
+            }
+        }
+
+        $this->total_amount[$key] = $this->totalProvisional;
         // invoice
         $this->totalInvoice=0;
         $this->totalDue =0;
