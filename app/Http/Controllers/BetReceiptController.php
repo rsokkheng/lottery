@@ -14,22 +14,27 @@ class BetReceiptController extends Controller
      */
 
     public BetReceipt $model;
+    public $currentDate;
 
     public function __construct(BetReceipt $model)
     {
         $this->model = $model;
+        $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
     public function index(Request $request)
     {
         try{
-            $date = $request->date??null;
+            $date = $this->currentDate;
+            if($request->has('date')){
+                $date = $request->get('date');
+            }
             $no = $request->no??null;
 //            $ddd = Carbon::createFromFormat('Y-m-d', $date)->firsto();
 //            $ddd = Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s');
 //            dd($ddd);
 //            dd($date, $no, is_null($date));
-            $data = $this->model->newQuery()->with(['user'])
+            $data = $this->model->  newQuery()->with(['user'])
                 ->when(!is_null($date), function ($q) use ($date){
 //                    $q->whereBetween('date', [Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'), Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s')]);
                     $q->where('date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
@@ -52,7 +57,6 @@ class BetReceiptController extends Controller
                     "compensate" => $item->compensate,
                 ];
             });
-//            dd($data);
             return view('bet.receipt-list', compact('data', 'date', 'no'));
         }catch (\Exception $exception){
             throwException($exception);
@@ -106,5 +110,45 @@ class BetReceiptController extends Controller
     public function destroy(BetReceipt $betReceipt)
     {
         //
+    }
+
+
+    public function betList(Request $request)
+    {
+        try{
+            $date = $this->currentDate;
+            if($request->has('date')){
+                $date = $request->get('date');
+            }
+            $company_id = -1;
+            if($request->has('com_id')){
+                $company_id = $request->get('com_id');
+            }
+            $receiptNo = $request->no??null;
+            $number = $request->number??null;
+            $company = [
+                [
+                    "label" => "All Company",
+                    "id" => -1,
+                ],
+                [
+                    "label" => "4PM Company",
+                    "id" => 1,
+                ],
+                [
+                    "label" => "5PM Company",
+                    "id" => 2,
+                ],
+                [
+                    "label" => "6PM Company",
+                    "id" => 3,
+                ]
+            ];
+            $data = [1,2,3,4];
+            return view('bet.bet-list', compact('data', 'date', 'receiptNo', 'number', 'company', 'company_id'));
+        }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
     }
 }
