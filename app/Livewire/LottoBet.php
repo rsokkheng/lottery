@@ -149,7 +149,6 @@ class LottoBet extends Component
 
     public function handleInputNumber()
     {
-
         foreach ($this->number as $key => $value) {
             $this->number[$key] = str_replace(' ', '', (string)$value);
             $normalizedNumber = $this->number[$key];
@@ -430,8 +429,8 @@ class LottoBet extends Component
             $updatedInvoices = [];
 
             foreach ($this->number as $key => $num) {
-                $lengthOfNum = strlen((integer)$num);
-                if (intval($num) > 0) {
+                $lengthOfNum = strlen($num);
+                if ($lengthOfNum > 0) {
                     $chanel = [];
                     $amount = [];
                     $countProvince = 0;
@@ -449,13 +448,14 @@ class LottoBet extends Component
                                     $this->totalInvoice += $total;
                                     $this->totalDue += $total * intval($this->packageRate[$key1]) / 100;
                                 }
-
-
                             }
                         }
                     }
+
+                    $isAsterisk = preg_match('/^\*\d+$|\d+\*$/', $num);
+
                     if ($countProvince > 0) {
-                        $this->totalAmountNormalNumber($key, $lengthOfNum, $countProvince);
+                        $this->totalAmountNormalNumber($key, $lengthOfNum, $countProvince, $isAsterisk);
                     }
                     $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
                     $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A", $key);
@@ -487,10 +487,9 @@ class LottoBet extends Component
     }
 
     // calculate total
-    private function totalAmountNormalNumber($key, $lengthNumber, $countProvince): void
+    private function totalAmountNormalNumber($key, $lengthNumber, $countProvince, $isAsterisk): void
     {
         $this->totalProvisional = 0;
-        $isHN = false;
         foreach ($this->schedules as $keys => $schedule) {
             if ($this->province_body_check[$keys][$key]) {
                 if ($schedule->code == "HN") {
@@ -498,7 +497,11 @@ class LottoBet extends Component
                         if ($this->a_check[$key]) {
                             $this->totalProvisional += $this->a_amount[$key] * MultiplierHNEnum::A * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->a_amount[$key] * MultiplierHNEnum::A;
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->a_amount[$key] * MultiplierHNEnum::A * 10;
+                            } else {
+                                $this->totalProvisional += $this->a_amount[$key] * MultiplierHNEnum::A;
+                            }
                         }
                     }
 
@@ -506,25 +509,33 @@ class LottoBet extends Component
                         if ($this->b_check[$key]) {
                             $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->b_amount[$key];
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->b_amount[$key] * 10;
+                            } else {
+                                $this->totalProvisional += $this->b_amount[$key];
+                            }
                         }
                     }
 
                     if ($this->ab_amount[$key] > 0) {
-                        $ab = match($lengthNumber) {
-                                2 => MultiplierHNEnum::AB,
-                                3 => MultiplierHNEnum::AB_3D,
-                                default => 1
-                           };
+                        $ab = match ($lengthNumber) {
+                            2 => MultiplierHNEnum::AB,
+                            3 => MultiplierHNEnum::AB_3D,
+                            default => 1
+                        };
                         if ($this->ab_check[$key]) {
                             $this->totalProvisional += $this->ab_amount[$key] * $ab * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->ab_amount[$key] * $ab;
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->ab_amount[$key] * $ab * 10;
+                            } else {
+                                $this->totalProvisional += $this->ab_amount[$key] * $ab;
+                            }
                         }
                     }
 
                     if ($this->roll_amount[$key] > 0) {
-                        $roll= match($lengthNumber) {
+                        $roll = match ($lengthNumber) {
                             2 => MultiplierHNEnum::ROLL,
                             3 => MultiplierHNEnum::ROLL_3D,
                             4 => MultiplierHNEnum::ROLL_4D,
@@ -533,7 +544,11 @@ class LottoBet extends Component
                         if ($this->roll_check[$key]) {
                             $this->totalProvisional += $this->roll_amount[$key] * $roll * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->roll_amount[$key] * $roll;
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->roll_amount[$key] * $roll * 10;
+                            } else {
+                                $this->totalProvisional += $this->roll_amount[$key] * $roll;
+                            }
                         }
                     }
 
@@ -542,7 +557,8 @@ class LottoBet extends Component
                         if ($this->roll_parlay_check[$key]) {
                             $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->roll_parlay_amount[$key];
+                                $this->totalProvisional += $this->roll_parlay_amount[$key];
+
                         }
                     }
                 } else {
@@ -550,7 +566,11 @@ class LottoBet extends Component
                         if ($this->a_check[$key]) {
                             $this->totalProvisional += $this->a_amount[$key] * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->a_amount[$key];
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->a_amount[$key] * 10;
+                            }else{
+                                $this->totalProvisional += $this->a_amount[$key];
+                            }
                         }
                     }
 
@@ -558,7 +578,12 @@ class LottoBet extends Component
                         if ($this->b_check[$key]) {
                             $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->b_amount[$key];
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->b_amount[$key] * 10;
+                            }
+                            else{
+                                $this->totalProvisional += $this->b_amount[$key];
+                            }
                         }
                     }
 
@@ -566,12 +591,16 @@ class LottoBet extends Component
                         if ($this->ab_check[$key]) {
                             $this->totalProvisional += ($this->ab_amount[$key] * MultiplierEnum::AB) * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB;
-                        }
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB *10;
+                            }
+                            else{
+                                $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB;
+                            }
+                            }
                     }
-
                     if ($this->roll_amount[$key] > 0) {
-                        $roll= match($lengthNumber) {
+                        $roll = match ($lengthNumber) {
                             2 => MultiplierEnum::ROLL,
                             3 => MultiplierEnum::ROLL_3D,
                             4 => MultiplierEnum::ROLL_4D,
@@ -580,7 +609,12 @@ class LottoBet extends Component
                         if ($this->roll_check[$key]) {
                             $this->totalProvisional += $this->roll_amount[$key] * $roll * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->roll_amount[$key] * $roll;
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->roll_amount[$key] * $roll * 10;
+                            }
+                            else {
+                                $this->totalProvisional += $this->roll_amount[$key] * $roll;
+                            }
                         }
                     }
 
@@ -588,7 +622,12 @@ class LottoBet extends Component
                         if ($this->roll7_check[$key]) {
                             $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
+                            if ($isAsterisk) {
+                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
+                            }
+                            else{
+                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
+                            }
                         }
                     }
 
@@ -676,7 +715,7 @@ class LottoBet extends Component
 
     }
 
-    private function totalAmountAsteriskNumber(): void
+    private function totalAmountAsteriskNumber($key, $lengthNumber, $countProvince): void
     {
 
     }
