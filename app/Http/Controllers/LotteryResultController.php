@@ -20,6 +20,12 @@ class LotteryResultController extends Controller
      */
     public string $currentDate;
     public string $currentDayName;
+
+    public array $rollA = ['GiaiDB'];
+    public array $rollB = ['GiaiTam'];
+    public array $rolls = ['GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB'];
+    public array $roll7 = ['GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiDB'];  // Roll 7 only have 6 prizes but GiaiTu check win result for only first row
+    public array $rollParlay = [''];
     public function __construct()
     {
         $this->currentDate = Carbon::today()->format('d/m/Y');
@@ -249,22 +255,25 @@ class LotteryResultController extends Controller
                         $query->where('draw_date', $resultDate)
                             ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet);
                     })->forceDelete();
-                $betResult->newQuery()
-                    ->where('draw_date', $resultDate)
-                    ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet)
-                    ->forceDelete();
                 foreach ($form['data'] as $item) {
-                    $betResult->newQuery()->create([
-                        'draw_date' => $resultDate,
-                        'province_code' => $item['province_code'],
-                        'prize_level' => $item['prize_level'],
-                        'winning_number' => $item['winning_number'],
-                        'result_order' => $item['result_order'],
-                        'lottery_schedule_id' => $item['schedule_id'],
-                    ]);
+                    $betResult->newQuery()->upsert([
+                            [
+                                'draw_date' => $resultDate,
+                                'province_code' => $item['province_code'],
+                                'prize_level' => $item['prize_level'],
+                                'winning_number' => $item['winning_number'],
+                                'result_order' => $item['result_order'],
+                                'lottery_schedule_id' => $item['schedule_id']
+                            ]
+                        ],
+                        uniqueBy: ['draw_date', 'province_code', 'prize_level', 'result_order', 'lottery_schedule_id'],
+                        update: ['winning_number']
+                    );
                 }
-                $insertBetWinRecords = $this->generateWinningNumbers($resultDate, $scheduleIdsByCurrentBet);
-                BetWinningRecord::insert($insertBetWinRecords);
+                $getNormalWinNumber = $this->generateNormalWinBet($resultDate, $scheduleIdsByCurrentBet);
+                $getHashWinNumber = $this->generateHashWinBet($resultDate, $scheduleIdsByCurrentBet);
+                $insertWinNumber = [...$getNormalWinNumber,...$getHashWinNumber];
+                BetWinningRecord::insert($insertWinNumber);
             }
 
             DB::commit();
@@ -398,11 +407,16 @@ class LotteryResultController extends Controller
 //       $today = Carbon::today()->format('Y-m-d');
 //        $dayName = Carbon::today()->dayName;
 //        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
-        $date = Carbon::today()->format('Y-m-d');
+//        $date = Carbon::today()->format('Y-m-d');
         $scheduleIds = [20,21,22];
+        $date = '2025-02-23';
 //        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
 //         $this->generateWinningNumbersCustom($date, $scheduleIds);
-//        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
+
+        //insert for type 2D, 3D, 4D
+        $getBetWin = $this->generateNormalWinBet($date, $scheduleIds);
+        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
+        return $getBetWin;
     }
 
     public function getBetTime($region): string
@@ -424,12 +438,87 @@ class LotteryResultController extends Controller
          BetWinningRecord::whereHas('betLotteryResult', function ($query) use ($date, $scheduleIds){
                 $query->where('draw_date', $date)
                     ->whereIn('lottery_schedule_id', $scheduleIds);
-            })->get();
+            })->forceDelete();
         BetWinningRecord::insert($insertRecords);
     }
 
+    public function generateNormalWinBet($date, $idSchedules): array
+    {
+//        $date = '2025-02-23';
+//        $day = 'Sunday';
+//        $time = '16:30:00';
+        $getBetWinningNumber = [];
+        DB::table('bets')
+             ->select(
+                 'bets.id as bet_id',
+                 'bet_numbers.generated_number',
+                 'bet_numbers.digit_length',
+                 'bet_numbers.a_amount',
+                 'bet_numbers.b_amount',
+                 'bet_numbers.ab_amount',
+                 'bet_numbers.roll_amount',
+                 'bet_numbers.roll7_amount',
+                 'bet_numbers.roll_parlay_amount',
+                 DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
+                'pkg_con.price as pkg_price',
+                 'pkg_con.bet_type as bet_type',
+                 'bets.bet_schedule_id',
+                 'bets.number_format as original_number'
+             )
+             ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+             ->whereIn('bets.bet_schedule_id',$idSchedules)
+            ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
+            ->orderBy('bets.id')
+            ->orderBy('bet_numbers.id')
+            ->lazy()
+            ->each(function ($bet) use (&$getBetWinningNumber, $date) {
+                $roll = [];
+                $isRoll7 = [];
+                if($bet->bet_type === '2D'){
+                    if ($bet->a_amount){
+                        array_push($roll, ...$this->rollA);
+                    }
+                    if ($bet->b_amount){
+                        array_push($roll, ...$this->rollB);
+                    }
+                    if ($bet->ab_amount) {
+                        array_push($roll, ...$this->rollA, ...$this->rollB);
+                    }
+                    if ($bet->roll_amount) {
+                        array_push($roll, ...$this->rolls);
+                    }
+                }else if($bet->bet_type === '3D'){
+                    if ($bet->roll_amount) {
+                        array_push($roll, ...$this->rolls);
+                    }
+                    if ($bet->roll7_amount) {
+                        $isRoll7 = $this->roll7;
+                        array_push($roll, ...$this->roll7);
+                    }
+                }else{
+                    if ($bet->roll_amount) {
+                        array_push($roll, ...$this->rolls);
+                    }
+                }
 
-    public function generateWinningNumbers($date, $idSchedules): array
+               $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number, $roll, $isRoll7);
+               if(count($getMatched)){
+                   $totalAmount = $bet->sum_bet_amount * $bet->pkg_price;
+                   foreach ($getMatched as $val){
+                       $getBetWinningNumber[] = [
+                           'bet_id' => $bet->bet_id,
+                           'result_id' => $val,
+                           'prize_amount' => $totalAmount
+                       ];
+                   }
+               }
+
+            });
+        return $getBetWinningNumber;
+    }
+
+    public function generateHashWinBet($date, $idSchedules): array
     {
 //        $date = '2025-02-23';
 //        $day = 'Sunday';
@@ -441,118 +530,128 @@ class LotteryResultController extends Controller
         $originalNumberArr = [];
         $notInResult = [];
         DB::table('bets')
-             ->select(
-                 'bets.id as bet_id',
-                 'bet_numbers.generated_number',
-                 'bet_numbers.digit_length',
-                 DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
+            ->select(
+                'bets.id as bet_id',
+                'bet_numbers.generated_number',
+                'bet_numbers.digit_length',
+                DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
                 'pkg_con.price as pkg_price',
-                 'pkg_con.bet_type as bet_type',
-                 'bets.bet_schedule_id',
-                 'bets.number_format as original_number'
-             )
-             ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
-             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
-             ->whereIn('bets.bet_schedule_id',$idSchedules)
+                'pkg_con.bet_type as bet_type',
+                'pkg_con.has_special as has_special',
+                'bets.bet_schedule_id',
+                'bets.number_format as original_number'
+            )
+            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+            ->whereIn('bets.bet_schedule_id', $idSchedules)
+            ->whereIn('pkg_con.bet_type', ['RP2','RP3'])
+            ->where('has_special', '0')
             ->orderBy('bets.id')
             ->orderBy('bet_numbers.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date, &$groupRP, &$originalNumber, &$duplicateRPNumber, &$notInResult, &$originalNumberArr) {
-                if(str_starts_with($bet->bet_type, 'RP')){
-                    $getMatched = [];
-                    if(count($originalNumberArr) == 0){
-                        $originalNumberArr = explode("#", $bet->original_number);
-                        $countDuplicate = array_count_values($originalNumberArr);
-                        foreach ($countDuplicate as $number => $count) {
-                            if ($count > 1) {
-                                $duplicateRPNumber[] = $number;
+                $getMatched = [];
+                if(count($originalNumberArr) == 0){
+                    $originalNumberArr = explode("#", $bet->original_number);
+                    $countDuplicate = array_count_values($originalNumberArr);
+                    foreach ($countDuplicate as $number => $count) {
+                        if ($count > 1) {
+                            $duplicateRPNumber[] = $number;
+                        }
+                    }
+                }
+
+                if(count($duplicateRPNumber)){
+                    if(in_array($bet->generated_number, $duplicateRPNumber)){
+                        $resultId = $this->matchWinNumberFromResult($date, $bet->bet_schedule_id, $bet->generated_number, $notInResult);
+                        if($resultId){
+                            $getMatched[] = $resultId;
+                            $notInResult[] = $resultId;
+                        }
+                    }else{
+                        $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
+                    }
+                }else{
+                    $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
+                }
+
+                if(!$originalNumber){
+                    $originalNumber = $bet->original_number;
+                }
+                $groupRP[] = [
+                    'results' => $getMatched,
+                    'sum_bet_amount' => $bet->sum_bet_amount,
+                    'pkg_price' => $bet->pkg_price,
+                    'bet_id' => $bet->bet_id,
+                    'generated_number' => $bet->generated_number
+                ];
+
+                if(count($groupRP) && count($originalNumberArr) == count($groupRP)){
+                    $getMinLength = 0;
+                    foreach ($groupRP as $RP){
+                        if(!$getMinLength){
+                            $getMinLength = count($RP['results']);
+                        }else{
+                            if($getMinLength > count($RP['results'])){
+                                $getMinLength = count($RP['results']);
                             }
                         }
-//                        dump($duplicateRPNumber);
                     }
+                    if($getMinLength){
+                        foreach ($groupRP as $RP){
+                            $totalAmount = $RP['sum_bet_amount'] * $RP['pkg_price'];
+                            foreach ($RP['results'] as $k => $val){
+                                if($k < $getMinLength){
+                                    $getBetWinningNumber[] = [
+                                        'bet_id' => $RP['bet_id'],
+                                        'result_id' => $val,
+                                        'prize_amount' => $totalAmount
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                    $groupRP = [];
+                    $originalNumberArr = [];
+                    $duplicateRPNumber = [];
+                    $notInResult = [];
+                }
+            });
+        return $getBetWinningNumber;
+    }
 
-                   if(count($duplicateRPNumber)){
-                       if(in_array($bet->generated_number, $duplicateRPNumber)){
-                           $resultId = $this->matchWinNumberFromResult($date, $bet->bet_schedule_id, $bet->generated_number, $notInResult);
-                           if($resultId){
-                               $getMatched[] = $resultId;
-                               $notInResult[] = $resultId;
-                           }
-                       }else{
-                           $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
-                       }
-                   }else{
-                       $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
-                   }
-
-                   if(!$originalNumber){
-                       $originalNumber = $bet->original_number;
-                   }
-                   $groupRP[] = [
-                       'results' => $getMatched,
-                       'sum_bet_amount' => $bet->sum_bet_amount,
-                       'pkg_price' => $bet->pkg_price,
-                       'bet_id' => $bet->bet_id,
-                       'generated_number' => $bet->generated_number
-                   ];
-
-//                   if(count($duplicates)){
-//                       if(count($groupRP)>1){
-//                           dd($groupRP);
-//                       }
-//                   }
-               }else{
-                   $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number);
-                   if(count($getMatched)){
-                       $totalAmount = $bet->sum_bet_amount * $bet->pkg_price;
-                       foreach ($getMatched as $val){
-                           $getBetWinningNumber[] = [
-                               'bet_id' => $bet->bet_id,
-                               'result_id' => $val,
-                               'prize_amount' => $totalAmount
-                           ];
-                       }
-                   }
-               }
-
-//                if(count($groupRP) && count($originalNumberArr) == count($groupRP)){
-//                    dump($groupRP);
-//                    $groupRP = [];
-//                    $originalNumberArr = [];
-//                    $duplicateRPNumber = [];
-//                    $notInResult = [];
-//                }
-
-               if(count($groupRP) && count($originalNumberArr) == count($groupRP)){
-                   $getMinLength = 0;
-                   foreach ($groupRP as $RP){
-                       if(!$getMinLength){
-                           $getMinLength = count($RP['results']);
-                       }else{
-                           if($getMinLength > count($RP['results'])){
-                               $getMinLength = count($RP['results']);
-                           }
-                       }
-                   }
-                   if($getMinLength){
-                       foreach ($groupRP as $RP){
-                           $totalAmount = $RP['sum_bet_amount'] * $RP['pkg_price'];
-                           foreach ($RP['results'] as $k => $val){
-                               if($k < $getMinLength){
-                                   $getBetWinningNumber[] = [
-                                       'bet_id' => $RP['bet_id'],
-                                       'result_id' => $val,
-                                       'prize_amount' => $totalAmount
-                                   ];
-                               }
-                           }
-                       }
-                   }
-                   $groupRP = [];
-                   $originalNumberArr = [];
-                   $duplicateRPNumber = [];
-                   $notInResult = [];
-               }
+    public function generateSpecialHashWinBet($date, $idSchedules): array
+    {
+//        $date = '2025-02-23';
+//        $day = 'Sunday';
+//        $time = '16:30:00';
+        $getBetWinningNumber = [];
+        $groupRP = [];
+        $originalNumber = '';
+        $duplicateRPNumber = [];
+        $originalNumberArr = [];
+        $notInResult = [];
+        DB::table('bets')
+            ->select(
+                'bets.id as bet_id',
+                'bet_numbers.generated_number',
+                'bet_numbers.digit_length',
+                DB::raw('bet_numbers.a_amount + bet_numbers.b_amount + bet_numbers.ab_amount + bet_numbers.roll_amount + bet_numbers.roll7_amount + bet_numbers.roll_parlay_amount as sum_bet_amount'),
+                'pkg_con.price as pkg_price',
+                'pkg_con.bet_type as bet_type',
+                'pkg_con.has_special as has_special',
+                'bets.bet_schedule_id',
+                'bets.number_format as original_number'
+            )
+            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+            ->whereIn('bets.bet_schedule_id',$idSchedules)
+            ->whereIn('pkg_con.bet_type', ['RP2','RP3','RP4'])
+            ->where('has_special', '0')
+            ->orderBy('bets.id')
+            ->orderBy('bet_numbers.id')
+            ->lazy()
+            ->each(function ($bet) use (&$getBetWinningNumber) {
 
             });
         return $getBetWinningNumber;
@@ -622,11 +721,19 @@ class LotteryResultController extends Controller
             ->get()->toArray();
     }
 
-    public function matchWinNumberFromResults($date, $scheduleId, $number): array
+    public function matchWinNumberFromResults($date, $scheduleId, $number, $roll = [], $roll7 = []): array
     {
+        $getRoll = [...$roll, ...$roll7];
         return DB::table('bet_lottery_results')
             ->where('draw_date', $date)
             ->where('lottery_schedule_id',$scheduleId)
+            ->when(count($getRoll), function ($q) use ($roll, $roll7){
+                $q->whereIn('prize_level', $roll)
+                ->when(count($roll7), function ($q2){
+                    $q2->where('prize_level', 'GiaiTu')
+                    ->where('result_order', 1);
+                });
+            })
             ->where('winning_number', 'like', '%'.$number)
             ->orderBy('result_id')
             ->pluck('result_id')
