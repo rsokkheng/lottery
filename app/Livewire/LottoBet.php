@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Enums\MultiplierEnum;
+use App\Enums\MultiplierHashtagEnum;
+use App\Enums\MultiplierHashtagHNEnum;
 use App\Enums\MultiplierHNEnum;
 use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
@@ -50,6 +52,7 @@ class LottoBet extends Component
     public $enableChanelRoll = [];
     public $enableChanelRoll7 = [];
     public $enableChanelRollParlay = [];
+    public $enableCheckRollParlay = [];
 
     public $schedules = [];
     public $currentDate;
@@ -156,7 +159,6 @@ class LottoBet extends Component
                 // $this->resetChanelValues();
                 return;
             }
-
             if (strpos($normalizedNumber, '#') !== false) {
                 $this->handleComplexBet($normalizedNumber, $key);
             } else {
@@ -231,7 +233,6 @@ class LottoBet extends Component
     private function handleSimpleBet($number, $key)
     {
         $length = strlen($number);
-
         switch ($length) {
             case 2:
                 $this->setBetType($key, "2D", true, true, true, true, false, false);
@@ -271,18 +272,33 @@ class LottoBet extends Component
     {
         $parts = explode('#', $normalizedNumber);
         $length = count($parts);
-        if ($length === 4 && count(array_unique($parts)) === 1) {
+        log::info($length);
+        if($length === 2 && count(array_unique($parts)) === 1)
+        {
+            $this->enableChanelRollParlay[$key] = true;
+        }
+        elseif($length === 3 && count(array_unique($parts)) === 1)
+        {
+            $this->enableChanelRollParlay[$key] = false;
+            $this->enableCheckRollParlay[$key] = false;
+        }
+        elseif($length === 3 && count(array_unique($parts)) !== 1)
+        {
+            $this->enableChanelRollParlay[$key] = true;
+            $this->enableCheckRollParlay[$key] = true;
+        }
+        elseif($length === 4 && count(array_unique($parts)) === 1)
+        {
+            $this->enableChanelRollParlay[$key] = false;
+            $this->enableCheckRollParlay[$key] = false;
+        }
+       
+        elseif ($length === 4 && count(array_unique($parts)) === 1) {
             $this->digit[$key] = '-';
             $this->checkRollParlay[$key] = false;
             return;
         }
-        if($length==4){
-            $this->roll_parlay_check[$key] = true;
-        }
-        else{
-            $this->roll_parlay_check[$key] = false;
-        }
-        $this->enableChanelRollParlay[$key] = true;
+
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
@@ -290,6 +306,13 @@ class LottoBet extends Component
             $this->digit[$key] = '-';
             $this->checkRollParlay[$key] = false;
             $this->resetChanelValues();
+        }
+
+        if($length==4){
+            $this->roll_parlay_check[$key] = true;
+        }
+        else{
+            $this->roll_parlay_check[$key] = false;
         }
     }
 
@@ -303,6 +326,7 @@ class LottoBet extends Component
         $this->enableChanelRoll[$key] = $enableRoll;
         $this->enableChanelRoll7[$key] = $enableRoll7;
         $this->enableChanelRollParlay[$key] = $chanelRollParlay;
+        $this->enableCheckRollParlay[$key]  = $chanelRollParlay;
 
         // get rate
         $packageConfig = $this->betPackageConfiguration->where(['package_id' => $this->user->package_id, 'bet_type' => $digit])->first();
@@ -316,7 +340,7 @@ class LottoBet extends Component
         $this->enableChanelAB[$key] = false;
         $this->enableChanelRoll[$key] = false;
         $this->enableChanelRoll7[$key] = false;
-        $this->enableChanelRollParlay[$key] = true;
+//        $this->enableChanelRollParlay[$key] = true;
     }
 
     private function resetBetType($key)
@@ -328,6 +352,7 @@ class LottoBet extends Component
         $this->enableChanelRoll[$key] = false;
         $this->enableChanelRoll7[$key] = false;
         $this->enableChanelRollParlay[$key] = false;
+        $this->enableCheckRollParlay[$key] = false;
     }
 
     private function resetChanelValues()
@@ -338,6 +363,7 @@ class LottoBet extends Component
         $this->enableChanelRoll = [];
         $this->enableChanelRoll7 = [];
         $this->enableChanelRollParlay = [];
+        $this->enableCheckRollParlay =[];
     }
 
     public function handleSave()
@@ -459,9 +485,16 @@ class LottoBet extends Component
                     $isAsterisk = preg_match('/^\*\d+$|\d+\*$/', $num);
                     $isHashtag = preg_match('/^(\d{2}(?:#\d{2}){1,3})$/', $num);
                     $countHashtag = substr_count($num, '#');
+                    if($countHashtag==1){
+                        $this->enableCheckRollParlay[$key] = false;
+                        log::info($this->enableCheckRollParlay[$key]);
+                    }
+                    elseif ($countHashtag ==2 || $countHashtag ==3){
+                        $this->enableCheckRollParlay[$key] = true;
+                    }
 
                     if ($countProvince > 0) {
-                        $this->totalAmountNormalNumber($key, $lengthOfNum, $countProvince, $isAsterisk, $isHashtag, $countHashtag);
+                        $this->totalAmountNormalNumber($key, $lengthOfNum,  $isAsterisk,  $countHashtag);
                     }
                     $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
                     $this->addAmount($amount, $this->a_amount[$key] ?? 0, $this->a_check[$key] ?? false, "A", $key);
@@ -493,7 +526,7 @@ class LottoBet extends Component
     }
 
     // calculate total
-    private function totalAmountNormalNumber($key, $lengthNumber, $countProvince, $isAsterisk, $isHashtag, $countHashtag): void
+    private function totalAmountNormalNumber($key, $lengthNumber, $isAsterisk, $countHashtag): void
     {
         $this->totalProvisional = 0;
         foreach ($this->schedules as $keys => $schedule) {
@@ -560,21 +593,16 @@ class LottoBet extends Component
 
 
                     if ($this->roll_parlay_amount[$key] > 0) {
+                        $value = match($countHashtag){
+                            1 => MultiplierHashtagHNEnum::one,
+                            2 => MultiplierHashtagHNEnum::two,
+                            3 => MultiplierHashtagHNEnum::three,
+                            default => 1
+                        };
                         if ($this->roll_parlay_check[$key]) {
-                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $value * $countHashtag;
                         } else {
-                            if ($isHashtag) {
-                                $value = match($countHashtag){
-                                    1 => 54,
-                                    2 => 81,
-                                    3 => 324,
-                                    default => 1
-                                };
-                                $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
-                            } else {
-                                $this->totalProvisional += $this->roll_parlay_amount[$key];
-                            }
-
+                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
                         }
                     }
                 } else {
@@ -644,21 +672,18 @@ class LottoBet extends Component
                     }
 
                     if ($this->roll_parlay_amount[$key] > 0) {
+                        $value = match($countHashtag){
+                            1 => MultiplierHashtagEnum::one,
+                            2 => MultiplierHashtagEnum::two,
+                            3 => MultiplierHashtagEnum::three,
+                            default => 1
+                        };
+
                         if ($this->roll_parlay_check[$key]) {
-                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
-                        } else {
-                            if ($isHashtag) {
-                                $value = match($countHashtag){
-                                    1 => 36,
-                                    2 => 54,
-                                    3 => 216,
-                                  default => 1
-                                };
+                                $this->totalProvisional += $this->roll_parlay_amount[$key] * $value * $countHashtag;
+                        }
+                        else {
                             $this->totalProvisional += $this->roll_parlay_amount[$key]* $value;
-                            }
-                            else{
-                            $this->totalProvisional += $this->roll_parlay_amount[$key];
-                            }
                         }
                     }
                 }
