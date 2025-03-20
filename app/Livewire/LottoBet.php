@@ -272,7 +272,8 @@ class LottoBet extends Component
     {
         $parts = explode('#', $normalizedNumber);
         $length = count($parts);
-        log::info($length);
+
+        $this->enableChanelRollParlay[$key] = true;
         if($length === 2 && count(array_unique($parts)) === 1)
         {
             $this->enableChanelRollParlay[$key] = true;
@@ -298,7 +299,7 @@ class LottoBet extends Component
             $this->checkRollParlay[$key] = false;
             return;
         }
-
+        $this->enableChanelRollParlay[$key] = true;
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
