@@ -133,11 +133,12 @@ class LottoBet extends Component
     public function handleProvinceCheck($index)
     {
 
-        if (isset($this->province_check[$index]) && $this->province_check[$index]) {
+        if ($this->province_check[$index]) {
             $this->province_body_check[$index] = array_fill(0, $this->totalRow, true);
         } else {
             $this->province_body_check[$index] = array_fill(0, $this->totalRow, false);
         }
+        log::info($this->province_body_check[$index]);
     }
 
     public function handleProvinceBodyCheck($key_sch, $key_num)
@@ -273,33 +274,33 @@ class LottoBet extends Component
         $parts = explode('#', $normalizedNumber);
         $length = count($parts);
 
-        $this->enableChanelRollParlay[$key] = true;
-        if($length === 2 && count(array_unique($parts)) === 1)
-        {
-            $this->enableChanelRollParlay[$key] = true;
-        }
-        elseif($length === 3 && count(array_unique($parts)) === 1)
-        {
-            $this->enableChanelRollParlay[$key] = false;
-            $this->enableCheckRollParlay[$key] = false;
-        }
-        elseif($length === 3 && count(array_unique($parts)) !== 1)
-        {
-            $this->enableChanelRollParlay[$key] = true;
-            $this->enableCheckRollParlay[$key] = true;
-        }
-        elseif($length === 4 && count(array_unique($parts)) === 1)
-        {
-            $this->enableChanelRollParlay[$key] = false;
-            $this->enableCheckRollParlay[$key] = false;
-        }
-       
-        elseif ($length === 4 && count(array_unique($parts)) === 1) {
-            $this->digit[$key] = '-';
-            $this->checkRollParlay[$key] = false;
-            return;
-        }
-        $this->enableChanelRollParlay[$key] = true;
+//        $this->enableChanelRollParlay[$key] = true;
+//        if($length === 2 && count(array_unique($parts)) === 1)
+//        {
+//            $this->enableChanelRollParlay[$key] = true;
+//        }
+//        elseif($length === 3 && count(array_unique($parts)) === 1)
+//        {
+//            $this->enableChanelRollParlay[$key] = false;
+//            $this->enableCheckRollParlay[$key] = false;
+//        }
+//        elseif($length === 3 && count(array_unique($parts)) !== 1)
+//        {
+//            $this->enableChanelRollParlay[$key] = true;
+//            $this->enableCheckRollParlay[$key] = true;
+//        }
+//        elseif($length === 4 && count(array_unique($parts)) === 1)
+//        {
+//            $this->enableChanelRollParlay[$key] = false;
+//            $this->enableCheckRollParlay[$key] = false;
+//        }
+//
+//        elseif ($length === 4 && count(array_unique($parts)) === 1) {
+//            $this->digit[$key] = '-';
+//            $this->checkRollParlay[$key] = false;
+//            return;
+//        }
+//        $this->enableChanelRollParlay[$key] = true;
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
@@ -309,8 +310,31 @@ class LottoBet extends Component
             $this->resetChanelValues();
         }
 
-        if($length==4){
+        if($length==2){
+            $this->enableChanelRollParlay[$key]= true;
+        }
+        elseif ($length==3){
+            if($parts[0]==$parts[1] &&$parts[1]==$parts[2] ){
+                $this->enableChanelRollParlay[$key]= false;
+                $this->enableCheckRollParlay[$key] = false;
+            }
+            else{
+                $this->enableChanelRollParlay[$key]= true;
+                $this->enableCheckRollParlay[$key] = true;
+            }
+        }
+        elseif($length==4){
             $this->roll_parlay_check[$key] = true;
+            if(count(array_unique($parts)) === 1) {
+                $this->digit[$key] = '-';
+                $this->enableCheckRollParlay[$key] = false;
+                $this->roll_parlay_check[$key] = false;
+            }
+            elseif($parts[0]==$parts[1] &&$parts[1]==$parts[2] ||$parts[1]==$parts[2] &&$parts[2]==$parts[3] ){
+                $this->enableChanelRollParlay[$key]= false;
+                $this->enableCheckRollParlay[$key] = false;
+                $this->roll_parlay_check[$key] = false;
+            }
         }
         else{
             $this->roll_parlay_check[$key] = false;
@@ -449,14 +473,21 @@ class LottoBet extends Component
     public function handleCheckChanel($key, $name = "")
     {
     }
-
     public function handleInputAmount($key)
     {
     }
 
+
     public function updated($propertyName)
     {
-        if (count($this->number) > 0 && count($this->province_body_check) > 0) {
+        $str = $propertyName;
+        $parts = explode('.', $str);
+        $index = end($parts);
+        if ($parts[0] === 'province_check') {
+            $this->province_body_check[$index] = array_fill(0, $this->totalRow, $this->province_check[$index]);
+        }
+
+        if (count($this->number) > 0 && count($this->province_body_check) > 0 || count($this->province_check)>0) {
             $updatedInvoices = [];
 
             foreach ($this->number as $key => $num) {
@@ -486,9 +517,10 @@ class LottoBet extends Component
                     $isAsterisk = preg_match('/^\*\d+$|\d+\*$/', $num);
                     $isHashtag = preg_match('/^(\d{2}(?:#\d{2}){1,3})$/', $num);
                     $countHashtag = substr_count($num, '#');
+
                     if($countHashtag==1){
                         $this->enableCheckRollParlay[$key] = false;
-                        log::info($this->enableCheckRollParlay[$key]);
+
                     }
                     elseif ($countHashtag ==2 || $countHashtag ==3){
                         $this->enableCheckRollParlay[$key] = true;
@@ -699,78 +731,6 @@ class LottoBet extends Component
             $this->totalInvoice += $total;
             $this->totalDue += $total * intval($this->packageRate[$key]) / 100;
         }
-
-    }
-
-    private function totalAmountNormalForHN($key): void
-    {
-
-        if ($this->a_amount[$key] > 0) {
-            if ($this->a_check[$key]) {
-                $this->totalProvisional += $this->a_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->a_amount[$key];
-            }
-        }
-
-        if ($this->b_amount[$key] > 0) {
-            if ($this->b_check[$key]) {
-                $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->b_amount[$key];
-            }
-        }
-
-        if ($this->ab_amount[$key] > 0) {
-            if ($this->ab_check[$key]) {
-                $this->totalProvisional += ($this->ab_amount[$key] * MultiplierEnum::AB) * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->ab_amount[$key] * MultiplierEnum::AB;
-            }
-        }
-
-        if ($this->roll_amount[$key] > 0) {
-            if ($this->roll_check[$key]) {
-                $this->totalProvisional += ($this->roll_amount[$key] * MultiplierEnum::ROLL) * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->roll_amount[$key] * MultiplierEnum::ROLL;
-            }
-        }
-
-        if ($this->roll7_amount[$key] > 0) {
-            if ($this->roll7_check[$key]) {
-                $this->totalProvisional += ($this->roll7_amount[$key] * MultiplierEnum::ROLL7) * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
-            }
-        }
-
-        if ($this->roll_parlay_amount[$key] > 0) {
-            if ($this->roll_parlay_check[$key]) {
-                $this->totalProvisional += $this->roll_parlay_amount[$key] * $this->permutationsLength[$key];
-            } else {
-                $this->totalProvisional += $this->roll_parlay_amount[$key];
-            }
-        }
-
-        $this->total_amount[$key] = $this->totalProvisional;
-        // invoice
-        $this->totalInvoice = 0;
-        $this->totalDue = 0;
-        foreach ($this->total_amount as $key => $total) {
-            $this->totalInvoice += $total;
-            $this->totalDue += $total * intval($this->packageRate[$key]) / 100;
-        }
-
-    }
-
-    private function totalAmountAsteriskNumber($key, $lengthNumber, $countProvince): void
-    {
-
-    }
-
-    private function totalAmountNumberSign(): void
-    {
 
     }
 }
