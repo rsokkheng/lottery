@@ -274,40 +274,9 @@ class LottoBet extends Component
         $parts = explode('#', $normalizedNumber);
         $length = count($parts);
 
-//        $this->enableChanelRollParlay[$key] = true;
-//        if($length === 2 && count(array_unique($parts)) === 1)
-//        {
-//            $this->enableChanelRollParlay[$key] = true;
-//        }
-//        elseif($length === 3 && count(array_unique($parts)) === 1)
-//        {
-//            $this->enableChanelRollParlay[$key] = false;
-//            $this->enableCheckRollParlay[$key] = false;
-//        }
-//        elseif($length === 3 && count(array_unique($parts)) !== 1)
-//        {
-//            $this->enableChanelRollParlay[$key] = true;
-//            $this->enableCheckRollParlay[$key] = true;
-//        }
-//        elseif($length === 4 && count(array_unique($parts)) === 1)
-//        {
-//            $this->enableChanelRollParlay[$key] = false;
-//            $this->enableCheckRollParlay[$key] = false;
-//        }
-//
-//        elseif ($length === 4 && count(array_unique($parts)) === 1) {
-//            $this->digit[$key] = '-';
-//            $this->checkRollParlay[$key] = false;
-//            return;
-//        }
-//        $this->enableChanelRollParlay[$key] = true;
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
-        } else {
-            $this->digit[$key] = '-';
-            $this->checkRollParlay[$key] = false;
-            $this->resetChanelValues();
         }
 
         if($length==2){
@@ -365,7 +334,6 @@ class LottoBet extends Component
         $this->enableChanelAB[$key] = false;
         $this->enableChanelRoll[$key] = false;
         $this->enableChanelRoll7[$key] = false;
-//        $this->enableChanelRollParlay[$key] = true;
     }
 
     private function resetBetType($key)
