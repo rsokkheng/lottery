@@ -10,6 +10,7 @@ class BetReceipt extends Model
 {
     use HasFactory;
     protected $table = 'bet_receipts';
+    protected $guarded = '';
 
     public function user(): BelongsTo
     {

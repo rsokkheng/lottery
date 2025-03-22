@@ -254,6 +254,7 @@
                                         type="checkbox"
                                         wire:model="roll_parlay_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{$i}},'RPCheck')"
+                                        :checked="{{ isset($roll_parlay_check[$i]) && $roll_parlay_check[$i] ? 'true':'false'}}"
                                         {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? '' : 'disabled' }}
                                         class="rounded-sm h-3 w-3 {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
 
@@ -266,7 +267,8 @@
                                     <input
                                             type="checkbox"
                                             wire:model="province_body_check.{{ $key }}.{{ $i }}"
-                                            wire:click="handleProvinceBodyCheck({{ $key }},{{ $i }})"
+                                            wire:click="handleProvinceBodyCheck({{ $key }},{{ $i }}, {{$item}})"
+                                            :checked="{{ isset($province_check[$key]) && $province_check[$key] ? 'true' : 'false' }}"
                                             class="h-3 w-3 rounded-sm">
                                     {{ $item['code'] }}
                                 </div>
