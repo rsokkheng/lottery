@@ -476,6 +476,7 @@ class LottoBet extends Component
             'roll_amount',
             'roll7_amount',
             'roll_parlay_amount',
+            'total_amount',
             'a_check',
             'b_check',
             'ab_check',
@@ -484,6 +485,7 @@ class LottoBet extends Component
             'roll_parlay_check'
             ];
         $this->reset($field);
+        $this->total_amount = array_fill(0, $this->totalRow, 0);
 
     }
 
