@@ -3,8 +3,6 @@
     <style>
 
     </style>
-
-{{--    </x-slot>--}}
     <div class="flex-col bg-white rounded-lg px-5 py-5">
             <div class="flex w-full space-x-2">
                 <div class="">
@@ -71,9 +69,9 @@
                             @foreach($data as $key => $row)
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['bet_no']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['id']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal" class="active text-blue-800 hover:underline" data-toggle="modal" data-target="#detailModal">{{$row['receipt_no']??''}}</a>
+                                        <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal" class="active text-blue-800 hover:underline" data-toggle="modal" data-target="#detailModal">{{$row['bet_receipt_id']??''}}</a>
                                     </td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['user_name']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['date']??''}}</td>
