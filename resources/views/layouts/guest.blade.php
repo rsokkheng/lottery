@@ -20,7 +20,6 @@
 <body class="hold-transition login-page">
     {{ $slot }}
     <!-- /.login-box -->
-
     <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap 4 -->

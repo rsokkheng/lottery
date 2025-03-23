@@ -13,6 +13,7 @@
         "laravel/socialite": "^5.11",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.5",
+        "masmerise/livewire-toaster": "^2.1",
         "spatie/laravel-permission": "^6.0",
         "twilio/sdk": "^7.14"
     },
