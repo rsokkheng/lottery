@@ -49,7 +49,7 @@ class BetReceiptController extends Controller
                     "user_id" => $item->user_id,
                     "user_username" => $item->user?->username,
                     "user_name" => $item->user?->name,
-                    "date" => is_null($item->date) ? null : date('Y-m-d H-i-s', strtotime($item->date)),
+                    "date" => is_null($item->date) ? null : date('Y-m-d H:i:s', strtotime($item->date)),
                     "currency" => $item->currency,
                     "total_amount" => $item->total_amount,
                     "commission" => $item->commission,
