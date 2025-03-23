@@ -304,6 +304,7 @@ class LottoBet extends Component
                 $this->enableCheckRollParlay[$key] = false;
                 $this->roll_parlay_check[$key] = false;
             }
+            $this->enableCheckRollParlay[$key] = false;
         } else {
             $this->roll_parlay_check[$key] = false;
         }
@@ -652,7 +653,12 @@ class LottoBet extends Component
                             default => 1
                         };
                         if ($this->roll_parlay_check[$key]) {
-                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
+                              if ($countHashtag ==2){
+                                $this->totalProvisional += $this->roll_parlay_amount[$key] * $value * $countHashtag ;
+                            }
+                              else{
+                                  $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
+                              }
                         } else {
                             $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
                         }
@@ -732,7 +738,12 @@ class LottoBet extends Component
                         };
 
                         if ($this->roll_parlay_check[$key]) {
-                            $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
+                            if($countHashtag ==2) {
+                                $this->totalProvisional += $this->roll_parlay_amount[$key] * $value * $countHashtag;
+                            }
+                            else{
+                                $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
+                            }
                         } else {
                             $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
                         }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bet;
 use App\Models\BetReceipt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,11 +15,13 @@ class BetReceiptController extends Controller
      */
 
     public BetReceipt $model;
+    public Bet $betModel;
     public $currentDate;
 
-    public function __construct(BetReceipt $model)
+    public function __construct(BetReceipt $model, Bet $betModel)
     {
         $this->model = $model;
+        $this->betModel = $betModel;
         $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
@@ -144,7 +147,7 @@ class BetReceiptController extends Controller
                     "id" => 3,
                 ]
             ];
-            $data = [1,2,3,4];
+            $data = $this->betModel->get();
             return view('bet.bet-list', compact('data', 'date', 'receiptNo', 'number', 'company', 'company_id'));
         }catch (\Exception $exception){
             throwException($exception);

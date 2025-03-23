@@ -256,7 +256,7 @@
                                         wire:click="handleCheckChanel({{$i}},'RPCheck')"
                                         :checked="{{ isset($roll_parlay_check[$i]) && $roll_parlay_check[$i] ? 'true':'false'}}"
                                         {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? '' : 'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="rounded-sm h-3 w-3 {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? 'bg-white' : 'cursor-no-drop' }}">
 
                             </div>
                         </td>
