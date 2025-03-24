@@ -67,24 +67,54 @@
                         <tbody>
                         @if(isset($data) && count($data))
                             @foreach($data as $key => $row)
+                                @php
+                                    $betNumber =$row->betNumber[0];
+                                    $betNumberAmount = 0;
+                                    $betNumberGame ="";
+                                    if(intval($betNumber->a_amount)>0){
+                                        $betNumberAmount+=$betNumber->a_amount;
+                                        $betNumberGame .= "A";
+                                    }
+                                    if(intval($betNumber->b_amount)>0){
+                                        $betNumberAmount+=$betNumber->b_amount;
+                                        $betNumberGame .= "B";
+                                    }
+                                    if(intval($betNumber->ab_amount)>0){
+                                        $betNumberAmount+=$betNumber->ab_amount;
+                                        $betNumberGame .= "AB";
+                                    }
+                                    if(intval($betNumber->roll_amount)>0){
+                                        $betNumberAmount+=$betNumber->roll_amount;
+                                        $betNumberGame .= "Roll";
+                                    }
+                                     if(intval($betNumber->roll7_amount)>0){
+                                        $betNumberAmount+=$betNumber->roll7_amount;
+                                        $betNumberGame .= "Roll7";
+                                    }
+                                     if(intval($betNumber->roll_parlay_amount)>0){
+                                        $betNumberAmount+=$betNumber->roll_parlay_amount;
+                                        $betNumberGame .= "Roll Parlay";
+                                    }
+
+                                @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['id']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal" class="active text-blue-800 hover:underline" data-toggle="modal" data-target="#detailModal">{{$row['bet_receipt_id']??''}}</a>
+                                        {{$row['bet_receipt_id']??''}}
                                     </td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['user_name']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['date']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['number']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['digit']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['game']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['company']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['amount']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['odds']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['net']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['turnover']??''}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{$row['commission']??''}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{$row['net_amount']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['user']?->name??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['bet_date']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{'Happy 288'}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->price??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->rate??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$betNumberAmount??''}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{$row['win_lose']??''}}</td>
                                 </tr>
                             @endforeach

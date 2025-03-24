@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\BetLotteryPackage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -51,5 +52,9 @@ class User extends Authenticatable
     public function package()
     {
         return $this->belongsTo(BetLotteryPackage::class, 'package_id');
+    }
+    public function bets():HasMany
+    {
+        return $this->hasMany(Bet::class);
     }
 }

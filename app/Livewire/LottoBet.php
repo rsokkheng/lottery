@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Masmerise\Toaster\Toaster;
+//use Masmerise\Toaster\Toaster;
 
 class LottoBet extends Component
 {
@@ -361,103 +361,103 @@ class LottoBet extends Component
     public function handleSave()
     {
 
-        Toaster::success('User created!');
-//        DB::beginTransaction();
-//        try {
-//            $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
-//            // create bet receipt
-//          $betReceipt = $this->betReceipt->create([
-//                'receipt_no' => $invoiceNumber,
-//                'user_id' => $this->user->id ?? 0,
-//                'date' => now(),
-//                'currency' => 'VND',
-//                'total_amount' => $this->totalInvoice,
-//                'commission' => $this->totalInvoice - $this->totalDue,
-//                'net_amount' => $this->totalDue,
-//                'compensate' => 0
-//
-//            ]);
-//
-//            foreach ($this->number as $key => $value) {
-//                if (!empty($value)) {
-//                    $betPackageConId = $this->betPackageConfiguration::where('bet_type', '=', $this->digit[$key])->pluck('id')->first();
-//                    foreach ($this->schedules as $key_prov => $schedule) {
-//                        if ($this->province_body_check[$key_prov][$key]) {
-//                            //insert bet
-//                            $betItem = [
-//                                'bet_receipt_id' => $betReceipt->id,
-//                                'user_id' => $this->user->id ?? 0,
-//                                'bet_schedule_id' => $schedule->id,
-//                                'bet_package_config_id' => $betPackageConId,
-//                                'number_format' => $value,
-//                                'digit_format' => $this->digit[$key],
-//                                'bet_date' => $this->currentDate,
-//                                'total_amount' => $this->total_amount[$key],
-//                            ];
-//                            $respone = Bet::create($betItem);
-//
-//                            //insert bet number
-//                            $betNumber1 = [
-//                                'bet_id' => $respone->id,
-//                                'original_number' => $value,
-//                                'a_amount' => $this->a_amount[$key] ?? 0,
-//                                'b_amount' => $this->b_amount[$key] ?? 0,
-//                                'ab_amount' => $this->ab_amount[$key] ?? 0,
-//                                'roll_amount' => $this->roll_amount[$key] ?? 0,
-//                                'roll7_amount' => $this->roll7_amount[$key] ?? 0,
-//                                'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
-//                                'a_check' => $this->a_check[$key],
-//                                'b_check' => $this->b_check[$key],
-//                                'ab_check' => $this->ab_check[$key],
-//                                'roll_check' => $this->roll_check[$key],
-//                                'roll7_check' => $this->roll7_check[$key],
-//                                'roll_parlay_check' => $this->roll_parlay_check[$key],
-//                            ];
-//
-//                            if (strpos($value, '#') !== false) {
-//                                $parts = explode('#', $value);
-//                                foreach ($parts as $part) {
-//                                    $betNumber2 = [
-//                                        'generated_number' => $part,
-//                                        'digit_length' => strlen($part),
-//                                    ];
-//
-//                                    $data = array_merge($betNumber1, $betNumber2);
-//                                    BetNumber::create($data);
-//                                }
-//                            } else if (strpos($value, '*') !== false) {
-//
-//                                $num = trim($value, '*');
-//
-//                                for ($i = 0; $i < 10; $i++) {
-//                                    $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
-//                                    $betNumber2 = [
-//                                        'generated_number' => $genNumber,
-//                                        'digit_length' => strlen($genNumber),
-//                                    ];
-//
-//                                    $data = array_merge($betNumber1, $betNumber2);
-//                                    BetNumber::create($data);
-//                                }
-//                            } else {
-//                                $betNumber2 = [
-//                                    'generated_number' => $value,
-//                                    'digit_length' => strlen($value),
-//                                ];
-//
-//                                $data = array_merge($betNumber1, $betNumber2);
-//                                BetNumber::create($data);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            DB::commit();
-//            $this->handleReset();
-//        } catch (\Exception $e) {
-//            DB::rollBack();
-//            dump($e->getMessage());
-//        }
+//        Toaster::success('User created!');
+        DB::beginTransaction();
+        try {
+            $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
+            // create bet receipt
+          $betReceipt = $this->betReceipt->create([
+                'receipt_no' => $invoiceNumber,
+                'user_id' => $this->user->id ?? 0,
+                'date' => now(),
+                'currency' => 'VND',
+                'total_amount' => $this->totalInvoice,
+                'commission' => $this->totalInvoice - $this->totalDue,
+                'net_amount' => $this->totalDue,
+                'compensate' => 0
+
+            ]);
+
+            foreach ($this->number as $key => $value) {
+                if (!empty($value)) {
+                    $betPackageConId = $this->betPackageConfiguration::where('bet_type', '=', $this->digit[$key])->pluck('id')->first();
+                    foreach ($this->schedules as $key_prov => $schedule) {
+                        if ($this->province_body_check[$key_prov][$key]) {
+                            //insert bet
+                            $betItem = [
+                                'bet_receipt_id' => $betReceipt->id,
+                                'user_id' => $this->user->id ?? 0,
+                                'bet_schedule_id' => $schedule->id,
+                                'bet_package_config_id' => $betPackageConId,
+                                'number_format' => $value,
+                                'digit_format' => $this->digit[$key],
+                                'bet_date' => $this->currentDate,
+                                'total_amount' => $this->total_amount[$key],
+                            ];
+                            $respone = Bet::create($betItem);
+
+                            //insert bet number
+                            $betNumber1 = [
+                                'bet_id' => $respone->id,
+                                'original_number' => $value,
+                                'a_amount' => $this->a_amount[$key] ?? 0,
+                                'b_amount' => $this->b_amount[$key] ?? 0,
+                                'ab_amount' => $this->ab_amount[$key] ?? 0,
+                                'roll_amount' => $this->roll_amount[$key] ?? 0,
+                                'roll7_amount' => $this->roll7_amount[$key] ?? 0,
+                                'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
+                                'a_check' => $this->a_check[$key],
+                                'b_check' => $this->b_check[$key],
+                                'ab_check' => $this->ab_check[$key],
+                                'roll_check' => $this->roll_check[$key],
+                                'roll7_check' => $this->roll7_check[$key],
+                                'roll_parlay_check' => $this->roll_parlay_check[$key],
+                            ];
+
+                            if (strpos($value, '#') !== false) {
+                                $parts = explode('#', $value);
+                                foreach ($parts as $part) {
+                                    $betNumber2 = [
+                                        'generated_number' => $part,
+                                        'digit_length' => strlen($part),
+                                    ];
+
+                                    $data = array_merge($betNumber1, $betNumber2);
+                                    BetNumber::create($data);
+                                }
+                            } else if (strpos($value, '*') !== false) {
+
+                                $num = trim($value, '*');
+
+                                for ($i = 0; $i < 10; $i++) {
+                                    $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
+                                    $betNumber2 = [
+                                        'generated_number' => $genNumber,
+                                        'digit_length' => strlen($genNumber),
+                                    ];
+
+                                    $data = array_merge($betNumber1, $betNumber2);
+                                    BetNumber::create($data);
+                                }
+                            } else {
+                                $betNumber2 = [
+                                    'generated_number' => $value,
+                                    'digit_length' => strlen($value),
+                                ];
+
+                                $data = array_merge($betNumber1, $betNumber2);
+                                BetNumber::create($data);
+                            }
+                        }
+                    }
+                }
+            }
+            DB::commit();
+            $this->handleReset();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dump($e->getMessage());
+        }
     }
     public function handleReset()
     {
