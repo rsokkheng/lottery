@@ -149,6 +149,7 @@ class BetReceiptController extends Controller
             ];
             $data = $this->betModel
                 ->with([
+                    'beReceipt',
                     'user',
                     'betNumber',
                     'bePackageConfig'

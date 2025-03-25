@@ -30,4 +30,8 @@ class Bet extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function beReceipt(): BelongsTo
+    {
+        return $this->belongsTo(BetReceipt::class, 'bet_receipt_id');
+    }
 }
