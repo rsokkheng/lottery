@@ -99,9 +99,9 @@
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row->beReceipt->receipt_no}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['id']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        {{$row['bet_receipt_id']??''}}
+                                        {{$row->beReceipt->receipt_no}}
                                     </td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['user']?->name??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['bet_date']??''}}</td>
