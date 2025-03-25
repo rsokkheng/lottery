@@ -108,11 +108,11 @@
                                     <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{'Happy 288'}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{'Lottery2888'}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$betNumberAmount??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->price??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->rate??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$betNumberAmount??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{$row['win_lose']??''}}</td>
