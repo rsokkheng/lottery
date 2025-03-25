@@ -104,7 +104,7 @@
                                         {{$row->beReceipt->receipt_no}}
                                     </td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['user']?->name??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['bet_date']??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row['created_at']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
