@@ -33,10 +33,6 @@ class BetReceiptController extends Controller
                 $date = $request->get('date');
             }
             $no = $request->no ?? null;
-//            $ddd = Carbon::createFromFormat('Y-m-d', $date)->firsto();
-//            $ddd = Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s');
-//            dd($ddd);
-//            dd($date, $no, is_null($date));
             $data = $this->model->newQuery()->with(['user'])
                 ->when(!is_null($date), function ($q) use ($date) {
 //                    $q->whereBetween('date', [Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'), Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s')]);
@@ -48,7 +44,7 @@ class BetReceiptController extends Controller
                 })
                 ->get()->map(function ($item) {
                     return [
-                        "id" => $item->id,
+                        'id' => $item->id,
                         "receipt_no" => $item->receipt_no,
                         "user_id" => $item->user_id,
                         "user_username" => $item->user?->username,
@@ -67,55 +63,6 @@ class BetReceiptController extends Controller
             return $exception->getMessage();
         }
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(BetReceipt $betReceipt)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(BetReceipt $betReceipt)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, BetReceipt $betReceipt)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(BetReceipt $betReceipt)
-    {
-        //
-    }
-
 
     public function betList(Request $request)
     {
@@ -159,11 +106,16 @@ class BetReceiptController extends Controller
                     $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                     $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
                 })->get();
-
             return view('bet.bet-list', compact('data', 'date', 'receiptNo', 'number', 'company', 'company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
         }
+    }
+
+    public function getBetByReceiptId($id)
+    {
+        $data = $this->model->with(['bets.betLotterySchedule'])->findOrFail($id);
+        return $data;
     }
 }

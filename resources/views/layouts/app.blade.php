@@ -31,11 +31,10 @@
     <!-- Page Content -->
     <main>
         {{ $slot }}
-
+    </main>
 </div>
-
+<x-toaster-hub />
 @livewireScripts
 
 </body>
-
 </html>
