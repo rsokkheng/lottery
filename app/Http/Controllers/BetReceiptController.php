@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Bet;
-use App\Models\BetReceipt;
 use Carbon\Carbon;
+use App\Models\Bet;
+use App\Models\User;
+use App\Models\BetReceipt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use function PHPUnit\Framework\throwException;
 
 class BetReceiptController extends Controller
@@ -28,25 +30,25 @@ class BetReceiptController extends Controller
     public function index(Request $request)
     {
         try {
+            $user = Auth::user()??0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
             $no = $request->no ?? null;
-//            $ddd = Carbon::createFromFormat('Y-m-d', $date)->firsto();
-//            $ddd = Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s');
-//            dd($ddd);
-//            dd($date, $no, is_null($date));
             $data = $this->model->newQuery()->with(['user'])
-                ->when(!is_null($date), function ($q) use ($date) {
-//                    $q->whereBetween('date', [Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'), Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s')]);
+                ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })->when(!is_null($date), function ($q) use ($date) {
                     $q->where('date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                     $q->where('date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
-                })
-                ->when(!is_null($no), function ($q) use ($no) {
+                })->when(!is_null($no), function ($q) use ($no) {
                     $q->where('receipt_no', 'like', $no . '%');
-                })
-                ->get()->map(function ($item) {
+                })->get()->map(function ($item) {
                     return [
                         "id" => $item->id,
                         "receipt_no" => $item->receipt_no,
@@ -120,6 +122,11 @@ class BetReceiptController extends Controller
     public function betList(Request $request)
     {
         try {
+            $user = Auth::user()??0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
@@ -155,7 +162,9 @@ class BetReceiptController extends Controller
                     'betNumber',
                     'bePackageConfig',
                     'betLotterySchedule'
-                ])->when(!is_null($date), function ($q) use ($date) {
+                ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })->when(!is_null($date), function ($q) use ($date) {
                     $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                     $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
                 })->get();

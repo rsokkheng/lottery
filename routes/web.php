@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\LoginWithOTPController;
-use App\Http\Controllers\SocialiteController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BetReportController;
+use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\LoginWithOTPController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -32,7 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lotto_vn/receipt-list', [\App\Http\Controllers\BetReceiptController::class, 'index'])->name('bet.receipt-list');
     Route::get('/lotto_vn/bet-list', [\App\Http\Controllers\BetReceiptController::class, 'betList'])->name('bet.bet-list');
     Route::get('/lotto_vn/bet-number', [\App\Http\Controllers\BetController::class, 'getBetNumber'])->name('bet.bet-number');
-
+    Route::get('/lotto_vn/report-sammary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
 });
 
 

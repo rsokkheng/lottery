@@ -25,10 +25,9 @@
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white" class="{{ Route::is('bet.receipt-list') ? 'active-menu' :''}}" href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white"  class="{{ Route::is('bet.bet-list') ? 'active-menu' :''}}" href="{{ route('bet.bet-list') }}">{{ __('Bet List') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white"  class="{{ Route::is('bet.bet-number') ? 'active-menu' :''}}" href="{{ route('bet.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
-                    <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Total Bet Number') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Win Report') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Daily Report') }}</x-nav-link>
-                    <x-nav-link style="font-size: 15px;font-weight: bold; color:white">{{ __('Summary Report') }}</x-nav-link>
+                    <x-nav-link style="font-size: 15px;font-weight: bold; color:white" class="{{ Route::is('reports.summary') ? 'active-menu' :''}}" href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
                     <x-nav-link style="font-size: 15px;font-weight: bold; color:white" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
                 </div>
 
@@ -82,12 +81,11 @@
     <div x-show="open" class="sm:hidden flex flex-col space-y-2 px-4 py-2 bg-blue-500 text-white">
         <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.input') ? 'active-menu' :''}}" href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.receipt-list') ? 'active-menu' :''}}" href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
-        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Bet List') }}</x-nav-link>
-        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Bet Number') }}</x-nav-link>
-        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Total Bet Number') }}</x-nav-link>
+        <x-nav-link style="font-size: 13px; font-weight: 800;"  class="{{ Route::is('bet.bet-list') ? 'active-menu' :''}}" href="{{ route('bet.bet-list') }}">{{ __('Bet List') }}</x-nav-link>
+        <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.bet-number') ? 'active-menu' :''}}" href="{{ route('bet.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Win Report') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Daily Report') }}</x-nav-link>
-        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#">{{ __('Summary Report') }}</x-nav-link>
+        <x-nav-link style="font-size: 13px; font-weight: 800;" href="#" class="{{ Route::is('reports.summary') ? 'active-menu' :''}}" href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
         <x-nav-link style="font-size: 13px; font-weight: 800;" class="{{ Route::is('bet.result-show') ? 'active-menu' :''}}" href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
     </div>
 </nav>

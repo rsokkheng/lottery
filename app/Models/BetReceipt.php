@@ -16,4 +16,7 @@ class BetReceipt extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+    public function bets(){
+        return $this->hasMany(Bet::class, 'bet_receipt_id','id');
+    }
 }

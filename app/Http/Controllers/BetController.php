@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,12 @@ class BetController extends Controller
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
-            $user = Auth::user();
+            $user = Auth::user()??0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
+          
             $digits = BetLotteryPackageConfiguration::query()->where('package_id', $user->package_id)
                     ->orderBy('id')->get(['id', 'bet_type']);
 
@@ -60,7 +66,9 @@ class BetController extends Controller
                 'betNumber',
                 'bePackageConfig',
                 'betLotterySchedule'
-            ])->when(!is_null($date), function ($q) use ($date) {
+            ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->when(!is_null($date), function ($q) use ($date) {
                 $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                 $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
             })->get();
