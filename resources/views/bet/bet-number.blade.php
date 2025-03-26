@@ -43,7 +43,7 @@
             </div>
             <div class="">
                 <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        onclick="searchReceipt('{{ route('bet.bet-list') }}')">
+                        onclick="searchReceipt('{{ route('bet.bet-number') }}')">
                     <svg class="si
                         cze-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg"
                          stroke="#ffffff">
@@ -128,10 +128,10 @@
                                 <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
                                 <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
                                 <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300">{{'Hanio'}}</td>
-                                <td class="py-2 px-1 border border-gray-300">{{$betNumberAmount}}</td>
+                                <td class="py-2 px-1 border border-gray-300">{{$row->betLotterySchedule->province_en}}</td>
+                                <td class="py-2 px-1 border border-gray-300">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
                                 <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->price??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->rate??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
                                 <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300">{{$commission}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300">{{$netAmount}}</td>

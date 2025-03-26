@@ -24,6 +24,9 @@ class BetController extends Controller
         try {
 
             $date = $this->currentDate;
+            if ($request->has('date')) {
+                $date = $request->get('date');
+            }
             $user = Auth::user();
             $digits = BetLotteryPackageConfiguration::query()->where('package_id', $user->package_id)
                     ->orderBy('id')->get(['id', 'bet_type']);
@@ -55,8 +58,12 @@ class BetController extends Controller
                 'beReceipt',
                 'user',
                 'betNumber',
-                'bePackageConfig'
-            ])->get();
+                'bePackageConfig',
+                'betLotterySchedule'
+            ])->when(!is_null($date), function ($q) use ($date) {
+                $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
+                $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+            })->get();
 
             return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
         } catch (\Exception $exception) {

@@ -48,6 +48,7 @@ class BetReceiptController extends Controller
                 })
                 ->get()->map(function ($item) {
                     return [
+                        "id" => $item->id,
                         "receipt_no" => $item->receipt_no,
                         "user_id" => $item->user_id,
                         "user_username" => $item->user?->username,
@@ -152,8 +153,12 @@ class BetReceiptController extends Controller
                     'beReceipt',
                     'user',
                     'betNumber',
-                    'bePackageConfig'
-                ])->get();
+                    'bePackageConfig',
+                    'betLotterySchedule'
+                ])->when(!is_null($date), function ($q) use ($date) {
+                    $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
+                    $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+                })->get();
 
             return view('bet.bet-list', compact('data', 'date', 'receiptNo', 'number', 'company', 'company_id'));
         } catch (\Exception $exception) {

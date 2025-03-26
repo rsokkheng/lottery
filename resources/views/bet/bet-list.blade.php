@@ -66,6 +66,11 @@
                         </thead>
                         <tbody>
                         @if(isset($data) && count($data))
+                            @php
+                            $totalTurnover =0;
+                            $totalCommission=0;
+                            $totalNetAmount=0;
+                            @endphp
                             @foreach($data as $key => $row)
                                 @php
                                     $betNumber =$row->betNumber[0];
@@ -95,6 +100,11 @@
                                         $betNumberAmount+=$betNumber->roll_parlay_amount;
                                         $betNumberGame .= "Roll Parlay";
                                     }
+                                    $commission =$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100);
+                                    $netAmount =$row['total_amount'] *$row['bePackageConfig']?->rate/100;
+                                    $totalCommission +=$commission;
+                                    $totalNetAmount +=$netAmount;
+                                    $totalTurnover +=$row['total_amount'];
 
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
@@ -108,10 +118,10 @@
                                     <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{'Lottery2888'}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$betNumberAmount??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{$row->betLotterySchedule->province_en}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->price??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->rate??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
@@ -120,9 +130,9 @@
                             @endforeach
                             <tr class="border border-gray-300 hover:bg-gray-100">
                                 <td colspan="12"></td>
-                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['turnover']??'0.000'}}</td>
-                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['commission']??'0.00'}}</td>
-                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['net_amount']??'0.000'}}</td>
+                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalTurnover??'0.000'}}</td>
+                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalCommission??'0.00'}}</td>
+                                <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalNetAmount??'0.000'}}</td>
                                 <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['win_lose']??'0.000'}}</td>
                             </tr>
                         @else

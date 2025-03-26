@@ -50,7 +50,14 @@
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal" class="active text-blue-800 hover:underline" data-toggle="modal" data-target="#detailModal">{{$row['receipt_no']??''}}</a>
+                                    <a href="#" 
+                                        class="active text-blue-800 hover:underline receipt-link" 
+                                        data-receipt-id="{{ $row['id'] ?? '' }}" 
+                                        data-modal-target="static-modal" 
+                                        data-modal-toggle="static-modal">
+                                        {{ $row['receipt_no'] ?? '' }}
+                                        </a>
+
                                     </td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['user_name']??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{$row['date']??''}}</td>
@@ -72,16 +79,6 @@
                 </div>
             </div>
     </div>
-
-
-{{--    Code Modal--}}
-
-
-    <!-- Modal toggle -->
-{{--    <button data-modal-target="static-modal" data-modal-toggle="static-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center " type="button">--}}
-{{--        Toggle modal--}}
-{{--    </button>--}}
-
     <!-- Main modal -->
     <div id="static-modal" data-modal-placement="top-left" data-modal-backdrop="static" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-3 w-full max-w-2xl max-h-full">
@@ -132,6 +129,7 @@
                 <!-- Modal footer -->
                 <div class="flex justify-content-end justify-items-end justify-end items-end p-4 md:p-5 border-t border-gray-200 rounded-b font-semibold">
                     <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center ">{{__('Print')}}</button>
+                    <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 text-white bg-green-400 ms-3 font-medium focus:outline-none rounded-lg border border-green-200 hover:bg-green-500 focus:z-10 focus:ring-4 focus:ring-green-100 ">{{__('Pay')}}</button>
                     <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 text-white bg-sky-400 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{__('Close')}}</button>
                 </div>
             </div>
