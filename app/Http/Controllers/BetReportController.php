@@ -75,10 +75,7 @@ class BetReportController extends Controller
               
                 ->groupBy(DB::raw('DATE(re.date), bee.draw_day'))
                 ->get();
-                dd($data);
-            
-
-
+           
             return view('reports.summary', compact('data', 'date'));
         } catch (\Exception $exception) {
             throwException($exception);

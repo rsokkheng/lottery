@@ -4,7 +4,7 @@
             <div class="mb-6">
                 <div class="w-full max-w-md mx-auto  rounded-lg">
                     <div class="text-center font-bold py-2">
-                        {{ __('Day 18 Month 01 Year 2025') }}
+                    {{ now()->format('d M Y') }}
                     </div>
                     <table class="w-full text-sm border-collapse">
                         <thead>
