@@ -125,6 +125,15 @@
                         </thead>
                         <tbody id="getBetByReceipt">
                         </tbody>
+                        <tr class="text-black font-bold text-nowrap">
+                            <th colspan="2" class="py-2 border border-white">{{__('Total Amount')}}</th>
+                            <th class="py-2 border border-white" id="totalAmount">0.00</th>
+                        </tr>
+                        <tr class="text-black font-bold text-nowrap">
+                            <th colspan="2" class="py-2 border border-white">{{__('Due Amount')}}</th>
+                            <th class="py-2 border border-white" id="dueAmount">0.00</th>
+                        </tr>
+
                     </table>
 
                 </div>
@@ -161,6 +170,7 @@
 
                     const getBetByReceipt = document.getElementById('getBetByReceipt');
                     getBetByReceipt.innerHTML = '';
+                    let totalAmount = 0; // Initialize total amount
                     data?.bets.forEach(item => {
                         getBetByReceipt.innerHTML += `
                             <tr class="border border-gray-300 hover:bg-gray-100">
@@ -169,6 +179,9 @@
                                 <td class="py-2 px-1 border border-gray-300">${item.total_amount}</td>
                             </tr>`;
                     });
+                    // Update Total Amount and Due Amount
+                    document.getElementById('totalAmount').innerText = totalAmount.toFixed(2);
+                    document.getElementById('dueAmount').innerText = totalAmount.toFixed(2); // Adjust this if due amount is calculated differently
                 })
                 .catch(error => console.error('Error:', error));
         }
