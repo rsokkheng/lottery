@@ -567,8 +567,9 @@ class LottoBet extends Component
                     $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
                     $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
                     $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
+//                    dump($amount);
+                    if (count($chanel)>0 && count($amount)>0 && $this->total_amount[$key]>0) {
 
-                    if (!empty($chanel) && $amount>0) {
                         $updatedInvoices[$key] = [
                             'number' => $num,
                             'chanel' => $chanel,
