@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-//use Masmerise\Toaster\Toaster;
+use Masmerise\Toaster\Toaster;
 
 class LottoBet extends Component
 {
@@ -74,6 +74,7 @@ class LottoBet extends Component
     public $totalProvisional = 0;
 
     public $packageRate = [];
+    public $lengthNum = [];
 
     public function mount(
         Bet                            $betModel,
@@ -127,6 +128,7 @@ class LottoBet extends Component
         $this->total_amount = array_fill(0, $this->totalRow, 0);
         $this->permutationsLength = array_fill(0, $this->totalRow, 0);
         $this->packageRate = array_fill(0, $this->totalRow, 0);
+        $this->lengthNum = array_fill(0, $this->totalRow, 0);
     }
 
 
@@ -144,6 +146,21 @@ class LottoBet extends Component
             $this->province_body_check[$index] = array_fill(0, $this->totalRow, false);
         }
     }
+    private function handleCheckHN($key_num, $scheduleId){
+        $countBodyCheckTrue = 0;
+        foreach ($this->schedules as $key =>$item){
+            if($this->province_body_check[$key][$key_num]){
+                $countBodyCheckTrue++;
+                if($item['code'] ==='HN' && $countBodyCheckTrue==1){
+                    $this->enableChanelRoll7[$key_num] = false;
+                    $this->roll7_amount[$key_num] = null;
+                }else{
+                    $this->enableChanelRoll7[$key_num] = true;
+                }
+            }
+        }
+
+    }
 
     public function handleProvinceBodyCheck($key_sch, $key_num, $item)
     {
@@ -151,6 +168,9 @@ class LottoBet extends Component
             $this->province_body_check[$key_sch][$key_num] = true;
         } else {
             $this->province_body_check[$key_sch][$key_num] = false;
+        }
+        if($this->lengthNum[$key_num] ==3){
+           $this->handleCheckHN($key_num, $item['id']);
         }
 
     }
@@ -238,6 +258,7 @@ class LottoBet extends Component
     private function handleSimpleBet($number, $key)
     {
         $length = strlen($number);
+        $this->lengthNum[$key] = $length;
         switch ($length) {
             case 2:
                 $this->setBetType($key, "2D", true, true, true, true, false, false);
@@ -361,7 +382,7 @@ class LottoBet extends Component
     public function handleSave()
     {
 
-//        Toaster::success('User created!');
+      //  Toaster::success('User created!');
         DB::beginTransaction();
         try {
             $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
@@ -547,7 +568,7 @@ class LottoBet extends Component
                     $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
                     $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
 
-                    if (!empty($chanel) && !empty($amount)) {
+                    if (!empty($chanel) && $amount>0) {
                         $updatedInvoices[$key] = [
                             'number' => $num,
                             'chanel' => $chanel,
@@ -563,7 +584,6 @@ class LottoBet extends Component
 
     private function addAmount(&$amountArray, $value, $check, $label, $index)
     {
-
         if ($value > 0) {
             $amountArray[] = $value . ($check ? "({$label}x)" : "({$label})");
         }

@@ -13,4 +13,8 @@ export default defineConfig({
         }),
     ],
     base: process.env.ASSET_URL || '/',
+    content: [
+        './resources/**/*.blade.php',
+        './vendor/masmerise/livewire-toaster/resources/views/*.blade.php', // 👈
+    ],
 });
