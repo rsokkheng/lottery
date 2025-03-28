@@ -154,9 +154,10 @@ class LottoBet extends Component
                 if($item['code'] ==='HN' && $countBodyCheckTrue==1){
                     $this->enableChanelRoll7[$key_num] = false;
                     $this->roll7_amount[$key_num] = null;
-                }else{
-                    $this->enableChanelRoll7[$key_num] = true;
                 }
+//                else{
+//                    $this->enableChanelRoll7[$key_num] = true;
+//                }
             }
         }
 
