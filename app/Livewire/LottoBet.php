@@ -147,18 +147,19 @@ class LottoBet extends Component
         }
     }
     private function handleCheckHN($key_num, $scheduleId){
-        $countBodyCheckTrue = 0;
+        $isHN = false;
         foreach ($this->schedules as $key =>$item){
             if($this->province_body_check[$key][$key_num]){
-                $countBodyCheckTrue++;
-                if($item['code'] ==='HN' && $countBodyCheckTrue==1){
+                if($item['code'] ==='HN'){
+                    $isHN = true;
                     $this->enableChanelRoll7[$key_num] = false;
                     $this->roll7_amount[$key_num] = null;
                 }
-//                else{
-//                    $this->enableChanelRoll7[$key_num] = true;
-//                }
+
             }
+        }
+        if(!$isHN){
+            $this->enableChanelRoll7[$key_num] = true;
         }
 
     }
