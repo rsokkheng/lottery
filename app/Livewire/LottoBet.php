@@ -150,18 +150,20 @@ class LottoBet extends Component
     }
     private function handleCheckHN($key_num){
         $isHN = false;
-        foreach ($this->schedules as $key =>$item){
-            if($this->province_body_check[$key][$key_num]){
-                if($item['code'] ==='HN'){
-                    $isHN = true;
-                    $this->enableChanelRoll7[$key_num] = false;
-                    $this->roll7_amount[$key_num] = null;
-                }
+        if($this->lengthNum[$key_num] ==3) {
+            foreach ($this->schedules as $key => $item) {
+                if ($this->province_body_check[$key][$key_num]) {
+                    if ($item['code'] === 'HN') {
+                        $isHN = true;
+                        $this->enableChanelRoll7[$key_num] = false;
+                        $this->roll7_amount[$key_num] = null;
+                    }
 
+                }
             }
-        }
-        if(!$isHN){
-            $this->enableChanelRoll7[$key_num] = true;
+            if (!$isHN) {
+                $this->enableChanelRoll7[$key_num] = true;
+            }
         }
 
     }
@@ -404,7 +406,8 @@ class LottoBet extends Component
 
             foreach ($this->number as $key => $value) {
                 if (!empty($value)) {
-                    $betPackageConId = $this->betPackageConfiguration::where('bet_type', '=', $this->digit[$key])->pluck('id')->first();
+                    $has_spacial = $this->roll_parlay_check[$key] ?1:0;
+                    $betPackageConId = $this->betPackageConfiguration::where(['bet_type'=> $this->digit[$key], 'has_special' =>$has_spacial])->pluck('id')->first();
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key]) {
                             //insert bet
