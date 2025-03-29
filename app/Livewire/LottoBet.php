@@ -104,8 +104,17 @@ class LottoBet extends Component
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code', 'time_close']);
+        $this->initializeProperty();
+    }
 
 
+    public function render()
+    {
+        return view('livewire.lotto-bet');
+    }
+
+    public function initializeProperty()
+    {
         foreach ($this->schedules as $key => $schedule) {
             $this->province_check[$key] = false;
             $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
@@ -123,20 +132,13 @@ class LottoBet extends Component
         $this->roll_check = array_fill(0, $this->totalRow, false);
         $this->roll7_check = array_fill(0, $this->totalRow, false);
         $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
-        // $this->number = array_fill(0, $this->totalRow, null);
+        $this->number = array_fill(0, $this->totalRow, null);
         $this->digit = array_fill(0, $this->totalRow, "");
         $this->total_amount = array_fill(0, $this->totalRow, 0);
         $this->permutationsLength = array_fill(0, $this->totalRow, 0);
         $this->packageRate = array_fill(0, $this->totalRow, 0);
         $this->lengthNum = array_fill(0, $this->totalRow, 0);
     }
-
-
-    public function render()
-    {
-        return view('livewire.lotto-bet');
-    }
-
     public function handleProvinceCheck($index)
     {
 
@@ -319,7 +321,6 @@ class LottoBet extends Component
                 $this->enableCheckRollParlay[$key] = true;
             }
         } elseif ($length == 4 && !$isThreeNumTheSame) {
-                $this->digit[$key] = '-';
                 $this->roll_parlay_check[$key] = true;
                 $this->enableChanelRollParlay[$key] = true;
                $this->enableCheckRollParlay[$key] = false;
@@ -507,8 +508,7 @@ class LottoBet extends Component
             'roll_parlay_check'
             ];
         $this->reset($field);
-        $this->total_amount = array_fill(0, $this->totalRow, 0);
-
+        $this->initializeProperty();
     }
 
     public function handleCheckChanel($key, $name = "")
