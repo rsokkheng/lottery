@@ -286,19 +286,48 @@
 </div>
 
 <script>
-    const formatNumberValue = (input) => {
+    // Function to move focus to the next input on Enter key press
+    const handleEnterKey = (event, inputs) => {
+        const currentInput = event.target;
+        if (currentInput.disabled) {
+            return; // Do nothing if the current input is disabled
+        }
+
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent form submission if inside a form
+
+            let nextIndex = Array.from(inputs).indexOf(currentInput) + 1;
+
+            // Skip disabled inputs
+            while (nextIndex < inputs.length && inputs[nextIndex].disabled) {
+                nextIndex++;
+            }
+
+            // Move focus to the next enabled input, if exists
+            if (nextIndex < inputs.length) {
+                inputs[nextIndex].focus();
+            }
+        }
+    }
+
+    // Example: Attach the handleEnterKey to the input fields
+    const formatNumberValue = (input, nextInput) => {
         let value = input.value.replace(/[^0-9]/g, ''); // Allow only digits (0-9)
         if (value.length > 5) {
             value = value.slice(0, 5); // Restrict to 4 digits
         }
         input.value = value; // Update the input value with the formatted number
+
+        // Add event listener to handle the Enter key
+        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
     }
 
-    function formatNumberInput(input) {
+    // Example: formatNumberInput with Enter key functionality
+    function formatNumberInput(input, nextInput) {
         let value = input.value;
 
+        // Logic for handling specific number formats like '#', '*' and others
         if (value.includes("#")) {
-            // Allow patterns with # as specified
             value = value.replace(/[^0-9#]/g, ''); // Remove invalid characters
             let validFormat =
                 /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
@@ -307,7 +336,6 @@
             }
         } else if (value.startsWith("*")) {
             value = value.replace(/[^0-9\*]/g, ''); // Remove invalid characters
-            // Ensure it starts with * followed by 1 to 3 digits
             if (!/^\*([0-9]{1,3})?$/.test(value)) {
                 value = value.slice(0, -1); // Remove the last character if invalid
             }
@@ -317,7 +345,6 @@
                 value = value.slice(0, -1); // Remove the last character if invalid
             }
         } else {
-            // Fallback for other cases, allow only numbers
             value = value.replace(/[^0-9]/g, ''); // Remove invalid characters
             if (value.length > 4) {
                 value = value.slice(0, 4); // Restrict to 4 digits
@@ -325,7 +352,22 @@
         }
 
         input.value = value; // Update the input value
+
+        // Add event listener to handle the Enter key
+        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
     }
 
+    // Function to initialize all input fields with next field navigation
+    const initializeInputs = () => {
+        const inputs = document.querySelectorAll('input[type="text"]'); // Select only input[type="text"]
+        
+        inputs.forEach((input) => {
+            // Add event listener to handle Enter key press for each input
+            input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
+        });
+    };
 
+    // Initialize all input fields when the page loads
+    window.addEventListener('DOMContentLoaded', initializeInputs);
 </script>
+
