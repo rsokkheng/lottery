@@ -125,13 +125,13 @@
                         </thead>
                         <tbody id="getBetByReceipt">
                         </tbody>
-                        <tr class="text-black font-bold text-nowrap">
-                            <th colspan="2" class="py-2 border border-white">{{__('Total Amount')}}</th>
-                            <th class="py-2 border border-white" id="totalAmount">0.00</th>
+                        <tr class="border border-gray-300 hover:bg-gray-100">
+                            <th colspan="2" class="py-2 px-1 border border-gray-300">{{__('Total Amount')}}</th>
+                            <th class="py-2 px-1 border border-gray-300" id="totalAmount">0.00</th>
                         </tr>
-                        <tr class="text-black font-bold text-nowrap">
-                            <th colspan="2" class="py-2 border border-white">{{__('Due Amount')}}</th>
-                            <th class="py-2 border border-white" id="dueAmount">0.00</th>
+                        <tr class="border border-gray-300 hover:bg-gray-100">
+                            <th colspan="2" class="py-2 px-1 border border-gray-300">{{__('Due Amount')}}</th>
+                            <th class="py-2 px-1 border border-gray-300" id="dueAmount">0.00</th>
                         </tr>
 
                     </table>
@@ -161,27 +161,28 @@
         }
 
         function handleShowBet(id) {
+
             fetch(`/lotto_vn/bet/${id}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log('Bet details:', data);
-
-                     document.getElementById('receipt_no').innerText = data?.receipt_no;
+                    let totalAmount =data?.totalAmount;
+                    let dueAmount = data?.dueAmount;
+                     document.getElementById('receipt_no').innerText = data?.no_receipt;
 
                     const getBetByReceipt = document.getElementById('getBetByReceipt');
                     getBetByReceipt.innerHTML = '';
-                    let totalAmount = 0; // Initialize total amount
-                    data?.bets.forEach(item => {
+                    data?.items?.forEach(item => {
                         getBetByReceipt.innerHTML += `
                             <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300">${item.number_format}</td>
-                                <td class="py-2 px-1 border border-gray-300">${item?.bet_lottery_schedule?.code}</td>
-                                <td class="py-2 px-1 border border-gray-300">${item.total_amount}</td>
+                                <td class="py-2 px-1 border border-gray-300">${item?.number??""}</td>
+                                <td class="py-2 px-1 border border-gray-300">${item?.company??""}</td>
+                                <td class="py-2 px-1 border border-gray-300">${item?.amount??""}</td>
                             </tr>`;
                     });
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = totalAmount.toFixed(2);
-                    document.getElementById('dueAmount').innerText = totalAmount.toFixed(2); // Adjust this if due amount is calculated differently
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2);
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2);
                 })
                 .catch(error => console.error('Error:', error));
         }

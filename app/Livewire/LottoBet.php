@@ -146,7 +146,7 @@ class LottoBet extends Component
             $this->province_body_check[$index] = array_fill(0, $this->totalRow, false);
         }
     }
-    private function handleCheckHN($key_num, $scheduleId){
+    private function handleCheckHN($key_num){
         $isHN = false;
         foreach ($this->schedules as $key =>$item){
             if($this->province_body_check[$key][$key_num]){
@@ -183,7 +183,6 @@ class LottoBet extends Component
             $this->number[$key] = str_replace(' ', '', (string)$value);
             $normalizedNumber = $this->number[$key];
             if ($this->isInvalidInput($normalizedNumber)) {
-                // $this->resetChanelValues();
                 return;
             }
             if (strpos($normalizedNumber, '#') !== false) {
@@ -340,6 +339,7 @@ class LottoBet extends Component
         $this->enableChanelRoll7[$key] = $enableRoll7;
         $this->enableChanelRollParlay[$key] = $chanelRollParlay;
         $this->enableCheckRollParlay[$key] = $chanelRollParlay;
+        $this->handleCheckHN($key);
 
         // get rate
         $packageConfig = $this->betPackageConfiguration->where(['package_id' => $this->user->package_id, 'bet_type' => $digit])->first();
@@ -569,7 +569,6 @@ class LottoBet extends Component
                     $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
                     $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
                     $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
-//                    dump($amount);
                     if (count($chanel)>0 && count($amount)>0 && $this->total_amount[$key]>0) {
 
                         $updatedInvoices[$key] = [

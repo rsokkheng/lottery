@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\BetReceipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use function PHPUnit\Framework\throwException;
 
 class BetReceiptController extends Controller
@@ -126,9 +127,38 @@ class BetReceiptController extends Controller
         }
     }
 
+    private function addAmount(&$amountArray, $value, $check, $label)
+    {
+        if ($value > 0) {
+            $amountArray = $value . ($check ? "({$label}x)" : "({$label})");
+        }
+    }
+
     public function getBetByReceiptId($id)
     {
-        $data = $this->model->with(['bets.betLotterySchedule'])->findOrFail($id);
-        return $data;
+        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber'])
+            ->findOrFail($id);
+
+        $items =[];
+        foreach ($result->bets as $bet){
+            $this->addAmount($amount, $bet['betNumber'][0]->a_amount ?? 0, $bet['betNumber'][0]->a_check ?? false, "A");
+            $this->addAmount($amount, $bet['betNumber'][0]->b_amount ?? 0, $bet['betNumber'][0]->b_check ?? false, "B");
+            $this->addAmount($amount, $bet['betNumber'][0]->ab_amount ?? 0, $bet['betNumber'][0]->ab_check ?? false, "AB");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll_amount ?? 0, $bet['betNumber'][0]->roll_check ?? false, "R");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll7_amount ?? 0, $bet['betNumber'][0]->roll7_check ?? false, "R7");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll_parlay_amount ?? 0, $bet['betNumber'][0]->roll_parlay_check ?? false, "RP");
+            $items[] =[
+                'number' => $bet['number_format'],
+                'company' => $bet['betLotterySchedule']?->code,
+                'amount' =>$amount
+            ];
+        }
+
+        return response()->json([
+                'no_receipt'=>$result?->receipt_no,
+                'totalAmount' => $result?->total_amount,
+                'dueAmount' => $result?->net_amount,
+                'items' => $items,
+        ]);
     }
 }
