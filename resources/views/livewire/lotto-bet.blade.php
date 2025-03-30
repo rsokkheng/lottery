@@ -1,13 +1,10 @@
 <div>
-{{--    <div class="sm:bg-green-500 md:bg-blue-500 lg:bg-red-500 xl:bg-gray-500 h-6"> Colloer</div>--}}
-    <div class="grid xl:grid-cols-[30%_68%] gap-4 mx-auto bg-white shadow-md py-4 rounded-lg space-x-2">
-        <div class="w-full px-2">
-            <div class="mb-6">
-                <div class="w-full max-w-md mx-auto  rounded-lg">
+    <div class="grid grid-cols-1 xl:grid-cols-[30%_68%] gap-4 xl:mx-auto bg-white shadow-md py-4 rounded-lg space-x-2">
+                <div class="w-[90%] px-2 mb-6 mx-auto w-full max-w-md rounded-lg">
                     <div class="text-center font-bold py-2">
-                    {{ now()->format('d M Y') }}
+                        {{ now()->format('d M Y') }}
                     </div>
-                    <table class="w-full text-sm border-collapse">
+                    <table class="text-sm border-collapse">
                         <thead>
                         <tr>
                             <th class="w-[20%] border border-gray-500 px-4 py-2 text-left">{{ __('Number') }}</th>
@@ -79,23 +76,21 @@
                     </button>
                 </div>
 
-            </div>
-            <!-- Note Section -->
 
-        </div>
+
 
         <!-- Table header Section -->
         <div class="overflow-auto w-full mx-auto relative">
+            <div class="flex whitespace-nowrap mb-2">
+                <p class="text-md font-bold">{{__('Time Left:')}}</p>
+                @foreach ($timeClose as $time)
+                    <p class="text-md font-bold px-2 " id="time-{{ $time->id }}">
+                        {{ $time->time_close }} ({{ $time->code }})
+                    </p>
+                @endforeach
+            </div>
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                    <span><small style="color:black;font-size:18px;font-weight: bold;">Time Left:</small>
-                        @foreach ($timeClose as $time)
-                            <span style="font-size: 18px; font-weight: bold; margin-right: 10px;"
-                                  id="time-{{ $time->id }}">
-                                {{ $time->time_close }} ({{ $time->code }})
-                            </span>
-                        @endforeach
-                    </span>
                     <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
                         <th class="border border-gray-300">{{ __('No') }}</th>
                         <th class="border border-gray-300 p-2">{{ __('Number') }}</th>
@@ -138,7 +133,7 @@
                                     autocomplete="off"
                                     wire:model.defer="number.{{ $i }}"
                                     wire:input="handleInputNumber"
-                                    class="w-[100px] sm:w-full h-8 rounded"
+                                    class="w-[100px] lg:w-full h-8 rounded"
                                     oninput="formatNumberInput(this)">
                         </td>
                         <!--Digit-->
@@ -153,7 +148,7 @@
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] sm:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input type="checkbox"
                                        id="a_check_{{ $i }}"
@@ -172,7 +167,7 @@
                                         wire:input="handleInputAmount({{$i}})"
                                         wire:input="handleInputNumber"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
-                                        class="w-[100px] sm:w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
 
                                 <input
@@ -191,7 +186,7 @@
                                         wire:model="ab_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] sm:w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
@@ -210,7 +205,7 @@
                                         wire:model="roll_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] sm:w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
@@ -228,7 +223,7 @@
                                         wire:model="roll7_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] sm:w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
@@ -246,7 +241,7 @@
                                         wire:model="roll_parlay_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] sm:w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                 <input
                                         type="checkbox"
@@ -358,7 +353,7 @@
     // Function to initialize all input fields with next field navigation
     const initializeInputs = () => {
         const inputs = document.querySelectorAll('input[type="text"]'); // Select only input[type="text"]
-        
+
         inputs.forEach((input) => {
             // Add event listener to handle Enter key press for each input
             input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
