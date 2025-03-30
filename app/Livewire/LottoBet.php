@@ -395,26 +395,31 @@ class LottoBet extends Component
       //  Toaster::success('User created!');
         DB::beginTransaction();
         try {
-            $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
-            // create bet receipt
-          $betReceipt = $this->betReceipt->create([
-                'receipt_no' => $invoiceNumber,
-                'user_id' => $this->user->id ?? 0,
-                'date' => now(),
-                'currency' => 'VND',
-                'total_amount' => $this->totalInvoice,
-                'commission' => $this->totalInvoice - $this->totalDue,
-                'net_amount' => $this->totalDue,
-                'compensate' => 0
+            $isCreateBetSuccess = false;
+            $betReceipt= null;
+            if($this->totalInvoice>0 && $this->totalDue>0) {
+                // generate no invoice
+                $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
+                // create bet receipt
+                $betReceipt = $this->betReceipt->create([
+                    'receipt_no' => $invoiceNumber,
+                    'user_id' => $this->user->id ?? 0,
+                    'date' => now(),
+                    'currency' => 'VND',
+                    'total_amount' => $this->totalInvoice,
+                    'commission' => $this->totalInvoice - $this->totalDue,
+                    'net_amount' => $this->totalDue,
+                    'compensate' => 0
 
-            ]);
+                ]);
+            }
 
             foreach ($this->number as $key => $value) {
                 if (!empty($value)) {
                     $has_spacial = $this->roll_parlay_check[$key] ?1:0;
                     $betPackageConId = $this->betPackageConfiguration::where(['bet_type'=> $this->digit[$key], 'has_special' =>$has_spacial])->pluck('id')->first();
                     foreach ($this->schedules as $key_prov => $schedule) {
-                        if ($this->province_body_check[$key_prov][$key]) {
+                        if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key])>0) {
                             //insert bet
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,
@@ -427,7 +432,10 @@ class LottoBet extends Component
                                 'total_amount' => $schedule['code'] =="HN"? $this->amountHN[$key]:$this->amountNotHN[$key],
                             ];
                             $respone = Bet::create($betItem);
-
+                            if($respone)
+                            {
+                                $isCreateBetSuccess= true;
+                            }
                             //insert bet number
                             $betNumber1 = [
                                 'bet_id' => $respone->id,
@@ -484,8 +492,11 @@ class LottoBet extends Component
                     }
                 }
             }
+            if($isCreateBetSuccess)
+            {
+                $this->handleReset();
+            }
             DB::commit();
-            $this->handleReset();
         } catch (\Exception $e) {
             DB::rollBack();
             dump($e->getMessage());
