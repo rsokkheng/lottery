@@ -35,8 +35,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lotto_vn/bet-number', [\App\Http\Controllers\BetController::class, 'getBetNumber'])->name('bet.bet-number');
     Route::get('/lotto_vn/report-sammary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
     Route::get('/lotto_vn/bet/{id}', [\App\Http\Controllers\BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
-
+    Route::get('/bet_receipt/{receipt_no}', [\App\Http\Controllers\BetReceiptController::class, 'printReceiptNo']);
 });
+
+
+
+
 
 
 // Auth routes

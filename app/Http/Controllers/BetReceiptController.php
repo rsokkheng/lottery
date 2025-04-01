@@ -161,4 +161,42 @@ class BetReceiptController extends Controller
                 'items' => $items,
         ]);
     }
+    public function printReceiptNo($receiptNo)
+    {
+        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber','user'])
+            ->where('receipt_no', '=', $receiptNo)
+            ->first();
+
+        if (!$result) {
+            return abort(404, 'Receipt not found');
+        }
+
+        $items = [];
+        foreach ($result->bets as $bet) {
+            $amount = [];
+
+            $this->addAmount($amount, $bet['betNumber'][0]->a_amount ?? 0, $bet['betNumber'][0]->a_check ?? false, "A");
+            $this->addAmount($amount, $bet['betNumber'][0]->b_amount ?? 0, $bet['betNumber'][0]->b_check ?? false, "B");
+            $this->addAmount($amount, $bet['betNumber'][0]->ab_amount ?? 0, $bet['betNumber'][0]->ab_check ?? false, "AB");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll_amount ?? 0, $bet['betNumber'][0]->roll_check ?? false, "R");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll7_amount ?? 0, $bet['betNumber'][0]->roll7_check ?? false, "R7");
+            $this->addAmount($amount, $bet['betNumber'][0]->roll_parlay_amount ?? 0, $bet['betNumber'][0]->roll_parlay_check ?? false, "RP");
+
+            $items[] = [
+                'number' => $bet['number_format'],
+                'company' => $bet['betLotterySchedule']?->code,
+                'amount' => $amount
+            ];
+        }
+
+        return view('bet.print_receipt', [
+            'receipt_no' => $result->receipt_no,
+            'total_amount' => $result->total_amount,
+            'due_amount' => $result->net_amount,
+            'bets' => $items,
+            'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
+            'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
+            'receipt_by' => $result?->user?->name,
+        ]);
+    }
 }

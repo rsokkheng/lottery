@@ -139,7 +139,7 @@
                 </div>
                 <!-- Modal footer -->
                 <div class="flex justify-content-end justify-items-end justify-end items-end p-4 md:p-5 border-t border-gray-200 rounded-b font-semibold">
-                    <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center ">{{__('Print')}}</button>
+                    <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center " onclick="printReceipt()" >{{__('Print')}}</button>
                     <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 text-white bg-sky-400 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{__('Close')}}</button>
                 </div>
             </div>
@@ -181,10 +181,32 @@
                             </tr>`;
                     });
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2);
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2);
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2)+ ' (VND)';
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2)+ ' (VND)';
                 })
                 .catch(error => console.error('Error:', error));
+        }
+        function printReceipt() {
+            var receiptNo = document.getElementById('receipt_no')?.innerText;
+            if (!receiptNo) {
+                alert("Receipt number not found!");
+                return;
+            }
+            var printWindow = window.open('/bet_receipt/' + receiptNo, '_blank');
+
+            if (!printWindow) {
+                alert('Popup blocked! Please allow popups for this site.');
+                return;
+            }
+
+            printWindow.onload = function () {
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.onafterprint = function () {
+                        printWindow.close();
+                    };
+                }, 500);
+            };
         }
     </script>
 </x-app-layout>
