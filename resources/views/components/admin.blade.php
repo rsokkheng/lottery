@@ -1,11 +1,3 @@
-<!--
-/*!
- *   AdminLTE With Laravel
- *   Author: Nihir Zala
- *   Website: https://nihirz.netlify.app
- *   License: Open source - MIT <https://opensource.org/licenses/MIT>
- */
--->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,8 +36,6 @@
 
     @yield('css')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @livewireStyles
-    @livewireScripts
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed {{ Auth::user()->mode }}-mode">
