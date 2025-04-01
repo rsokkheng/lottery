@@ -268,8 +268,8 @@
                                 <div class="flex-column">
                                     <input
                                             type="checkbox"
-                                            wire:model="province_body_check.{{ $key }}.{{ $i }}"
-                                            wire:click="handleProvinceBodyCheck({{ $key }},{{ $i }}, {{$item}})"
+                                            wire:model.live="province_body_check.{{ $key }}.{{ $i }}"
+                                            wire:change="handleProvinceBodyCheck({{ $key }},{{ $i }}, {{$item}})"
                                             :checked="{{ isset($province_check[$key]) && $province_check[$key] ? 'true' : 'false' }}"
                                             class="h-3 w-3 rounded-sm">
                                     {{ $item['code'] }}
