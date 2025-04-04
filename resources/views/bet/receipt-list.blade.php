@@ -5,9 +5,9 @@
     </style>
 
     {{--    </x-slot>--}}
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
-        <div class="flex w-full space-x-2">
-            <div class="">
+    <div class="flex-col bg-white rounded-lg px-5 py-5 ">
+        <div class="grid grid-cols-2  sm:flex sm:justify-start sm:items-center sm:space-x-2">
+            <div class="mr-4">
                 <div class="relative max-w-sm">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -24,20 +24,13 @@
             <div class="">
                 <input type="text" id="receipt-no" value="{{ $no }}" class="rounded" placeholder="Receipt No">
             </div>
-            <div class="">
-                <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            <div class="mt-4 sm:mt-0">
+                <button class="max-w-auto px-2 py-1 sm:py-2 sm:w-full flex justify-center items-center bg-blue-500 text-white rounded hover:bg-blue-600"
                         onclick="searchReceipt('{{ route('bet.receipt-list') }}')">
-                    <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg"
-                         stroke="#ffffff">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                  d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z"
-                                  fill="#ffffff"></path>
-                        </g>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
-                    {{__('Search')}}
+                   <p class="text-[12px] sm:text-base">{{__('Search')}}</p>
                 </button>
             </div>
 
@@ -46,16 +39,16 @@
             <div class="w-full overflow-auto py-4">
                 <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                     <thead>
-                    <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                        <th class="py-2 border border-white">{{__('No')}}</th>
-                        <th class="py-2 border border-white">{{__('Receipt No')}}</th>
-                        <th class="py-2 border border-white">{{__('Account')}}</th>
-                        <th class="py-2 border border-white">{{__('Date')}}</th>
-                        <th class="py-2 border border-white">{{__('Currency')}}</th>
-                        <th class="py-2 border border-white">{{__('Total Amount')}}</th>
-                        <th class="py-2 border border-white">{{__('Commission')}}</th>
-                        <th class="py-2 border border-white">{{__('Net Amount')}}</th>
-                        <th class="py-2 border border-white">{{__('Compensate')}}</th>
+                    <tr class="bg-blue-500 border text-white font-bold text-nowrap ">
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('No')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Receipt No')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Account')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Date')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Currency')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Total Amount')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Commission')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Net Amount')}}</th>
+                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Compensate')}}</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -65,16 +58,16 @@
                                 <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
                                 <td onclick="handleShowBet('{{$row['id']}}')" class="py-2 px-1 border border-gray-300">
                                     <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal"
-                                       class="active text-blue-800 hover:underline" data-toggle="modal"
+                                       class="active text-blue-800 hover:underline whitespace-nowrap text-[12px] sm:text-base" data-toggle="modal"
                                        data-target="#detailModal">{{$row['receipt_no']??''}}</a>
                                 </td>
-                                <td class="py-2 px-1 border border-gray-300">{{$row['user_name']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300">{{$row['date']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300">{{$row['currency']??''}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300">{{$row['commission']??''}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300">{{$row['net_amount']??''}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300">{{$row['compensate']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['user_name']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['date']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['currency']??''}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['total_amount']??''}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['commission']??''}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['net_amount']??''}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['compensate']??''}}</td>
                             </tr>
                         @endforeach
                     @else
