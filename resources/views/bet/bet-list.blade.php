@@ -3,9 +3,8 @@
     <style>
 
     </style>
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
-        <div class="grid-cols-1 grid md:flex w-full space-x-2 space-y-2">
-            <div>
+    <div class="grid-cols-2 grid sm:flex-col bg-white rounded-lg px-5 py-5">
+        <div class="flex w-full space-x-2 space-y-2">
             <div class="relative w-full md:max-w-sm">
                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -15,14 +14,12 @@
                 </div>
                 <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
-                       class="border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
+                       class="w-full border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
                        placeholder="Select date">
             </div>
-            </div>
         </div>
-        <div>
-
-            <select id="company" class="rounded">
+        <div class="mb-2 ml-2">
+            <select id="company" class="rounded w-full">
                 @foreach($company as $val)
                     @if($company_id == $val['id'])
                         <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
@@ -32,26 +29,19 @@
                 @endforeach
             </select>
         </div>
-        <div class="">
-            <input type="text" id="receipt-no" value="{{ $receiptNo }}" class="rounded" placeholder="Receipt No">
+        <div class="w-full">
+            <input type="text" id="receipt-no" value="{{ $receiptNo }}" class="rounded w-full" placeholder="Receipt No">
         </div>
-        <div class="">
-            <input type="text" id="number" value="{{ $number }}" class="rounded" placeholder="Number">
+        <div class="w-full ml-2">
+            <input type="text" id="number" value="{{ $number }}" class="rounded w-full" placeholder="Number">
         </div>
-        <div class="">
-            <button class=" md:w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        <div class="mt-2">
+            <button class="wax-w-auto md:w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                     onclick="searchReceipt('{{ route('bet.bet-list') }}')">
-                <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg"
-                     stroke="#ffffff">
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                              d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z"
-                              fill="#ffffff"></path>
-                    </g>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
-                {{__('Search')}}
+                <p> {{__('Search')}} </p>
             </button>
         </div>
 
@@ -61,22 +51,22 @@
             <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                 <thead>
                 <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                    <th class="py-2 border border-white">{{__('No')}}</th>
-                    <th class="py-2 border border-white">{{__('Bet No')}}</th>
-                    <th class="py-2 border border-white">{{__('Receipt No')}}</th>
-                    <th class="py-2 border border-white">{{__('Account')}}</th>
-                    <th class="py-2 border border-white">{{__('Date Time')}}</th>
-                    <th class="py-2 border border-white">{{__('Number')}}</th>
-                    <th class="py-2 border border-white">{{__('Digit')}}</th>
-                    <th class="py-2 border border-white">{{__('Game')}}</th>
-                    <th class="py-2 border border-white">{{__('Company')}}</th>
-                    <th class="py-2 border border-white">{{__('Amount')}}</th>
-                    <th class="py-2 border border-white">{{__('Odds')}}</th>
-                    <th class="py-2 border border-white">{{__('Net')}}</th>
-                    <th class="py-2 border border-white">{{__('Turnover')}}</th>
-                    <th class="py-2 border border-white">{{__('Commission')}}</th>
-                    <th class="py-2 border border-white">{{__('Net Amount')}}</th>
-                    <th class="py-2 border border-white">{{__('Win/Lose')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('No')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Bet No')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Receipt No')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Account')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Date Time')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Number')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Digit')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Game')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Company')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Amount')}}</th>
+                    <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Odds')}}</th>
+                    <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{__('Net')}}</th>
+                    <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{__('Turnover')}}</th>
+                    <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{__('Commission')}}</th>
+                    <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{__('Net Amount')}}</th>
+                    <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{__('Win/Lose')}}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -123,32 +113,32 @@
 
                         @endphp
                         <tr class="border border-gray-300 hover:bg-gray-100">
-                            <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['id']??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$key+1}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['id']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
                                 {{$row->beReceipt->receipt_no}}
                             </td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['user']?->name??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['created_at']??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['number_format']??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['digit_format']??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$betNumberGame??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row->betLotterySchedule->province_en}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['bePackageConfig']?->price??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                            <td class="py-2 px-1 border border-gray-300">{{$row['total_amount']??''}}</td>
-                            <td class="text-right py-2 px-1 border border-gray-300">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
-                            <td class="text-right py-2 px-1 border border-gray-300">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
-                            <td class="text-right py-2 px-1 border border-gray-300">{{$row['win_lose']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['user']?->name??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['created_at']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['number_format']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['digit_format']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$betNumberGame??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row->betLotterySchedule->province_en}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['bePackageConfig']?->price??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['total_amount']??''}}</td>
+                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
+                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
+                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['win_lose']??''}}</td>
                         </tr>
                     @endforeach
                     <tr class="border border-gray-300 hover:bg-gray-100">
                         <td colspan="12"></td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalTurnover??'0.000'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalCommission??'0.00'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalNetAmount??'0.000'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['win_lose']??'0.000'}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalTurnover??'0.000'}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalCommission??'0.00'}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalNetAmount??'0.000'}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['win_lose']??'0.000'}}</td>
                     </tr>
                 @else
                     <tr class="border border-gray-300 hover:bg-gray-100">
