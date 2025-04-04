@@ -21,8 +21,8 @@
                            placeholder="Select date">
                 </div>
             </div>
-            <div class="">
-                <input type="text" id="receipt-no" value="{{ $no }}" class="rounded" placeholder="Receipt No">
+            <div class="w-full">
+                <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full" placeholder="Receipt No">
             </div>
             <div class="mt-4 sm:mt-0">
                 <button class="max-w-auto px-2 py-1 sm:py-2 sm:w-full flex justify-center items-center bg-blue-500 text-white rounded hover:bg-blue-600"
