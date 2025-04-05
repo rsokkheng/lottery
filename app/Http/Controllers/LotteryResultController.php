@@ -433,7 +433,7 @@ class LotteryResultController extends Controller
 
 //        $ddd = $this->matchWinNumberFromResultsRoll7('2025-03-29', 33, 154);
 //        dd($ddd);
-        return $this->getWinningReport();
+//        return $this->getWinningReport();
         return $this->getPermutations('154');
 
 
@@ -441,19 +441,19 @@ class LotteryResultController extends Controller
 //        $dayName = Carbon::today()->dayName;
 //        $resultTime = $this->getBetTime(HelperEnum::MienNamSlug->value);
 //        $date = Carbon::today()->format('Y-m-d');
-        $scheduleIds = [33];
-        $date = '2025-03-29';
+//        $scheduleIds = [33];
+//        $date = '2025-03-29';
 //        return $this->generateNormalWinBet($date, $scheduleIds);
-        return $this->generateHashWinBet($date, $scheduleIds);
+//        return $this->generateHashWinBet($date, $scheduleIds);
 
 
 //        $idSchedules = $this->getPluckIdSchedule($dayName, $resultTime);
 //         $this->generateWinningNumbersCustom($date, $scheduleIds);
 
         //insert for type 2D, 3D, 4D
-        $getBetWin = $this->generateNormalWinBet($date, $scheduleIds);
-        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
-        return $getBetWin;
+//        $getBetWin = $this->generateNormalWinBet($date, $scheduleIds);
+//        $this->insertWinningRecords($date, $scheduleIds, $getBetWin);
+//        return $getBetWin;
     }
 
     public function getBetTime($region): string
@@ -525,11 +525,10 @@ class LotteryResultController extends Controller
                     if ($bet->a_amount){
                         $rollChecked = [];
                         $rollUnChecked = [];
-
                         if($bet->a_check){
-                            array_push($rollChecked, ...$rollA);
+                            $rollChecked = $rollA;
                         }else{
-                            array_push($rollUnChecked, ...$rollB);
+                            $rollUnChecked = $rollA;
                         }
                         array_push($betByRoll, array('amount' => $bet->a_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
                     }
@@ -537,9 +536,9 @@ class LotteryResultController extends Controller
                         $rollChecked = [];
                         $rollUnChecked = [];
                         if($bet->b_check){
-                            array_push($rollChecked, ...$rollA);
+                            $rollChecked = $rollB;
                         }else{
-                            array_push($rollUnChecked, ...$rollB);
+                            $rollUnChecked = $rollB;
                         }
                         array_push($betByRoll, array('amount' => $bet->b_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
                     }
@@ -653,8 +652,6 @@ class LotteryResultController extends Controller
                         }
                     }
                 }
-//                dump($getBetWinningNumber);
-//                dd($betByRoll);
 
             });
         return $getBetWinningNumber;
@@ -963,7 +960,8 @@ class LotteryResultController extends Controller
                     'pkg_con.price as odds',
                     'bets.number_format as original_number',
                     'bets.bet_date',
-                    DB::raw('sum(bets.total_amount) as turnover'),
+                    DB::raw('sum(bets.total_amount) as total_turnover'),
+                    'bets.total_amount as turnover',
                     'schedule.province',
                     'bet_receipts.receipt_no',
                     'bet_numbers.a_amount',
@@ -993,11 +991,11 @@ class LotteryResultController extends Controller
                      });
                  })
                  ->when($number, function ($q) use ($number){
-                     $q->where('bets.number_format', $number);
+                     $q->where('bets.number_format', 'like','%'.$number.'%');
                  })
                 ->orderBy('record.bet_id')
                 ->groupBy('record.bet_id')
-                ->groupBy('record.win_number')
+                 ->groupBy('record.win_number')
                  ->groupBy('bet_type')
                  ->groupBy('pkg_con.rate')
                  ->groupBy('pkg_con.price')
@@ -1056,28 +1054,18 @@ class LotteryResultController extends Controller
                         $getBetRoll = $getBetRoll.'Roll Parlay';
                     }
 
-//                          $commission =$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100);
-//                                 $netAmount =$row['total_amount'] *$row['bePackageConfig']?->rate/100;
-                    $commission = $record->turnover - ($record->turnover * $record->net / 100);
-                    $netAmount = $record->turnover * $record->net / 100;
-
                     $prepareData = [
                         'bet_id' => $record->bet_id,
-                        'win_number' => $record->win_number,
                         'account' => $record->account,
                         'amount' => $amount,
                         'net' => $record->net,
                         'odds' => $record->odds,
-                        'turnover' => $record->turnover,
-                        'compensate' => $record->sum_prize_amount,
                         'bet_type' => $record->bet_type,
                         'original_number' => $record->original_number,
                         'company' => $record->province,
                         'game' => $getBetRoll,
                         'receipt_no' => $record->receipt_no,
                         'bet_date' => $record->bet_date,
-                        'commission' => $commission,
-                        'net_amount' => $netAmount,
                     ];
 
                     if(in_array($record->bet_type, ['RP2','RP3'])){
@@ -1085,12 +1073,23 @@ class LotteryResultController extends Controller
                             return $val['bet_id'] === $record->bet_id;
                         });
                         if(!count($existBet)){
-                            $prepareData['compensate'] = BetWinningRecord::query()
-                                ->where('bet_id', $record->bet_id)->first()->prize_amount??0;
+                            $commission = $record->turnover - ($record->turnover * $record->net / 100);
+                            $netAmount = $record->turnover * $record->net / 100;
+                            $prepareData['compensate'] = BetWinningRecord::query()->where('bet_id', $record->bet_id)->first()->prize_amount??0;
                             $prepareData['win_number'] = $record->original_number;
+                            $prepareData['turnover'] = $record->turnover;
+                            $prepareData['commission'] = $commission;
+                            $prepareData['net_amount'] = $netAmount;
                             $data[] = $prepareData;
                         }
                     }else{
+                        $commission = $record->total_turnover - ($record->total_turnover * $record->net / 100);
+                        $netAmount = $record->total_turnover * $record->net / 100;
+                        $prepareData['turnover'] = $record->total_turnover;
+                        $prepareData['win_number'] = $record->win_number;
+                        $prepareData['compensate'] = $record->sum_prize_amount;
+                        $prepareData['commission'] = $commission;
+                        $prepareData['net_amount'] = $netAmount;
                         $data[] = $prepareData;
                     }
                 });

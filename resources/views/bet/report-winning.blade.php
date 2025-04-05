@@ -6,9 +6,9 @@
 
     {{--    </x-slot>--}}
     <div class="flex-col bg-white rounded-lg px-5 py-5">
-        <div class="flex w-full space-x-2">
-            <div class="">
-                <div class="relative max-w-sm">
+        <div class="flex lg:w-2/4 md:w-2/3 max-sm:w-full max-sm:flex-col gap-4">
+            <div class="flex w-full">
+                <div class="relative w-full">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                              fill="currentColor" viewBox="0 0 20 20">
@@ -21,8 +21,8 @@
                            placeholder="Select date">
                 </div>
             </div>
-            <div>
-                <select id="company" class="rounded">
+            <div class="flex w-full">
+                <select id="company" class=" w-full rounded">
                     @foreach($companies as $val)
                         @if($company == $val['id'])
                             <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
@@ -32,10 +32,10 @@
                     @endforeach
                 </select>
             </div>
-            <div class="">
-                <input type="text" id="bet-number" value="{{ $number }}" class="rounded" placeholder="Bet number">
+            <div class="flex w-full">
+                <input type="text" id="bet-number" value="{{ $number }}" class="w-full rounded" placeholder="Bet number">
             </div>
-            <div class="">
+            <div class="flex w-full">
                 <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                         onclick="searchWinning('{{ route('bet.bet-winning') }}')">
                     <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -136,9 +136,10 @@
         function searchWinning(url) {
             const date = $('#datepicker-receipt').val();
             const number = $('#bet-number').val()
+            const numberEncoded = encodeURIComponent(number); // "12%2324%2334"
             const company = $('#company').val()
             if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&number=' + number + '&company=' + company;
+                window.location = url + '?date=' + date + '&number=' + numberEncoded + '&company=' + company;
             }
         }
         
