@@ -38,7 +38,7 @@
                             class="{{ Route::is('bet.bet-number') ? 'active-menu' : 'not-active-menu' }}"
                             href="{{ route('bet.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
                 <x-nav-link style="font-size: 15px; font-weight: bold; color: white;"
-                            class="not-active-menu" href="#">{{ __('Win Report') }}</x-nav-link>
+                            class="{{ Route::is('bet.bet-winning') ? 'active-menu' : 'not-active-menu' }}" href="{{ route('bet.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
                 <x-nav-link style="font-size: 15px; font-weight: bold; color: white;"
                             class="not-active-menu" href="#">{{ __('Daily Report') }}</x-nav-link>
                 <x-nav-link style="font-size: 15px; font-weight: bold; color: white;"
