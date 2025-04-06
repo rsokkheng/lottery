@@ -1,24 +1,20 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
-    <style>
 
-    </style>
-    <div class="grid-cols-2 grid sm:flex-col bg-white rounded-lg px-5 py-5">
-        <div class="flex w-full space-x-2 space-y-2">
-            <div class="relative w-full md:max-w-sm">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                    <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                    </svg>
-                </div>
-                <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
-                       datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
-                       class="w-full border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
-                       placeholder="Select date">
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg px-4 py-4">
+        <div class="relative flex items-center w-full lg:w-48">
+            <div class="absolute inset-y-0 start-0 flex ps-4 items-center pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                     fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                </svg>
             </div>
+            <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
+                   datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
+                   class="w-full border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
+                   placeholder="Select date">
         </div>
-        <div class="mb-2 ml-2">
+        <div class="w-full lg:w-48">
             <select id="company" class="rounded w-full">
                 @foreach($company as $val)
                     @if($company_id == $val['id'])
@@ -29,22 +25,23 @@
                 @endforeach
             </select>
         </div>
-        <div class="w-full">
+        <div class="w-full lg:w-48">
             <input type="text" id="receipt-no" value="{{ $receiptNo }}" class="rounded w-full" placeholder="Receipt No">
         </div>
-        <div class="w-full ml-2">
+        <div class="w-full lg:w-48">
             <input type="text" id="number" value="{{ $number }}" class="rounded w-full" placeholder="Number">
         </div>
-        <div class="mt-2">
-            <button class="wax-w-auto md:w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        <div class="w-full sm:w-16">
+            <button class="wax-w-auto flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2 rounded hover:bg-blue-600"
                     onclick="searchReceipt('{{ route('bet.bet-list') }}')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
                 </svg>
                 <p> {{__('Search')}} </p>
             </button>
         </div>
-
     </div>
     <div class="flex w-full">
         <div class="w-full overflow-auto py-4">

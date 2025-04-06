@@ -1,14 +1,10 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
-    <style>
 
-    </style>
-
-    {{--    </x-slot>--}}
-    <div class="flex-col bg-white rounded-lg px-5 py-5 ">
-        <div class="grid grid-cols-2  sm:flex sm:justify-start sm:items-center sm:space-x-2">
-            <div class="mr-4">
-                <div class="relative max-w-sm">
+    <div class="flex-col bg-white rounded-lg px-5 py-5">
+        <div class="grid grid-cols-2 gap-2 sm:gap-0 sm:flex sm:justify-start sm:items-center sm:space-x-2">
+            <div class="w-full sm:w-40">
+                <div class="relative">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                              fill="currentColor" viewBox="0 0 20 20">
@@ -21,16 +17,18 @@
                            placeholder="Select date">
                 </div>
             </div>
-            <div class="w-full">
+            <div class="w-full sm:w-40">
                 <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full" placeholder="Receipt No">
             </div>
-            <div class="mt-4 sm:mt-0">
-                <button class="max-w-auto px-2 py-1 sm:py-2 sm:w-full flex justify-center items-center bg-blue-500 text-white rounded hover:bg-blue-600"
+            <div class="w-full sm:w-16">
+                <button class="flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2  rounded hover:bg-blue-600"
                         onclick="searchReceipt('{{ route('bet.receipt-list') }}')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                         stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
                     </svg>
-                   <p class="text-[12px] sm:text-base">{{__('Search')}}</p>
+                    <p> {{__('Search')}} </p>
                 </button>
             </div>
 
