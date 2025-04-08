@@ -527,8 +527,7 @@ class LottoBet extends Component
             'roll7_check',
             'roll_parlay_check'
             ];
-//        $this->reset($field);
-        $this->pull($field);
+        $this->reset($field);
         $this->initializeProperty();
     }
 
