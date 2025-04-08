@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Masmerise\Toaster\Toaster;
 
 class LottoBet extends Component
 {
@@ -388,11 +387,10 @@ class LottoBet extends Component
             ];
         $this->reset($fieldReset);
     }
+    public $showNotification = false;
 
     public function handleSave()
     {
-
-      //  Toaster::success('User created!');
         DB::beginTransaction();
         try {
             $isCreateBetSuccess = false;
@@ -495,6 +493,7 @@ class LottoBet extends Component
             if($isCreateBetSuccess)
             {
                 $this->handleReset();
+                $this->dispatch('bet-saved', message: 'Bet saved successfully!');
             }
             DB::commit();
         } catch (\Exception $e) {

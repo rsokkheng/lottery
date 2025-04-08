@@ -10,9 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-{{--    <link rel="stylesheet" href="{{ asset('admin/dist/css/adminlte.min.css') }}">--}}
     @livewireStyles
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
@@ -20,7 +18,6 @@
     <div class="w-full">
      @include('layouts.navigation')
     </div>
-    <x-toaster-hub />
     <!-- Page Heading -->
     @isset($header)
         <header class="bg-white shadow">
@@ -35,7 +32,6 @@
         {{ $slot }}
     </main>
 </div>
-<x-toaster-hub />
 @livewireScripts
 
 </body>
