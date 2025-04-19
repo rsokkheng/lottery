@@ -504,36 +504,32 @@ class LottoBet extends Component
     public function handleReset()
     {
         $this->resetChanelValues();
-        
-        // Reset properties to empty values
-    $propertiesToReset = [
-        'number' => [],
-        'totalInvoice' => 0,
-        'totalDue' => 0,
-        'invoices' => [],
-        'province_check' => [],
-        'province_body_check' => [],
-        'a_amount' => [],
-        'b_amount' => [],
-        'ab_amount' => [],
-        'roll_amount' => [],
-        'roll7_amount' => [],
-        'roll_parlay_amount' => [],
-        'total_amount' => [],
-        'amountHN' => [],
-        'amountNotHN' => [],
-        'a_check' => [],
-        'b_check' => [],
-        'ab_check' => [],
-        'roll_check' => [],
-        'roll7_check' => [],
-        'roll_parlay_check' => []
-    ];
+         // Force reset each property based on expected type
+        $this->number = [];
+        $this->totalInvoice = 0;
+        $this->totalDue = 0;
+        $this->invoices = [];
 
-    // Set each property to its corresponding empty value
-    foreach ($propertiesToReset as $property => $value) {
-        $this->{$property} = $value;
-    }
+        $this->province_check = [];
+        $this->province_body_check = [];
+
+        $this->a_amount = [];
+        $this->b_amount = [];
+        $this->ab_amount = [];
+        $this->roll_amount = [];
+        $this->roll7_amount = [];
+        $this->roll_parlay_amount = [];
+        $this->total_amount = [];
+        $this->amountHN = [];
+        $this->amountNotHN = [];
+
+        $this->a_check = [];
+        $this->b_check = [];
+        $this->ab_check = [];
+        $this->roll_check = [];
+        $this->roll7_check = [];
+        $this->roll_parlay_check = [];
+       
         $this->initializeProperty();
     }
 
