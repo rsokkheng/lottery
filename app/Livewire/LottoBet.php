@@ -503,33 +503,63 @@ class LottoBet extends Component
     }
     public function handleReset()
     {
-    
-         // Reset all arrays to empty first
-    $properties = [
-        'number', 'digit', 
-        'a_amount', 'b_amount', 'ab_amount', 
-        'roll_amount', 'roll7_amount', 'roll_parlay_amount',
-        'a_check', 'b_check', 'ab_check', 
-        'roll_check', 'roll7_check', 'roll_parlay_check',
-        'province_check', 'province_body_check',
-        'total_amount', 'amountHN', 'amountNotHN'
-    ];
-    
-    // First set everything to empty arrays
-    foreach ($properties as $property) {
-        $this->$property = [];
-    }
-        
-        // Clear other fields if needed
         $this->resetChanelValues();
-        
-        // Re-initialize with proper defaults
-        $this->initializeProperty();
-        
+        $field = [
+            'number',
+            'totalInvoice',
+            'totalDue',
+            'invoices',
+            'province_check',
+            'province_body_check',
+            'a_amount',
+            'b_amount',
+            'ab_amount',
+            'roll_amount',
+            'roll7_amount',
+            'roll_parlay_amount',
+            'total_amount',
+            'amountHN',
+            'amountNotHN',
+            'a_check',
+            'b_check',
+            'ab_check',
+            'roll_check',
+            'roll7_check',
+            'roll_parlay_check'
+            ];
+        $this->reset($field);
+        $this->initializePropertyValue();
 
+    }
 
-     }
+    public function initializePropertyValue()
+    {
+        foreach ($this->schedules as $key => $schedule) {
+            $this->province_check[$key] = false;
+            $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
+        }
 
+        $this->a_amount = array_fill(0, $this->totalRow, "");
+        $this->b_amount = array_fill(0, $this->totalRow, "");
+        $this->ab_amount = array_fill(0, $this->totalRow, "");
+        $this->roll_amount = array_fill(0, $this->totalRow, "");
+        $this->roll7_amount = array_fill(0, $this->totalRow, "");
+        $this->roll_parlay_amount = array_fill(0, $this->totalRow, "");
+        $this->a_check = array_fill(0, $this->totalRow, false);
+        $this->b_check = array_fill(0, $this->totalRow, false);
+        $this->ab_check = array_fill(0, $this->totalRow, false);
+        $this->roll_check = array_fill(0, $this->totalRow, false);
+        $this->roll7_check = array_fill(0, $this->totalRow, false);
+        $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
+        $this->number = array_fill(0, $this->totalRow, "");
+        $this->digit = array_fill(0, $this->totalRow, "");
+        $this->permutationsLength = array_fill(0, $this->totalRow, "");
+        $this->packageRate = array_fill(0, $this->totalRow, "");
+        $this->lengthNum = array_fill(0, $this->totalRow, "");
+        $this->total_amount = array_fill(0, $this->totalRow, "");
+        $this->amountHN = array_fill(0, $this->totalRow, "");
+        $this->amountNotHN = array_fill(0, $this->totalRow, "");
+    }
     public function handleCheckChanel($key, $name = "")
     {
     }
