@@ -505,7 +505,7 @@ class LottoBet extends Component
     {
         $this->resetChanelValues();
         
-        $this->reset('number',
+        $this->reset(['number',
                     'totalInvoice',
                     'totalDue',
                     'invoices',
@@ -525,8 +525,7 @@ class LottoBet extends Component
                     'ab_check',
                     'roll_check',
                     'roll7_check',
-                    'roll_parlay_check'
-        );
+                    'roll_parlay_check']);
         $this->initializeProperty();
     }
 
