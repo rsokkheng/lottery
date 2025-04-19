@@ -503,34 +503,31 @@ class LottoBet extends Component
     }
     public function handleReset()
     {
-        Log::info('handleReset() called in production');
         $this->resetChanelValues();
-        $field = [
-            'number',
-            'totalInvoice',
-            'totalDue',
-            'invoices',
-            'province_check',
-            'province_body_check',
-            'a_amount',
-            'b_amount',
-            'ab_amount',
-            'roll_amount',
-            'roll7_amount',
-            'roll_parlay_amount',
-            'total_amount',
-            'amountHN',
-            'amountNotHN',
-            'a_check',
-            'b_check',
-            'ab_check',
-            'roll_check',
-            'roll7_check',
-            'roll_parlay_check'
-            ];
-        $this->reset($field);
+        
+        $this->reset('number',
+                    'totalInvoice',
+                    'totalDue',
+                    'invoices',
+                    'province_check',
+                    'province_body_check',
+                    'a_amount',
+                    'b_amount',
+                    'ab_amount',
+                    'roll_amount',
+                    'roll7_amount',
+                    'roll_parlay_amount',
+                    'total_amount',
+                    'amountHN',
+                    'amountNotHN',
+                    'a_check',
+                    'b_check',
+                    'ab_check',
+                    'roll_check',
+                    'roll7_check',
+                    'roll_parlay_check'
+        );
         $this->initializeProperty();
-        Log::info('State after reset: ');
     }
 
     public function handleCheckChanel($key, $name = "")
