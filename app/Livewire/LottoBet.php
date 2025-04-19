@@ -503,35 +503,32 @@ class LottoBet extends Component
     }
     public function handleReset()
     {
-        $this->resetChanelValues();
-         // Force reset each property based on expected type
-        $this->number = [];
-        $this->totalInvoice = 0;
-        $this->totalDue = 0;
-        $this->invoices = [];
-
-        $this->province_check = [];
-        $this->province_body_check = [];
-
-        $this->a_amount = [];
-        $this->b_amount = [];
-        $this->ab_amount = [];
-        $this->roll_amount = [];
-        $this->roll7_amount = [];
-        $this->roll_parlay_amount = [];
-        $this->total_amount = [];
-        $this->amountHN = [];
-        $this->amountNotHN = [];
-
-        $this->a_check = [];
-        $this->b_check = [];
-        $this->ab_check = [];
-        $this->roll_check = [];
-        $this->roll7_check = [];
-        $this->roll_parlay_check = [];
-       
-        $this->initializeProperty();
+    
+         // Reset all arrays to empty first
+    $properties = [
+        'number', 'digit', 
+        'a_amount', 'b_amount', 'ab_amount', 
+        'roll_amount', 'roll7_amount', 'roll_parlay_amount',
+        'a_check', 'b_check', 'ab_check', 
+        'roll_check', 'roll7_check', 'roll_parlay_check',
+        'province_check', 'province_body_check',
+        'total_amount', 'amountHN', 'amountNotHN'
+    ];
+    
+    // First set everything to empty arrays
+    foreach ($properties as $property) {
+        $this->$property = [];
     }
+        
+        // Clear other fields if needed
+        $this->resetChanelValues();
+        
+        // Re-initialize with proper defaults
+        $this->initializeProperty();
+        
+
+
+     }
 
     public function handleCheckChanel($key, $name = "")
     {
