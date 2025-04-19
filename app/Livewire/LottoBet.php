@@ -391,9 +391,9 @@ class LottoBet extends Component
 
     public function handleSave()
     {
+        $isCreateBetSuccess = false;
         DB::beginTransaction();
         try {
-            $isCreateBetSuccess = false;
             $betReceipt= null;
             if($this->totalInvoice>0 && $this->totalDue>0) {
                 // generate no invoice
@@ -490,15 +490,15 @@ class LottoBet extends Component
                     }
                 }
             }
-            if($isCreateBetSuccess)
-            {
-                $this->handleReset();
-                $this->dispatch('bet-saved', message: 'Bet saved successfully!');
-            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             dump($e->getMessage());
+        }
+        if($isCreateBetSuccess)
+        {
+            $this->handleReset();
+            $this->dispatch('bet-saved', message: 'Bet saved successfully!');
         }
     }
     public function handleReset()
