@@ -505,27 +505,35 @@ class LottoBet extends Component
     {
         $this->resetChanelValues();
         
-        $this->reset(['number',
-                    'totalInvoice',
-                    'totalDue',
-                    'invoices',
-                    'province_check',
-                    'province_body_check',
-                    'a_amount',
-                    'b_amount',
-                    'ab_amount',
-                    'roll_amount',
-                    'roll7_amount',
-                    'roll_parlay_amount',
-                    'total_amount',
-                    'amountHN',
-                    'amountNotHN',
-                    'a_check',
-                    'b_check',
-                    'ab_check',
-                    'roll_check',
-                    'roll7_check',
-                    'roll_parlay_check']);
+        // Reset properties to empty values
+    $propertiesToReset = [
+        'number' => [],
+        'totalInvoice' => 0,
+        'totalDue' => 0,
+        'invoices' => [],
+        'province_check' => [],
+        'province_body_check' => [],
+        'a_amount' => [],
+        'b_amount' => [],
+        'ab_amount' => [],
+        'roll_amount' => [],
+        'roll7_amount' => [],
+        'roll_parlay_amount' => [],
+        'total_amount' => [],
+        'amountHN' => [],
+        'amountNotHN' => [],
+        'a_check' => [],
+        'b_check' => [],
+        'ab_check' => [],
+        'roll_check' => [],
+        'roll7_check' => [],
+        'roll_parlay_check' => []
+    ];
+
+    // Set each property to its corresponding empty value
+    foreach ($propertiesToReset as $property => $value) {
+        $this->{$property} = $value;
+    }
         $this->initializeProperty();
     }
 
