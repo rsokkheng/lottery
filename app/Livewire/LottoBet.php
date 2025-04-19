@@ -503,6 +503,7 @@ class LottoBet extends Component
     }
     public function handleReset()
     {
+        Log::info('handleReset() called in production');
         $this->resetChanelValues();
         $field = [
             'number',
@@ -529,6 +530,7 @@ class LottoBet extends Component
             ];
         $this->reset($field);
         $this->initializeProperty();
+        Log::info('State after reset: ');
     }
 
     public function handleCheckChanel($key, $name = "")
