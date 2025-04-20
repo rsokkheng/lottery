@@ -330,9 +330,15 @@
 
     // Example: Attach the handleEnterKey to the input fields
     const formatNumberValue = (input, nextInput) => {
-        let value = input.value.replace(/[^0-9]/g, ''); // Allow only digits (0-9)
-        if (value.length > 5) {
-            value = value.slice(0, 5); // Restrict to 4 digits
+        let value = input.value.replace(/[^0-9.]/g, ''); // Allow only digits (0-9)
+        // Allow only one dot
+        const parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+         // Limit to 5 characters
+         if (value.length > 5) {
+            value = value.slice(0, 5);
         }
         input.value = value; // Update the input value with the formatted number
 
