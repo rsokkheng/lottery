@@ -6,6 +6,12 @@
                 <p>Dashboard</p>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="{{ route('admin.menu.index') }}" class="nav-link {{ Route::is('admin.menu.index') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-home"></i>
+                <p>Menus</p>
+            </a>
+        </li>
         @role('admin')
             <li class="nav-item">
                 <a href="{{ route('admin.user.index') }}"

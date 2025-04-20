@@ -6,7 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Happy Lottery 2888</title>
+    <title>{{ config('app.name', 'Lottery2888') }}</title>
+    <link rel="icon" href="{{ asset('images/snooker.png') }}" type="image/png">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -34,13 +35,36 @@
             margin-top: 20px;
             background-color: #111;
         }
+        .lotto-img {
+            border: 2px solid #ddd;
+            transition: border-color 0.3s ease;
+            width: 100%;
+            height: auto;
+        }
+
+        .lotto-img:hover {
+            border-color: yellow; /* or any hover color you like */
+        }
+
+        .product_list {
+            list-style: none;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pro_text {
+            pointer-events: none; /* So the hover works on the image */
+        }
+
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container" style="max-width: 1300px;"> <!-- Restrict navbar width -->
-        <a class="navbar-brand text-warning" href="#">Happy Lottery 2888</a>
+        <a class="navbar-brand text-warning" href="#">
+        <img src="{{ asset('images/logo2888.png') }}" >
+        </a>
         <div class=" navbar-collapse justify-content-end" id="navbarNav">
             <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
                 @csrf
@@ -57,18 +81,20 @@
         </div>
     </div>
 </nav>
-
+@php
+    use App\Models\Menu;
+    $betMenus = Menu::all();
+@endphp
 
 <!-- Carousel -->
 <div class="container">
     <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner mx-auto" style="max-width: 1300px;">
+        @foreach ($betMenus as $menu)
             <div class="carousel-item active" data-bs-interval="3000">
-                <img src="{{ asset('images/ads1.png') }}" class="d-block w-100 img-fluid" alt="Slide 1">
+                <img src="{{ asset('uploads/banners/' .$menu->banner ?? 'uploads/default_banner.jpg') }}" class="d-block w-100 img-fluid" alt="Slide 1" style="width: 100%;">
             </div>
-            <div class="carousel-item" data-bs-interval="3000">
-                <img src="{{ asset('images/ads2.png') }}" class="d-block w-100 img-fluid" alt="Slide 2">
-            </div>
+         @endforeach
         </div>
     </div>
 </div>
@@ -78,69 +104,19 @@
 <div class="container mt-4">
     <div class="row g-4">
         <!-- Lotto -->
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card">
-                <a href="#">
-                    <img src="{{ asset('images/ad_intro_lotto.jpg') }}" class="card-img-top img-fluid" alt="Lotto">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">LOTTO</h5>
-                    <p class="card-text">Lotto Vietnam & Lotto Cambodia</p>
-                </div>
+        @foreach ($betMenus as $menu)
+            <div class="col-12 col-md-6 col-lg-4">
+                <li class="product_list position-relative">
+                    <img src="{{ asset('uploads/images/' .$menu->image ?? 'uploads/default_banner.jpg') }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
+                    
+                    <div class="pro_text position-absolute w-100 h-100 top-0 start-0 d-flex">
+                        <h3 style="color: yellow; font-weight: 600;" class="bg-opacity-50 px-3 py-2 rounded">
+                            {{ $menu->title ?? 'LOTTO' }}
+                        </h3>
+                    </div>
+                </li>
             </div>
-        </div>
-
-        <!-- Sports -->
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card">
-                <a href="#sportsLink">
-                    <img src="{{ asset('images/ad_intro_sports.jpg') }}" class="card-img-top img-fluid" alt="Sports">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">SPORTS</h5>
-                    <p class="card-text">Enjoy Football & Basketball</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Casino -->
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card">
-                <a href="#casinoLink">
-                    <img src="{{ asset('images/ad_intro_sports.jpg') }}" class="card-img-top img-fluid" alt="Live Casino">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">LIVE CASINO</h5>
-                    <p class="card-text">Welcome to Shanghai Resort</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Games -->
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card">
-                <a href="#gamesLink">
-                    <img src="{{ asset('images/ad_intro_sports.jpg') }}" class="card-img-top img-fluid" alt="Games">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">Games</h5>
-                    <p class="card-text">Keno & Slot & Roulette</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Binary Options -->
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card">
-                <a href="#binaryOptionsLink">
-                    <img src="{{ asset('images/ad_intro_sports.jpg') }}" class="card-img-top img-fluid" alt="Binary Options">
-                </a>
-                <div class="card-body">
-                    <h5 class="card-title">BINARY OPTIONS</h5>
-                    <p class="card-text">Trading and Investments</p>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
 

@@ -534,7 +534,7 @@ class LottoBet extends Component
 
     public function initializePropertyValue()
     {
-        foreach ($this->schedules as $key => $schedule) {
+        foreach ($this->schedules as $key) {
             $this->province_check[$key] = false;
             $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
         }

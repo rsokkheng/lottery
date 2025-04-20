@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\BetLotteryPackage;
+use App\Models\Menu;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
@@ -75,7 +76,7 @@ class UserController extends Controller
     }
     public function destroy($id)
     {
-        User::where('id',decrypt($id))->delete();
+        Menu::where('id',decrypt($id))->delete();
         return redirect()->back()->with('success','User deleted successfully.');
     }
 }

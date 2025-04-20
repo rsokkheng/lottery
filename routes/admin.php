@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\BetLotteryPackageController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\PermissionController;
-
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\RoleController;
+
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\LotteryResultController;
+use App\Http\Controllers\BetLotteryPackageController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard',[ProfileController::class,'dashboard'])->name('dashboard');
@@ -18,7 +19,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::middleware(['role:admin'])->group(function(){
+
         # <Menu>
+        Route::resource('menu',MenuController::class);
         Route::resource('user',UserController::class);
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
