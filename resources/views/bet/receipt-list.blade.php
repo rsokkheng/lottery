@@ -52,7 +52,7 @@
                     <tbody>
                     @if(isset($data) && count($data))
                         @foreach($data as $key => $row)
-                            <tr class="border border-gray-300 hover:bg-gray-100">
+                            <tr class="border border-gray-300 hover:bg-gray-100 {{ $row['is_win'] ? 'bg-red-200 hover:bg-red-100 text-red-500' : ''}} ">
                                 <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
                                 <td onclick="handleShowBet('{{$row['id']}}')" class="py-2 px-1 border border-gray-300">
                                     <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal"
@@ -164,8 +164,9 @@
                     const getBetByReceipt = document.getElementById('getBetByReceipt');
                     getBetByReceipt.innerHTML = '';
                     data?.items?.forEach(item => {
+                        let winColor =  Boolean(item?.is_win) ? 'bg-red-200 hover:bg-red-100 text-red-500' : ''
                         getBetByReceipt.innerHTML += `
-                            <tr class="border border-gray-300 hover:bg-gray-100">
+                            <tr class="border border-gray-300 hover:bg-gray-100 ${winColor}">
                                 <td class="py-2 px-1 border border-gray-300">${item?.number??""}</td>
                                 <td class="py-2 px-1 border border-gray-300">${item?.company??""}</td>
                                 <td class="py-2 px-1 border border-gray-300">${item?.amount??""}</td>

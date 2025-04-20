@@ -11,7 +11,7 @@ class Bet extends Model
 {
     use HasFactory;
     protected $guarded = '';
-
+    protected $table = 'bets';
     public function betNumber():HasMany
     {
         return $this->hasMany(BetNumber::class);
@@ -33,5 +33,10 @@ class Bet extends Model
     public function beReceipt(): BelongsTo
     {
         return $this->belongsTo(BetReceipt::class, 'bet_receipt_id');
+    }
+
+    public function betWinningRecords(): HasMany
+    {
+        return $this->hasMany(BetWinningRecord::class, 'bet_id', 'id');
     }
 }

@@ -17,8 +17,8 @@ class BetWinningRecord extends Model
         return $this->belongsTo(LotteryResult::class,'result_id','result_id');
     }
 
-    public function bets(): HasMany
+    public function bets(): BelongsTo
     {
-        return $this->hasMany(Bet::class, 'bet_id', 'id');
+        return $this->belongsTo(Bet::class, 'bet_id', 'id');
     }
 }
