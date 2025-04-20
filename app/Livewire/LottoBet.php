@@ -97,7 +97,7 @@ class LottoBet extends Component
 
         $this->schedules = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
-            ->where('time_close', '<=', $this->currentTime)
+            ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code']);
         $this->timeClose = $this->betLotteryScheduleModel
@@ -438,12 +438,12 @@ class LottoBet extends Component
                             $betNumber1 = [
                                 'bet_id' => $respone->id,
                                 'original_number' => $value,
-                                'a_amount' => (int)$this->a_amount[$key] ?? 0,
-                                'b_amount' => (int)$this->b_amount[$key] ?? 0,
-                                'ab_amount' => (int)$this->ab_amount[$key] ?? 0,
-                                'roll_amount' => (int)$this->roll_amount[$key] ?? 0,
-                                'roll7_amount' => (int)$this->roll7_amount[$key] ?? 0,
-                                'roll_parlay_amount' => (int)$this->roll_parlay_amount[$key] ?? 0,
+                                'a_amount' => $this->a_amount[$key] ?? 0,
+                                'b_amount' => $this->b_amount[$key] ?? 0,
+                                'ab_amount' => $this->ab_amount[$key] ?? 0,
+                                'roll_amount' => $this->roll_amount[$key] ?? 0,
+                                'roll7_amount' => $this->roll7_amount[$key] ?? 0,
+                                'roll_parlay_amount' => $this->roll_parlay_amount[$key] ?? 0,
                                 'a_check' => $this->a_check[$key],
                                 'b_check' => $this->b_check[$key],
                                 'ab_check' => $this->ab_check[$key],
@@ -528,38 +528,11 @@ class LottoBet extends Component
             'roll_parlay_check'
             ];
         $this->reset($field);
-        $this->initializePropertyValue();
+        $this->initializeProperty();
 
     }
 
-    public function initializePropertyValue()
-    {
-        foreach ($this->schedules as $key) {
-            $this->province_check[$key] = false;
-            $this->province_body_check[$key] = array_fill(0, $this->totalRow, false);
-        }
-
-        $this->a_amount = array_fill(0, $this->totalRow, "");
-        $this->b_amount = array_fill(0, $this->totalRow, "");
-        $this->ab_amount = array_fill(0, $this->totalRow, "");
-        $this->roll_amount = array_fill(0, $this->totalRow, "");
-        $this->roll7_amount = array_fill(0, $this->totalRow, "");
-        $this->roll_parlay_amount = array_fill(0, $this->totalRow, "");
-        $this->a_check = array_fill(0, $this->totalRow, false);
-        $this->b_check = array_fill(0, $this->totalRow, false);
-        $this->ab_check = array_fill(0, $this->totalRow, false);
-        $this->roll_check = array_fill(0, $this->totalRow, false);
-        $this->roll7_check = array_fill(0, $this->totalRow, false);
-        $this->roll_parlay_check = array_fill(0, $this->totalRow, false);
-        $this->number = array_fill(0, $this->totalRow, "");
-        $this->digit = array_fill(0, $this->totalRow, "");
-        $this->permutationsLength = array_fill(0, $this->totalRow, "");
-        $this->packageRate = array_fill(0, $this->totalRow, "");
-        $this->lengthNum = array_fill(0, $this->totalRow, "");
-        $this->total_amount = array_fill(0, $this->totalRow, "");
-        $this->amountHN = array_fill(0, $this->totalRow, "");
-        $this->amountNotHN = array_fill(0, $this->totalRow, "");
-    }
+   
     public function handleCheckChanel($key, $name = "")
     {
     }
