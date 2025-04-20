@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BetWinningRecord;
 use Carbon\Carbon;
 use App\Models\Bet;
 use App\Models\User;
@@ -19,12 +20,14 @@ class BetReceiptController extends Controller
 
     public BetReceipt $model;
     public Bet $betModel;
+    public BetWinningRecord $betWinningRecord;
     public $currentDate;
 
-    public function __construct(BetReceipt $model, Bet $betModel)
+    public function __construct(BetReceipt $model, Bet $betModel, BetWinningRecord $betWinningRecord)
     {
         $this->model = $model;
         $this->betModel = $betModel;
+        $this->betWinningRecord = $betWinningRecord;
         $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
@@ -41,7 +44,8 @@ class BetReceiptController extends Controller
                 $date = $request->get('date');
             }
             $no = $request->no ?? null;
-            $data = $this->model->newQuery()->with(['user'])
+
+            $data = $this->model->newQuery()->with(['user', 'bets.betWinningRecords'])
                 ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($date), function ($q) use ($date) {
@@ -50,6 +54,9 @@ class BetReceiptController extends Controller
                 })->when(!is_null($no), function ($q) use ($no) {
                     $q->where('receipt_no', 'like', $no . '%');
                 })->get()->map(function ($item) {
+                    $checkWinBet = $item->bets->map(function ($bet){
+                        return $bet->betWinningRecords()->count();
+                    })->sum();
                     return [
                         'id' => $item->id,
                         "receipt_no" => $item->receipt_no,
@@ -62,6 +69,7 @@ class BetReceiptController extends Controller
                         "commission" => $item->commission,
                         "net_amount" => $item->net_amount,
                         "compensate" => $item->compensate,
+                        "is_win" => (bool)$checkWinBet
                     ];
                 });
             return view('bet.receipt-list', compact('data', 'date', 'no'));
@@ -138,8 +146,11 @@ class BetReceiptController extends Controller
     {
         $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber'])
             ->findOrFail($id);
-
-        $items =[];
+        $betIdWin = $this->betWinningRecord->newQuery()
+            ->whereHas('bets', function ($q) use ($id){
+                $q->where('bet_receipt_id', $id);
+            })->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
+        $items = [];
         foreach ($result->bets as $bet){
             $this->addAmount($amount, $bet['betNumber'][0]->a_amount ?? 0, $bet['betNumber'][0]->a_check ?? false, "A");
             $this->addAmount($amount, $bet['betNumber'][0]->b_amount ?? 0, $bet['betNumber'][0]->b_check ?? false, "B");
@@ -150,7 +161,8 @@ class BetReceiptController extends Controller
             $items[] =[
                 'number' => $bet['number_format'],
                 'company' => $bet['betLotterySchedule']?->code,
-                'amount' =>$amount
+                'amount' =>$amount,
+                'is_win' => in_array($bet->id, $betIdWin)
             ];
         }
 
