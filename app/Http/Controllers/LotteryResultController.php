@@ -1014,39 +1014,39 @@ class LotteryResultController extends Controller
                 ->each(function ($record) use (&$data) {
                     $getBetRoll = '';
                     $amount = 0;
-                    if($record->a_amount){
+                    if($record->a_amount > 0){
                         $amount = $amount+$record->a_amount;
                         $getBetRoll = $getBetRoll.'Head';
                     }
-                    if($record->b_amount){
+                    if($record->b_amount > 0){
                         $amount = $amount+$record->b_amount;
                         if($getBetRoll){
                             $getBetRoll = $getBetRoll.',&nbsp;';
                         }
                         $getBetRoll = $getBetRoll.'Last';
                     }
-                    if($record->ab_amount){
+                    if($record->ab_amount > 0){
                         $amount = $amount+$record->ab_amount;
                         if($getBetRoll){
                             $getBetRoll = $getBetRoll.',&nbsp;';
                         }
                         $getBetRoll = $getBetRoll.'Head+Last';
                     }
-                    if($record->roll_amount){
+                    if($record->roll_amount > 0){
                         $amount = $amount+$record->roll_amount;
                         if($getBetRoll){
                             $getBetRoll = $getBetRoll.',&nbsp;';
                         }
                         $getBetRoll = $getBetRoll.'Roll';
                     }
-                    if($record->roll7_amount){
+                    if($record->roll7_amount > 0){
                         $amount = $amount+$record->roll7_amount;
                         if($getBetRoll){
                             $getBetRoll = $getBetRoll.',&nbsp;';
                         }
                         $getBetRoll = $getBetRoll.'Roll7';
                     }
-                    if($record->roll_parlay_amount){
+                    if($record->roll_parlay_amount > 0){
                         $amount = $amount+$record->roll_parlay_amount;
                         if($getBetRoll){
                             $getBetRoll = $getBetRoll.',&nbsp;';

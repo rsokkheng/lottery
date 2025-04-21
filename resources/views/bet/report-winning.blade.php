@@ -92,9 +92,7 @@
                                 <td class="py-2 px-2 border border-gray-300">{{$row['bet_no']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['win_number']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['bet_type']??''}}</td>
-                                <td class="py-2 px-2 border border-gray-300">
-                                   @php echo $row['game']??''; @endphp
-                                </td>
+                                <td class="py-2 px-2 border border-gray-300">{{$row['game']??''}} </td>
                                 <td class="py-2 px-1 border border-gray-300">{{$row['company']??''}}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300">{{$row['amount']??0}}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300">{{$row['odds']??0}}</td>
