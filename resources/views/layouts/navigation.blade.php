@@ -44,7 +44,7 @@
                 <x-nav-link
                         class="{{ Route::is('bet.bet-winning') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('bet.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
                 <x-nav-link
-                        class="not-active-menu hover:text-white" href="#">{{ __('Daily Report') }}</x-nav-link>
+                class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
                 <x-nav-link
                         class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
@@ -95,7 +95,7 @@
                             <li>
                                 <x-nav-link
                                         class="black"
-                                        href="#">{{ __('Daily Report') }}</x-nav-link>
+                                        href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
                             </li>
                             <li>
                                 <x-nav-link

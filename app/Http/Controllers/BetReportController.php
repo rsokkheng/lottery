@@ -46,12 +46,11 @@ class BetReportController extends Controller
                 SELECT 
                     be.bet_receipt_id,
                     se.draw_day 
-                FROM lottery.bets be
-                INNER JOIN lottery.bet_lottery_schedules se  ON se.id = be.bet_schedule_id
-                WHERE be.bet_date = "2025-03-26"
+                FROM bets be
+                INNER JOIN bet_lottery_schedules se  ON se.id = be.bet_schedule_id
                 GROUP BY be.bet_receipt_id, se.draw_day
                  ) as bee'))
-                ->join('lottery.bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
+                ->join('bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
                 ->selectRaw('
                     DATE(re.date) AS date,
                     bee.draw_day,
@@ -67,6 +66,8 @@ class BetReportController extends Controller
                         Carbon::parse($start_date)->startOfDay()->format('Y-m-d H:i:s'),
                         Carbon::parse($end_date)->endOfDay()->format('Y-m-d H:i:s')
                     ]);
+                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
                 })
                 ->when($date && !$start_date && !$end_date, function ($q) use ($date) {
                     // Apply filter for specific date
@@ -77,6 +78,77 @@ class BetReportController extends Controller
                 ->get();
            
             return view('reports.summary', compact('data', 'date'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+    public function getDailyReport(Request $request)
+    {
+        try {
+
+            $date = $request->get('date') ?? null;
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
+            $date = $this->currentDate;
+            if ($request->has('date')) {
+                $date = $request->get('date');
+            }
+            $company_id = -1;
+            if ($request->has('com_id')) {
+                $company_id = $request->get('com_id');
+            }
+            $company = [
+                [
+                    "label" => "All Company",
+                    "id" => 0,
+                ],
+                [
+                    "label" => "4PM Company",
+                    "id" => 1,
+                ],
+                [
+                    "label" => "5PM Company",
+                    "id" => 2,
+                ],
+                [
+                    "label" => "6PM Company",
+                    "id" => 3,
+                ]
+            ];
+            
+            $data = DB::table(DB::raw('(
+                SELECT 
+                    be.bet_receipt_id,
+                    se.draw_day,
+                    user.name
+                FROM bets be
+                INNER JOIN bet_lottery_schedules se ON se.id = be.bet_schedule_id
+                INNER JOIN users as user ON user.id = be.user_id
+                GROUP BY be.bet_receipt_id, se.draw_day, user.name
+            ) as bee'))
+            ->join('bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
+            ->selectRaw('
+                DATE(re.date) AS date,
+                bee.draw_day,
+                bee.name,
+                COUNT(re.id) AS total,
+                SUM(re.total_amount) AS Turnover,
+                SUM(re.commission) AS Commission,
+                SUM(re.net_amount) AS NetAmount,
+                SUM(re.compensate) AS Compensate
+            ')
+            ->when($date, function ($q) use ($date) {
+                $q->whereDate('re.date', '=', Carbon::parse($date)->format('Y-m-d'));
+            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->groupBy(DB::raw('DATE(re.date), bee.draw_day, bee.name'))
+            ->get();
+            return view('reports.daily', compact('data', 'date','company','company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();

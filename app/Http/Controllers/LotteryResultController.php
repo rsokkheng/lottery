@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
 use App\Enums\HelperEnum;
-use App\Models\BetWinningRecord;
+use Illuminate\Http\Request;
 use App\Models\LotteryResult;
 use App\Models\LotterySchedule;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use App\Models\BetWinningRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use function PHPUnit\Framework\throwException;
 
@@ -948,6 +950,11 @@ class LotteryResultController extends Controller
             if ($request->has('company')) {
                 $company = $request->get('company');
             }
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
 
             $data = [];
              DB::table('bet_winning_records as record')
@@ -990,6 +997,9 @@ class LotteryResultController extends Controller
                          $q2->where('schedule.draw_time', '18:30:00');
                      });
                  })
+                 ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('bets.user_id', $user->id);
+                })
                  ->when($number, function ($q) use ($number){
                      $q->where('bets.number_format', 'like','%'.$number.'%');
                  })
