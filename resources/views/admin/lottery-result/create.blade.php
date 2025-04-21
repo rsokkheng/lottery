@@ -31,7 +31,7 @@
                                 <tbody>
                                     @foreach($data['form_result']['result'] as $pKey => $prize)
                                         <tr>
-                                            <td class="text-white">
+                                            <td class="text-black">
                                                 {{ $prize['prize_label'] }}
                                             </td>
                                             @foreach($prize['provinces'] as $province)
