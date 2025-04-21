@@ -1,5 +1,5 @@
 <div class="row">
-    @role('admin')
+   
         <div class="col-lg-3 col-6">
             <div class="small-box bg-info">
                 <div class="inner">
@@ -26,7 +26,5 @@
                         class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
-       
-       
-    @endrole
+
 </div>
