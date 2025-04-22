@@ -88,7 +88,7 @@
                             }
                             if(intval($betNumber->ab_amount)>0){
                                 $betNumberAmount+=$betNumber->ab_amount;
-                                $betNumberGame .= "AB";
+                                $betNumberGame .= "A+B";
                             }
                             if(intval($betNumber->roll_amount)>0){
                                 $betNumberAmount+=$betNumber->roll_amount;

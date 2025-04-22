@@ -451,6 +451,33 @@ class LottoBet extends Component
                                 'roll7_check' => $this->roll7_check[$key],
                                 'roll_parlay_check' => $this->roll_parlay_check[$key],
                             ];
+                            // Define all amount/check pairs
+                            $betTypes = [
+                                'a' => [
+                                    'amount' => $this->a_amount[$key] ?? 0,
+                                    'check' => $this->a_check[$key],
+                                ],
+                                'b' => [
+                                    'amount' => $this->b_amount[$key] ?? 0,
+                                    'check' => $this->b_check[$key],
+                                ],
+                                'ab' => [
+                                    'amount' => $this->ab_amount[$key] ?? 0,
+                                    'check' => $this->ab_check[$key],
+                                ],
+                                'roll' => [
+                                    'amount' => $this->roll_amount[$key] ?? 0,
+                                    'check' => $this->roll_check[$key],
+                                ],
+                                'roll7' => [
+                                    'amount' => $this->roll7_amount[$key] ?? 0,
+                                    'check' => $this->roll7_check[$key],
+                                ],
+                                'roll_parlay' => [
+                                    'amount' => $this->roll_parlay_amount[$key] ?? 0,
+                                    'check' => $this->roll_parlay_check[$key],
+                                ],
+                            ];
 
                             if (strpos($value, '#') !== false) {
                                 $parts = explode('#', $value);
@@ -463,7 +490,8 @@ class LottoBet extends Component
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
                                 }
-                            } else if (strpos($value, '*') !== false) {
+                            } 
+                            else if (strpos($value, '*') !== false) {
 
                                 $num = trim($value, '*');
 
@@ -477,14 +505,47 @@ class LottoBet extends Component
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
                                 }
-                            } else {
-                                $betNumber2 = [
-                                    'generated_number' => $value,
-                                    'digit_length' => strlen($value),
-                                ];
-
-                                $data = array_merge($betNumber1, $betNumber2);
-                                BetNumber::create($data);
+                            }
+                            else {
+                                foreach ($betTypes as $type => $info) {
+                                    if ($info['amount'] > 0 || $info['check'] > 0) {
+                            
+                                        // Skip if all digits are the same (e.g. 111, 2222)
+                                        if (count(array_unique(str_split($value))) === 1) {
+                                            continue;
+                                        }
+                                        // Prepare common bet data
+                                        $betNumber1 = [
+                                            'bet_id' => $respone->id,
+                                            'original_number' => $value,
+                                        ];
+                            
+                                        $amounts = [
+                                            'a_amount' => 0, 'b_amount' => 0, 'ab_amount' => 0,
+                                            'roll_amount' => 0, 'roll7_amount' => 0, 'roll_parlay_amount' => 0,
+                                        ];
+                                        $checkeds = [
+                                            'a_check' => 0, 'b_check' => 0, 'ab_check' => 0,
+                                            'roll_check' => 0, 'roll7_check' => 0, 'roll_parlay_check' => 0,
+                                        ];
+                            
+                                        $amounts["{$type}_amount"] = $info['amount'];
+                                        $checkeds["{$type}_check"] = $info['check'];
+                            
+                                        // 🔁 Get all valid permutations
+                                        $combinations = $this->generateUniquePermutations(str_split($value));
+                            
+                                        foreach ($combinations as $combo) {
+                                            $betNumber2 = [
+                                                'generated_number' => $combo,
+                                                'digit_length' => strlen($combo),
+                                            ];
+                            
+                                            $data = array_merge($betNumber1, $betNumber2, $amounts, $checkeds);
+                                            BetNumber::create($data);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -501,6 +562,31 @@ class LottoBet extends Component
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
         }
     }
+    function generateUniquePermutations(array $digits): array
+    {
+        $results = [];
+        $recurse = function ($current, $remaining) use (&$results, &$recurse) {
+            if (count($remaining) === 0) {
+                $results[] = implode('', $current);
+                return;
+            }
+            $used = [];
+            foreach ($remaining as $i => $digit) {
+                if (in_array($digit, $used)) continue; // skip same digit at same level
+                $used[] = $digit;
+                $next = $current;
+                $next[] = $digit;
+                $nextRemaining = $remaining;
+                unset($nextRemaining[$i]);
+                $nextRemaining = array_values($nextRemaining); // reindex
+                $recurse($next, $nextRemaining);
+            }
+        };
+
+        $recurse([], $digits);
+        return array_unique($results);
+    }
+
     public function handleReset()
     {
         $this->resetChanelValues();

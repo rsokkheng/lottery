@@ -82,10 +82,15 @@
                         $totalTurnover =0;
                         $totalCommission=0;
                         $totalNetAmount=0;
+                    
                         @endphp
-                        @foreach($data as $key => $row)
+                        @foreach($data as  $row)
+                         @php
+                             $No = 1;
+                         @endphp
+                            @foreach($row->betNumber as $key => $bet)
                             @php
-                                $betNumber =$row->betNumber[0];
+                                $betNumber =$bet;
                                 $betNumberAmount = 0;
                                 $betNumberGame ="";
                                 if(intval($betNumber->a_amount)>0){
@@ -98,7 +103,7 @@
                                 }
                                 if(intval($betNumber->ab_amount)>0){
                                     $betNumberAmount+=$betNumber->ab_amount;
-                                    $betNumberGame .= "AB";
+                                    $betNumberGame .= "A+B";
                                 }
                                 if(intval($betNumber->roll_amount)>0){
                                     $betNumberAmount+=$betNumber->roll_amount;
@@ -119,9 +124,9 @@
                                  $totalTurnover +=$row['total_amount'];
                             @endphp
                             <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$key+1}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bet_date']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['number_format']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->generated_number}}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['digit_format']??''}}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumberGame??''}}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
@@ -134,6 +139,7 @@
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['win_lose']??''}}</td>
 
                             </tr>
+                            @endforeach
                         @endforeach
                         <tr class="border border-gray-300 hover:bg-gray-100">
                             <td colspan="9"></td>
