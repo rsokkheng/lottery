@@ -105,7 +105,7 @@
 
 
         <!-- Table header Section -->
-        <div class="overflow-auto w-full mx-auto relative">
+        <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
             <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">{{__('Time Left:')}}</p>
                 @foreach ($timeClose as $time)
@@ -172,6 +172,7 @@
                                         type="text"
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
+                                        @focus="showPopup({{ $i }}, $event)"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -299,6 +300,20 @@
                 @endfor
                 </tbody>
             </table>
+
+            <!-- Popup -->
+            <div x-show="show"
+                 x-transition
+                 :style="'top:' + posY + 'px; left:' + posX + 'px'"
+                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50"
+            >
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">+1</button>
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">+50</button>
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">+100</button>
+                <button class="bg-blue-500 text-white p-1 m-1 rounded">+500</button>
+            </div>
         </div>
     </div>
 </div>
@@ -393,5 +408,36 @@
 
     // Initialize all input fields when the page loads
     window.addEventListener('DOMContentLoaded', initializeInputs);
+
+    function popupHandler() {
+        return {
+            show: false,
+            activeRow: null,
+            posX: 0,
+            posY: 0,
+
+            showPopup(row, event) {
+                this.activeRow = row;
+                this.show = true;
+                const rect = event.target.getBoundingClientRect();
+                this.posX = rect.left ;
+                this.posY = rect.top - 140 ;
+                console.log(rect.left)
+                console.log(rect.top)
+                console.log(window.scrollY)
+            },
+
+            hidePopup() {
+                this.show = false;
+                this.activeRow = null;
+            },
+
+            shouldHighlight(row) {
+                if (!this.show) return false;
+                if (this.activeRow == 4) return row == 4;
+                return row >= this.activeRow;
+            }
+        }
+    }
 </script>
 

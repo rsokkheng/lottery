@@ -99,7 +99,8 @@ class LottoBet extends Component
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
-            ->get(['id', 'code']);
+            ->get(['id', 'code', 'company_id']);
+        log::info($this->schedules);
         $this->timeClose = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
@@ -421,6 +422,7 @@ class LottoBet extends Component
                             //insert bet
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,
+                                'company_id' => $schedule->company_id,
                                 'user_id' => $this->user->id ?? 0,
                                 'bet_schedule_id' => $schedule->id,
                                 'bet_package_config_id' => $betPackageConId,
