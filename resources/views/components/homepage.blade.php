@@ -86,36 +86,36 @@
     </style>
 </head>
 <body>
-
-<div class="header-center" style="max-width: 1300px;">
-    <div class="d-flex justify-content-between align-items-center p-3 " >
+<div class="header-center container" style="max-width: 1300;">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center p-3">
         <!-- Left: Logo -->
-        <div class="logo">
-        <a class="navbar-brand text-warning" href="#">
-        <img src="{{ asset('images/logo2888.png') }}" >
-        </a>
+        <div class="logo mb-9 mb-md-0">
+            <a class="navbar-brand text-warning" href="#">
+                <img src="{{ asset('images/logo2888.png') }}" style="max-width: 1200px; height: auto;">
+            </a>
         </div>
 
         <!-- Right: Login Form -->
-        <div class="login-form p-3 shadow-sm">
+        <div class="login-form p-3 shadow-sm w-10 w-md-auto">
             <!-- Display Username -->
-            <div class="mb-3">
+            <div class="mb-2 text-center text-md-start">
                 <strong>Welcome, {{ Auth::user()->name ?? 'Guest' }}!</strong>
             </div>
 
             <!-- Account Management Link -->
-            <div class="mb-3">
+            <div class="mb-2 text-center text-md-start">
                 <a href="{{ url('/admin/dashboard') }}" class="btn btn-secondary btn-sm">Manage Account</a>
             </div>
 
             <!-- Logout Form -->
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" class="text-center text-md-start">
                 @csrf
                 <button type="submit" class="btn btn-danger btn-sm">Log out</button>
             </form>
         </div>
     </div>
 </div>
+
 
 @php
     use App\Models\Menu;
