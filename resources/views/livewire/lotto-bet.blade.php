@@ -172,7 +172,8 @@
                                         type="text"
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup({{ $i }}, $event)"
+                                        @focus="showPopup('a_amount',{{ $i }}, $event)"
+                                        x-ref="a_amount{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -192,6 +193,8 @@
                                         wire:model="b_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         wire:input="handleInputNumber"
+                                        @focus="showPopup('b_amount',{{ $i }}, $event)"
+                                        x-ref="b_amount{{ $i }}"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -211,6 +214,8 @@
                                         type="text"
                                         wire:model="ab_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
+                                        @focus="showPopup('ab_amount',{{ $i }}, $event)"
+                                        x-ref="ab_amount{{ $i }}"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -230,6 +235,8 @@
                                         id="roll_amount_{{ $i }}"
                                         wire:model="roll_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
+                                        @focus="showPopup('roll_amount',{{ $i }}, $event)"
+                                        x-ref="roll_amount{{$i}}"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -248,6 +255,8 @@
                                         type="text"
                                         wire:model="roll7_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
+                                        @focus="showPopup('roll7_amount',{{ $i }}, $event)"
+                                        x-ref="roll7_amount{{$i}}"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -266,6 +275,8 @@
                                         type="text"
                                         wire:model="roll_parlay_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
+                                        @focus="showPopup('roll_parlay_amount',{{ $i }}, $event)"
+                                        x-ref="roll_parlay_amount{{$i}}"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -307,12 +318,12 @@
                  :style="'top:' + posY + 'px; left:' + posX + 'px'"
                  class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50"
             >
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">+1</button>
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">+50</button>
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">+100</button>
-                <button class="bg-blue-500 text-white p-1 m-1 rounded">+500</button>
+                <button @click="clearValue()" class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
+                <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
+                <button @click="addValue(1)" class="bg-blue-500 text-white p-1 m-1 rounded">+1</button>
+                <button @click="addValue(50)" class="bg-blue-500 text-white p-1 m-1 rounded">+50</button>
+                <button @click="addValue(100)" class="bg-blue-500 text-white p-1 m-1 rounded">+100</button>
+                <button @click="addValue(500)" class="bg-blue-500 text-white p-1 m-1 rounded">+500</button>
             </div>
         </div>
     </div>
@@ -413,18 +424,17 @@
         return {
             show: false,
             activeRow: null,
+            activeCol: null,
             posX: 0,
             posY: 0,
 
-            showPopup(row, event) {
+            showPopup(col,row, event) {
+                this.activeCol = col;
                 this.activeRow = row;
                 this.show = true;
                 const rect = event.target.getBoundingClientRect();
                 this.posX = rect.left ;
                 this.posY = rect.top - 140 ;
-                console.log(rect.left)
-                console.log(rect.top)
-                console.log(window.scrollY)
             },
 
             hidePopup() {
@@ -436,7 +446,20 @@
                 if (!this.show) return false;
                 if (this.activeRow == 4) return row == 4;
                 return row >= this.activeRow;
+            },
+
+
+            addValue(amount) {
+                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+                let current = parseFloat(input.value) || 0;
+                input.value = (current + amount).toFixed(1);
+                input.focus();
+            },
+
+            clearValue() {
+                this.$refs[`${this.activeCol}${this.activeRow}`].value = '';
             }
+
         }
     }
 </script>
