@@ -106,6 +106,12 @@
 
         <!-- Table header Section -->
         <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
+        <div class="flex whitespace-nowrap mb-2">
+                <p class="text-md font-bold">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</p>
+            </div>
+            <div class="flex whitespace-nowrap mb-2">
+                <p class="text-md font-bold">Shortcut Word:	Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll Parlay(RP) Cross(x)</p>
+            </div>
             <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">{{__('Time Left:')}}</p>
                 @foreach ($timeClose as $time)
@@ -316,11 +322,13 @@
             <div x-show="show"
                  x-transition
                  :style="'top:' + posY + 'px; left:' + posX + 'px'"
-                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50"
+                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50 pointer-events-auto"
             >
                 <button @click="clearValue()" class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
                 <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
                 <button @click="addValue(1)" class="bg-blue-500 text-white p-1 m-1 rounded">+1</button>
+                <button @click="addValue(5)" class="bg-blue-500 text-white p-1 m-1 rounded">+5</button>
+                <button @click="addValue(10)" class="bg-blue-500 text-white p-1 m-1 rounded">+10</button>
                 <button @click="addValue(50)" class="bg-blue-500 text-white p-1 m-1 rounded">+50</button>
                 <button @click="addValue(100)" class="bg-blue-500 text-white p-1 m-1 rounded">+100</button>
                 <button @click="addValue(500)" class="bg-blue-500 text-white p-1 m-1 rounded">+500</button>
@@ -421,46 +429,62 @@
     window.addEventListener('DOMContentLoaded', initializeInputs);
 
     function popupHandler() {
-        return {
-            show: false,
-            activeRow: null,
-            activeCol: null,
-            posX: 0,
-            posY: 0,
+    return {
+        show: false,
+        activeRow: null,
+        activeCol: null,
+        posX: 0,
+        posY: 0,
 
-            showPopup(col,row, event) {
-                this.activeCol = col;
-                this.activeRow = row;
-                this.show = true;
-                const rect = event.target.getBoundingClientRect();
-                this.posX = rect.left ;
-                this.posY = rect.top - 140 ;
-            },
+        showPopup(col, row, event) {
+            this.activeCol = col;
+            this.activeRow = row;
+            this.show = true;
+            const rect = event.target.getBoundingClientRect();
+            this.posX = rect.left;
+            this.posY = rect.top - 180;
+        },
 
-            hidePopup() {
-                this.show = false;
-                this.activeRow = null;
-            },
+        hidePopup() {
+            this.show = false;
+            this.activeRow = null;
+            this.activeCol = null;
+        },
 
-            shouldHighlight(row) {
-                if (!this.show) return false;
-                if (this.activeRow == 4) return row == 4;
-                return row >= this.activeRow;
-            },
+        shouldHighlight(row) {
+            if (!this.show) return false;
+            if (this.activeRow == 4) return row == 4;
+            return row >= this.activeRow;
+        },
 
+        addValue(amount) {
+            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+            let current = parseFloat(input.value) || 0;
+            let result = current + amount;
+            input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        },
 
-            addValue(amount) {
-                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
-                let current = parseFloat(input.value) || 0;
-                input.value = (current + amount).toFixed(1);
-                input.focus();
-            },
+        clearValue() {
+            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+            input.value = '';
+            input.focus();
+        },
 
-            clearValue() {
-                this.$refs[`${this.activeCol}${this.activeRow}`].value = '';
-            }
-
+        initOutsideClick() {
+            document.addEventListener('click', (e) => {
+                const isInsidePopup = e.target.closest('.popup');
+                const isInput = e.target.closest('input');
+                if (!isInsidePopup && !isInput && this.show) {
+                    this.hidePopup();
+                }
+            });
         }
     }
+}
+
+
+
 </script>
 
