@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BetWinningRecord extends Model
 {
     use HasFactory;
+    protected $guarded = [];
     protected $table = 'bet_winning_records';
-
     public function betLotteryResult(): BelongsTo
     {
         return $this->belongsTo(LotteryResult::class,'result_id','result_id');
