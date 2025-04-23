@@ -105,7 +105,7 @@
 
 
         <!-- Table header Section -->
-        <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
+        <div class="overflow-auto w-full mx-auto relative">
         <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</p>
             </div>
