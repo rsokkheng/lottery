@@ -462,7 +462,7 @@
             let current = parseFloat(input.value) || 0;
             let result = current + amount;
             input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-            input.dispatchEvent(new Event('input', { bubbles: true }));
+          //  input.dispatchEvent(new Event('input', { bubbles: true }));
             input.focus();
         },
 
