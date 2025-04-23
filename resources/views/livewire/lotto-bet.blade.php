@@ -178,8 +178,7 @@
                                         type="text"
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('a_amount',{{ $i }}, $event)"
-                                        x-ref="a_amount{{ $i }}"
+                                       
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
