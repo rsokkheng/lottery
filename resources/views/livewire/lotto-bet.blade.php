@@ -428,37 +428,60 @@
     // Initialize all input fields when the page loads
     window.addEventListener('DOMContentLoaded', initializeInputs);
 
-    function popupHandler() {
+       popupHandler = function () {
         return {
             show: false,
+            activeRow: null,
+            activeCol: null,
             posX: 0,
             posY: 0,
-            targetInput: null,
 
-            showPopup(field, index, event) {
-                this.targetInput = event.target;
-                const rect = this.targetInput.getBoundingClientRect();
-                this.posX = rect.left + window.scrollX + rect.width + 10;
-                this.posY = rect.top + window.scrollY;
+            showPopup(col, row, event) {
+                this.activeCol = col;
+                this.activeRow = row;
                 this.show = true;
+                const rect = event.target.getBoundingClientRect();
+                this.posX = rect.left;
+                this.posY = rect.top - 180;
             },
 
-            clearValue() {
-                if (this.targetInput) {
-                    this.targetInput.value = '';
-                    this.targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+            hidePopup() {
+                this.show = false;
+                this.activeRow = null;
+                this.activeCol = null;
+            },
+
+            shouldHighlight(row) {
+                if (!this.show) return false;
+                if (this.activeRow == 4) return row == 4;
+                return row >= this.activeRow;
             },
 
             addValue(amount) {
-                if (this.targetInput) {
-                    let currentValue = parseFloat(this.targetInput.value) || 0;
-                    let newValue = currentValue + amount;
-                    this.targetInput.value = newValue.toFixed(2);
-                    this.targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+                let current = parseFloat(input.value) || 0;
+                let result = current + amount;
+                input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.focus();
+            },
+
+            clearValue() {
+                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+                input.value = '';
+                input.focus();
+            },
+
+            initOutsideClick() {
+                document.addEventListener('click', (e) => {
+                    const isInsidePopup = e.target.closest('.popup');
+                    const isInput = e.target.closest('input');
+                    if (!isInsidePopup && !isInput && this.show) {
+                        this.hidePopup();
+                    }
+                });
             }
-        };
+        }
     }
 
 
