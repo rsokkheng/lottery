@@ -338,151 +338,126 @@
 </div>
 
 <script>
-    // Function to move focus to the next input on Enter key press
-    const handleEnterKey = (event, inputs) => {
-        const currentInput = event.target;
-        if (currentInput.disabled) {
-            return; // Do nothing if the current input is disabled
-        }
-
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent form submission if inside a form
-
-            let nextIndex = Array.from(inputs).indexOf(currentInput) + 1;
-
-            // Skip disabled inputs
-            while (nextIndex < inputs.length && inputs[nextIndex].disabled) {
-                nextIndex++;
-            }
-
-            // Move focus to the next enabled input, if exists
-            if (nextIndex < inputs.length) {
-                inputs[nextIndex].focus();
-            }
-        }
-    }
-
-    // Example: Attach the handleEnterKey to the input fields
-    const formatNumberValue = (input, nextInput) => {
-        let value = input.value.replace(/[^0-9.]/g, ''); // Allow only digits (0-9)
-        // Allow only one dot
-        const parts = value.split('.');
-        if (parts.length > 2) {
-            value = parts[0] + '.' + parts.slice(1).join('');
-        }
-         // Limit to 5 characters
-         if (value.length > 5) {
-            value = value.slice(0, 5);
-        }
-        input.value = value; // Update the input value with the formatted number
-
-        // Add event listener to handle the Enter key
-        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
-    }
-
-    // Example: formatNumberInput with Enter key functionality
-    function formatNumberInput(input, nextInput) {
-        let value = input.value;
-
-        // Logic for handling specific number formats like '#', '*' and others
-        if (value.includes("#")) {
-            value = value.replace(/[^0-9#]/g, ''); // Remove invalid characters
-            let validFormat =
-                /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
-            if (!validFormat.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
-            }
-        } else if (value.startsWith("*")) {
-            value = value.replace(/[^0-9\*]/g, ''); // Remove invalid characters
-            if (!/^\*([0-9]{1,3})?$/.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
-            }
-        } else if (value.startsWith("*") || value.endsWith("*")) {
-            const validFormat = /^\*?\d{1,3}\*?$/;
-            if (!validFormat.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
-            }
-        } else {
-            value = value.replace(/[^0-9]/g, ''); // Remove invalid characters
-            if (value.length > 4) {
-                value = value.slice(0, 4); // Restrict to 4 digits
-            }
-        }
-
-        input.value = value; // Update the input value
-
-        // Add event listener to handle the Enter key
-        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
-    }
-
-    // Function to initialize all input fields with next field navigation
-    const initializeInputs = () => {
-        const inputs = document.querySelectorAll('input[type="text"]'); // Select only input[type="text"]
-
-        inputs.forEach((input) => {
-            // Add event listener to handle Enter key press for each input
-            input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
-        });
-    };
-
-    // Initialize all input fields when the page loads
-    window.addEventListener('DOMContentLoaded', initializeInputs);
-
     window.popupHandler = function () {
-        return {
-            show: false,
-            activeRow: null,
-            activeCol: null,
-            posX: 0,
-            posY: 0,
+    return {
+        show: false,
+        activeRow: null,
+        activeCol: null,
+        posX: 0,
+        posY: 0,
 
-            showPopup(col, row, event) {
-                this.activeCol = col;
-                this.activeRow = row;
-                this.show = true;
-                const rect = event.target.getBoundingClientRect();
-                this.posX = rect.left;
-                this.posY = rect.top - 180;
-            },
+        showPopup(col, row, event) {
+            this.activeCol = col;
+            this.activeRow = row;
+            this.show = true;
+            const rect = event.target.getBoundingClientRect();
+            this.posX = rect.left;
+            this.posY = rect.top - 180;
+        },
 
-            hidePopup() {
-                this.show = false;
-                this.activeRow = null;
-                this.activeCol = null;
-            },
+        hidePopup() {
+            this.show = false;
+            this.activeRow = null;
+            this.activeCol = null;
+        },
 
-            shouldHighlight(row) {
-                if (!this.show) return false;
-                if (this.activeRow == 4) return row == 4;
-                return row >= this.activeRow;
-            },
+        shouldHighlight(row) {
+            if (!this.show) return false;
+            if (this.activeRow == 4) return row == 4;
+            return row >= this.activeRow;
+        },
 
-            addValue(amount) {
-                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
-                let current = parseFloat(input.value) || 0;
-                let result = current + amount;
-                input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.focus();
-            },
+        addValue(amount) {
+            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+            let current = parseFloat(input.value) || 0;
+            let result = current + amount;
+            input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        },
 
-            clearValue() {
-                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
-                input.value = '';
-                input.focus();
-            },
+        clearValue() {
+            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        },
 
-            initOutsideClick() {
-                document.addEventListener('click', (e) => {
-                    const isInsidePopup = e.target.closest('.popup');
-                    const isInput = e.target.closest('input');
-                    if (!isInsidePopup && !isInput && this.show) {
-                        this.hidePopup();
-                    }
-                });
+        handleEnterKey(event, inputs) {
+            const currentInput = event.target;
+            if (currentInput.disabled) return;
+
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                let nextIndex = Array.from(inputs).indexOf(currentInput) + 1;
+
+                while (nextIndex < inputs.length && inputs[nextIndex].disabled) {
+                    nextIndex++;
+                }
+
+                if (nextIndex < inputs.length) {
+                    inputs[nextIndex].focus();
+                }
             }
+        },
+
+        formatNumberValue(input, inputs) {
+            let value = input.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (value.length > 5) {
+                value = value.slice(0, 5);
+            }
+            input.value = value;
+
+            input.addEventListener('keydown', (e) => this.handleEnterKey(e, inputs));
+        },
+
+        formatNumberInput(input, nextInputs) {
+            let value = input.value;
+
+            if (value.includes("#")) {
+                value = value.replace(/[^0-9#]/g, '');
+                const validFormat = /^(\d+|(\d{2}\#){1,3}\d{0,2})$/;
+                if (!validFormat.test(value)) value = value.slice(0, -1);
+            } else if (value.startsWith("*")) {
+                value = value.replace(/[^0-9\*]/g, '');
+                if (!/^\*([0-9]{1,3})?$/.test(value)) value = value.slice(0, -1);
+            } else {
+                value = value.replace(/[^0-9]/g, '');
+                if (value.length > 4) value = value.slice(0, 4);
+            }
+
+            input.value = value;
+
+            input.addEventListener('keydown', (e) => this.handleEnterKey(e, nextInputs));
+        },
+
+        initializeInputs() {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach(input => {
+                input.addEventListener('keydown', (e) => this.handleEnterKey(e, inputs));
+            });
+        },
+
+        initOutsideClick() {
+            document.addEventListener('click', (e) => {
+                const isInsidePopup = e.target.closest('.popup');
+                const isInput = e.target.closest('input');
+                if (!isInsidePopup && !isInput && this.show) {
+                    this.hidePopup();
+                }
+            });
+        },
+
+        init() {
+            this.initializeInputs();
+            this.initOutsideClick();
         }
-    }
+    };
+};
 
 
 </script>
