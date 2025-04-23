@@ -107,9 +107,6 @@
         <!-- Table header Section -->
         <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
         <div class="flex whitespace-nowrap mb-2">
-                <p class="text-md font-bold">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</p>
-            </div>
-            <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">Shortcut Word:	Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll Parlay(RP) Cross(x)</p>
             </div>
             <div class="flex whitespace-nowrap mb-2">
@@ -322,7 +319,7 @@
             <div x-show="show"
                  x-transition
                  :style="'top:' + posY + 'px; left:' + posX + 'px'"
-                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50 pointer-events-auto"
+                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50"
             >
                 <button @click="clearValue()" class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
                 <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
@@ -442,7 +439,7 @@
             this.show = true;
             const rect = event.target.getBoundingClientRect();
             this.posX = rect.left;
-            this.posY = rect.top - 180;
+            this.posY = rect.top - 140;
         },
 
         hidePopup() {
@@ -462,7 +459,6 @@
             let current = parseFloat(input.value) || 0;
             let result = current + amount;
             input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-          //  input.dispatchEvent(new Event('input', { bubbles: true }));
             input.focus();
         },
 
