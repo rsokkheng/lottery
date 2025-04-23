@@ -105,7 +105,7 @@
 
 
         <!-- Table header Section -->
-        <div class="overflow-auto w-full mx-auto relative">
+        <div x-data="popupHandler()"  x-init="initOutsideClick()" class="overflow-auto w-full mx-auto relative">
         <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</p>
             </div>
@@ -163,7 +163,7 @@
                                     type="text"
                                     autocomplete="off"
                                     wire:model.defer="number.{{ $i }}"
-                                    wire:input.live="handleInputNumber"
+                                    wire:input="handleInputNumber"
                                     class="w-[100px] lg:w-full h-8 rounded"
                                     oninput="formatNumberInput(this)">
                         </td>
@@ -178,7 +178,8 @@
                                         type="text"
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                       
+                                        @focus="showPopup('a_amount',{{ $i }}, $event)"
+                                        x-ref="a_amount{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
@@ -427,62 +428,61 @@
     // Initialize all input fields when the page loads
     window.addEventListener('DOMContentLoaded', initializeInputs);
 
-    function popupHandler() {
-    return {
-        show: false,
-        activeRow: null,
-        activeCol: null,
-        posX: 0,
-        posY: 0,
+    window.popupHandler = function () {
+        return {
+            show: false,
+            activeRow: null,
+            activeCol: null,
+            posX: 0,
+            posY: 0,
 
-        showPopup(col, row, event) {
-            this.activeCol = col;
-            this.activeRow = row;
-            this.show = true;
-            const rect = event.target.getBoundingClientRect();
-            this.posX = rect.left;
-            this.posY = rect.top - 180;
-        },
+            showPopup(col, row, event) {
+                this.activeCol = col;
+                this.activeRow = row;
+                this.show = true;
+                const rect = event.target.getBoundingClientRect();
+                this.posX = rect.left;
+                this.posY = rect.top - 180;
+            },
 
-        hidePopup() {
-            this.show = false;
-            this.activeRow = null;
-            this.activeCol = null;
-        },
+            hidePopup() {
+                this.show = false;
+                this.activeRow = null;
+                this.activeCol = null;
+            },
 
-        shouldHighlight(row) {
-            if (!this.show) return false;
-            if (this.activeRow == 4) return row == 4;
-            return row >= this.activeRow;
-        },
+            shouldHighlight(row) {
+                if (!this.show) return false;
+                if (this.activeRow == 4) return row == 4;
+                return row >= this.activeRow;
+            },
 
-        addValue(amount) {
-            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
-            let current = parseFloat(input.value) || 0;
-            let result = current + amount;
-            input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.focus();
-        },
+            addValue(amount) {
+                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+                let current = parseFloat(input.value) || 0;
+                let result = current + amount;
+                input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.focus();
+            },
 
-        clearValue() {
-            const input = this.$refs[`${this.activeCol}${this.activeRow}`];
-            input.value = '';
-            input.focus();
-        },
+            clearValue() {
+                const input = this.$refs[`${this.activeCol}${this.activeRow}`];
+                input.value = '';
+                input.focus();
+            },
 
-        initOutsideClick() {
-            document.addEventListener('click', (e) => {
-                const isInsidePopup = e.target.closest('.popup');
-                const isInput = e.target.closest('input');
-                if (!isInsidePopup && !isInput && this.show) {
-                    this.hidePopup();
-                }
-            });
+            initOutsideClick() {
+                document.addEventListener('click', (e) => {
+                    const isInsidePopup = e.target.closest('.popup');
+                    const isInput = e.target.closest('input');
+                    if (!isInsidePopup && !isInput && this.show) {
+                        this.hidePopup();
+                    }
+                });
+            }
         }
     }
-}
-
 
 
 </script>
