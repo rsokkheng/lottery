@@ -54,6 +54,24 @@
 
                 <tr>
                     <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
+                        {{ __('Bet Credit') }}
+                    </td>
+                    <td class="border border-gray-500 px-4 py-2 text-right">
+
+                        {{ $betUserWallet->given_credit }} (VND)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
+                        {{ __('Outstanding') }}
+                    </td>
+                    <td class="border border-gray-500 px-4 py-2 text-right">
+
+                        {{ $betUserWallet->beginning }} (VND)
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
                         {{ __('Total Amount') }}
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
@@ -107,17 +125,17 @@
         <!-- Table header Section -->
         <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
         <div class="flex whitespace-nowrap mb-2">
-                <p class="text-md font-bold">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</p>
+                <h6 style="font-size:14px">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</h6>
             </div>
             <div class="flex whitespace-nowrap mb-2">
-                <p class="text-md font-bold">Shortcut Word:	Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll Parlay(RP) Cross(x)</p>
+                <h6 style="font-size:14px">Shortcut Word:	Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll Parlay(RP) Cross(x)</h6>
             </div>
             <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">{{__('Time Left:')}}</p>
                 @foreach ($timeClose as $time)
-                    <p class="text-md font-bold px-2 " id="time-{{ $time->id }}">
+                    <h6 style="font-size:14px" id="time-{{ $time->id }}">
                         {{ $time->time_close }} ({{ $time->code }})
-                    </p>
+                    </h6>
                 @endforeach
             </div>
             <table class="w-full text-sm border-collapse border border-gray-300">

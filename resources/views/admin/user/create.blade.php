@@ -1,8 +1,8 @@
 <x-admin>
-    @section('title', 'Create User')
+    @section('title', 'Create Member')
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Create User</h3>
+            <h3 class="card-title">Create Member</h3>
             <div class="card-tools"><a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-dark">Back</a></div>
         </div>
         <div class="card-body">
@@ -19,10 +19,10 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="Username" class="form-label">Username:*</label>
+                            <label for="Username" class="form-label">Account ID:*</label>
                             <input type="username" class="form-control" autocomplete="off" name="username" required
                                 value="{{ old('username') }}">
-                                <x-error>username</x-error>
+                                <x-error>Account ID</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">
@@ -40,6 +40,7 @@
                                 <x-error>phonenumber</x-error>
                         </div>
                     </div>
+                   
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label for="role" class="form-label">Role:*</label>
@@ -55,7 +56,7 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="package" class="form-label">Package:*</label>
+                            <label for="package" class="form-label">Package:* </label>
                             <select name="package_id" id="package_id" class="form-control" required>
                                 <option value="" selected disabled>selecte the Package</option>
                                 @foreach ($packages as $package)
@@ -64,6 +65,14 @@
                                 @endforeach
                             </select>
                             <x-error>package</x-error>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="GiveCredit" class="form-label">Give Credit:* (Available: 352,870.63)</label>
+                            <input type="number" class="form-control"  autocomplete="off" name="given_credit" required
+                                value="{{ old('given_credit') }}">
+                                <x-error>Given Credit</x-error>
                         </div>
                     </div>
                     <div class="col-lg-12">

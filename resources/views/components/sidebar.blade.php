@@ -18,12 +18,12 @@
                 <a href="{{ route('admin.user.index') }}"
                     class="nav-link {{ Route::is('admin.user.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-user"></i>
-                    <p>Users
+                    <p>Account Management
                         <span class="badge badge-info right">{{ $userCount }}</span>
                     </p>
                 </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="{{ route('admin.role.index') }}"
                     class="nav-link {{ Route::is('admin.role.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-user-tag"></i>
@@ -40,7 +40,7 @@
                         <span class="badge badge-danger right">{{ $PermissionCount }}</span>
                     </p>
                 </a>
-            </li>
+            </li> -->
             <li class="nav-item">
                 <a href="{{ route('admin.bet-lottery-package.index') }}"
                     class="nav-link {{ Route::is('admin.bet-lottery-package.index') ? 'active' : '' }}">

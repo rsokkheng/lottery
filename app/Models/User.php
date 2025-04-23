@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\BetUserWallet;
 use App\Models\BetLotteryPackage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Models\Role;
@@ -57,6 +58,10 @@ class User extends Authenticatable
     public function bets():HasMany
     {
         return $this->hasMany(Bet::class);
+    }
+    public function userWallet()
+    {
+        return $this->hasMany(BetUserWallet::class);
     }
    
 }

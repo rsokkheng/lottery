@@ -8,25 +8,47 @@
         <div class="card-body">
             <table class="table table-striped" id="userTable">
                 <thead>
-                    <tr>
+                    <tr style="font-size: 14px;">
                         <th>#</th>
-                        <th>UserName</th>
+                        <th>Role Name</th>
+                        <th>Account ID</th>
                         <th>Name</th>
-                        <th>Phone Number</th>
                         <th>Package</th>
-                        <th>Created</th>
+                        <th>Available Credit</th>
+                        <th>Bet Credit</th>
+                        <th>Cash Balance</th>
+                        <th>Register Date</th>
+                        <th>Last Login</th>
                         <th>Action</th>
                   
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($data as $user)
+                   
+                    @foreach ($data as $key => $user)
                         <tr>
-                            <td>{{ $user->id }}</td>
+                            <td>{{ $key+1 }}</td>
+                            <td> @foreach ($user->roles as $role)
+                                    <span class="badge bg-success">{{ $role->name }}</span>
+                                @endforeach
+                            </td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->phonenumber }}</td>
                             <td>{{ $user->package->package_code }}</td>
+                            <td> @foreach ($user->userWallet as $wallet)
+                                    <span>{{ $wallet->available_credit}}</span>
+                                @endforeach
+                            </td>
+                            <td>@foreach ($user->userWallet as $wallet)
+                                    <span>{{ $wallet->given_credit }}</span>
+                                @endforeach
+                            </td>
+                            <td>
+                            @foreach ($user->userWallet as $wallet)
+                                    <span>{{ $wallet->balance }}</span>
+                                @endforeach
+                            </td>
+                            <td>{{ $user->created_at }}</td>
                             <td>{{ $user->created_at }}</td>
                             <td>
                                 <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
@@ -49,7 +71,7 @@
                 $('#userTable').DataTable({
                     "paging": true,
                     "searching": true,
-                    "ordering": true,
+                    "ordering": false,
                     "responsive": true,
                 });
             });

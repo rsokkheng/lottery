@@ -21,10 +21,10 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="form-group">
-                            <label for="Username" class="form-label">Username:*</label>
+                            <label for="Username" class="form-label">Account ID:*</label>
                             <input type="username" class="form-control" name="username" required
                                 value="{{ $user->username}}">
-                                <x-error>username</x-error>
+                                <x-error>Account ID</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">

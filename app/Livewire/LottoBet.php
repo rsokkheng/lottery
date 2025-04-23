@@ -11,6 +11,7 @@ use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
 use App\Models\BetNumber;
 use App\Models\BetReceipt;
+use App\Models\BetUserWallet;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -77,13 +78,16 @@ class LottoBet extends Component
     public $packageRate = [];
     public $lengthNum = [];
 
+    public $betUserWallet;
+
     public function mount(
         Bet                            $betModel,
         BetLotterySchedule             $betLotteryScheduleModel,
         BetLotteryPackageConfiguration $betPackageConfiguration,
-        BetReceipt                     $betReceipt
+        BetReceipt                     $betReceipt,
+
     )
-    {
+    { 
         // Initialization logic if needed
         $this->betLotteryScheduleModel = $betLotteryScheduleModel;
         $this->betModel = $betModel;
@@ -97,7 +101,7 @@ class LottoBet extends Component
 
         $this->schedules = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
-            ->where('time_close', '>=', $this->currentTime)
+            ->where('time_close', '<=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code', 'company_id']);
         $this->timeClose = $this->betLotteryScheduleModel
@@ -105,7 +109,10 @@ class LottoBet extends Component
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code', 'time_close']);
+        $this->betUserWallet = BetUserWallet::where('user_id',$this->user->id)->first();
         $this->initializeProperty();
+
+       
     }
 
 

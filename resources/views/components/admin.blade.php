@@ -61,7 +61,7 @@
                         @endif
                     </div>
                     <div class="info">
-                        <a href="{{ route('admin.dashboard') }}" class="d-block">{{ config('app.name') }}</a>
+                        <a href="{{ route('admin.dashboard') }}" class="d-block">{{ Auth::user()->name }}</a>
                     </div>
                 </div>
                 <!-- Sidebar Menu -->

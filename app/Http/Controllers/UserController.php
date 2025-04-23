@@ -22,7 +22,7 @@ class UserController extends Controller
     }
     public function index()
     {
-        $data = User::with('package')->orderBy('id','DESC')->get();
+        $data = User::with('package','roles','userWallet')->where('record_status_id','=',1)->orderBy('id','ASC')->get();
         return view('admin.user.index', compact('data'));
     }
     public function create()
@@ -31,7 +31,6 @@ class UserController extends Controller
     }
     public function store(Request $request)
     {
-        Log::info($request->all());
         $request->validate([
             'name' => 'required', 'string', 'max:255',
             'username' => 'required', 'unique:'.User::class,
@@ -43,11 +42,11 @@ class UserController extends Controller
         $user = User::create([
             'package_id' => $request->package_id,
             'name' => $request->name,
-            'email' => 'lottery2888@gmail.com',
             'username' => $request->username,
             'phonenumber' => $request->phonenumber,
             'password' => bcrypt($request->password),
         ]);
+        
         $user->assignRole($request->role);
         return redirect()->route('admin.user.index')->with('success','User created successfully.');
     }
@@ -76,7 +75,7 @@ class UserController extends Controller
     }
     public function destroy($id)
     {
-        Menu::where('id',decrypt($id))->delete();
+        User::where('id', decrypt($id))->update(['record_status_id' => 0]);
         return redirect()->back()->with('success','User deleted successfully.');
     }
 }

@@ -6,8 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Lottery2888') }}</title>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
     <link rel="icon" href="{{ asset('images/snooker.png') }}" type="image/png">
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
