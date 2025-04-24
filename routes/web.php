@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lotto_vn/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
     Route::get('/lotto_vn/bet/{id}', [\App\Http\Controllers\BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
     Route::get('/bet_receipt/{receipt_no}', [\App\Http\Controllers\BetReceiptController::class, 'printReceiptNo']);
+    Route::get('/bet_receipt_pay/{receipt_no}', [\App\Http\Controllers\BetReceiptController::class, 'payReceipt']);
 });
 
 

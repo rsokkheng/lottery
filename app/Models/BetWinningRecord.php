@@ -21,4 +21,8 @@ class BetWinningRecord extends Model
     {
         return $this->belongsTo(Bet::class, 'bet_id', 'id');
     }
+
+    public function betReceipt(){
+        return $this->belongsTo(BetReceipt::class, 'receipt_id','id');
+    }
 }

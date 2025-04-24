@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\BetReceipt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use function PHPUnit\Framework\throwException;
 
@@ -144,7 +145,7 @@ class BetReceiptController extends Controller
 
     public function getBetByReceiptId($id)
     {
-        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber'])
+        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber', 'betWinningRecords'])
             ->findOrFail($id);
         $betIdWin = $this->betWinningRecord->newQuery()
             ->whereHas('bets', function ($q) use ($id){
@@ -165,11 +166,12 @@ class BetReceiptController extends Controller
                 'is_win' => in_array($bet->id, $betIdWin)
             ];
         }
-
+        $isPaid = $result->betWinningRecords?->first()?->paid_status;
         return response()->json([
                 'no_receipt'=>$result?->receipt_no,
                 'totalAmount' => $result?->total_amount,
                 'dueAmount' => $result?->net_amount,
+                'is_paid' => $isPaid == 2,
                 'items' => $items,
         ]);
     }
@@ -209,6 +211,24 @@ class BetReceiptController extends Controller
             'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
             'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
             'receipt_by' => $result?->user?->name,
+        ]);
+    }
+
+    public function payReceipt($no)
+    {
+        if($no){
+            $id = BetReceipt::query()->where('receipt_no', $no)->first()?->id;
+            BetWinningRecord::query()->whereHas('betReceipt', function ($q) use ($id){
+                $q->where('receipt_id', $id);
+            })->update(['paid_at'=> date('Y-m-d H:i:s'), 'paid_status'=>2]);
+            return response()->json([
+                'success'=> true,
+                'message'=> 'Receipt was paid.'
+            ]);
+        }
+        return response()->json([
+        'success'=> false,
+            'message'=> 'No receipt for pay.'
         ]);
     }
 }

@@ -1,5 +1,7 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.min.css') }}">
 
     <div class="flex-col bg-white rounded-lg px-5 py-5">
         <div class="grid grid-cols-2 gap-2 sm:gap-0 sm:flex sm:justify-start sm:items-center sm:space-x-2">
@@ -52,7 +54,7 @@
                     <tbody>
                     @if(isset($data) && count($data))
                         @foreach($data as $key => $row)
-                            <tr class="border border-gray-300 hover:bg-gray-100 {{ $row['is_win'] ? 'bg-red-200 hover:bg-red-100 text-red-500' : ''}} ">
+                            <tr class="border border-gray-300 hover:bg-gray-100 {{ $row['is_win'] ? 'bg-red-100 hover:bg-red-200 text-red-500' : ''}} ">
                                 <td class="py-2 px-1 border border-gray-300">{{$key+1}}</td>
                                 <td onclick="handleShowBet('{{$row['id']}}')" class="py-2 px-1 border border-gray-300">
                                     <a href="#" data-modal-target="static-modal" data-modal-toggle="static-modal"
@@ -129,9 +131,10 @@
 
                 </div>
                 <!-- Modal footer -->
-                <div class="flex justify-content-end justify-items-end justify-end items-end p-4 md:p-5 border-t border-gray-200 rounded-b font-semibold">
+                <div class="flex justify-content-end justify-items-end justify-end items-end p-4 space-x-2 md:p-5 border-t border-gray-200 rounded-b font-semibold">
+                    <button id="btn_pay" style="display: none" data-modal-hide="static-modal" type="button" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 text-center " onclick="payReceipt()" >{{__('Pay')}}</button>
                     <button data-modal-hide="static-modal" type="button" class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center " onclick="printReceipt()" >{{__('Print')}}</button>
-                    <button data-modal-hide="static-modal" type="button" class="py-2.5 px-5 text-white bg-sky-400 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{__('Close')}}</button>
+                    <button data-modal-hide="static-modal" type="button" class="text-white bg-sky-400 py-2.5 px-5 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{__('Close')}}</button>
                 </div>
             </div>
         </div>
@@ -141,8 +144,13 @@
     <script src="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.js') }}"></script>
     <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
-
+    <script src="{{ asset('admin/plugins/toastr/js/toastr.min.js') }}"></script>
     <script>
+        // Toastr alerts
+        toastr.options = {
+            "progressBar": true,
+            "closeButton": true,
+        }
         function searchReceipt(url) {
             const date = $('#datepicker-receipt').val();
             const no = $('#receipt-no').val()
@@ -156,15 +164,19 @@
             fetch(`/lotto_vn/bet/${id}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Bet details:', data);
                     let totalAmount =data?.totalAmount;
                     let dueAmount = data?.dueAmount;
-                     document.getElementById('receipt_no').innerText = data?.no_receipt;
 
+                     document.getElementById('receipt_no').innerText = data?.no_receipt;
                     const getBetByReceipt = document.getElementById('getBetByReceipt');
                     getBetByReceipt.innerHTML = '';
+                    let existWin = false;
                     data?.items?.forEach(item => {
-                        let winColor =  Boolean(item?.is_win) ? 'bg-red-200 hover:bg-red-100 text-red-500' : ''
+                        let winColor = ''
+                        if(Boolean(item?.is_win)){
+                            existWin = true
+                            winColor = 'bg-red-100 hover:bg-red-200 text-red-500'
+                        }
                         getBetByReceipt.innerHTML += `
                             <tr class="border border-gray-300 hover:bg-gray-100 ${winColor}">
                                 <td class="py-2 px-1 border border-gray-300">${item?.number??""}</td>
@@ -172,6 +184,12 @@
                                 <td class="py-2 px-1 border border-gray-300">${item?.amount??""}</td>
                             </tr>`;
                     });
+                    if(!(data?.is_paid) && existWin){
+                        $("#btn_pay").show()
+                    }else{
+                        $("#btn_pay").hide()
+                    }
+
                     // Update Total Amount and Due Amount
                     document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2)+ ' (VND)';
                     document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2)+ ' (VND)';
@@ -199,6 +217,20 @@
                     };
                 }, 500);
             };
+        }
+
+        function payReceipt(){
+            let receipt_no = $('#receipt_no').text();
+            fetch(`/bet_receipt_pay/${receipt_no}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data?.success){
+                        toastr.success('Receipt was paid!');
+                    }else{
+                        toastr.error('Internal error!');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         }
     </script>
 </x-app-layout>
