@@ -35,7 +35,7 @@ class BetController extends Controller
             }
           
             $digits = BetLotteryPackageConfiguration::query()->where('package_id', $user->package_id)
-                    ->orderBy('id')->get(['id', 'bet_type']);
+                    ->orderBy('id')->get(['id', 'bet_type','has_special']);
 
             $company_id = -1;
             if ($request->has('com_id')) {

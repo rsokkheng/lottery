@@ -35,7 +35,11 @@
                 <select class="rounded w-full">
                     <option value="0">All package</option>
                     @foreach($digits as $val)
-                        <option value="{{ $val['id'] }}">{{ $val['bet_type']}}</option>
+                    @if($val['has_special'] ==1 && $val['bet_type']=='RP3')
+                        <option value="{{ $val['id'] }}">RP3X</option>
+                    @else
+                        <option value="{{ $val['id'] }}">{{ $val['bet_type'] }}</option>
+                    @endif
                     @endforeach
                 </select>
             </div>
@@ -117,11 +121,11 @@
                                     $betNumberAmount+=$betNumber->roll_parlay_amount;
                                     $betNumberGame .= "Roll Parlay";
                                 }
-                                 $commission =$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100);
-                                 $netAmount =$row['total_amount'] *$row['bePackageConfig']?->rate/100;
+                                 $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
+                                 $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
                                  $totalCommission +=$commission;
                                  $totalNetAmount +=$netAmount;
-                                 $totalTurnover +=$row['total_amount'];
+                                 $totalTurnover +=$betNumber->total_amount;
                             @endphp
                             <tr class="border border-gray-300 hover:bg-gray-100">
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
@@ -133,7 +137,7 @@
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['total_amount']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$commission}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$netAmount}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['win_lose']??''}}</td>
@@ -143,10 +147,10 @@
                         @endforeach
                         <tr class="border border-gray-300 hover:bg-gray-100">
                             <td colspan="9"></td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalTurnover??'0.000'}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalCommission??'0.00'}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$totalNetAmount??'0.000'}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{$row['win_lose']??'0.000'}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalTurnover, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalCommission, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $row['win_lose'], 3, '.', '')}}</td>
                         </tr>
                     @else
                         <tr class="border border-gray-300 hover:bg-gray-100">
