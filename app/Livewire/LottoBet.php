@@ -398,7 +398,6 @@ class LottoBet extends Component
 
     public function handleSave()
     {
-        dd( $this->invoices);
         $isCreateBetSuccess = false;
         DB::beginTransaction();
         try {
@@ -549,11 +548,30 @@ class LottoBet extends Component
                                             // Just use the original value
                                             $combinations = [$value];
                                         }
+                                        $total_amount = $info['amount'];
+                                        if($schedule->code =="HN"){
+                                            if($type=="a"){
+                                                $total_amount *= 4;
+                                            }
+                                            elseif ($type == "ab") {
+                                                $total_amount *= 5;
+                                            } elseif ($type == "roll") {
+                                                $total_amount *= 27;
+                                            }
+                                        }else {
+                                            if ($type == "ab") {
+                                                $total_amount *= 2;
+                                            } elseif ($type == "roll") {
+                                                $total_amount *= 18;
+                                            }
+                                        }
+
                                 
                                         foreach ($combinations as $combo) {
                                             $betNumber2 = [
                                                 'generated_number' => $combo,
                                                 'digit_length' => strlen($combo),
+                                                'total_amount' => $total_amount,
                                             ];
                                 
                                             $data = array_merge($betNumber1, $betNumber2, $amounts, $checkeds);
