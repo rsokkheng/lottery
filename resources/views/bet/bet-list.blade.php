@@ -72,10 +72,14 @@
                         $totalTurnover =0;
                         $totalCommission=0;
                         $totalNetAmount=0;
+                        $No = 1;
+                      
                     @endphp
                     @foreach($data as $key => $row)
+                          
+                          @foreach($row->betNumber as $bet)
                         @php
-                            $betNumber =$row->betNumber[0];
+                            $betNumber =$bet;
                             $betNumberAmount = 0;
                             $betNumberGame ="";
                             if(intval($betNumber->a_amount)>0){
@@ -102,15 +106,16 @@
                                 $betNumberAmount+=$betNumber->roll_parlay_amount;
                                 $betNumberGame .= "Roll Parlay";
                             }
-                            $commission =$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100);
-                            $netAmount =$row['total_amount'] *$row['bePackageConfig']?->rate/100;
+
+                            $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
+                            $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
                             $totalCommission +=$commission;
                             $totalNetAmount +=$netAmount;
-                            $totalTurnover +=$row['total_amount'];
+                            $totalTurnover +=$betNumber->total_amount;
 
                         @endphp
                         <tr class="border border-gray-300 hover:bg-gray-100">
-                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$key+1}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$No++}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['id']??''}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
                                 {{$row->beReceipt->receipt_no}}
@@ -124,11 +129,12 @@
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['bePackageConfig']?->price??''}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['total_amount']??''}}</td>
-                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['total_amount']-($row['total_amount'] *$row['bePackageConfig']?->rate/100)}}</td>
-                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{($row['total_amount'] *$row['bePackageConfig']?->rate)/100}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$betNumber->total_amount}}</td>
+                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ $commission}}</td>
+                            <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$netAmount}}</td>
                             <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['win_lose']??''}}</td>
                         </tr>
+                        @endforeach
                     @endforeach
                     <tr class="border border-gray-300 hover:bg-gray-100">
                         <td colspan="12"></td>

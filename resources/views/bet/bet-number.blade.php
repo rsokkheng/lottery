@@ -86,12 +86,11 @@
                         $totalTurnover =0;
                         $totalCommission=0;
                         $totalNetAmount=0;
+                        $No = 1;
                     
                         @endphp
                         @foreach($data as  $row)
-                         @php
-                             $No = 1;
-                         @endphp
+                       
                             @foreach($row->betNumber as $key => $bet)
                             @php
                                 $betNumber =$bet;
