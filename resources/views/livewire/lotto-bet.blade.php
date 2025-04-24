@@ -489,16 +489,6 @@
                 input.value = '';
                 input.focus();
             },
-
-            initOutsideClick() {
-                document.addEventListener('click', (e) => {
-                    const isInsidePopup = e.target.closest('.popup');
-                    const isInput = e.target.closest('input');
-                    if (!isInsidePopup && !isInput && this.show) {
-                        this.hidePopup();
-                    }
-                });
-            }
         }
     }
 

@@ -398,6 +398,7 @@ class LottoBet extends Component
 
     public function handleSave()
     {
+        dd( $this->invoices);
         $isCreateBetSuccess = false;
         DB::beginTransaction();
         try {
@@ -486,6 +487,7 @@ class LottoBet extends Component
                                     'check' => $this->roll_parlay_check[$key],
                                 ],
                             ];
+                            
 
                             if (strpos($value, '#') !== false) {
                                 $parts = explode('#', $value);
@@ -517,17 +519,17 @@ class LottoBet extends Component
                             else {
                                 foreach ($betTypes as $type => $info) {
                                     if ($info['amount'] > 0 || $info['check'] > 0) {
-                            
-                                        // Skip if all digits are the same (e.g. 111, 2222)
+                                
+                                        // Skip same digits (e.g., 111, 2222)
                                         if (count(array_unique(str_split($value))) === 1) {
                                             continue;
                                         }
-                                        // Prepare common bet data
+                                
                                         $betNumber1 = [
                                             'bet_id' => $respone->id,
                                             'original_number' => $value,
                                         ];
-                            
+                                
                                         $amounts = [
                                             'a_amount' => 0, 'b_amount' => 0, 'ab_amount' => 0,
                                             'roll_amount' => 0, 'roll7_amount' => 0, 'roll_parlay_amount' => 0,
@@ -536,19 +538,24 @@ class LottoBet extends Component
                                             'a_check' => 0, 'b_check' => 0, 'ab_check' => 0,
                                             'roll_check' => 0, 'roll7_check' => 0, 'roll_parlay_check' => 0,
                                         ];
-                            
+                                
                                         $amounts["{$type}_amount"] = $info['amount'];
                                         $checkeds["{$type}_check"] = $info['check'];
-                            
-                                        // 🔁 Get all valid permutations
-                                        $combinations = $this->generateUniquePermutations(str_split($value));
-                            
+                                
+                                        // If check > 0, generate all permutations
+                                        if ($info['check'] > 0) {
+                                            $combinations = $this->generateUniquePermutations(str_split($value));
+                                        } else {
+                                            // Just use the original value
+                                            $combinations = [$value];
+                                        }
+                                
                                         foreach ($combinations as $combo) {
                                             $betNumber2 = [
                                                 'generated_number' => $combo,
                                                 'digit_length' => strlen($combo),
                                             ];
-                            
+                                
                                             $data = array_merge($betNumber1, $betNumber2, $amounts, $checkeds);
                                             BetNumber::create($data);
                                         }
