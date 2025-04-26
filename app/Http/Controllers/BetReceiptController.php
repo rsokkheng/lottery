@@ -139,32 +139,70 @@ class BetReceiptController extends Controller
     private function addAmount(&$amountArray, $value, $check, $label)
     {
         if ($value > 0) {
-            $amountArray = $value . ($check ? "({$label}x)" : "({$label})");
+            $getAmount = $value . ($check ? "({$label}x)" : "({$label})");
+            $amountArray = $getAmount;
+//            if(!empty($amountArray)){
+//                $amountArray = $amountArray.', '.$getAmount;
+//            }else{
+//                $amountArray = $amountArray.$getAmount;
+//            }
         }
     }
 
     public function getBetByReceiptId($id)
     {
-        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber', 'betWinningRecords'])
+        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber', 'betWinningRecords', 'bets'=>function ($q) {
+            $q->orderBy('number_format');
+        }])
             ->findOrFail($id);
         $betIdWin = $this->betWinningRecord->newQuery()
             ->whereHas('bets', function ($q) use ($id){
                 $q->where('bet_receipt_id', $id);
-            })->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
+            })
+            ->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
         $items = [];
-        foreach ($result->bets as $bet){
+        $amount = '';
+        foreach ($result->bets as $key => $bet){
             $this->addAmount($amount, $bet['betNumber'][0]->a_amount ?? 0, $bet['betNumber'][0]->a_check ?? false, "A");
             $this->addAmount($amount, $bet['betNumber'][0]->b_amount ?? 0, $bet['betNumber'][0]->b_check ?? false, "B");
             $this->addAmount($amount, $bet['betNumber'][0]->ab_amount ?? 0, $bet['betNumber'][0]->ab_check ?? false, "AB");
             $this->addAmount($amount, $bet['betNumber'][0]->roll_amount ?? 0, $bet['betNumber'][0]->roll_check ?? false, "R");
             $this->addAmount($amount, $bet['betNumber'][0]->roll7_amount ?? 0, $bet['betNumber'][0]->roll7_check ?? false, "R7");
             $this->addAmount($amount, $bet['betNumber'][0]->roll_parlay_amount ?? 0, $bet['betNumber'][0]->roll_parlay_check ?? false, "RP");
-            $items[] =[
-                'number' => $bet['number_format'],
-                'company' => $bet['betLotterySchedule']?->code,
-                'amount' =>$amount,
-                'is_win' => in_array($bet->id, $betIdWin)
-            ];
+
+            $companyCode = $bet['betLotterySchedule']?->code;
+            if(count($items)){
+                $itemsFilter = array_filter($items, function ($val) use ($bet, $companyCode){
+                    return $val['number'] === $bet['number_format'];
+                });
+
+                if(empty($itemsFilter)){
+                    $items[] =[
+                        'number' => $bet['number_format'],
+                        'company' => $companyCode,
+                        'amount' => $amount,
+                        'is_win' => in_array($bet->id, $betIdWin)
+                    ];
+                }else{
+                    $items = array_map(function ($val) use ($bet, $companyCode) {
+                        if($val['number'] === $bet['number_format']){
+                            return [...$val, 'company'=> $val['company'].', '.$companyCode];
+                        }
+                        return $val;
+                    },$items);
+                }
+            }else{
+                $items[] =[
+                    'number' => $bet['number_format'],
+                    'company' => $companyCode,
+                    'amount' => $amount,
+                    'is_win' => in_array($bet->id, $betIdWin)
+                ];
+            }
+
+            $amount = '';
+
+
         }
         $isPaid = $result->betWinningRecords?->first()?->paid_status;
         return response()->json([

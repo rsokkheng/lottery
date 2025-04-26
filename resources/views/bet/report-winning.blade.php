@@ -84,7 +84,7 @@
                             $totalNetAmount=0;
                         @endphp
                         @foreach($data as $key => $row)
-                            <tr class="border border-gray-300 hover:bg-gray-100">
+                            <tr class="border border-gray-300 hover:bg-gray-100 text-center">
                                 <td class="py-2 px-2 border border-gray-300">{{$key+1}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['receipt_no']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['account']??''}}</td>

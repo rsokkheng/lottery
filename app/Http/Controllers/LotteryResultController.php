@@ -23,9 +23,9 @@ class LotteryResultController extends Controller
      */
     public string $currentDate;
     public string $currentDayName;
+    public array $rollA = ['GiaiTam'];
+    public array $rollB = ['GiaiDB'];
 
-    public array $rollA = ['GiaiDB'];
-    public array $rollB = ['GiaiTam'];
     public array $rolls = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB'];
     public array $roll7 = ['GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiDB'];  // Roll 7 only have 6 prizes but GiaiTu check win result for only first row
     public array $rollParlay = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB']; // check all prizes
@@ -498,6 +498,7 @@ class LotteryResultController extends Controller
 //        $date = '2025-02-23';
 //        $day = 'Sunday';
 //        $time = '16:30:00';
+        $data = [];
         $getBetWinningNumber = [];
          DB::table('bets')
             ->select(
@@ -509,7 +510,7 @@ class LotteryResultController extends Controller
                 'schedule.region_slug',
                 'bets.bet_receipt_id'
             )
-            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+            ->leftJoin('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
             ->join('bet_lottery_schedules as schedule','schedule.id','=','bets.bet_schedule_id')
             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
             ->whereIn('bets.bet_schedule_id',$idSchedules)
@@ -517,85 +518,102 @@ class LotteryResultController extends Controller
             ->orderBy('bets.id')
             ->orderBy('bet_numbers.id')
             ->lazy()
-            ->each(function ($bet) use (&$getBetWinningNumber, $date) {
-                $reverseNumber = [];
-                $betByRoll = [];
+            ->each(function ($bet) use (&$getBetWinningNumber, $date, &$data) {
+                if(!in_array($bet->bet_id, $data)) {
+                    $data[] = $bet->bet_id;
+                    $reverseNumber = [];
+                    $betByRoll = [];
 
-                if($bet->a_check || $bet->b_check || $bet->ab_check || $bet->roll_check || $bet->roll7_check) {
-                    //bet 23 => 23, 32
-                    //bet 234 => 234,243,324,342,423,432
-                    $reverseNumber = $this->getPermutations($bet->generated_number);
-                }
-
-                if($bet->region_slug === HelperEnum::MienBacDienToanSlug){
-                    $rollA = $this->HanoiRollA;
-                    $rollB = $this->HanoiRollB;
-                }else{
-                    $rollA = $this->rollA;
-                    $rollB = $this->rollB;
-                }
-
-                if($bet->bet_type === '2D'){
-                    if ($bet->a_amount){
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->a_check){
-                            $rollChecked = $rollA;
-                        }else{
-                            $rollUnChecked = $rollA;
-                        }
-                        array_push($betByRoll, array('amount' => $bet->a_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
-                    }
-                    if ($bet->b_amount){
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->b_check){
-                            $rollChecked = $rollB;
-                        }else{
-                            $rollUnChecked = $rollB;
-                        }
-                        array_push($betByRoll, array('amount' => $bet->b_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
-                    }
-                    if ($bet->ab_amount) {
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->ab_check){
-                            array_push($rollChecked, ...$rollA, ...$rollB);
-                        }else{
-                            array_push($rollUnChecked, ...$rollA, ...$rollB);
-                        }
-                        array_push($betByRoll, array('amount' => $bet->ab_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                    if ($bet->a_check || $bet->b_check || $bet->ab_check || $bet->roll_check || $bet->roll7_check) {
+                        //bet 23 => 23, 32
+                        //bet 234 => 234,243,324,342,423,432
+                        $reverseNumber = $this->getPermutations($bet->generated_number);
                     }
 
-                    if ($bet->roll_amount) {
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->roll_check){
-                            array_push($rollChecked, ...$this->rolls);
-                        }else{
-                            array_push($rollUnChecked, ...$this->rolls);
-                        }
-                        array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                    if ($bet->region_slug === HelperEnum::MienBacDienToanSlug) {
+                        $rollA = $this->HanoiRollA;
+                        $rollB = $this->HanoiRollB;
+                    } else {
+                        $rollA = $this->rollA;
+                        $rollB = $this->rollB;
                     }
 
-                }else if($bet->bet_type === '3D'){
-                    if ($bet->roll_amount) {
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->roll_check){
-                            array_push($rollChecked, ...$this->rolls);
-                        }else{
-                            array_push($rollUnChecked, ...$this->rolls);
+                    if ($bet->bet_type === '2D') {
+                        if ($bet->a_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->a_check) {
+                                $rollChecked = $rollA;
+                            } else {
+                                $rollUnChecked = $rollA;
+                            }
+                            array_push($betByRoll, array('amount' => $bet->a_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
                         }
-                        array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
-                    }
-                    if ($bet->roll7_amount) {
-                        if($bet->roll7_check){
-                            foreach ($reverseNumber as $betNumber){
-                                $getMatched = $this->matchWinNumberFromResultsRoll7($date, $bet->bet_schedule_id, $betNumber);
-                                if(count($getMatched)){
+                        if ($bet->b_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->b_check) {
+                                $rollChecked = $rollB;
+                            } else {
+                                $rollUnChecked = $rollB;
+                            }
+                            array_push($betByRoll, array('amount' => $bet->b_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                        }
+                        if ($bet->ab_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->ab_check) {
+                                array_push($rollChecked, ...$rollA, ...$rollB);
+                            } else {
+                                array_push($rollUnChecked, ...$rollA, ...$rollB);
+                            }
+                            array_push($betByRoll, array('amount' => $bet->ab_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                        }
+
+                        if ($bet->roll_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->roll_check) {
+                                array_push($rollChecked, ...$this->rolls);
+                            } else {
+                                array_push($rollUnChecked, ...$this->rolls);
+                            }
+                            array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                        }
+
+                    } else if ($bet->bet_type === '3D') {
+                        if ($bet->roll_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->roll_check) {
+                                array_push($rollChecked, ...$this->rolls);
+                            } else {
+                                array_push($rollUnChecked, ...$this->rolls);
+                            }
+                            array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                        }
+                        if ($bet->roll7_amount) {
+                            if ($bet->roll7_check) {
+                                foreach ($reverseNumber as $betNumber) {
+                                    $getMatched = $this->matchWinNumberFromResultsRoll7($date, $bet->bet_schedule_id, $betNumber);
+                                    if (count($getMatched)) {
+                                        $totalAmount = $bet->roll7_amount * $bet->pkg_price;
+                                        foreach ($getMatched as $val) {
+                                            $getBetWinningNumber[] = [
+                                                'bet_id' => $bet->bet_id,
+                                                'receipt_id' => $bet->bet_receipt_id,
+                                                'win_number' => $val->bet_number,
+                                                'result_id' => $val->result_id,
+                                                'prize_amount' => $totalAmount
+                                            ];
+                                        }
+                                    }
+                                }
+                            } else {
+                                $getMatched = $this->matchWinNumberFromResultsRoll7($date, $bet->bet_schedule_id, $bet->generated_number);
+                                if (count($getMatched)) {
                                     $totalAmount = $bet->roll7_amount * $bet->pkg_price;
-                                    foreach ($getMatched as $val){
+                                    foreach ($getMatched as $val) {
                                         $getBetWinningNumber[] = [
                                             'bet_id' => $bet->bet_id,
                                             'receipt_id' => $bet->bet_receipt_id,
@@ -606,42 +624,46 @@ class LotteryResultController extends Controller
                                     }
                                 }
                             }
-                        }else{
-                            $getMatched = $this->matchWinNumberFromResultsRoll7($date, $bet->bet_schedule_id, $bet->generated_number);
-                            if(count($getMatched)){
-                                $totalAmount = $bet->roll7_amount * $bet->pkg_price;
-                                foreach ($getMatched as $val){
-                                    $getBetWinningNumber[] = [
-                                        'bet_id' => $bet->bet_id,
-                                        'receipt_id' => $bet->bet_receipt_id,
-                                        'win_number' => $val->bet_number,
-                                        'result_id' => $val->result_id,
-                                        'prize_amount' => $totalAmount
-                                    ];
+                            $betByRoll = [];
+                        }
+                    } else {
+                        if ($bet->roll_amount) {
+                            $rollChecked = [];
+                            $rollUnChecked = [];
+                            if ($bet->roll_check) {
+                                array_push($rollChecked, ...$this->rolls);
+                            } else {
+                                array_push($rollUnChecked, ...$this->rolls);
+                            }
+                            array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
+                        }
+                    }
+
+
+                    foreach ($betByRoll as $getBet) {
+                        if (count($getBet['rollCheck'])) {
+                            foreach ($reverseNumber as $betNumber) {
+                                $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $betNumber, $getBet['rollCheck']);
+                                if (count($getMatched)) {
+                                    $totalAmount = $getBet['amount'] * $bet->pkg_price;
+                                    foreach ($getMatched as $val) {
+                                        $getBetWinningNumber[] = [
+                                            'bet_id' => $bet->bet_id,
+                                            'receipt_id' => $bet->bet_receipt_id,
+                                            'win_number' => $val->bet_number,
+                                            'result_id' => $val->result_id,
+                                            'prize_amount' => $totalAmount
+                                        ];
+                                    }
                                 }
                             }
                         }
-                    }
-                }else{
-                    if ($bet->roll_amount) {
-                        $rollChecked = [];
-                        $rollUnChecked = [];
-                        if($bet->roll_check){
-                            array_push($rollChecked, ...$this->rolls);
-                        }else{
-                            array_push($rollUnChecked, ...$this->rolls);
-                        }
-                        array_push($betByRoll, array('amount' => $bet->roll_amount, 'rollCheck' => $rollChecked, 'rollUncheck' => $rollUnChecked));
-                    }
-                }
 
-                foreach ($betByRoll as $getBet){
-                    if(count($getBet['rollCheck'])){
-                        foreach ($reverseNumber as $betNumber){
-                            $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $betNumber, $getBet['rollCheck']);
-                            if(count($getMatched)){
+                        if (count($getBet['rollUncheck'])) {
+                            $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number, $getBet['rollUncheck']);
+                            if (count($getMatched)) {
                                 $totalAmount = $getBet['amount'] * $bet->pkg_price;
-                                foreach ($getMatched as $val){
+                                foreach ($getMatched as $val) {
                                     $getBetWinningNumber[] = [
                                         'bet_id' => $bet->bet_id,
                                         'receipt_id' => $bet->bet_receipt_id,
@@ -650,22 +672,6 @@ class LotteryResultController extends Controller
                                         'prize_amount' => $totalAmount
                                     ];
                                 }
-                            }
-                        }
-                    }
-
-                    if(count($getBet['rollUncheck'])){
-                        $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number, $getBet['rollUncheck']);
-                        if(count($getMatched)){
-                            $totalAmount = $getBet['amount'] * $bet->pkg_price;
-                            foreach ($getMatched as $val){
-                                $getBetWinningNumber[] = [
-                                    'bet_id' => $bet->bet_id,
-                                    'receipt_id' => $bet->bet_receipt_id,
-                                    'win_number' => $val->bet_number,
-                                    'result_id' => $val->result_id,
-                                    'prize_amount' => $totalAmount
-                                ];
                             }
                         }
                     }
@@ -734,7 +740,7 @@ class LotteryResultController extends Controller
             ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
             ->whereIn('bets.bet_schedule_id', $idSchedules)
-            ->whereIn('pkg_con.bet_type', ['RP2','RP3'])
+            ->whereIn('pkg_con.bet_type', ['RP2','RP3', 'RP4'])
 //            ->where('bets.id', 41)
 //            ->where('has_special', '0')
             ->orderBy('bets.id')
@@ -982,13 +988,14 @@ class LotteryResultController extends Controller
                 ->select(
                     'record.bet_id',
                     'record.win_number',
-                    DB::raw('sum(record.prize_amount) as sum_prize_amount'),
+//                    DB::raw('sum(record.prize_amount) as sum_prize_amount'),
+                    'record.prize_amount as sum_prize_amount',
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
                     'pkg_con.price as odds',
                     'bets.number_format as original_number',
                     'bets.bet_date',
-                    DB::raw('sum(bets.total_amount) as total_turnover'),
+//                    DB::raw('sum(bets.total_amount) as total_turnover'),
                     'bets.total_amount as turnover',
                     'schedule.province',
                     'bet_receipts.receipt_no',
@@ -998,6 +1005,13 @@ class LotteryResultController extends Controller
                     'bet_numbers.roll_amount',
                     'bet_numbers.roll7_amount',
                     'bet_numbers.roll_parlay_amount',
+                    DB::raw('sum(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
+//                    'bet_numbers.a_check',
+//                    'bet_numbers.b_check',
+//                    'bet_numbers.ab_check',
+//                    'bet_numbers.roll_check',
+//                    'bet_numbers.roll7_check',
+//                    'bet_numbers.roll_parlay_check',
                     'users.name as account'
                 )
                  ->join('bets','record.bet_id','=', 'bets.id')
@@ -1027,6 +1041,7 @@ class LotteryResultController extends Controller
                 ->orderBy('record.bet_id')
                 ->groupBy('record.bet_id')
                  ->groupBy('record.win_number')
+                 ->groupBy('record.prize_amount')
                  ->groupBy('bet_type')
                  ->groupBy('pkg_con.rate')
                  ->groupBy('pkg_con.price')
@@ -1040,6 +1055,12 @@ class LotteryResultController extends Controller
                  ->groupBy('bet_numbers.ab_amount')
                  ->groupBy('bet_numbers.roll_amount')
                  ->groupBy('bet_numbers.roll7_amount')
+                 ->groupBy('bet_numbers.roll_parlay_amount')
+//                 ->groupBy('bet_numbers.a_check')
+//                 ->groupBy('bet_numbers.b_check')
+//                 ->groupBy('bet_numbers.ab_check')
+//                 ->groupBy('bet_numbers.roll_check')
+//                 ->groupBy('bet_numbers.roll7_check')
                  ->groupBy('bet_numbers.roll_parlay_amount')
                  ->groupBy('users.name')
                 ->each(function ($record) use (&$data) {
@@ -1085,13 +1106,18 @@ class LotteryResultController extends Controller
                         $getBetRoll = $getBetRoll.'Roll Parlay';
                     }
 
+                    $betType = $record->bet_type;
+                    if($record->sum_check){
+                        $betType = $record->bet_type.'(x)';
+                    }
+
                     $prepareData = [
                         'bet_id' => $record->bet_id,
                         'account' => $record->account,
                         'amount' => $amount,
                         'net' => $record->net,
                         'odds' => $record->odds,
-                        'bet_type' => $record->bet_type,
+                        'bet_type' => $betType,
                         'original_number' => $record->original_number,
                         'company' => $record->province,
                         'game' => $getBetRoll,
@@ -1099,7 +1125,7 @@ class LotteryResultController extends Controller
                         'bet_date' => $record->bet_date,
                     ];
 
-                    if(in_array($record->bet_type, ['RP2','RP3'])){
+                    if(in_array($record->bet_type, ['RP2','RP3', 'RP4'])){
                         $existBet = array_filter($data, function ($val) use ($record) {
                             return $val['bet_id'] === $record->bet_id;
                         });
@@ -1114,14 +1140,19 @@ class LotteryResultController extends Controller
                             $data[] = $prepareData;
                         }
                     }else{
-                        $commission = $record->total_turnover - ($record->total_turnover * $record->net / 100);
-                        $netAmount = $record->total_turnover * $record->net / 100;
-                        $prepareData['turnover'] = $record->total_turnover;
-                        $prepareData['win_number'] = $record->win_number;
-                        $prepareData['compensate'] = $record->sum_prize_amount;
-                        $prepareData['commission'] = $commission;
-                        $prepareData['net_amount'] = $netAmount;
-                        $data[] = $prepareData;
+                        $existBet = array_filter($data, function ($val) use ($record) {
+                            return $val['bet_id'] === $record->bet_id;
+                        });
+                        if(!count($existBet)) {
+                            $commission = $record->turnover - ($record->turnover * $record->net / 100);
+                            $netAmount = $record->turnover * $record->net / 100;
+                            $prepareData['turnover'] = $record->turnover;
+                            $prepareData['win_number'] = sprintf("%02d", $record->win_number);
+                            $prepareData['compensate'] = $record->sum_prize_amount;
+                            $prepareData['commission'] = $commission;
+                            $prepareData['net_amount'] = $netAmount;
+                            $data[] = $prepareData;
+                        }
                     }
                 });
 
