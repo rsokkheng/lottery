@@ -94,13 +94,9 @@ class LottoBet extends Component
         $this->betPackageConfiguration = $betPackageConfiguration;
         $this->betReceipt = $betReceipt;
 
-        $this->currentDate = '2025-04-25';
-        $this->currentDay = 'Friday';
-        $this->currentTime = '01:10:10';
-
-//        $this->currentDate = Carbon::now()->format('Y-m-d');
-//        $this->currentDay = Carbon::now()->format('l');
-//        $this->currentTime = Carbon::now()->format('H:i:s');
+        $this->currentDate = Carbon::now()->format('Y-m-d');
+        $this->currentDay = Carbon::now()->format('l');
+        $this->currentTime = Carbon::now()->format('H:i:s');
         $this->user = Auth::user();
 
         $this->schedules = $this->betLotteryScheduleModel
@@ -402,8 +398,6 @@ class LottoBet extends Component
         $this->reset($fieldReset);
     }
 
-    public $showNotification = false;
-
     public function handleSave()
     {
         $isCreateBetSuccess = false;
@@ -496,13 +490,24 @@ class LottoBet extends Component
 
 
                             if (strpos($number, '#') !== false) {
-                                $parts = explode('#', $number);
-                                foreach ($parts as $part) {
-                                    $betNumber2 = [
-                                        'generated_number' => $part,
-                                        'digit_length' => strlen($part),
-                                    ];
+                                if ($this->roll_parlay_check[$key] == true) {
+                                    $parts = $this->generateSharpNumber($number);
+                                    $multiplierHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
+                                    foreach ($parts as $part) {
+                                        $betNumber2 = [
+                                            'generated_number' => $part,
+                                            'digit_length' => $this->digit[$key],
+                                            'total_amount' => $this->roll_parlay_amount[$key] * $multiplierHashtag,
+                                        ];
 
+                                        $data = array_merge($betNumber1, $betNumber2);
+                                        BetNumber::create($data);
+                                    }
+                                } else {
+                                    $betNumber2 = [
+                                        'generated_number' => $number,
+                                        'digit_length' => $this->digit[$key],
+                                    ];
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
                                 }
@@ -593,18 +598,32 @@ class LottoBet extends Component
             $multiplier = match ($type) {
                 'a' => $numberLength == 2 ? MultiplierHNEnum::A : 0,
                 'ab' => $numberLength == 2 ? MultiplierHNEnum::AB : ($numberLength == 3 ? MultiplierHNEnum::AB_3D : 0),
-                'roll' => $numberLength == 2 ? MultiplierHNEnum::ROLL : ($numberLength == 3 ? MultiplierHNEnum::ROLL_3D : ($numberLength == 4 ? MultiplierHNEnum::ROLL_4D: 0)),
+                'roll' => $numberLength == 2 ? MultiplierHNEnum::ROLL : ($numberLength == 3 ? MultiplierHNEnum::ROLL_3D : ($numberLength == 4 ? MultiplierHNEnum::ROLL_4D : 0)),
                 default => 1,
             };
         } else {
             $multiplier = match ($type) {
-                'ab' => $numberLength == 2  ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
-                'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D: 0)),
+                'ab' => $numberLength == 2 ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
+                'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D : 0)),
                 default => 1,
             };
         }
 
-        return $total_amount*$multiplier;
+        return $total_amount * $multiplier;
+    }
+
+    private function generateSharpNumber($number)
+    {
+        $parts = explode('#', $number);
+
+        $result = [];
+
+        for ($i = 0; $i < count($parts) - 1; $i++) {
+            for ($j = $i + 1; $j < count($parts); $j++) {
+                $result[] = $parts[$i] . '#' . $parts[$j];
+            }
+        }
+        return $result;
     }
 
     function generateUniquePermutations(array $digits): array
