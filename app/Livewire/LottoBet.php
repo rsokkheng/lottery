@@ -623,7 +623,7 @@ class LottoBet extends Component
                 $result[] = $parts[$i] . '#' . $parts[$j];
             }
         }
-        return $result;
+        return array_unique($result);
     }
 
     function generateUniquePermutations(array $digits): array
