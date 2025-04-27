@@ -39,7 +39,7 @@ class LottoBet extends Component
     public $roll7_amount = [];
     public $roll_parlay_amount = [];
     public $total_amount = [];
-    public $amountHN= [];
+    public $amountHN = [];
     public $amountNotHN = [];
 
     public $a_check = [];
@@ -87,7 +87,7 @@ class LottoBet extends Component
         BetReceipt                     $betReceipt,
 
     )
-    { 
+    {
         // Initialization logic if needed
         $this->betLotteryScheduleModel = $betLotteryScheduleModel;
         $this->betModel = $betModel;
@@ -113,10 +113,10 @@ class LottoBet extends Component
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('time_close', 'asc')
             ->get(['id', 'code', 'time_close']);
-        $this->betUserWallet = BetUserWallet::where('user_id',$this->user->id)->first();
+        $this->betUserWallet = BetUserWallet::where('user_id', $this->user->id)->first();
         $this->initializeProperty();
 
-       
+
     }
 
 
@@ -154,6 +154,7 @@ class LottoBet extends Component
         $this->amountHN = array_fill(0, $this->totalRow, 0);
         $this->amountNotHN = array_fill(0, $this->totalRow, 0);
     }
+
     public function handleProvinceCheck($index)
     {
 
@@ -163,9 +164,11 @@ class LottoBet extends Component
             $this->province_body_check[$index] = array_fill(0, $this->totalRow, false);
         }
     }
-    private function handleCheckHN($key_num){
+
+    private function handleCheckHN($key_num)
+    {
         $isHN = false;
-        if($this->lengthNum[$key_num] ==3) {
+        if ($this->lengthNum[$key_num] == 3) {
             foreach ($this->schedules as $key => $item) {
                 if ($this->province_body_check[$key][$key_num]) {
                     if ($item['code'] === 'HN') {
@@ -190,8 +193,8 @@ class LottoBet extends Component
         } else {
             $this->province_body_check[$key_sch][$key_num] = false;
         }
-        if($this->lengthNum[$key_num] ==3){
-           $this->handleCheckHN($key_num, $item['id']);
+        if ($this->lengthNum[$key_num] == 3) {
+            $this->handleCheckHN($key_num, $item['id']);
         }
 
     }
@@ -319,7 +322,7 @@ class LottoBet extends Component
         $parts = explode('#', $normalizedNumber);
         $length = count($parts);
         $counts = array_count_values($parts);
-        $isThreeNumTheSame= max($counts) >= 3;
+        $isThreeNumTheSame = max($counts) >= 3;
         if ($length >= 2 && $length <= 4) {
             $this->digit[$key] = "RP" . $length;
             $this->setBetTypeForComplex($key);
@@ -338,9 +341,9 @@ class LottoBet extends Component
                 $this->enableCheckRollParlay[$key] = true;
             }
         } elseif ($length == 4 && !$isThreeNumTheSame) {
-                $this->roll_parlay_check[$key] = true;
-                $this->enableChanelRollParlay[$key] = true;
-               $this->enableCheckRollParlay[$key] = false;
+            $this->roll_parlay_check[$key] = true;
+            $this->enableChanelRollParlay[$key] = true;
+            $this->enableCheckRollParlay[$key] = false;
         } else {
             $this->roll_parlay_check[$key] = false;
         }
@@ -387,7 +390,7 @@ class LottoBet extends Component
 
     private function resetChanelValues()
     {
-        $fieldReset =[
+        $fieldReset = [
             'enableChanelA',
             'enableChanelB',
             'enableChanelAB',
@@ -395,9 +398,10 @@ class LottoBet extends Component
             'enableChanelRoll7',
             'enableChanelRollParlay',
             'enableCheckRollParlay',
-            ];
+        ];
         $this->reset($fieldReset);
     }
+
     public $showNotification = false;
 
     public function handleSave()
@@ -405,8 +409,8 @@ class LottoBet extends Component
         $isCreateBetSuccess = false;
         DB::beginTransaction();
         try {
-            $betReceipt= null;
-            if($this->totalInvoice>0 && $this->totalDue>0) {
+            $betReceipt = null;
+            if ($this->totalInvoice > 0 && $this->totalDue > 0) {
                 // generate no invoice
                 $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
                 // create bet receipt
@@ -423,12 +427,12 @@ class LottoBet extends Component
                 ]);
             }
 
-            foreach ($this->number as $key => $value) {
-                if (!empty($value)) {
-                    $has_spacial = $this->roll_parlay_check[$key] ?1:0;
-                    $betPackageConId = $this->betPackageConfiguration::where(['bet_type'=> $this->digit[$key], 'has_special' =>$has_spacial])->pluck('id')->first();
+            foreach ($this->number as $key => $number) {
+                if (!empty($number)) {
+                    $has_spacial = $this->roll_parlay_check[$key] ? 1 : 0;
+                    $betPackageConId = $this->betPackageConfiguration::where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->pluck('id')->first();
                     foreach ($this->schedules as $key_prov => $schedule) {
-                        if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key])>0) {
+                        if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key]) > 0) {
                             //insert bet
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,
@@ -436,20 +440,19 @@ class LottoBet extends Component
                                 'user_id' => $this->user->id ?? 0,
                                 'bet_schedule_id' => $schedule->id,
                                 'bet_package_config_id' => $betPackageConId,
-                                'number_format' => $value,
+                                'number_format' => $number,
                                 'digit_format' => $this->digit[$key],
                                 'bet_date' => $this->currentDate,
-                                'total_amount' => $schedule['code'] =="HN"? $this->amountHN[$key]:$this->amountNotHN[$key],
+                                'total_amount' => $schedule['code'] == "HN" ? $this->amountHN[$key] : $this->amountNotHN[$key],
                             ];
                             $respone = Bet::create($betItem);
-                            if($respone)
-                            {
-                                $isCreateBetSuccess= true;
+                            if ($respone) {
+                                $isCreateBetSuccess = true;
                             }
                             //insert bet number
                             $betNumber1 = [
                                 'bet_id' => $respone->id,
-                                'original_number' => $value,
+                                'original_number' => $number,
                                 'a_amount' => $this->a_amount[$key] ?? 0,
                                 'b_amount' => $this->b_amount[$key] ?? 0,
                                 'ab_amount' => $this->ab_amount[$key] ?? 0,
@@ -490,10 +493,10 @@ class LottoBet extends Component
                                     'check' => $this->roll_parlay_check[$key],
                                 ],
                             ];
-                            
 
-                            if (strpos($value, '#') !== false) {
-                                $parts = explode('#', $value);
+
+                            if (strpos($number, '#') !== false) {
+                                $parts = explode('#', $number);
                                 foreach ($parts as $part) {
                                     $betNumber2 = [
                                         'generated_number' => $part,
@@ -503,13 +506,12 @@ class LottoBet extends Component
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
                                 }
-                            } 
-                            else if (strpos($value, '*') !== false) {
+                            } else if (strpos($number, '*') !== false) {
 
-                                $num = trim($value, '*');
+                                $num = trim($number, '*');
 
                                 for ($i = 0; $i < 10; $i++) {
-                                    $genNumber = str_starts_with($value, '*') ? $i . $num : $num . $i;
+                                    $genNumber = str_starts_with($number, '*') ? $i . $num : $num . $i;
                                     $betNumber2 = [
                                         'generated_number' => $genNumber,
                                         'digit_length' => strlen($genNumber),
@@ -518,21 +520,20 @@ class LottoBet extends Component
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
                                 }
-                            }
-                            else {
+                            } else {
                                 foreach ($betTypes as $type => $info) {
                                     if ($info['amount'] > 0 || $info['check'] > 0) {
-                                
+
                                         // Skip same digits (e.g., 111, 2222)
-                                        if (count(array_unique(str_split($value))) === 1) {
+                                        if (count(array_unique(str_split($number))) === 1) {
                                             continue;
                                         }
-                                
+
                                         $betNumber1 = [
                                             'bet_id' => $respone->id,
-                                            'original_number' => $value,
+                                            'original_number' => $number,
                                         ];
-                                
+
                                         $amounts = [
                                             'a_amount' => 0, 'b_amount' => 0, 'ab_amount' => 0,
                                             'roll_amount' => 0, 'roll7_amount' => 0, 'roll_parlay_amount' => 0,
@@ -541,43 +542,27 @@ class LottoBet extends Component
                                             'a_check' => 0, 'b_check' => 0, 'ab_check' => 0,
                                             'roll_check' => 0, 'roll7_check' => 0, 'roll_parlay_check' => 0,
                                         ];
-                                
+
                                         $amounts["{$type}_amount"] = $info['amount'];
                                         $checkeds["{$type}_check"] = $info['check'];
-                                
+
                                         // If check > 0, generate all permutations
                                         if ($info['check'] > 0) {
-                                            $combinations = $this->generateUniquePermutations(str_split($value));
+                                            $combinations = $this->generateUniquePermutations(str_split($number));
                                         } else {
                                             // Just use the original value
-                                            $combinations = [$value];
-                                        }
-                                        $total_amount = $info['amount'];
-                                        if($schedule->code =="HN"){
-                                            if($type=="a"){
-                                                $total_amount *= 4;
-                                            }
-                                            elseif ($type == "ab") {
-                                                $total_amount *= 5;
-                                            } elseif ($type == "roll") {
-                                                $total_amount *= 27;
-                                            }
-                                        }else {
-                                            if ($type == "ab") {
-                                                $total_amount *= 2;
-                                            } elseif ($type == "roll") {
-                                                $total_amount *= 18;
-                                            }
+                                            $combinations = [$number];
                                         }
 
-                                
+                                        $total_amount = $this->calculateBetNumberTotalAmount($number, $info['amount'], $schedule->code, $type);
+
                                         foreach ($combinations as $combo) {
                                             $betNumber2 = [
                                                 'generated_number' => $combo,
                                                 'digit_length' => strlen($combo),
                                                 'total_amount' => $total_amount,
                                             ];
-                                
+
                                             $data = array_merge($betNumber1, $betNumber2, $amounts, $checkeds);
                                             BetNumber::create($data);
                                         }
@@ -593,12 +578,35 @@ class LottoBet extends Component
             DB::rollBack();
             dump($e->getMessage());
         }
-        if($isCreateBetSuccess)
-        {
+        if ($isCreateBetSuccess) {
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
         }
     }
+
+    private function calculateBetNumberTotalAmount($number, $amount, $code, $type)
+    {
+        $total_amount = $amount;
+        $numberLength = strlen($number);
+        $multiplier = 0;
+        if ($code == "HN") {
+            $multiplier = match ($type) {
+                'a' => $numberLength == 2 ? MultiplierHNEnum::A : 0,
+                'ab' => $numberLength == 2 ? MultiplierHNEnum::AB : ($numberLength == 3 ? MultiplierHNEnum::AB_3D : 0),
+                'roll' => $numberLength == 2 ? MultiplierHNEnum::ROLL : ($numberLength == 3 ? MultiplierHNEnum::ROLL_3D : ($numberLength == 4 ? MultiplierHNEnum::ROLL_4D: 0)),
+                default => 1,
+            };
+        } else {
+            $multiplier = match ($type) {
+                'ab' => $numberLength == 2  ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
+                'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D: 0)),
+                default => 1,
+            };
+        }
+
+        return $total_amount*$multiplier;
+    }
+
     function generateUniquePermutations(array $digits): array
     {
         $results = [];
@@ -649,13 +657,13 @@ class LottoBet extends Component
             'roll_check',
             'roll7_check',
             'roll_parlay_check'
-            ];
+        ];
         $this->reset($field);
         $this->initializeProperty();
 
     }
 
-   
+
     public function handleCheckChanel($key, $name = "")
     {
     }
@@ -688,8 +696,7 @@ class LottoBet extends Component
                         if ($this->province_body_check[$key_prov][$key] == true) {
                             $countProvince++;
                             $chanel[] = $schedule->code;
-                        }
-                        else {
+                        } else {
                             $this->total_amount[$key] = 0;
                             $this->totalInvoice = 0;
                             $this->totalDue = 0;
@@ -715,7 +722,7 @@ class LottoBet extends Component
                     $this->addAmount($amount, $this->roll_amount[$key] ?? 0, $this->roll_check[$key] ?? false, "R", $key);
                     $this->addAmount($amount, $this->roll7_amount[$key] ?? 0, $this->roll7_check[$key] ?? false, "R7", $key);
                     $this->addAmount($amount, $this->roll_parlay_amount[$key] ?? 0, $this->roll_parlay_check[$key] ?? false, "RP", $key);
-                    if (count($chanel)>0 && count($amount)>0 && $this->total_amount[$key]>0) {
+                    if (count($chanel) > 0 && count($amount) > 0 && $this->total_amount[$key] > 0) {
 
                         $updatedInvoices[$key] = [
                             'number' => $num,
@@ -813,12 +820,11 @@ class LottoBet extends Component
                             default => 1
                         };
                         if ($this->roll_parlay_check[$key]) {
-                              if ($countHashtag ==2){
-                                $this->totalProvisionalHN += $this->roll_parlay_amount[$key] * $value * $countHashtag ;
+                            if ($countHashtag == 2) {
+                                $this->totalProvisionalHN += $this->roll_parlay_amount[$key] * $value * $countHashtag;
+                            } else {
+                                $this->totalProvisionalHN += $this->roll_parlay_amount[$key] * $value;
                             }
-                              else{
-                                  $this->totalProvisionalHN += $this->roll_parlay_amount[$key] * $value;
-                              }
                         } else {
                             $this->totalProvisionalHN += $this->roll_parlay_amount[$key] * $value;
                         }
@@ -898,10 +904,9 @@ class LottoBet extends Component
                         };
 
                         if ($this->roll_parlay_check[$key]) {
-                            if($countHashtag ==2) {
+                            if ($countHashtag == 2) {
                                 $this->totalProvisional += $this->roll_parlay_amount[$key] * $value * $countHashtag;
-                            }
-                            else{
+                            } else {
                                 $this->totalProvisional += $this->roll_parlay_amount[$key] * $value;
                             }
                         } else {
@@ -914,7 +919,7 @@ class LottoBet extends Component
 
         $this->amountHN[$key] = $this->totalProvisionalHN;
         $this->amountNotHN[$key] = $this->totalProvisional;
-        $this->total_amount[$key] = $this->totalProvisional+ $this->totalProvisionalHN;
+        $this->total_amount[$key] = $this->totalProvisional + $this->totalProvisionalHN;
         // invoice
         $this->totalInvoice = 0;
         $this->totalDue = 0;
