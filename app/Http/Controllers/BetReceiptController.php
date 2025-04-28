@@ -139,14 +139,21 @@ class BetReceiptController extends Controller
     private function addAmount(&$amountArray, $value, $check, $label)
     {
         if ($value > 0) {
+            // Format the amount with the appropriate label
             $amount = $value . ($check ? "({$label}x)" : "({$label})");
-            if(!empty($amountArray)){
-                $amountArray = $amountArray.', '.$amount;
-            }else{
-                $amountArray = $amount;
+            
+            // Check if the label is already present in the array to avoid duplicates
+            if (strpos($amountArray, "({$label})") === false && strpos($amountArray, "({$label}x)") === false) {
+                // If it's not in the array, append the new formatted amount
+                if (!empty($amountArray)) {
+                    $amountArray .= ', ' . $amount;
+                } else {
+                    $amountArray = $amount;
+                }
             }
         }
     }
+    
 
     public function getBetByReceiptId($id)
     {

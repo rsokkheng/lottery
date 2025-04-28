@@ -33,7 +33,6 @@
             </div>
             <div class="w-full lg:w-48">
                 <select class="rounded w-full">
-                    <option value="0">All package</option>
                     @foreach($digits as $val)
                     @if($val['has_special'] ==1 && $val['bet_type']=='RP3')
                         <option value="{{ $val['id'] }}">RP3X</option>

@@ -122,7 +122,7 @@
                             </td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['user']?->name??''}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['created_at']??''}}</td>
-                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['number_format']??''}}</td>
+                            <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$bet->generated_number}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['digit_format']??''}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$betNumberGame??''}}</td>
                             <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row->betLotterySchedule->province_en}}</td>
@@ -138,10 +138,10 @@
                     @endforeach
                     <tr class="border border-gray-300 hover:bg-gray-100">
                         <td colspan="12"></td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalTurnover??'0.000'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalCommission??'0.00'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$totalNetAmount??'0.000'}}</td>
-                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{$row['win_lose']??'0.000'}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format( $totalTurnover, 3, '.', '')}} </td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{ number_format( $totalCommission, 3, '.', '')}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{number_format( $totalNetAmount, 3, '.', '')}}</td>
+                        <td class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">{{number_format( $row['win_lose'], 3, '.', '')}}</td>
                     </tr>
                 @else
                     <tr class="border border-gray-300 hover:bg-gray-100">

@@ -122,8 +122,7 @@
                  class="absolute right-0 top-0 mt-12 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50 border border-gray-200">
                 <a href="{{ route('admin.profile.edit') }}"
                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-[12px]">{{ __('Change Password') }}</a>
-                <a href="#"
-                   class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-[12px]">{{ __('Change Language') }}</a>
+                
                 <a href="{{ route('admin.dashboard') }}"
                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-[12px]">{{ __('Manage Account') }}</a>
                 <form method="POST" action="{{ route('logout') }}">
@@ -180,7 +179,6 @@
             <div x-show="accountOpen" @click.away="accountOpen = false"
                  class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50 border border-gray-200">
                 <a href="{{ route('admin.profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('Change Password') }}</a>
-                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('Change Language') }}</a>
                 <a href="{{ route('admin.dashboard') }}"
                    class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('Manage Account') }}</a>
                 <form method="POST" action="{{ route('logout') }}">

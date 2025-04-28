@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\BalanceReportController;
 use App\Http\Controllers\LotteryResultController;
 use App\Http\Controllers\BetLotteryPackageController;
 
@@ -22,6 +23,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
 
         # <Menu>
         Route::resource('menu',MenuController::class);
+        Route::resource('balance-report',BalanceReportController::class);
         Route::resource('user',UserController::class);
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
