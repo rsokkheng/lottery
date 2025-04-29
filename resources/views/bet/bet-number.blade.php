@@ -95,27 +95,27 @@
                                 $betNumber =$bet;
                                 $betNumberAmount = 0;
                                 $betNumberGame ="";
-                                if(intval($betNumber->a_amount)>0){
+                                if($betNumber->a_amount >0){
                                     $betNumberAmount+=$betNumber->a_amount;
                                     $betNumberGame .= "A";
                                 }
-                                if(intval($betNumber->b_amount)>0){
+                                if($betNumber->b_amount >0){
                                     $betNumberAmount+=$betNumber->b_amount;
                                     $betNumberGame .= "B";
                                 }
-                                if(intval($betNumber->ab_amount)>0){
+                                if($betNumber->ab_amount >0){
                                     $betNumberAmount+=$betNumber->ab_amount;
                                     $betNumberGame .= "A+B";
                                 }
-                                if(intval($betNumber->roll_amount)>0){
+                                if($betNumber->roll_amount >0){
                                     $betNumberAmount+=$betNumber->roll_amount;
                                     $betNumberGame .= "Roll";
                                 }
-                                 if(intval($betNumber->roll7_amount)>0){
+                                 if($betNumber->roll7_amount >0){
                                     $betNumberAmount+=$betNumber->roll7_amount;
                                     $betNumberGame .= "Roll7";
                                 }
-                                 if(intval($betNumber->roll_parlay_amount)>0){
+                                 if($betNumber->roll_parlay_amount >0){
                                     $betNumberAmount+=$betNumber->roll_parlay_amount;
                                     $betNumberGame .= "Roll Parlay";
                                 }
