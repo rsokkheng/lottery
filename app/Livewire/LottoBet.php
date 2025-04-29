@@ -529,12 +529,6 @@ class LottoBet extends Component
                             } else {
                                 foreach ($betTypes as $type => $info) {
                                     if ($info['amount'] > 0 || $info['check'] > 0) {
-
-                                        // Skip same digits (e.g., 111, 2222)
-                                        if (count(array_unique(str_split($number))) === 1) {
-                                            continue;
-                                        }
-
                                         $betNumber1 = [
                                             'bet_id' => $respone->id,
                                             'original_number' => $number,
