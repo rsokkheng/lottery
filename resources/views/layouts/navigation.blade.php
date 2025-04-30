@@ -21,9 +21,8 @@
         <!-- Logo/Title -->
         <div class="md:flex md:space-x-10">
             <div class="shrink-0 flex items-center m-4 md:m-0">
-                <a href="{{ route('bet.input') }}"
-                   class="text-yellow-300 font-bold text-[18px] md:text-xl">
-                    {{__('LOTTERY 2888')}}
+                <a href="{{ route('bet.input') }}">
+                    <img src="{{ asset('images/logo2888_back.png') }}"  style="max-width: 60px;">
                 </a>
             </div>
 

@@ -72,7 +72,9 @@
 <body onload="window.print(); window.onafterprint = function() { window.close(); }">
 
     <div class="receipt">
-        <p class="title">Lottery2888</p>
+        <p class="title">
+        <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 100px; height: auto;" >
+        </p>
        <!-- Receipt Details with Left & Right Alignment -->
        <div class="details">
             <span>Receipt No: <strong>{{ $receipt_no }}</strong></span>

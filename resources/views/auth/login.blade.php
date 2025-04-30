@@ -62,7 +62,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container" style="max-width: 1300px;"> <!-- Restrict navbar width -->
     <a class="navbar-brand text-warning" href="#">
-        <img src="{{ asset('images/logo2888.png') }}" >
+        <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
         </a>
         <div class=" navbar-collapse justify-content-end" id="navbarNav">
             <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
