@@ -120,9 +120,9 @@ class BetReceiptController extends Controller
                 ->with([
                     'beReceipt',
                     'user',
-                    'betNumber',
                     'bePackageConfig',
-                    'betLotterySchedule'
+                    'betLotterySchedule',
+                    'betNumber.betNumberWin'
                 ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($date), function ($q) use ($date) {

@@ -14,5 +14,9 @@ class BetNumber extends Model
     {
         return $this->belongsTo(Bet::class);
     }
+    public function betNumberWin()
+    {
+        return $this->hasOne(BetWinningRecord::class, 'bet_number_id', 'id');
+    }
     
 }

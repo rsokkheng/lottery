@@ -32,12 +32,12 @@
                 </select>
             </div>
             <div class="w-full lg:w-48">
-                <select class="rounded w-full">
+                <select id="digit_type" class="rounded w-full">
                     @foreach($digits as $val)
                     @if($val['has_special'] ==1 && $val['bet_type']=='RP3')
-                        <option value="{{ $val['id'] }}">RP3X</option>
+                        <option value="RP3X">RP3X</option>
                     @else
-                        <option value="{{ $val['id'] }}">{{ $val['bet_type'] }}</option>
+                        <option value="{{ $val['bet_type'] }}">{{ $val['bet_type'] }}</option>
                     @endif
                     @endforeach
                 </select>
@@ -86,6 +86,8 @@
                         $totalCommission=0;
                         $totalNetAmount=0;
                         $No = 1;
+                        $winLose=0;
+                        $totalWinLose=0;
                     
                         @endphp
                         @foreach($data as  $row)
@@ -121,9 +123,13 @@
                                 }
                                  $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
                                  $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
+                                 $prizeAmount = ($bet->betNumberWin->prize_amount ?? 0);
                                  $totalCommission +=$commission;
                                  $totalNetAmount +=$netAmount;
                                  $totalTurnover +=$betNumber->total_amount;
+                                 $winLose = $prizeAmount - $netAmount;
+                                 $totalWinLose +=$winLose;
+
                             @endphp
                             <tr class="border border-gray-300 hover:bg-gray-100">
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
@@ -138,7 +144,7 @@
                                 <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$commission}}</td>
                                 <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$netAmount}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['win_lose']??''}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{ $winLose < 0 ? 'text-red-500' : ''}}">{{$winLose}}</td>
 
                             </tr>
                             @endforeach
@@ -148,7 +154,7 @@
                             <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalTurnover, 3, '.', '')}}</td>
                             <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalCommission, 3, '.', '')}}</td>
                             <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $row['win_lose'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalWinLose < 0 ? 'text-red-500' : ''}}">{{number_format(  $totalWinLose, 3, '.', '')}}</td>
                         </tr>
                     @else
                         <tr class="border border-gray-300 hover:bg-gray-100">
@@ -172,9 +178,10 @@
         const date = $('#datepicker-receipt').val();
         const no = $('#receipt-no').val()
         const number = $('#number').val()
+        const digit_type = $('#digit_type').val()
         const com_id = $('#company').find(":selected").val();
         if(date.length || no.length){
-            window.location = url +'?date='+date+'&no='+no+'&number='+number+'&com_id='+com_id;
+            window.location = url +'?date='+date+'&no='+no+'&number='+number+'&com_id='+com_id+'&digit_type='+digit_type;
         }
     }
 </script>

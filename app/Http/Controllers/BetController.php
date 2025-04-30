@@ -33,14 +33,19 @@ class BetController extends Controller
                 $user = User::find($user->id);
                 $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
             }
-          
-            $digits = BetLotteryPackageConfiguration::query()->where('package_id', $user->package_id)
-                    ->orderBy('id')->get(['id', 'bet_type','has_special']);
+            $digits = BetLotteryPackageConfiguration::query()
+            ->where('package_id', $user->package_id)
+            ->orderBy('id')->get(['id', 'bet_type','has_special']);
 
             $company_id = -1;
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
+            $digit_type = "2D";
+            if ($request->has('digit_type')) {
+                $digit_type = $request->get('digit_type');
+            }
+            
             $number = $request->number ?? null;
             $company = [
                 [
@@ -63,7 +68,7 @@ class BetController extends Controller
             $data =$this->betModel->with([
                 'beReceipt',
                 'user',
-                'betNumber',
+                'betNumber.betNumberWin',
                 'bePackageConfig',
                 'betLotterySchedule'
             ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
@@ -71,6 +76,12 @@ class BetController extends Controller
             })->when(!is_null($date), function ($q) use ($date) {
                 $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                 $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+            })->when(!is_null($digit_type), function ($q) use ($digit_type) {
+                $q->where('digit_format', '=', $digit_type);
+            })->when(!is_null($number), function ($q) use ($number) {
+                $q->whereHas('betNumber', function ($query) use ($number) {
+                    $query->where('generated_number', $number);
+                });
             })->get();
 
             return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
