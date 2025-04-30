@@ -91,7 +91,7 @@
         <!-- Left: Logo -->
         <div class="logo mb-9 mb-md-0">
             <a class="navbar-brand text-warning" href="#">
-                <img src="{{ asset('images/logo2888.png') }}" style="max-width: 1200px; height: auto;">
+                <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
             </a>
         </div>
 

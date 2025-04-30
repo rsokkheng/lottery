@@ -490,9 +490,9 @@ class LottoBet extends Component
 
 
                             if (strpos($number, '#') !== false) {
+                                $multiplierHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
                                 if ($this->roll_parlay_check[$key] == true) {
                                     $parts = $this->generateSharpNumber($number);
-                                    $multiplierHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
                                     foreach ($parts as $part) {
                                         $betNumber2 = [
                                             'generated_number' => $part,
@@ -507,6 +507,7 @@ class LottoBet extends Component
                                     $betNumber2 = [
                                         'generated_number' => $number,
                                         'digit_length' => $this->digit[$key],
+                                        'total_amount' => $this->roll_parlay_amount[$key] * $multiplierHashtag,
                                     ];
                                     $data = array_merge($betNumber1, $betNumber2);
                                     BetNumber::create($data);
@@ -528,12 +529,6 @@ class LottoBet extends Component
                             } else {
                                 foreach ($betTypes as $type => $info) {
                                     if ($info['amount'] > 0 || $info['check'] > 0) {
-
-                                        // Skip same digits (e.g., 111, 2222)
-                                        if (count(array_unique(str_split($number))) === 1) {
-                                            continue;
-                                        }
-
                                         $betNumber1 = [
                                             'bet_id' => $respone->id,
                                             'original_number' => $number,

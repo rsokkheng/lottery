@@ -120,14 +120,22 @@ class BetReceiptController extends Controller
                 ->with([
                     'beReceipt',
                     'user',
-                    'betNumber',
                     'bePackageConfig',
-                    'betLotterySchedule'
+                    'betLotterySchedule',
+                    'betNumber.betNumberWin'
                 ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($date), function ($q) use ($date) {
                     $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                     $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+                })->when(!is_null($receiptNo), function ($q) use ($receiptNo) {
+                    $q->whereHas('beReceipt', function ($query) use ($receiptNo) {
+                        $query->where('receipt_no', $receiptNo);
+                    });
+                })->when(!is_null($number), function ($q) use ($number) {
+                    $q->whereHas('betNumber', function ($query) use ($number) {
+                        $query->where('generated_number', $number);
+                    });
                 })->get();
             return view('bet.bet-list', compact('data', 'date', 'receiptNo', 'number', 'company', 'company_id'));
         } catch (\Exception $exception) {
@@ -136,24 +144,39 @@ class BetReceiptController extends Controller
         }
     }
 
-    private function addAmount(&$amountArray, $value, $check, $label)
-    {
-        if ($value > 0) {
-            $amount = $value . ($check ? "({$label}x)" : "({$label})");
-            if(!empty($amountArray)){
-                $amountArray = $amountArray.', '.$amount;
-            }else{
+private function addAmount(&$amountArray, $value, $check, $label)
+{
+    if ($value > 0) {
+        // Convert value to integer if it is a whole number
+        $displayValue = ($value == (int)$value) ? (int)$value : $value;
+    
+        // Format the amount with the appropriate label
+        $amount = $displayValue . ($check ? "({$label}x)" : "({$label})");
+        
+        // Check if the label is already present in the array to avoid duplicates
+        if (strpos($amountArray, "({$label})") === false && strpos($amountArray, "({$label}x)") === false) {
+            // If it's not in the array, append the new formatted amount
+            if (!empty($amountArray)) {
+                $amountArray .= ', ' . $amount;
+            } else {
                 $amountArray = $amount;
             }
         }
     }
+    
+}
+
 
     public function getBetByReceiptId($id)
     {
-        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber', 'betWinningRecords', 'bets'=>function ($q) {
-            $q->orderBy('number_format');
-        }])
-            ->findOrFail($id);
+        $result = $this->model->with([
+            'bets.betLotterySchedule',
+            'bets.betNumber',
+            'betWinningRecords',
+            'bets' => function ($q) {
+                $q->orderBy('number_format');
+            }
+        ])->findOrFail($id);
         $betIdWin = $this->betWinningRecord->newQuery()
             ->whereHas('bets', function ($q) use ($id){
                 $q->where('bet_receipt_id', $id);
@@ -161,7 +184,10 @@ class BetReceiptController extends Controller
             ->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
         $items = [];
         $amount = '';
-        foreach ($result->bets as $key => $bet){
+
+     
+        foreach ($result->bets as $bet){
+
             foreach ($bet['betNumber'] as $betNumber){
                 $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
                 $this->addAmount($amount, $betNumber->b_amount ?? 0, $betNumber->b_check ?? false, "B");
@@ -171,6 +197,7 @@ class BetReceiptController extends Controller
                 $this->addAmount($amount, $betNumber->roll_parlay_amount ?? 0, $betNumber->roll_parlay_check ?? false, "RP");
             }
             $companyCode = $bet['betLotterySchedule']?->code;
+            $isWin = in_array($bet->id, $betIdWin);
             if(count($items)){
                 $itemsFilter = array_filter($items, function ($val) use ($bet, $companyCode){
                     return $val['number'] === $bet['number_format'];
@@ -181,14 +208,15 @@ class BetReceiptController extends Controller
                         'number' => $bet['number_format'],
                         'company' => $companyCode,
                         'amount' => $amount,
-                        'is_win' => in_array($bet->id, $betIdWin)
+                        'is_win' => $isWin
                     ];
                 }else{
-                    $items = array_map(function ($val) use ($bet, $companyCode, $amount) {
+                    $items = array_map(function ($val) use ($bet, $companyCode, $isWin) {
                         if($val['number'] === $bet['number_format']){
                             return [
                                 ...$val,
-                                'company'=> $val['company'].', '.$companyCode
+                                'company'=> $val['company'].', '.$companyCode,
+                                'is_win' => $val['is_win'] || $isWin
                             ];
                         }
                         return $val;
@@ -199,7 +227,7 @@ class BetReceiptController extends Controller
                     'number' => $bet['number_format'],
                     'company' => $companyCode,
                     'amount' => $amount,
-                    'is_win' => in_array($bet->id, $betIdWin)
+                    'is_win' => $isWin
                 ];
             }
             $amount = '';

@@ -49,7 +49,7 @@
                                 @endforeach
                             </td>
                             <td>{{ $user->created_at }}</td>
-                            <td>{{ $user->created_at }}</td>
+                            <td>{{ $user->updated_at }}</td>
                             <td>
                                 <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
                                 <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST" onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">

@@ -23,6 +23,16 @@
                     </p>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('admin.balance-report.index') }}"
+                    class="nav-link {{ Route::is('admin.balance-report.index') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-money-bill"></i>
+                    <p>Balance Report
+                        <span class="badge badge-info right">{{ $userCount }}</span>
+                    </p>
+                </a>
+            </li>
             <!-- <li class="nav-item">
                 <a href="{{ route('admin.role.index') }}"
                     class="nav-link {{ Route::is('admin.role.index') ? 'active' : '' }}">
