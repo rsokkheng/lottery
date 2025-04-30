@@ -600,6 +600,7 @@ class LottoBet extends Component
             $multiplier = match ($type) {
                 'ab' => $numberLength == 2 ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
                 'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D : 0)),
+                'roll7' => $numberLength ==3? MultiplierEnum::ROLL7 :0,
                 default => 1,
             };
         }
