@@ -340,16 +340,16 @@
             <div x-show="show"
                  x-transition
                  :style="'top:' + posY + 'px; left:' + posX + 'px'"
-                 class="grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50 pointer-events-auto"
+                 class="w-40 grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50 pointer-events-auto gap-2"
             >
-                <button @click="clearValue()" class="bg-blue-500 text-white p-1 m-1 rounded">CLS</button>
-                <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 m-1 rounded">+0.5</button>
-                <button @click="addValue(1)" class="bg-blue-500 text-white p-1 m-1 rounded">+1</button>
-                <button @click="addValue(5)" class="bg-blue-500 text-white p-1 m-1 rounded">+5</button>
-                <button @click="addValue(10)" class="bg-blue-500 text-white p-1 m-1 rounded">+10</button>
-                <button @click="addValue(50)" class="bg-blue-500 text-white p-1 m-1 rounded">+50</button>
-                <button @click="addValue(100)" class="bg-blue-500 text-white p-1 m-1 rounded">+100</button>
-                <button @click="addValue(500)" class="bg-blue-500 text-white p-1 m-1 rounded">+500</button>
+                <button @click="clearValue()" class="bg-blue-500 text-white p-1 rounded">CLS</button>
+                <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 rounded">+0.5</button>
+                <button @click="addValue(1)" class="bg-blue-500 text-white p-1 rounded">+1</button>
+                <button @click="addValue(5)" class="bg-blue-500 text-white p-1 rounded">+5</button>
+                <button @click="addValue(10)" class="bg-blue-500 text-white p-1 rounded">+10</button>
+                <button @click="addValue(50)" class="bg-blue-500 text-white p-1 rounded">+50</button>
+                <button @click="addValue(100)" class="bg-blue-500 text-white p-1 rounded">+100</button>
+                <button @click="addValue(500)" class="bg-blue-500 text-white p-1 rounded">+500</button>
             </div>
         </div>
     </div>
