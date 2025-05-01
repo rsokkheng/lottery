@@ -124,11 +124,13 @@
 
         <!-- Table header Section -->
         <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
-        <div class="flex whitespace-nowrap mb-2">
-                <h6 style="font-size:14px">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49) big(50-99) even(00,02,...,98) odd(01,03,...,99)</h6>
+            <div  class="flex whitespace-nowrap mb-2">
+                <h6 style="font-size:14px">Number Wildcard: * = any of 0,1,2,3,...,9 11-19(11,12,...,19) small(00-49)
+                    big(50-99) even(00,02,...,98) odd(01,03,...,99)</h6>
             </div>
             <div class="flex whitespace-nowrap mb-2">
-                <h6 style="font-size:14px">Shortcut Word:	Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll Parlay(RP) Cross(x)</h6>
+                <h6 style="font-size:14px">Shortcut Word: Head(A) Last(B) Head+Last(A+B) Roll(R) Roll7(R7) Roll
+                    Parlay(RP) Cross(x)</h6>
             </div>
             <div class="flex whitespace-nowrap mb-2">
                 <p class="text-md font-bold">{{__('Time Left:')}}</p>
@@ -196,7 +198,7 @@
                                         type="text"
                                         wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('a_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('a_amount',{{ $i }}, $event)"
                                         x-ref="a_amount{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -217,7 +219,7 @@
                                         wire:model="b_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
                                         wire:input="handleInputNumber"
-                                        @focus="showPopup('b_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('b_amount',{{ $i }}, $event)"
                                         x-ref="b_amount{{ $i }}"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -238,7 +240,7 @@
                                         type="text"
                                         wire:model="ab_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('ab_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('ab_amount',{{ $i }}, $event)"
                                         x-ref="ab_amount{{ $i }}"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -259,7 +261,7 @@
                                         id="roll_amount_{{ $i }}"
                                         wire:model="roll_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('roll_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('roll_amount',{{ $i }}, $event)"
                                         x-ref="roll_amount{{$i}}"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -279,7 +281,7 @@
                                         type="text"
                                         wire:model="roll7_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('roll7_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('roll7_amount',{{ $i }}, $event)"
                                         x-ref="roll7_amount{{$i}}"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -299,7 +301,7 @@
                                         type="text"
                                         wire:model="roll_parlay_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{$i}})"
-                                        @focus="showPopup('roll_parlay_amount',{{ $i }}, $event)"
+                                        @click.stop="showPopup('roll_parlay_amount',{{ $i }}, $event)"
                                         x-ref="roll_parlay_amount{{$i}}"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
                                         class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
@@ -339,8 +341,10 @@
             <!-- Popup -->
             <div x-show="show"
                  x-transition
+                 @click.away="hidePopup()"
                  :style="'top:' + posY + 'px; left:' + posX + 'px'"
-                 class="w-40 grid grid-cols-2 fixed bg-white border p-2 rounded shadow z-50 pointer-events-auto gap-2"
+                 class="w-40 grid grid-cols-2 fixed bg-gray-200 border p-2 rounded shadow z-50 gap-2"
+
             >
                 <button @click="clearValue()" class="bg-blue-500 text-white p-1 rounded">CLS</button>
                 <button @click="addValue(0.5)" class="bg-blue-500 text-white p-1 rounded">+0.5</button>
@@ -388,8 +392,8 @@
         if (parts.length > 2) {
             value = parts[0] + '.' + parts.slice(1).join('');
         }
-         // Limit to 5 characters
-         if (value.length > 5) {
+        // Limit to 5 characters
+        if (value.length > 5) {
             value = value.slice(0, 5);
         }
         input.value = value; // Update the input value with the formatted number
@@ -446,7 +450,7 @@
     // Initialize all input fields when the page loads
     window.addEventListener('DOMContentLoaded', initializeInputs);
 
-       popupHandler = function () {
+    popupHandler = function () {
         return {
             show: false,
             activeRow: null,
@@ -480,7 +484,7 @@
                 let current = parseFloat(input.value) || 0;
                 let result = current + amount;
                 input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('input', {bubbles: true}));
                 input.focus();
             },
 
