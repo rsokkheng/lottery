@@ -1086,7 +1086,7 @@ class LotteryResultController extends Controller
     }
 
 
-    public function getWinningReport(Request $request)
+    public function getWinningReportOld(Request $request)
     {
         try{
 //            dd($request->all());
@@ -1130,12 +1130,6 @@ class LotteryResultController extends Controller
                     'bet_numbers.roll7_amount',
                     'bet_numbers.roll_parlay_amount',
                     DB::raw('sum(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
-//                    'bet_numbers.a_check',
-//                    'bet_numbers.b_check',
-//                    'bet_numbers.ab_check',
-//                    'bet_numbers.roll_check',
-//                    'bet_numbers.roll7_check',
-//                    'bet_numbers.roll_parlay_check',
                     'users.name as account'
                 )
                  ->join('bets','record.bet_id','=', 'bets.id')
@@ -1180,13 +1174,196 @@ class LotteryResultController extends Controller
                  ->groupBy('bet_numbers.roll_amount')
                  ->groupBy('bet_numbers.roll7_amount')
                  ->groupBy('bet_numbers.roll_parlay_amount')
-//                 ->groupBy('bet_numbers.a_check')
-//                 ->groupBy('bet_numbers.b_check')
-//                 ->groupBy('bet_numbers.ab_check')
-//                 ->groupBy('bet_numbers.roll_check')
-//                 ->groupBy('bet_numbers.roll7_check')
-                 ->groupBy('bet_numbers.roll_parlay_amount')
                  ->groupBy('users.name')
+                ->each(function ($record) use (&$data) {
+                    $getBetRoll = '';
+                    $amount = 0;
+                    if($record->a_amount > 0){
+                        $amount = $amount+$record->a_amount;
+                        $getBetRoll = $getBetRoll.'Head';
+                    }
+                    if($record->b_amount > 0){
+                        $amount = $amount+$record->b_amount;
+                        if($getBetRoll){
+                            $getBetRoll = $getBetRoll.',&nbsp;';
+                        }
+                        $getBetRoll = $getBetRoll.'Last';
+                    }
+                    if($record->ab_amount > 0){
+                        $amount = $amount+$record->ab_amount;
+                        if($getBetRoll){
+                            $getBetRoll = $getBetRoll.',&nbsp;';
+                        }
+                        $getBetRoll = $getBetRoll.'Head+Last';
+                    }
+                    if($record->roll_amount > 0){
+                        $amount = $amount+$record->roll_amount;
+                        if($getBetRoll){
+                            $getBetRoll = $getBetRoll.',&nbsp;';
+                        }
+                        $getBetRoll = $getBetRoll.'Roll';
+                    }
+                    if($record->roll7_amount > 0){
+                        $amount = $amount+$record->roll7_amount;
+                        if($getBetRoll){
+                            $getBetRoll = $getBetRoll.',&nbsp;';
+                        }
+                        $getBetRoll = $getBetRoll.'Roll7';
+                    }
+                    if($record->roll_parlay_amount > 0){
+                        $amount = $amount+$record->roll_parlay_amount;
+                        if($getBetRoll){
+                            $getBetRoll = $getBetRoll.',&nbsp;';
+                        }
+                        $getBetRoll = $getBetRoll.'Roll Parlay';
+                    }
+
+                    $betType = $record->bet_type;
+                    if($record->sum_check){
+                        $betType = $record->bet_type.'(x)';
+                    }
+
+                    $prepareData = [
+                        'bet_id' => $record->bet_id,
+                        'account' => $record->account,
+                        'amount' => $amount,
+                        'net' => $record->net,
+                        'odds' => $record->odds,
+                        'bet_type' => $betType,
+                        'original_number' => $record->original_number,
+                        'company' => $record->province,
+                        'game' => $getBetRoll,
+                        'receipt_no' => $record->receipt_no,
+                        'bet_date' => $record->bet_date,
+                    ];
+
+                    if(in_array($record->bet_type, ['RP2','RP3', 'RP4'])){
+                        $existBet = array_filter($data, function ($val) use ($record) {
+                            return $val['bet_id'] === $record->bet_id;
+                        });
+                        if(!count($existBet)){
+                            $commission = $record->turnover - ($record->turnover * $record->net / 100);
+                            $netAmount = $record->turnover * $record->net / 100;
+                            $prepareData['compensate'] = BetWinningRecord::query()->where('bet_id', $record->bet_id)->first()->prize_amount??0;
+                            $prepareData['win_number'] = $record->original_number;
+                            $prepareData['turnover'] = $record->turnover;
+                            $prepareData['commission'] = $commission;
+                            $prepareData['net_amount'] = $netAmount;
+                            $data[] = $prepareData;
+                        }
+                    }else{
+                        $existBet = array_filter($data, function ($val) use ($record) {
+                            return $val['bet_id'] === $record->bet_id;
+                        });
+                        if(!count($existBet)) {
+                            $commission = $record->turnover - ($record->turnover * $record->net / 100);
+                            $netAmount = $record->turnover * $record->net / 100;
+                            $prepareData['turnover'] = $record->turnover;
+                            $prepareData['win_number'] = sprintf("%02d", $record->win_number);
+                            $prepareData['compensate'] = $record->sum_prize_amount;
+                            $prepareData['commission'] = $commission;
+                            $prepareData['net_amount'] = $netAmount;
+                            $data[] = $prepareData;
+                        }
+                    }
+                });
+
+//             return $data;
+
+            return view('bet.report-winning', compact('data','companies', 'date', 'number', 'company'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+
+    public function getWinningReport(Request $request)
+    {
+        try{
+//            dd($request->all());
+            $date = date('Y-m-d');
+            $companies = $this->companies;
+//            $date = '2025-03-29';
+            if ($request->has('date')) {
+                $date = $request->get('date');
+            }
+            $number = $request->number ?? null;
+            $company = -1;
+            if ($request->has('company')) {
+                $company = $request->get('company');
+            }
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
+
+            $data = [];
+            DB::table('bet_winning_records as record')
+                ->select(
+                    'record.bet_id',
+                    'record.win_number',
+                    'record.prize_amount as sum_prize_amount',
+                    'pkg_con.bet_type',
+                    'pkg_con.rate as net',
+                    'pkg_con.price as odds',
+                    'bets.number_format as original_number',
+                    'bets.bet_date',
+                    'bets.total_amount as turnover',
+                    'schedule.province',
+                    'bet_receipts.receipt_no',
+                    'bet_numbers.a_amount',
+                    'bet_numbers.b_amount',
+                    'bet_numbers.ab_amount',
+                    'bet_numbers.roll_amount',
+                    'bet_numbers.roll7_amount',
+                    'bet_numbers.roll_parlay_amount',
+                    DB::raw('sum(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
+                    'users.name as account'
+                )
+                ->join('bets','record.bet_id','=', 'bets.id')
+                ->join('users','users.id','=', 'bets.user_id')
+                ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
+                ->join('bet_receipts','bet_receipts.id','=', 'bets.bet_receipt_id')
+                ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bets.bet_schedule_id')
+                ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
+                ->where('bets.bet_date', $date)
+                ->when($company, function ($q) use ($company){
+                    $q->when($company == 1, function ($q2){
+                        $q2->where('schedule.draw_time', '16:30:00');
+                    });
+                    $q->when($company == 2, function ($q2){
+                        $q2->where('schedule.draw_time', '17:30:00');
+                    });
+                    $q->when($company == 3, function ($q2){
+                        $q2->where('schedule.draw_time', '18:30:00');
+                    });
+                })
+                ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('bets.user_id', $user->id);
+                })
+                ->when($number, function ($q) use ($number){
+                    $q->where('bets.number_format', 'like','%'.$number.'%');
+                })
+                ->orderBy('record.bet_id')
+                ->groupBy('record.bet_id')
+                ->groupBy('record.win_number')
+                ->groupBy('record.prize_amount')
+                ->groupBy('bet_type')
+                ->groupBy('pkg_con.rate')
+                ->groupBy('pkg_con.price')
+                ->groupBy('bets.number_format')
+                ->groupBy('bets.bet_date')
+                ->groupBy('bets.total_amount')
+                ->groupBy('schedule.province')
+                ->groupBy('bet_receipts.receipt_no')
+                ->groupBy('bet_numbers.a_amount')
+                ->groupBy('bet_numbers.b_amount')
+                ->groupBy('bet_numbers.ab_amount')
+                ->groupBy('bet_numbers.roll_amount')
+                ->groupBy('bet_numbers.roll7_amount')
+                ->groupBy('bet_numbers.roll_parlay_amount')
+                ->groupBy('users.name')
                 ->each(function ($record) use (&$data) {
                     $getBetRoll = '';
                     $amount = 0;
