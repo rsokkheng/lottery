@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\BetLotteryPackage;
+use App\Models\BetUserWallet;
 use App\Models\Menu;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -43,8 +44,15 @@ class UserController extends Controller
             'package_id' => $request->package_id,
             'name' => $request->name,
             'username' => $request->username,
+            'email' => $request->username.'@gmail.com',
             'phonenumber' => $request->phonenumber,
             'password' => bcrypt($request->password),
+        ]);
+
+        BetUserWallet::create([
+            'user_id' => $user->id,
+            'currency' => "VDN",
+            'status' => "Active",
         ]);
         
         $user->assignRole($request->role);

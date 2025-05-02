@@ -83,7 +83,7 @@ class BetController extends Controller
                     $query->where('generated_number', $number);
                 });
             })->get();
-
+            
             return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
         } catch (\Exception $exception) {
             throwException($exception);

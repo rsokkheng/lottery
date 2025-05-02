@@ -199,7 +199,7 @@ private function addAmount(&$amountArray, $value, $check, $label)
             $companyCode = $bet['betLotterySchedule']?->code;
             $isWin = in_array($bet->id, $betIdWin);
             if(count($items)){
-                $itemsFilter = array_filter($items, function ($val) use ($bet, $companyCode){
+                $itemsFilter = array_filter($items, function ($val) use ($bet){
                     return $val['number'] === $bet['number_format'];
                 });
 
@@ -211,16 +211,12 @@ private function addAmount(&$amountArray, $value, $check, $label)
                         'is_win' => $isWin
                     ];
                 }else{
-                    $items = array_map(function ($val) use ($bet, $companyCode, $isWin) {
-                        if($val['number'] === $bet['number_format']){
-                            return [
-                                ...$val,
-                                'company'=> $val['company'].', '.$companyCode,
-                                'is_win' => $val['is_win'] || $isWin
-                            ];
-                        }
-                        return $val;
-                    },$items);
+                    $items[] =[
+                        'number' => $bet['number_format'],
+                        'company' => $companyCode,
+                        'amount' => $amount,
+                        'is_win' => $isWin
+                    ];
                 }
             }else{
                 $items[] =[
@@ -275,15 +271,11 @@ private function addAmount(&$amountArray, $value, $check, $label)
                         'amount' => $amount,
                     ];
                 }else{
-                    $items = array_map(function ($val) use ($bet, $companyCode, $amount) {
-                        if($val['number'] === $bet['number_format']){
-                            return [
-                                ...$val,
-                                'company'=> $val['company'].', '.$companyCode
-                            ];
-                        }
-                        return $val;
-                    },$items);
+                    $items[] =[
+                        'number' => $bet['number_format'],
+                        'company' => $companyCode,
+                        'amount' => $amount,
+                    ];
                 }
             }else{
                 $items[] =[
