@@ -1232,7 +1232,7 @@ class LotteryResultController extends Controller
                     'pkg_con.price as odds',
                     'bets.number_format as original_number',
                     'bets.bet_date',
-                    'bets.total_amount as turnover',
+                    'bet_numbers.total_amount as turnover',
                     'schedule.province',
                     'bet_receipts.receipt_no',
                     'bet_numbers.a_amount',
@@ -1281,6 +1281,7 @@ class LotteryResultController extends Controller
                 ->groupBy('schedule.province')
                 ->groupBy('bet_receipts.receipt_no')
                 ->groupBy('bet_numbers.a_amount')
+                ->groupBy('bet_numbers.total_amount')
                 ->groupBy('bet_numbers.b_amount')
                 ->groupBy('bet_numbers.ab_amount')
                 ->groupBy('bet_numbers.roll_amount')
