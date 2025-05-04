@@ -40,16 +40,16 @@
                                                         @php $c=1; $r=1; @endphp
                                                         @foreach($province['row_result'] as $key=>$row)
                                                             @if($c == 1)
-                                                                <div class="d-flex w-full p-1 justify-content-between">  <!-- open tag dev for new row -->
+                                                                <div class="d-flex w-full justify-content-between">  <!-- open tag dev for new row -->
                                                                     @endif
-                                                                    <div class="d-flex w-full p-1 max-md:p-0 justify-center">
-                                                                        <p class="pr-1 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
+                                                                    <div class="d-flex w-full max-md:p-0 justify-center">
+                                                                        <p class="pr-1 pl-1 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
                                                                         <input type="text"
                                                                                name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                                value="{{ $row['winning_number']??''}}"
                                                                                data-max-length="{{$row['input_length']??0}}"
                                                                                maxlength="{{$row['input_length']??0}}"
-                                                                               class="form-control class-only-input-win-number split-input"
+                                                                               class="form-control border-0 shadow-none class-only-input-win-number split-input"
                                                                                placeholder="0"
                                                                                aria-label="Winning number"
                                                                         >
@@ -62,14 +62,14 @@
                                                         @endforeach
                                                     @else
                                                         @foreach($province['row_result'] as $row)
-                                                            <div class="d-flex w-full justify-center p-1 max-md:p-0">
+                                                            <div class="d-flex w-full justify-center max-md:p-0">
                                                                 <p class="pr-1 pt-2 text-secondary" style="height: 100% !important;">{{$row['result_order']}}</p>
                                                                 <input type="text"
                                                                        name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                        value="{{ $row['winning_number']??''}}"
                                                                        data-max-length="{{$row['input_length']??0}}"
                                                                        maxlength="{{$row['input_length']??0}}"
-                                                                       class="form-control class-only-input-win-number split-input"
+                                                                       class="form-control border-0 shadow-none class-only-input-win-number split-input"
                                                                        placeholder="0"
                                                                        aria-label="Winning number"
                                                                 >
