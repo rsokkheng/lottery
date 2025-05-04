@@ -31,11 +31,11 @@
                                 <tbody>
                                     @foreach($data['form_result']['result'] as $pKey => $prize)
                                         <tr>
-                                            <td class="text-black">
+                                            <th class="text-black">
                                                 {{ $prize['prize_label'] }}
-                                            </td>
+                                            </th>
                                             @foreach($prize['provinces'] as $province)
-                                                <td class="text-primary p-1">
+                                                <th class="text-primary p-1">
                                                     @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)
                                                         @php $c=1; $r=1; @endphp
                                                         @foreach($province['row_result'] as $key=>$row)
@@ -48,7 +48,8 @@
                                                                                name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                                value="{{ $row['winning_number']??''}}"
                                                                                data-max-length="{{$row['input_length']??0}}"
-                                                                               class="form-control class-only-input-win-number"
+                                                                               maxlength="{{$row['input_length']??0}}"
+                                                                               class="form-control class-only-input-win-number split-input"
                                                                                placeholder="0"
                                                                                aria-label="Winning number"
                                                                         >
@@ -67,7 +68,8 @@
                                                                        name="[{{$province['province_code']}}][{{$pKey}}][{{$province['schedule_id']}}][{{$row['result_order']}}]"
                                                                        value="{{ $row['winning_number']??''}}"
                                                                        data-max-length="{{$row['input_length']??0}}"
-                                                                       class="form-control class-only-input-win-number"
+                                                                       maxlength="{{$row['input_length']??0}}"
+                                                                       class="form-control class-only-input-win-number split-input"
                                                                        placeholder="0"
                                                                        aria-label="Winning number"
                                                                 >
@@ -75,7 +77,7 @@
                                                         @endforeach
                                                     @endif
 
-                                                </td>
+                                                </th>
                                             @endforeach
                                         </tr>
                                     @endforeach
@@ -94,6 +96,30 @@
     @section('js')
         <script>
             $(function(){
+
+                const $inputs = $('.split-input');
+
+                $inputs.on('paste', function (e) {
+                    e.preventDefault();
+
+                    const pasteData = (e.originalEvent.clipboardData || window.clipboardData)
+                        .getData('text')
+                        .replace(/\D/g, '');
+
+                    const startIndex = $inputs.index(this);
+                    let offset = 0;
+
+                    // Clear values from current input onward
+                    $inputs.slice(startIndex).val('');
+
+                    $inputs.slice(startIndex).each(function () {
+                        const maxLen = parseInt($(this).attr('maxlength'), 10) || 0;
+                        const chunk = pasteData.substring(offset, offset + maxLen);
+                        $(this).val(chunk);
+                        offset += maxLen;
+                    });
+                });
+
 
                 $('.class-only-input-win-number').each(function () {
                     let inputLength = $(this).data("max-length")??0
@@ -177,6 +203,7 @@
                     });
 
                 })
+
             });
         </script>
     @endsection
