@@ -232,67 +232,71 @@ private function addAmount(&$amountArray, $value, $check, $label)
 
         $isPaid = $result->betWinningRecords?->first()?->paid_status;
         $companyMap =$bet['betLotterySchedule']?->id;
-        $grouped = collect($items)
-            ->flatMap(function ($item) {
-                // Split amount string into parts like "30(R)"
-                $amounts = explode(',', $item['amount']);
-                return collect($amounts)->map(function ($amt) use ($item) {
-                    if (preg_match('/^(\d+)\((\w+)\)$/', trim($amt), $matches)) {
-                        return [
-                            'number' => $item['number'],
-                            'company' => $item['company'],
-                            'type' => $matches[2],
-                            'amount' => (int)$matches[1],
-                            'is_win' => $item['is_win'],
-                        ];
-                    }
-                    return null;
-                })->filter();
-            })
-            // Step 1: Group by number + company + type to sum only within the same company
-            ->groupBy(function ($item) {
-                return "{$item['number']}_{$item['company']}_{$item['type']}";
-            })
-            ->map(function ($group) {
-                $first = $group->first();
-                return [
-                    'number' => $first['number'],
-                    'company' => $first['company'],
-                    'type' => $first['type'],
-                    'amount' => $group->sum('amount'),
-                    'is_win' => $group->contains('is_win', true),
-                ];
-            })
-            // Step 2: Group by number to prepare merging company display
-            ->groupBy('number')
-            ->map(function ($groupedItems, $number) use ($companyMap) {
-                // Collect unique company names for this number
-                $companyNames = $groupedItems->pluck('company')
-                    ->unique()
-                    ->map(fn($id) => $companyMap[$id] ?? $id)
-                    ->implode(', ');
+        if(count($items) > 1){
+            $grouped = collect($items)
+                ->flatMap(function ($item) {
+                    // Split amount string into parts like "30(R)"
+                    $amounts = explode(',', $item['amount']);
+                    return collect($amounts)->map(function ($amt) use ($item) {
+                        if (preg_match('/^([\d.]+)\((\w+)\)$/', trim($amt), $matches)) {
+                            return [
+                                'number' => $item['number'],
+                                'company' => $item['company'],
+                                'type' => $matches[2],
+                                'amount' => $matches[1],
+                                'is_win' => $item['is_win'],
+                            ];
+                        }
+                        return null;
+                    })->filter();
+                })
+                // Step 1: Group by number + company + type to sum only within the same company
+                ->groupBy(function ($item) {
+                    return "{$item['number']}_{$item['company']}_{$item['type']}";
+                })
+                ->map(function ($group) {
+                    $first = $group->first();
+                    return [
+                        'number' => $first['number'],
+                        'company' => $first['company'],
+                        'type' => $first['type'],
+                        'amount' => $group->sum('amount'),
+                        'is_win' => $group->contains('is_win', true),
+                    ];
+                })
+                // Step 2: Group by number to prepare merging company display
+                ->groupBy('number')
+                ->map(function ($groupedItems, $number) use ($companyMap) {
+                    // Collect unique company names for this number
+                    $companyNames = $groupedItems->pluck('company')
+                        ->unique()
+                        ->map(fn($id) => $companyMap[$id] ?? $id)
+                        ->implode(', ');
 
-                // Group by type + amount to avoid duplicating identical values across companies
-                $amountGrouped = $groupedItems
-                    ->groupBy(function ($item) {
-                        return "{$item['type']}_{$item['amount']}";
-                    })
-                    ->map(function ($items) {
-                        // If multiple companies have the same amount+type, just show once
-                        $first = $items->first();
-                        return "{$first['amount']}({$first['type']})";
-                    })
-                    ->values()
-                    ->implode(', ');
+                    // Group by type + amount to avoid duplicating identical values across companies
+                    $amountGrouped = $groupedItems
+                        ->groupBy(function ($item) {
+                            return "{$item['type']}_{$item['amount']}";
+                        })
+                        ->map(function ($items) {
+                            // If multiple companies have the same amount+type, just show once
+                            $first = $items->first();
+                            return "{$first['amount']}({$first['type']})";
+                        })
+                        ->values()
+                        ->implode(', ');
 
-                return [
-                    'number' => $number,
-                    'company' => $companyNames,
-                    'amount' => $amountGrouped,
-                    'is_win' => $groupedItems->contains('is_win', true),
-                ];
-            })
-            ->values();
+                    return [
+                        'number' => $number,
+                        'company' => $companyNames,
+                        'amount' => $amountGrouped,
+                        'is_win' => $groupedItems->contains('is_win', true),
+                    ];
+                })
+                ->values();
+            }else{
+                $grouped = $items;
+            }
 
         return response()->json([
             'no_receipt' => $result?->receipt_no,
@@ -360,12 +364,12 @@ private function addAmount(&$amountArray, $value, $check, $label)
                 // Split amount string into parts like "30(R)"
                 $amounts = explode(',', $item['amount']);
                 return collect($amounts)->map(function ($amt) use ($item) {
-                    if (preg_match('/^(\d+)\((\w+)\)$/', trim($amt), $matches)) {
+                    if (preg_match('/^([\d.]+)\((\w+)\)$/', trim($amt), $matches)) {
                         return [
                             'number' => $item['number'],
                             'company' => $item['company'],
                             'type' => $matches[2],
-                            'amount' => (int)$matches[1],
+                            'amount' => $matches[1],
                         ];
                     }
                     return null;
