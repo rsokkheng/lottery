@@ -1203,10 +1203,8 @@ class LotteryResultController extends Controller
     public function getWinningReport(Request $request)
     {
         try{
-//            dd($request->all());
             $date = date('Y-m-d');
             $companies = $this->companies;
-//            $date = '2025-03-29';
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
@@ -1230,10 +1228,10 @@ class LotteryResultController extends Controller
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
                     'pkg_con.price as odds',
-                    'bets.number_format as original_number',
                     'bets.bet_date',
+                    'bet_numbers.generated_number as generated_number',
                     'bet_numbers.total_amount as turnover',
-                    'schedule.province',
+                    'schedule.province_en',
                     'bet_receipts.receipt_no',
                     'bet_numbers.a_amount',
                     'bet_numbers.b_amount',
@@ -1244,9 +1242,9 @@ class LotteryResultController extends Controller
                     DB::raw('sum(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
                     'users.name as account'
                 )
-                ->join('bets','record.bet_id','=', 'bets.id')
+                ->join('bet_numbers','bet_numbers.id','=', 'record.bet_number_id')
+                ->join('bets','bet_numbers.bet_id','=', 'bets.id')
                 ->join('users','users.id','=', 'bets.user_id')
-                ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
                 ->join('bet_receipts','bet_receipts.id','=', 'bets.bet_receipt_id')
                 ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bets.bet_schedule_id')
                 ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
@@ -1275,11 +1273,11 @@ class LotteryResultController extends Controller
                 ->groupBy('bet_type')
                 ->groupBy('pkg_con.rate')
                 ->groupBy('pkg_con.price')
-                ->groupBy('bets.number_format')
                 ->groupBy('bets.bet_date')
                 ->groupBy('bets.total_amount')
-                ->groupBy('schedule.province')
+                ->groupBy('schedule.province_en')
                 ->groupBy('bet_receipts.receipt_no')
+                ->groupBy('bet_numbers.generated_number')
                 ->groupBy('bet_numbers.a_amount')
                 ->groupBy('bet_numbers.total_amount')
                 ->groupBy('bet_numbers.b_amount')
@@ -1343,8 +1341,8 @@ class LotteryResultController extends Controller
                         'net' => $record->net,
                         'odds' => $record->odds,
                         'bet_type' => $betType,
-                        'original_number' => $record->original_number,
-                        'company' => $record->province,
+                        'original_number' => $record->generated_number,
+                        'company' => $record->province_en,
                         'game' => $getBetRoll,
                         'receipt_no' => $record->receipt_no,
                         'bet_date' => $record->bet_date,
@@ -1358,7 +1356,7 @@ class LotteryResultController extends Controller
                             $commission = $record->turnover - ($record->turnover * $record->net / 100);
                             $netAmount = $record->turnover * $record->net / 100;
                             $prepareData['compensate'] = BetWinningRecord::query()->where('bet_id', $record->bet_id)->first()->prize_amount??0;
-                            $prepareData['win_number'] = $record->original_number;
+                            $prepareData['win_number'] = $record->generated_number;
                             $prepareData['turnover'] = $record->turnover;
                             $prepareData['commission'] = $commission;
                             $prepareData['net_amount'] = $netAmount;
@@ -1380,9 +1378,6 @@ class LotteryResultController extends Controller
                         }
                     }
                 });
-
-//             return $data;
-
             return view('bet.report-winning', compact('data','companies', 'date', 'number', 'company'));
         } catch (\Exception $exception) {
             throwException($exception);

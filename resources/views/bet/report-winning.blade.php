@@ -89,18 +89,18 @@
                                 <td class="py-2 px-2 border border-gray-300">{{$row['receipt_no']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['account']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['bet_date']??''}}</td>
-                                <td class="py-2 px-2 border border-gray-300">{{$row['bet_no']??''}}</td>
+                                <td class="py-2 px-2 border border-gray-300">{{$row['bet_id']??''}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['win_number']??''}}</td>
-                                <td class="py-2 px-2 border border-gray-300">{{$row['bet_type']??''}}</td>
+                                <td class="py-2 px-2 border border-gray-300">{{$row['bet_type']=="RP4(x)" ? 'PL2' : $row['bet_type']}}</td>
                                 <td class="py-2 px-2 border border-gray-300">{{$row['game']??''}} </td>
                                 <td class="py-2 px-1 border border-gray-300">{{$row['company']??''}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['amount']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['odds']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['net']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['turnover']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['commission']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['net_amount']??0}}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">{{$row['compensate']??0}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['amount'], 2, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['odds'], 2, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['net'], 2, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['turnover'], 2, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['commission'], 3, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['net_amount'], 3, '.', '')}}</td>
+                                <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $row['compensate'], 3, '.', '')}}</td>
                             </tr>
                             @php
                                 $totalCommission += (float)$row['commission']??0;
@@ -110,9 +110,9 @@
                         @endforeach
                         <tr class="border border-gray-300  hover:bg-gray-100">
                             <td colspan="13"></td>
-                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{$totalCommission??'0.00'}}</td>
-                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{$totalNetAmount??'0.000'}}</td>
-                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{$totalCompensate??'0.000'}}</td>
+                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{ number_format( $totalCommission, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{ number_format( $totalNetAmount, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">{{ number_format( $totalCompensate, 3, '.', '')}}</td>
                         </tr>
                     @else
                         <tr class="border border-gray-300 hover:bg-gray-100">
