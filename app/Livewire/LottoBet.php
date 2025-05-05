@@ -37,6 +37,7 @@ class LottoBet extends Component
     public $ab_amount = [];
     public $roll_amount = [];
     public $roll7_amount = [];
+    public $store_roll7_amount = [];
     public $roll_parlay_amount = [];
     public $total_amount = [];
     public $amountHN = [];
@@ -77,6 +78,7 @@ class LottoBet extends Component
 
     public $packageRate = [];
     public $lengthNum = [];
+    public $isCheckHN = [];
 
     public $betUserWallet;
 
@@ -93,10 +95,6 @@ class LottoBet extends Component
         $this->betModel = $betModel;
         $this->betPackageConfiguration = $betPackageConfiguration;
         $this->betReceipt = $betReceipt;
-
-//         $this->currentDate = '2025-05-03';
-//         $this->currentDay = 'Saturday';
-//         $this->currentTime = '01:10:10';
 
         $this->currentDate = Carbon::now()->format('Y-m-d');
         $this->currentDay = Carbon::now()->format('l');
@@ -153,6 +151,8 @@ class LottoBet extends Component
         $this->total_amount = array_fill(0, $this->totalRow, 0);
         $this->amountHN = array_fill(0, $this->totalRow, 0);
         $this->amountNotHN = array_fill(0, $this->totalRow, 0);
+        $this->store_roll7_amount = array_fill(0, $this->totalRow, null);
+        $this->isCheckHN = array_fill(0, $this->totalRow, false);
     }
 
     public function handleProvinceCheck($index)
@@ -169,10 +169,14 @@ class LottoBet extends Component
     {
         $isHN = false;
         if ($this->lengthNum[$key_num] == 3) {
+            if($this->roll7_amount[$key_num]> 0){
+                $this->store_roll7_amount[$key_num] = $this->roll7_amount[$key_num];
+            }
             foreach ($this->schedules as $key => $item) {
                 if ($this->province_body_check[$key][$key_num]) {
                     if ($item['code'] === 'HN') {
                         $isHN = true;
+                        $this->isCheckHN[$key_num] = true;
                         $this->enableChanelRoll7[$key_num] = false;
                         $this->roll7_amount[$key_num] = null;
                     }
@@ -180,7 +184,9 @@ class LottoBet extends Component
                 }
             }
             if (!$isHN) {
+                $this->isCheckHN[$key_num] = false;
                 $this->enableChanelRoll7[$key_num] = true;
+                $this->roll7_amount[$key_num] = $this->store_roll7_amount[$key_num];
             }
         }
 
@@ -903,7 +909,7 @@ class LottoBet extends Component
                         }
                     }
 
-                    if ($this->roll7_amount[$key] > 0) {
+                    if ($this->roll7_amount[$key] > 0 ) {
                         if ($this->roll7_check[$key]) {
                             $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
                         } else {
