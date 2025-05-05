@@ -585,6 +585,7 @@ class LottoBet extends Component
         if ($isCreateBetSuccess) {
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
+            return redirect()->to('/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
 

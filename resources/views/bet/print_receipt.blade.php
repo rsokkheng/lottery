@@ -69,7 +69,7 @@
         }
     </style>
 </head>
-<body onload="window.print(); window.onafterprint = function() { window.close(); }">
+<body onload="handlePrint()">
 
     <div class="receipt">
         <p class="title">
@@ -96,9 +96,9 @@
             <tbody>
                 @foreach($bets as $bet)
                 <tr>
-                    <td>{{ $bet['number'] }}</td>
-                    <td>{{ $bet['company'] }}</td>
-                    <td>{{ $bet['amount'] }}</td>
+                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['number'] }}</td>
+                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['company'] }}</td>
+                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['amount'] }}</td>
                 </tr>
                 @endforeach
                 <!-- Total Amount row -->
@@ -119,4 +119,12 @@
     <p class="footer">Thank you for betting with us!</p>
 
 </body>
+<script>
+    function handlePrint() {
+        window.print();
+        window.onafterprint = function () {
+            window.location.href = '{{ route('bet.input') }}';
+        };
+    }
+</script>
 </html>
