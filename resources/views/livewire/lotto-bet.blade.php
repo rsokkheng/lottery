@@ -184,7 +184,7 @@
                                     autocomplete="off"
                                     wire:model.defer="number.{{ $i }}"
                                     wire:input="handleInputNumber"
-                                    class="w-[100px] lg:w-full h-8 rounded"
+                                    class="w-[124px] h-8 rounded text-center"
                                     oninput="formatNumberInput(this)">
                         </td>
                         <!--Digit-->
