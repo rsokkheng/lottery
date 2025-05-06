@@ -37,7 +37,7 @@ class BetController extends Controller
             ->where('package_id', $user->package_id)
             ->orderBy('id')->get(['id', 'bet_type','has_special']);
 
-            $company_id = -1;
+            $company_id = null;
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
@@ -50,7 +50,7 @@ class BetController extends Controller
             $company = [
                 [
                     "label" => "All Company",
-                    "id" => 0,
+                    "id" => null,
                 ],
                 [
                     "label" => "4PM Company",
@@ -78,6 +78,8 @@ class BetController extends Controller
                 $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
             })->when(!is_null($digit_type), function ($q) use ($digit_type) {
                 $q->where('digit_format', '=', $digit_type);
+            })->when(!is_null($company_id), function ($q) use ($company_id) {
+                $q->where('company_id', '=', $company_id);
             })->when(!is_null($number), function ($q) use ($number) {
                 $q->whereHas('betNumber', function ($query) use ($number) {
                     $query->where('generated_number', $number);

@@ -92,7 +92,7 @@ class BetReceiptController extends Controller
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
-            $company_id = -1;
+            $company_id = null;
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
@@ -101,7 +101,7 @@ class BetReceiptController extends Controller
             $company = [
                 [
                     "label" => "All Company",
-                    "id" => 0,
+                    "id" => null,
                 ],
                 [
                     "label" => "4PM Company",
@@ -128,6 +128,8 @@ class BetReceiptController extends Controller
                 })->when(!is_null($date), function ($q) use ($date) {
                     $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
                     $q->where('bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+                })->when(!is_null($company_id), function ($q) use ($company_id) {
+                    $q->where('company_id', $company_id);
                 })->when(!is_null($receiptNo), function ($q) use ($receiptNo) {
                     $q->whereHas('beReceipt', function ($query) use ($receiptNo) {
                         $query->where('receipt_no', $receiptNo);
