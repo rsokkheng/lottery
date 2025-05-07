@@ -79,6 +79,7 @@ class LottoBet extends Component
     public $packageRate = [];
     public $lengthNum = [];
     public $isCheckHN = [];
+    public $roll7AmountProvisional =0;
 
     public $betUserWallet;
 
@@ -165,33 +166,6 @@ class LottoBet extends Component
         }
     }
 
-    private function handleCheckHN($key_num)
-    {
-        $isHN = false;
-        if ($this->lengthNum[$key_num] == 3) {
-            if($this->roll7_amount[$key_num]> 0){
-                $this->store_roll7_amount[$key_num] = $this->roll7_amount[$key_num];
-            }
-            foreach ($this->schedules as $key => $item) {
-                if ($this->province_body_check[$key][$key_num]) {
-                    if ($item['code'] === 'HN') {
-                        $isHN = true;
-                        $this->isCheckHN[$key_num] = true;
-                        $this->enableChanelRoll7[$key_num] = false;
-                        $this->roll7_amount[$key_num] = null;
-                    }
-
-                }
-            }
-            if (!$isHN) {
-                $this->isCheckHN[$key_num] = false;
-                $this->enableChanelRoll7[$key_num] = true;
-                $this->roll7_amount[$key_num] = $this->store_roll7_amount[$key_num];
-            }
-        }
-
-    }
-
     public function handleProvinceBodyCheck($key_sch, $key_num, $item)
     {
         if ($this->province_body_check[$key_sch][$key_num]) {
@@ -200,7 +174,7 @@ class LottoBet extends Component
             $this->province_body_check[$key_sch][$key_num] = false;
         }
         if ($this->lengthNum[$key_num] == 3) {
-            $this->handleCheckHN($key_num, $item['id']);
+            $this->handleCheckHN($key_num);
         }
 
     }
@@ -611,7 +585,7 @@ class LottoBet extends Component
             $multiplier = match ($type) {
                 'ab' => $numberLength == 2 ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
                 'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D : 0)),
-                'roll7' => $numberLength ==3? MultiplierEnum::ROLL7 :0,
+                'roll7' => $numberLength == 3 ? MultiplierEnum::ROLL7 : 0,
                 default => 1,
             };
         }
@@ -696,8 +670,33 @@ class LottoBet extends Component
 
     public function handleInputAmount($key)
     {
+        $this->store_roll7_amount[$key] = null;
     }
 
+    private function handleCheckHN($key_num)
+    {
+        $isHN = false;
+        if ($this->lengthNum[$key_num] == 3) {
+            if ($this->roll7_amount[$key_num] > 0) {
+                $this->store_roll7_amount[$key_num] = $this->roll7_amount[$key_num];
+            }
+            foreach ($this->schedules as $key => $item) {
+                if ($this->province_body_check[$key][$key_num]) {
+                    if ($item['code'] === 'HN') {
+                        $isHN = true;
+                        $this->enableChanelRoll7[$key_num] = false;
+                        $this->roll7_amount[$key_num] = null;
+                    }
+
+                }
+            }
+            if (!$isHN) {
+                $this->enableChanelRoll7[$key_num] = true;
+                $this->roll7_amount[$key_num] = $this->store_roll7_amount[$key_num];
+            }
+        }
+
+    }
 
     public function updated($propertyName)
     {
@@ -736,10 +735,10 @@ class LottoBet extends Component
                     }
 
                     $isAsterisk = preg_match('/^\*\d+$|\d+\*$/', $num);
-                    $isHashtag = preg_match('/^(\d{2}(?:#\d{2}){1,3})$/', $num);
                     $countHashtag = substr_count($num, '#');
 
                     if ($countProvince > 0) {
+                        $this->handleCheckHN($key);
                         $this->totalAmountNormalNumber($key, $lengthOfNum, $isAsterisk, $countHashtag);
                     }
                     $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
@@ -775,9 +774,12 @@ class LottoBet extends Component
     {
         $this->totalProvisional = 0;
         $this->totalProvisionalHN = 0;
+        $this->roll7AmountProvisional =0;
+        $this->isCheckHN[$key] = false;
         foreach ($this->schedules as $keys => $schedule) {
             if ($this->province_body_check[$keys][$key]) {
                 if ($schedule->code == "HN") {
+                    $this->isCheckHN[$key] = true;
                     if ($this->a_amount[$key] > 0) {
                         if ($this->a_check[$key]) {
                             $this->totalProvisionalHN += $this->a_amount[$key] * MultiplierHNEnum::A * $this->permutationsLength[$key];
@@ -908,15 +910,15 @@ class LottoBet extends Component
                             }
                         }
                     }
-
-                    if ($this->roll7_amount[$key] > 0 ) {
+                    if ($this->roll7_amount[$key] > 0) {
                         if ($this->roll7_check[$key]) {
-                            $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
-                        } else {
+                            $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
+                        }
+                        else {
                             if ($isAsterisk) {
-                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
+                                $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
                             } else {
-                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
+                                $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
                             }
                         }
                     }
@@ -946,6 +948,9 @@ class LottoBet extends Component
         $this->amountHN[$key] = $this->totalProvisionalHN;
         $this->amountNotHN[$key] = $this->totalProvisional;
         $this->total_amount[$key] = $this->totalProvisional + $this->totalProvisionalHN;
+        if(!$this->isCheckHN[$key] ){
+            $this->total_amount[$key] += $this->roll7AmountProvisional;
+        }
         // invoice
         $this->totalInvoice = 0;
         $this->totalDue = 0;
