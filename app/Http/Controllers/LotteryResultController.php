@@ -150,6 +150,8 @@ class LotteryResultController extends Controller
             })
             ->where('region_slug', $regionSlug)
             ->where('record_status_id',1)
+            ->orderBy('company_id', 'asc')
+            ->orderBy('sequence', 'asc')
             ->get()->toArray();
     }
 

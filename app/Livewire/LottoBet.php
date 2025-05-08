@@ -106,11 +106,13 @@ class LottoBet extends Component
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('company_id', 'asc')
+            ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'company_id']);
         $this->timeClose = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('company_id', 'asc')
+            ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
         $this->betUserWallet = BetUserWallet::where('user_id', $this->user->id)->first();
         $this->initializeProperty();
