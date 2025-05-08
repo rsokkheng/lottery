@@ -305,17 +305,46 @@ class LotteryResultController extends Controller
                 if(count($insertWinNumber)) {
                     $recordsCreated = BetWinningRecord::query()->insert($insertWinNumber);
                     if ($recordsCreated) {
-                        $getRecords = BetWinningRecord::query()->select(
-                            DB::raw('sum(prize_amount) as sum_prize_amount'),
-                            'receipt_id'
-                        )
-                            ->whereDate('created_at', date('Y-m-d'))
-                            ->orderBy('receipt_id')
-                            ->groupBy('receipt_id')
-                            ->get();
-                        foreach ($getRecords as $record) {
-                            BetReceipt::query()->find($record->receipt_id)->update(['compensate' => $record['sum_prize_amount'] ?? 0]);
-                        }
+                        $checkBetRP = 0;
+                        $updateRecord = [];
+                            DB::table('bet_winning_records as records')
+                            ->select('records.receipt_id','records.prize_amount','bets.digit_format')
+                            ->join('bets','bets.id','=','records.bet_id')
+                            ->whereDate('records.created_at', date('Y-m-d'))
+                                ->orderBy('records.bet_number_id')
+                            ->orderBy('records.receipt_id')
+                            ->each(function ($records) use (&$updateRecord, &$checkBetRP){
+                                if(in_array($records->digit_format, ['RP2','RP3','RP4'])) {
+                                    $checkBetRP[] = ['digit_format' => $records->digit_format, 'receipt_id' => $records->receipt_id, 'prize_amount'=>(float)$records->prize_amount];
+                                }else{
+                                    $checkBetRP = [];
+                                }
+                                if(empty($updateRecord)){
+                                    $updateRecord[$records->receipt_id] = [
+                                        'receipt_id' => $records->receipt_id,
+                                        'prize_amount' => (float)$records->prize_amount,
+                                    ];
+                                }else{
+                                    $filter = array_filter($updateRecord, function ($val) use ($records) {
+                                        return $val['receipt_id'] === $records->receipt_id;
+                                    });
+                                    if(count($filter)){
+                                        if(empty($checkBetRP) || count($checkBetRP)==1){
+                                            $updateRecord[$records->receipt_id]['prize_amount'] = $filter[$records->receipt_id]['prize_amount'] + (float)$records->prize_amount;
+                                        }
+                                    }else{
+                                        $updateRecord[$records->receipt_id] = [
+                                            'receipt_id' => $records->receipt_id,
+                                            'prize_amount' => (float)$records->prize_amount,
+                                        ];
+                                    }
+                                }
+                            });
+
+                            foreach ($updateRecord as $record) {
+                                BetReceipt::query()->find($record['receipt_id'])->update(['compensate' => $record['prize_amount']]);
+                            }
+
                     }
                 }
             }
