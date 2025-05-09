@@ -305,7 +305,7 @@ class LotteryResultController extends Controller
                 if(count($insertWinNumber)) {
                     $recordsCreated = BetWinningRecord::query()->insert($insertWinNumber);
                     if ($recordsCreated) {
-                        $checkBetRP = 0;
+                        $checkBetRP = [];
                         $updateRecord = [];
                             DB::table('bet_winning_records as records')
                             ->select('records.receipt_id','records.prize_amount','bets.digit_format')
