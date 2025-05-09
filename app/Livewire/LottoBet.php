@@ -499,18 +499,41 @@ class LottoBet extends Component
                                     BetNumber::create($data);
                                 }
                             } else if (strpos($number, '*') !== false) {
+                                foreach ($betTypes as $type => $info) {
+                                    if ($info['amount'] > 0) {
+                                        $betNumber1 = [
+                                            'bet_id' => $respone->id,
+                                            'original_number' => $number,
+                                        ];
 
-                                $num = trim($number, '*');
+                                        $amounts = [
+                                            'a_amount' => 0, 'b_amount' => 0, 'ab_amount' => 0,
+                                            'roll_amount' => 0, 'roll7_amount' => 0, 'roll_parlay_amount' => 0,
+                                        ];
+                                        $checkeds = [
+                                            'a_check' => 0, 'b_check' => 0, 'ab_check' => 0,
+                                            'roll_check' => 0, 'roll7_check' => 0, 'roll_parlay_check' => 0,
+                                        ];
 
-                                for ($i = 0; $i < 10; $i++) {
-                                    $genNumber = str_starts_with($number, '*') ? $i . $num : $num . $i;
-                                    $betNumber2 = [
-                                        'generated_number' => $genNumber,
-                                        'digit_length' => strlen($genNumber),
-                                    ];
+                                        $amounts["{$type}_amount"] = $info['amount'];
+                                        $checkeds["{$type}_check"] = $info['check'];
 
-                                    $data = array_merge($betNumber1, $betNumber2);
-                                    BetNumber::create($data);
+                                        $num = trim($number, '*');
+                                        $numberLength = strlen($num) + 1;
+
+                                        $total_amount = $this->calculateBetNumberTotalAmount($numberLength, $info['amount'], $schedule->code, $type);
+                                        for ($i = 0; $i < 10; $i++) {
+                                            $genNumber = str_starts_with($number, '*') ? $i . $num : $num . $i;
+                                            $betNumber2 = [
+                                                'generated_number' => $genNumber,
+                                                'digit_length' => strlen($genNumber),
+                                                'total_amount'=> $total_amount,
+                                            ];
+
+                                            $data = array_merge($betNumber1, $betNumber2, $amounts);
+                                            BetNumber::create($data);
+                                        }
+                                    }
                                 }
                             } else {
                                 foreach ($betTypes as $type => $info) {
@@ -539,8 +562,8 @@ class LottoBet extends Component
                                             // Just use the original value
                                             $combinations = [$number];
                                         }
-
-                                        $total_amount = $this->calculateBetNumberTotalAmount($number, $info['amount'], $schedule->code, $type);
+                                        $numberLength = strlen($number);
+                                        $total_amount = $this->calculateBetNumberTotalAmount($numberLength, $info['amount'], $schedule->code, $type);
 
                                         foreach ($combinations as $combo) {
                                             $betNumber2 = [
@@ -571,10 +594,8 @@ class LottoBet extends Component
         }
     }
 
-    private function calculateBetNumberTotalAmount($number, $amount, $code, $type)
+    private function calculateBetNumberTotalAmount($numberLength, $amount, $code, $type)
     {
-        $total_amount = $amount;
-        $numberLength = strlen($number);
         $multiplier = 0;
         if ($code == "HN") {
             $multiplier = match ($type) {
@@ -592,7 +613,7 @@ class LottoBet extends Component
             };
         }
 
-        return $total_amount * $multiplier;
+        return $amount * $multiplier;
     }
 
     private function generateSharpNumber($number)
