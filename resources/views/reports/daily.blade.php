@@ -65,7 +65,7 @@
                             @endphp
                             @foreach($data as $key => $row)
                                 @php
-                                    $diff = $row->NetAmount - $row->Compensate;
+                                    $diff = $row->Compensate - $row->NetAmount ;
                                     $totalInvoice += (float)($row->total ?? 0);
                                     $turNover += (float)($row->Turnover ?? 0);
                                     $totalCommission += (float)($row->Commission ?? 0);
