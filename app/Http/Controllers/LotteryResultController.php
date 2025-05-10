@@ -614,7 +614,7 @@ class LotteryResultController extends Controller
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
-                if ($bet->region_slug === HelperEnum::MienBacDienToanSlug) {
+                if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
@@ -1375,7 +1375,7 @@ class LotteryResultController extends Controller
                         'net' => $record->net,
                         'odds' => $record->odds,
                         'bet_type' => $betType,
-                        'original_number' => $record->generated_number,
+                        'original_number' => (string)$record->generated_number,
                         'company' => $record->province_en,
                         'game' => $getBetRoll,
                         'receipt_no' => $record->receipt_no,
@@ -1404,7 +1404,7 @@ class LotteryResultController extends Controller
                             $commission = $record->turnover - ($record->turnover * $record->net / 100);
                             $netAmount = $record->turnover * $record->net / 100;
                             $prepareData['turnover'] = $record->turnover;
-                            $prepareData['win_number'] = sprintf("%02d", $record->win_number);
+                            $prepareData['win_number'] = $record->generated_number;
                             $prepareData['compensate'] = $record->sum_prize_amount;
                             $prepareData['commission'] = $commission;
                             $prepareData['net_amount'] = $netAmount;

@@ -97,9 +97,14 @@ class LottoBet extends Component
         $this->betPackageConfiguration = $betPackageConfiguration;
         $this->betReceipt = $betReceipt;
 
+//        $this->currentDate = '2025-05-07';
+//        $this->currentDay = 'Wednesday';
+//        $this->currentTime = '01:01:01';
+
         $this->currentDate = Carbon::now()->format('Y-m-d');
         $this->currentDay = Carbon::now()->format('l');
         $this->currentTime = Carbon::now()->format('H:i:s');
+
         $this->user = Auth::user();
 
         $this->schedules = $this->betLotteryScheduleModel
