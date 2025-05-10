@@ -1384,7 +1384,7 @@ class LotteryResultController extends Controller
 
                     if(in_array($record->bet_type, ['RP2','RP3', 'RP4'])){
                         $existBet = array_filter($data, function ($val) use ($record) {
-                            return $val['bet_id'] === $record->bet_id;
+                            return $val['bet_number_id'] === $record->bet_number_id;
                         });
                         if(!count($existBet)){
                             $commission = $record->turnover - ($record->turnover * $record->net / 100);
