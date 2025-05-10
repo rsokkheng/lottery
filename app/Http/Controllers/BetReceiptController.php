@@ -176,7 +176,7 @@ private function addAmount(&$amountArray, $value, $check, $label)
             'bets.betNumber',
             'betWinningRecords',
             'bets' => function ($q) {
-                $q->orderBy('number_format');
+                $q->orderBy('id');
             }
         ])->findOrFail($id);
         $betIdWin = $this->betWinningRecord->newQuery()
