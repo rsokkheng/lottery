@@ -31,11 +31,11 @@
                                 <tbody>
                                     @foreach($data['form_result']['result'] as $pKey => $prize)
                                         <tr>
-                                            <td class="text-black">
+                                            <th class="text-black">
                                                 {{ $prize['prize_label'] }}
-                                            </td>
+                                            </th>
                                             @foreach($prize['provinces'] as $province)
-                                                <td class="text-primary p-1">
+                                                <th class="text-primary p-1">
                                                     @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)
                                                         @php $c=1; $r=1; @endphp
                                                         @foreach($province['row_result'] as $key=>$row)
@@ -77,7 +77,7 @@
                                                         @endforeach
                                                     @endif
 
-                                                </td>
+                                                </th>
                                             @endforeach
                                         </tr>
                                     @endforeach
@@ -97,65 +97,25 @@
         <script>
             $(function(){
 
-                // const $inputs = $('.split-input');
-                // $inputs.on('paste', function (e) {
-                //     e.preventDefault();
-                //
-                //     const pasteData = (e.originalEvent.clipboardData || window.clipboardData)
-                //         .getData('text')
-                //         .replace(/\D/g, '');
-                //
-                //     const startIndex = $inputs.index(this);
-                //     let offset = 0;
-                //
-                //     // Clear values from current input onward
-                //     $inputs.slice(startIndex).val('');
-                //
-                //     $inputs.slice(startIndex).each(function () {
-                //         const maxLen = parseInt($(this).attr('maxlength'), 10) || 0;
-                //         const chunk = pasteData.substring(offset, offset + maxLen);
-                //         $(this).val(chunk);
-                //         offset += maxLen;
-                //     });
-                // });
-
-
-                $('table').on('paste', 'input', function (e) {
-                    const clipboardData = (e.originalEvent || e).clipboardData || window.clipboardData;
-                    const pastedText = clipboardData.getData('text').replace(/\s+/g, '');
+                const $inputs = $('.split-input');
+                $inputs.on('paste', function (e) {
                     e.preventDefault();
 
-                    let charIndex = 0;
+                    const pasteData = (e.originalEvent.clipboardData || window.clipboardData)
+                        .getData('text')
+                        .replace(/\D/g, '');
 
-                    const $startInput = $(this);
-                    const $startTd = $startInput.closest('td');
-                    const columnIndex = $startTd.index();
-                    const $table = $startTd.closest('table');
-                    let startPasting = false;
+                    const startIndex = $inputs.index(this);
+                    let offset = 0;
 
-                    // Traverse table rows to find all inputs in the same column
-                    $table.find('tr').each(function () {
-                        const $td = $(this).find('td').eq(columnIndex);
-                        if (!$td.length) return;
+                    // Clear values from current input onward
+                    $inputs.slice(startIndex).val('');
 
-                        const $inputs = $td.find('input');
-
-                        $inputs.each(function () {
-                            if (!startPasting) {
-                                if (this === $startInput[0]) {
-                                    startPasting = true;
-                                } else {
-                                    return;
-                                }
-                            }
-
-                            if (startPasting && charIndex < pastedText.length) {
-                                const maxLen = parseInt($(this).attr('maxlength')) || pastedText.length;
-                                const valuePart = pastedText.slice(charIndex, charIndex + maxLen);
-                                $(this).val(valuePart);
-                                charIndex += valuePart.length;
-                            }
-                        });
+                    $inputs.slice(startIndex).each(function () {
+                        const maxLen = parseInt($(this).attr('maxlength'), 10) || 0;
+                        const chunk = pasteData.substring(offset, offset + maxLen);
+                        $(this).val(chunk);
+                        offset += maxLen;
                     });
                 });
 

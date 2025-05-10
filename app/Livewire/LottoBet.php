@@ -37,6 +37,7 @@ class LottoBet extends Component
     public $ab_amount = [];
     public $roll_amount = [];
     public $roll7_amount = [];
+    public $store_roll7_amount = [];
     public $roll_parlay_amount = [];
     public $total_amount = [];
     public $amountHN = [];
@@ -77,6 +78,8 @@ class LottoBet extends Component
 
     public $packageRate = [];
     public $lengthNum = [];
+    public $isCheckHN = [];
+    public $roll7AmountProvisional =0;
 
     public $betUserWallet;
 
@@ -107,12 +110,14 @@ class LottoBet extends Component
         $this->schedules = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
-            ->orderBy('time_close', 'asc')
+            ->orderBy('company_id', 'asc')
+            ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'company_id']);
         $this->timeClose = $this->betLotteryScheduleModel
             ->where('draw_day', '=', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
-            ->orderBy('time_close', 'asc')
+            ->orderBy('company_id', 'asc')
+            ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
         $this->betUserWallet = BetUserWallet::where('user_id', $this->user->id)->first();
         $this->initializeProperty();
@@ -154,6 +159,8 @@ class LottoBet extends Component
         $this->total_amount = array_fill(0, $this->totalRow, 0);
         $this->amountHN = array_fill(0, $this->totalRow, 0);
         $this->amountNotHN = array_fill(0, $this->totalRow, 0);
+        $this->store_roll7_amount = array_fill(0, $this->totalRow, null);
+        $this->isCheckHN = array_fill(0, $this->totalRow, false);
     }
 
     public function handleProvinceCheck($index)
@@ -166,27 +173,6 @@ class LottoBet extends Component
         }
     }
 
-    private function handleCheckHN($key_num)
-    {
-        $isHN = false;
-        if ($this->lengthNum[$key_num] == 3) {
-            foreach ($this->schedules as $key => $item) {
-                if ($this->province_body_check[$key][$key_num]) {
-                    if ($item['code'] === 'HN') {
-                        $isHN = true;
-                        $this->enableChanelRoll7[$key_num] = false;
-                        $this->roll7_amount[$key_num] = null;
-                    }
-
-                }
-            }
-            if (!$isHN) {
-                $this->enableChanelRoll7[$key_num] = true;
-            }
-        }
-
-    }
-
     public function handleProvinceBodyCheck($key_sch, $key_num, $item)
     {
         if ($this->province_body_check[$key_sch][$key_num]) {
@@ -195,7 +181,7 @@ class LottoBet extends Component
             $this->province_body_check[$key_sch][$key_num] = false;
         }
         if ($this->lengthNum[$key_num] == 3) {
-            $this->handleCheckHN($key_num, $item['id']);
+            $this->handleCheckHN($key_num);
         }
 
     }
@@ -518,18 +504,41 @@ class LottoBet extends Component
                                     BetNumber::create($data);
                                 }
                             } else if (strpos($number, '*') !== false) {
+                                foreach ($betTypes as $type => $info) {
+                                    if ($info['amount'] > 0) {
+                                        $betNumber1 = [
+                                            'bet_id' => $respone->id,
+                                            'original_number' => $number,
+                                        ];
 
-                                $num = trim($number, '*');
+                                        $amounts = [
+                                            'a_amount' => 0, 'b_amount' => 0, 'ab_amount' => 0,
+                                            'roll_amount' => 0, 'roll7_amount' => 0, 'roll_parlay_amount' => 0,
+                                        ];
+                                        $checkeds = [
+                                            'a_check' => 0, 'b_check' => 0, 'ab_check' => 0,
+                                            'roll_check' => 0, 'roll7_check' => 0, 'roll_parlay_check' => 0,
+                                        ];
 
-                                for ($i = 0; $i < 10; $i++) {
-                                    $genNumber = str_starts_with($number, '*') ? $i . $num : $num . $i;
-                                    $betNumber2 = [
-                                        'generated_number' => $genNumber,
-                                        'digit_length' => strlen($genNumber),
-                                    ];
+                                        $amounts["{$type}_amount"] = $info['amount'];
+                                        $checkeds["{$type}_check"] = $info['check'];
 
-                                    $data = array_merge($betNumber1, $betNumber2);
-                                    BetNumber::create($data);
+                                        $num = trim($number, '*');
+                                        $numberLength = strlen($num) + 1;
+
+                                        $total_amount = $this->calculateBetNumberTotalAmount($numberLength, $info['amount'], $schedule->code, $type);
+                                        for ($i = 0; $i < 10; $i++) {
+                                            $genNumber = str_starts_with($number, '*') ? $i . $num : $num . $i;
+                                            $betNumber2 = [
+                                                'generated_number' => $genNumber,
+                                                'digit_length' => strlen($genNumber),
+                                                'total_amount'=> $total_amount,
+                                            ];
+
+                                            $data = array_merge($betNumber1, $betNumber2, $amounts);
+                                            BetNumber::create($data);
+                                        }
+                                    }
                                 }
                             } else {
                                 foreach ($betTypes as $type => $info) {
@@ -558,8 +567,8 @@ class LottoBet extends Component
                                             // Just use the original value
                                             $combinations = [$number];
                                         }
-
-                                        $total_amount = $this->calculateBetNumberTotalAmount($number, $info['amount'], $schedule->code, $type);
+                                        $numberLength = strlen($number);
+                                        $total_amount = $this->calculateBetNumberTotalAmount($numberLength, $info['amount'], $schedule->code, $type);
 
                                         foreach ($combinations as $combo) {
                                             $betNumber2 = [
@@ -586,13 +595,12 @@ class LottoBet extends Component
         if ($isCreateBetSuccess) {
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
+            return redirect()->to('/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
 
-    private function calculateBetNumberTotalAmount($number, $amount, $code, $type)
+    private function calculateBetNumberTotalAmount($numberLength, $amount, $code, $type)
     {
-        $total_amount = $amount;
-        $numberLength = strlen($number);
         $multiplier = 0;
         if ($code == "HN") {
             $multiplier = match ($type) {
@@ -605,12 +613,12 @@ class LottoBet extends Component
             $multiplier = match ($type) {
                 'ab' => $numberLength == 2 ? MultiplierEnum::AB : ($numberLength == 3 ? MultiplierEnum::AB : 0),
                 'roll' => $numberLength == 2 ? MultiplierEnum::ROLL : ($numberLength == 3 ? MultiplierEnum::ROLL_3D : ($numberLength == 4 ? MultiplierEnum::ROLL_4D : 0)),
-                'roll7' => $numberLength ==3? MultiplierEnum::ROLL7 :0,
+                'roll7' => $numberLength == 3 ? MultiplierEnum::ROLL7 : 0,
                 default => 1,
             };
         }
 
-        return $total_amount * $multiplier;
+        return $amount * $multiplier;
     }
 
     private function generateSharpNumber($number)
@@ -690,8 +698,33 @@ class LottoBet extends Component
 
     public function handleInputAmount($key)
     {
+        $this->store_roll7_amount[$key] = null;
     }
 
+    private function handleCheckHN($key_num)
+    {
+        $isHN = false;
+        if ($this->lengthNum[$key_num] == 3) {
+            if ($this->roll7_amount[$key_num] > 0) {
+                $this->store_roll7_amount[$key_num] = $this->roll7_amount[$key_num];
+            }
+            foreach ($this->schedules as $key => $item) {
+                if ($this->province_body_check[$key][$key_num]) {
+                    if ($item['code'] === 'HN') {
+                        $isHN = true;
+                        $this->enableChanelRoll7[$key_num] = false;
+                        $this->roll7_amount[$key_num] = null;
+                    }
+
+                }
+            }
+            if (!$isHN) {
+                $this->enableChanelRoll7[$key_num] = true;
+                $this->roll7_amount[$key_num] = $this->store_roll7_amount[$key_num];
+            }
+        }
+
+    }
 
     public function updated($propertyName)
     {
@@ -730,10 +763,10 @@ class LottoBet extends Component
                     }
 
                     $isAsterisk = preg_match('/^\*\d+$|\d+\*$/', $num);
-                    $isHashtag = preg_match('/^(\d{2}(?:#\d{2}){1,3})$/', $num);
                     $countHashtag = substr_count($num, '#');
 
                     if ($countProvince > 0) {
+                        $this->handleCheckHN($key);
                         $this->totalAmountNormalNumber($key, $lengthOfNum, $isAsterisk, $countHashtag);
                     }
                     $this->addAmount($amount, $this->b_amount[$key] ?? 0, $this->b_check[$key] ?? false, "B", $key);
@@ -769,9 +802,12 @@ class LottoBet extends Component
     {
         $this->totalProvisional = 0;
         $this->totalProvisionalHN = 0;
+        $this->roll7AmountProvisional =0;
+        $this->isCheckHN[$key] = false;
         foreach ($this->schedules as $keys => $schedule) {
             if ($this->province_body_check[$keys][$key]) {
                 if ($schedule->code == "HN") {
+                    $this->isCheckHN[$key] = true;
                     if ($this->a_amount[$key] > 0) {
                         if ($this->a_check[$key]) {
                             $this->totalProvisionalHN += $this->a_amount[$key] * MultiplierHNEnum::A * $this->permutationsLength[$key];
@@ -902,15 +938,15 @@ class LottoBet extends Component
                             }
                         }
                     }
-
                     if ($this->roll7_amount[$key] > 0) {
                         if ($this->roll7_check[$key]) {
-                            $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
-                        } else {
+                            $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
+                        }
+                        else {
                             if ($isAsterisk) {
-                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
+                                $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
                             } else {
-                                $this->totalProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
+                                $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7;
                             }
                         }
                     }
@@ -940,6 +976,9 @@ class LottoBet extends Component
         $this->amountHN[$key] = $this->totalProvisionalHN;
         $this->amountNotHN[$key] = $this->totalProvisional;
         $this->total_amount[$key] = $this->totalProvisional + $this->totalProvisionalHN;
+        if(!$this->isCheckHN[$key] ){
+            $this->total_amount[$key] += $this->roll7AmountProvisional;
+        }
         // invoice
         $this->totalInvoice = 0;
         $this->totalDue = 0;
