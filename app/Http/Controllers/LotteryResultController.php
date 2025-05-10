@@ -1254,6 +1254,7 @@ class LotteryResultController extends Controller
             DB::table('bet_winning_records as record')
                 ->select(
                     'record.bet_id',
+                    'record.bet_number_id',
                     'record.win_number',
                     'record.prize_amount as sum_prize_amount',
                     'pkg_con.bet_type',
@@ -1299,6 +1300,7 @@ class LotteryResultController extends Controller
                 })
                 ->orderBy('record.bet_id')
                 ->groupBy('record.bet_id')
+                ->groupBy('record.bet_number_id')
                 ->groupBy('record.win_number')
                 ->groupBy('record.prize_amount')
                 ->groupBy('bet_type')
@@ -1366,6 +1368,7 @@ class LotteryResultController extends Controller
                     }
 
                     $prepareData = [
+                        'bet_number_id' => $record->bet_number_id,
                         'bet_id' => $record->bet_id,
                         'account' => $record->account,
                         'amount' => $amount,
@@ -1395,7 +1398,7 @@ class LotteryResultController extends Controller
                         }
                     }else{
                         $existBet = array_filter($data, function ($val) use ($record) {
-                            return $val['bet_id'] === $record->bet_id;
+                            return $val['bet_number_id'] === $record->bet_number_id;
                         });
                         if(!count($existBet)) {
                             $commission = $record->turnover - ($record->turnover * $record->net / 100);
