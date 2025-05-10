@@ -303,17 +303,46 @@ class LotteryResultController extends Controller
                 if(count($insertWinNumber)) {
                     $recordsCreated = BetWinningRecord::query()->insert($insertWinNumber);
                     if ($recordsCreated) {
-                        $getRecords = BetWinningRecord::query()->select(
-                            DB::raw('sum(prize_amount) as sum_prize_amount'),
-                            'receipt_id'
-                        )
-                            ->whereDate('created_at', date('Y-m-d'))
-                            ->orderBy('receipt_id')
-                            ->groupBy('receipt_id')
-                            ->get();
-                        foreach ($getRecords as $record) {
-                            BetReceipt::query()->find($record->receipt_id)->update(['compensate' => $record['sum_prize_amount'] ?? 0]);
-                        }
+                        $checkBetRP = [];
+                        $updateRecord = [];
+                            DB::table('bet_winning_records as records')
+                            ->select('records.receipt_id','records.prize_amount','bets.digit_format')
+                            ->join('bets','bets.id','=','records.bet_id')
+                            ->whereDate('records.created_at', date('Y-m-d'))
+                                ->orderBy('records.bet_number_id')
+                            ->orderBy('records.receipt_id')
+                            ->each(function ($records) use (&$updateRecord, &$checkBetRP){
+                                if(in_array($records->digit_format, ['RP2','RP3','RP4'])) {
+                                    $checkBetRP[] = ['digit_format' => $records->digit_format, 'receipt_id' => $records->receipt_id, 'prize_amount'=>(float)$records->prize_amount];
+                                }else{
+                                    $checkBetRP = [];
+                                }
+                                if(empty($updateRecord)){
+                                    $updateRecord[$records->receipt_id] = [
+                                        'receipt_id' => $records->receipt_id,
+                                        'prize_amount' => (float)$records->prize_amount,
+                                    ];
+                                }else{
+                                    $filter = array_filter($updateRecord, function ($val) use ($records) {
+                                        return $val['receipt_id'] === $records->receipt_id;
+                                    });
+                                    if(count($filter)){
+                                        if(empty($checkBetRP) || count($checkBetRP)==1){
+                                            $updateRecord[$records->receipt_id]['prize_amount'] = $filter[$records->receipt_id]['prize_amount'] + (float)$records->prize_amount;
+                                        }
+                                    }else{
+                                        $updateRecord[$records->receipt_id] = [
+                                            'receipt_id' => $records->receipt_id,
+                                            'prize_amount' => (float)$records->prize_amount,
+                                        ];
+                                    }
+                                }
+                            });
+
+                            foreach ($updateRecord as $record) {
+                                BetReceipt::query()->find($record['receipt_id'])->update(['compensate' => $record['prize_amount']]);
+                            }
+
                     }
                 }
             }
@@ -583,7 +612,7 @@ class LotteryResultController extends Controller
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
-                if ($bet->region_slug === HelperEnum::MienBacDienToanSlug) {
+                if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
@@ -1343,8 +1372,8 @@ class LotteryResultController extends Controller
                         'net' => $record->net,
                         'odds' => $record->odds,
                         'bet_type' => $betType,
-                        'original_number' => $record->original_number,
-                        'company' => $record->province,
+                        'original_number' => (string)$record->generated_number,
+                        'company' => $record->province_en,
                         'game' => $getBetRoll,
                         'receipt_no' => $record->receipt_no,
                         'bet_date' => $record->bet_date,
@@ -1372,7 +1401,7 @@ class LotteryResultController extends Controller
                             $commission = $record->turnover - ($record->turnover * $record->net / 100);
                             $netAmount = $record->turnover * $record->net / 100;
                             $prepareData['turnover'] = $record->turnover;
-                            $prepareData['win_number'] = sprintf("%02d", $record->win_number);
+                            $prepareData['win_number'] = $record->generated_number;
                             $prepareData['compensate'] = $record->sum_prize_amount;
                             $prepareData['commission'] = $commission;
                             $prepareData['net_amount'] = $netAmount;
