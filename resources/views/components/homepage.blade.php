@@ -142,9 +142,15 @@
         @foreach ($betMenus as $menu)
             <div class="col-12 col-md-6 col-lg-4">
                 <li class="product_list position-relative">
+                @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
                      <a href="{{ url('lotto_vn/bet') }}">
                     <img src="{{ asset('uploads/images/' .$menu->image ?? 'uploads/default_banner.jpg') }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
                     </a>
+                @else
+                 <a href="{{ url('lotto_vn/receipt-list') }}">
+                    <img src="{{ asset('uploads/images/' .$menu->image ?? 'uploads/default_banner.jpg') }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
+                    </a>
+                @endif
                     <div class="pro_text position-absolute w-100 h-100 top-0 start-0 d-flex">
                         <h3 style="color: yellow; font-weight: 600;" class="bg-opacity-50 px-3 py-2 rounded">
                             {{ $menu->title ?? 'LOTTO' }}
