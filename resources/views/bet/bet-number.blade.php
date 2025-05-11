@@ -5,6 +5,21 @@
     </style>
     <div class="flex-col bg-white rounded-lg px-5 py-5">
         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg  py-4">
+            @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty())
+             <div class="w-full lg:w-48">
+                <select id="member" class="rounded w-full">
+                     <option value="">All Members</option>
+                    @foreach($members as $member)
+                        @if($member_id == $member['id'])
+                            <option selected value="{{ $member['id'] }}">{{ $member['name'] }}</option>
+                        @else
+                            <option value="{{ $member['id'] }}">{{ $member['name'] }}</option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+            @endif
+
             <div class="w-full lg:w-48">
                 <div class="relative">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -20,6 +35,7 @@
                            placeholder="Select date">
                 </div>
             </div>
+           
             <div class="w-full lg:w-48">
                 <select id="company" class="rounded w-full">
                     @foreach($company as $val)
@@ -33,13 +49,17 @@
             </div>
             <div class="w-full lg:w-48">
                 <select id="digit_type" class="rounded w-full">
-                    @foreach($digits as $val)
-                    @if($val['has_special'] ==1 && $val['bet_type']=='RP3')
-                        <option value="RP3X">RP3X</option>
-                    @else
-                        <option value="{{ $val['bet_type'] }}">{{ $val['bet_type'] }}</option>
-                    @endif
-                    @endforeach
+                @foreach($digits as $val)
+                    @php
+                        $isSpecial = $val['has_special'] == 1 && $val['bet_type'] == 'RP3';
+                        $optionValue = $isSpecial ? 'RP3X' : $val['bet_type'];
+                    @endphp
+
+                    <option value="{{ $optionValue }}" {{ $digit_type == $optionValue ? 'selected' : '' }}>
+                        {{ $optionValue }}
+                    </option>
+                @endforeach
+
                 </select>
             </div>
             <div class="w-full lg:w-48">
@@ -178,10 +198,11 @@
         const date = $('#datepicker-receipt').val();
         const no = $('#receipt-no').val()
         const number = $('#number').val()
+        const member_id = $('#member').val()
         const digit_type = $('#digit_type').val()
         const com_id = $('#company').find(":selected").val();
         if(date.length || no.length){
-            window.location = url +'?date='+date+'&no='+no+'&number='+number+'&com_id='+com_id+'&digit_type='+digit_type;
+            window.location = url +'?date='+date+'&no='+no+'&number='+number+'&com_id='+com_id+'&member_id='+member_id+'&digit_type='+digit_type;
         }
     }
 </script>

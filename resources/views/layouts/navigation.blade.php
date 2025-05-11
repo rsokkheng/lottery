@@ -28,9 +28,11 @@
 
             <!--Menu size computer-->
             <div class="hidden lg:flex lg:space-x-4">
-                <x-nav-link
-                        class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
-                        href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
+                    <x-nav-link
+                            class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                            href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                @endif
                 <x-nav-link
                         class="{{ Route::is('bet.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
@@ -54,9 +56,11 @@
 
             {{--   Menu size tablet   --}}
             <div class="hidden lg:hidden md:flex md:items-center md:space-x-2">
-                <x-nav-link
-                        class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
-                        href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
+                    <x-nav-link
+                            class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                            href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+                @endif
                 <x-nav-link
                         class="{{ Route::is('bet.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
@@ -148,8 +152,10 @@
 
     <!-- Mobile Menu (Collapsed by Default) -->
     <div x-show="open" class="md:hidden flex flex-col space-y-2 px-4 py-2 bg-blue-500">
-        <x-nav-link class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }}"
-                    href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+        @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
+            <x-nav-link class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }}"
+                        href="{{ route('bet.input') }}">{{ __('Bet') }}</x-nav-link>
+        @endif
         <x-nav-link class="{{ Route::is('bet.receipt-list') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
         <x-nav-link class="{{ Route::is('bet.bet-list') ? 'active-menu' : 'not-active-menu' }}"
