@@ -23,7 +23,7 @@ class BetReceipt extends Model
         return $this->hasMany(Bet::class);
     }
 
-    public function betWinningRecords(){
-        return $this->hasMany(BetWinningRecord::class, 'receipt_id', 'id');
+    public function betWinning(){
+        return $this->hasMany(BetWinning::class, 'bet_receipt_id', 'id');
     }
 }

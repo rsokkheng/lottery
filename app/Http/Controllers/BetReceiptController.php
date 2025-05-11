@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetWinningRecord;
+use App\Models\BetWinning;
 use Carbon\Carbon;
 use App\Models\Bet;
 use App\Models\User;
@@ -21,14 +21,14 @@ class BetReceiptController extends Controller
 
     public BetReceipt $model;
     public Bet $betModel;
-    public BetWinningRecord $betWinningRecord;
+    public BetWinning $betWinning;
     public $currentDate;
 
-    public function __construct(BetReceipt $model, Bet $betModel, BetWinningRecord $betWinningRecord)
+    public function __construct(BetReceipt $model, Bet $betModel, BetWinning $betWinning)
     {
         $this->model = $model;
         $this->betModel = $betModel;
-        $this->betWinningRecord = $betWinningRecord;
+        $this->betWinning = $betWinning;
         $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
@@ -46,7 +46,7 @@ class BetReceiptController extends Controller
             }
             $no = $request->no ?? null;
 
-            $data = $this->model->newQuery()->with(['user', 'bets.betWinningRecords'])
+            $data = $this->model->newQuery()->with(['user', 'bets.betWinning'])
                 ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($date), function ($q) use ($date) {
@@ -56,7 +56,7 @@ class BetReceiptController extends Controller
                     $q->where('receipt_no', 'like', $no . '%');
                 })->get()->map(function ($item) {
                     $checkWinBet = $item->bets->map(function ($bet){
-                        return $bet->betWinningRecords()->count();
+                        return $bet->betWinning()->count();
                     })->sum();
                     return [
                         'id' => $item->id,
@@ -174,12 +174,12 @@ private function addAmount(&$amountArray, $value, $check, $label)
         $result = $this->model->with([
             'bets.betLotterySchedule',
             'bets.betNumber',
-            'betWinningRecords',
+            'betWinning',
             'bets' => function ($q) {
                 $q->orderBy('id');
             }
         ])->findOrFail($id);
-        $betIdWin = $this->betWinningRecord->newQuery()
+        $betIdWin = $this->betWinning->newQuery()
             ->whereHas('bets', function ($q) use ($id){
                 $q->where('bet_receipt_id', $id);
             })
@@ -187,7 +187,6 @@ private function addAmount(&$amountArray, $value, $check, $label)
         $items = [];
         $amount = '';
 
-     
         foreach ($result->bets as $bet){
 
             foreach ($bet['betNumber'] as $betNumber){
@@ -232,7 +231,7 @@ private function addAmount(&$amountArray, $value, $check, $label)
         }
         
 
-        $isPaid = $result->betWinningRecords?->first()?->paid_status;
+        $isPaid = $result->betWinning?->first()?->paid_status;
         $companyMap =$bet['betLotterySchedule']?->id;
         if(count($items) > 1){
             $grouped = collect($items)
@@ -416,7 +415,6 @@ private function addAmount(&$amountArray, $value, $check, $label)
                     'number' => $number,
                     'company' => $companyNames,
                     'amount' => $amountGrouped,
-                 
                 ];
             })
             ->values();
@@ -436,8 +434,8 @@ private function addAmount(&$amountArray, $value, $check, $label)
     {
         if($no){
             $id = BetReceipt::query()->where('receipt_no', $no)->first()?->id;
-            BetWinningRecord::query()->whereHas('betReceipt', function ($q) use ($id){
-                $q->where('receipt_id', $id);
+            BetWinning::query()->whereHas('betReceipt', function ($q) use ($id){
+                $q->where('bet_receipt_id', $id);
             })->update(['paid_at'=> date('Y-m-d H:i:s'), 'paid_status'=>2]);
             return response()->json([
                 'success'=> true,
