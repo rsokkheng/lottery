@@ -3,7 +3,7 @@
     <style>
 
     </style>
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
+    <div class="flex-col bg-white rounded-lg px-4 py-4">
             <div class="flex w-full space-x-2">
                 <div class="">
                     <div class="relative max-w-sm">

@@ -5,7 +5,7 @@
     </style>
 
     {{--    </x-slot>--}}
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
+    <div class="flex-col bg-white rounded-lg px-4 py-4">
         <div class="flex lg:w-2/4 md:w-2/3 max-sm:w-full max-sm:flex-col gap-4">
             <div class="flex w-full">
                 <div class="relative w-full">

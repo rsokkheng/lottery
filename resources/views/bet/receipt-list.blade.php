@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.min.css') }}">
 
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
+    <div class="flex-col bg-white rounded-lg px-4 py-4">
         <div class="grid grid-cols-2 gap-2 sm:gap-0 sm:flex sm:justify-start sm:items-center sm:space-x-2">
             <div class="w-full sm:w-40">
                 <div class="relative">

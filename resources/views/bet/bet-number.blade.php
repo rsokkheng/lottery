@@ -1,10 +1,7 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
-    <style>
-
-    </style>
-    <div class="flex-col bg-white rounded-lg px-5 py-5">
-        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg  py-4">
+    <div class="flex-col bg-white rounded-lg px-4 py-4">
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg">
             @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty())
              <div class="w-full lg:w-48">
                 <select id="member" class="rounded w-full">
@@ -143,7 +140,7 @@
                                 }
                                  $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
                                  $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
-                                 $prizeAmount = ($bet->betNumberWin->prize_amount ?? 0);
+                                 $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
                                  $totalCommission +=$commission;
                                  $totalNetAmount +=$netAmount;
                                  $totalTurnover +=$betNumber->total_amount;
@@ -152,19 +149,19 @@
 
                             @endphp
                             <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bet_date']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->generated_number}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['digit_format']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumberGame??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$commission}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$netAmount}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{ $winLose < 0 ? 'text-red-500' : ''}}">{{$winLose}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$No++}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bet_date']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->generated_number}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['digit_format']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumberGame??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$commission}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$netAmount}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas {{ $winLose < 0 ? 'text-red-500' : ''}}">{{$winLose}}</td>
 
                             </tr>
                             @endforeach

@@ -111,7 +111,7 @@
 
                             $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
                             $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
-                            $prizeAmount = ($bet->betNumberWin->prize_amount ?? 0);
+                            $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
                             $totalCommission +=$commission;
                             $totalNetAmount +=$netAmount;
                             $totalTurnover +=$betNumber->total_amount;

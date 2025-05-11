@@ -122,7 +122,7 @@ class BetReceiptController extends Controller
                     'user',
                     'bePackageConfig',
                     'betLotterySchedule',
-                    'betNumber.betNumberWin'
+                    'betNumber.betNumberWin.betWinning',
                 ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($date), function ($q) use ($date) {

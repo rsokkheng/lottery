@@ -13,7 +13,7 @@
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             width: 80mm;
             margin: 0;
             padding: 10px;
@@ -36,7 +36,7 @@
         .details {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             margin-bottom: 5px;
         }
@@ -48,7 +48,7 @@
         }
 
         th, td {
-            font-size: 12px;
+            font-size: 15px;
             padding: 5px;
             text-align: center;
             border: 1px solid black; /* Added border */
@@ -59,12 +59,12 @@
         }
 
         .footer {
-            font-size: 10px;
+            font-size: 12px;
             margin-top: 10px;
         }
         .footer_bold{
             margin-top: 10px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
         }
     </style>
@@ -96,9 +96,9 @@
             <tbody>
                 @foreach($bets as $bet)
                 <tr>
-                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['number'] }}</td>
-                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['company'] }}</td>
-                    <td style="letter-spacing: 1px; font-weight:600">{{ $bet['amount'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['number'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['company'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['amount'] }}</td>
                 </tr>
                 @endforeach
                 <!-- Total Amount row -->

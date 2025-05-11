@@ -29,11 +29,9 @@ class BetController extends Controller
                 $date = $request->get('date');
             }
             $user = Auth::user()??0;
-            
             $digits = BetLotteryPackageConfiguration::query()
             ->where('package_id', $user->package_id)
             ->orderBy('id')->get(['id', 'bet_type','has_special']);
-
             $members = User::where('record_status_id', 1)
             ->whereHas('roles', function ($query) {
                 $query->where('name', 'staff');
@@ -64,19 +62,18 @@ class BetController extends Controller
                 ["label" => "5PM Company", "id" => 2],
                 ["label" => "6PM Company", "id" => 3],
             ];
-            $data =$this->betModel->with([
+            $data =$this->betModel
+            ->with([
                 'beReceipt',
                 'user',
-                'betNumber.betNumberWin',
+                'betNumber.betNumberWin.betWinning',
                 'bePackageConfig',
                 'betLotterySchedule'
             ])->when(!in_array('admin', $roles) && !in_array('manager', $roles),
                 function ($q) use ($member_id, $user) {
                     $q->where('user_id', $member_id ?? $user->id);
                 }
-            )
-            // ✅ Apply member_id only for admin/manager if selected
-            ->when(
+            )->when(
                 in_array('admin', $roles) || in_array('manager', $roles),
                 function ($q) use ($member_id) {
                     if (!is_null($member_id)) {
@@ -95,6 +92,7 @@ class BetController extends Controller
                     $query->where('generated_number', $number);
                 });
             })->get();
+
             
             return view('bet.bet-number', compact('data', 'date','company','company_id','digit_type','digits','number','members','member_id'));
         } catch (\Exception $exception) {

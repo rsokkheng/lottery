@@ -886,6 +886,7 @@ class LotteryResultController extends Controller
             DB::table('bet_winning_records as record')
                 ->select(
                     'bet_winning.bet_id',
+                    'record.bet_number_id',
                     'bet_winning.win_amount as compensate',
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
