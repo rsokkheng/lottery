@@ -464,7 +464,12 @@ class LotteryResultController extends Controller
                         $sumAmount = $item['prize_amount'];
                         $betAmount = $item;
                     }else{
-                        if($betAmount['bet_number_id'] !== $item['bet_number_id']){
+                        if(in_array($item['bet_type'],['RP2','RP3','RP4'])) {
+                            if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
+                                $sumAmount += $item['prize_amount'];
+                                $betAmount = $item;
+                            }
+                        }else{
                             $sumAmount += $item['prize_amount'];
                             $betAmount = $item;
                         }
@@ -511,7 +516,7 @@ class LotteryResultController extends Controller
 //        }
 //        dd($original,$countDuplicate);
 
-//        $data1 = $this->generateNormalWinBet($date, $scheduleIds);
+        $data1 = $this->generateNormalWinBet($date, $scheduleIds);
 //        $data2 = $this->generateHashWinBet($date, $scheduleIds);
 //        $data = [...$data1, ...$data2];
 //        return $this->insertBetWinning($data);
@@ -638,6 +643,7 @@ class LotteryResultController extends Controller
                                 'bet_id' => $bet->bet_id,
                                 'bet_number_id' => $bet->id,
                                 'receipt_id' => $bet->bet_receipt_id,
+                                'bet_type' => $bet->bet_type,
                                 'win_number' => $val->bet_number,
                                 'result_id' => $val->result_id,
                                 'prize_amount' => $totalAmount
@@ -653,6 +659,7 @@ class LotteryResultController extends Controller
                                 'bet_id' => $bet->bet_id,
                                 'bet_number_id' => $bet->id,
                                 'receipt_id' => $bet->bet_receipt_id,
+                                'bet_type' => $bet->bet_type,
                                 'win_number' => $val->bet_number,
                                 'result_id' => $val->result_id,
                                 'prize_amount' => $totalAmount
@@ -778,6 +785,7 @@ class LotteryResultController extends Controller
                                 $getBetWinningNumber[] = [
                                     'bet_id' => $bet->bet_id,
                                     'receipt_id' => $bet->bet_receipt_id,
+                                    'bet_type' => $bet->bet_type,
                                     'win_number' => $val->bet_number,
                                     'result_id' => $val->result_id,
                                     'bet_number_id' => $bet->id,
@@ -887,6 +895,8 @@ class LotteryResultController extends Controller
                 ->select(
                     'bet_winning.bet_id',
                     'bet_winning.win_amount as compensate',
+                    DB::raw('COUNT(record.bet_number_id) as count_bet_number'),
+                    'record.bet_number_id',
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
                     'pkg_con.price as odds',
@@ -1020,7 +1030,7 @@ class LotteryResultController extends Controller
                     $prepareData['commission'] = $commission;
                     $prepareData['net_amount'] = $netAmount;
                     if(in_array($record->bet_type, ['RP2','RP3','RP4'])){
-                        $compensate = $record->odds * $record->roll_parlay_amount;
+                        $compensate = ($record->odds * $record->count_bet_number) / 2;
                     }else{
                         $compensate = $record->compensate;
                     }
