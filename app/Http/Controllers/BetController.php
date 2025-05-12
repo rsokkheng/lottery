@@ -95,6 +95,8 @@ class BetController extends Controller
                 ->orderBy('company_id')
                 ->orderBy('bet_receipt_id')
                 ->orderBy('bet_schedule_id')
+                ->orderBy('number_format')
+                ->orderBy('total_amount','DESC')
                 ->get();
             return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
         } catch (\Exception $exception) {

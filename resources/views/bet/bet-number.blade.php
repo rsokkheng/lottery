@@ -155,7 +155,7 @@
                                       if(empty($checkBet)){
                                         $checkBet = $getRow;
                                      }else{
-                                         if($checkBet['company_id'] === $row['company_id'] && $checkBet['bet_receipt_id'] === $row['bet_receipt_id'] && $checkBet['bet_schedule_id'] === $row['bet_schedule_id'] && $checkBet['game'] === $betNumberGame && $checkBet['win_number'] === $betNumber->generated_number){
+                                         if($checkBet['company_id'] === $row['company_id'] && $checkBet['bet_receipt_id'] === $row['bet_receipt_id'] && $checkBet['bet_schedule_id'] === $row['bet_schedule_id'] && $checkBet['game'] === $betNumberGame && $checkBet['win_number'] === $row['number_format']){
                                              $checkBet['amount'] += $betNumberAmount;
                                              $checkBet['turnover'] += $bet->total_amount;
                                              $checkBet['commission'] += $commission;
