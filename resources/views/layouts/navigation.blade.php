@@ -162,8 +162,13 @@
                     href="{{ route('bet.bet-list') }}">{{ __('Bet List') }}</x-nav-link>
         <x-nav-link class="{{ Route::is('bet.bet-number') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
-        <x-nav-link class="not-active-menu" href="#">{{ __('Win Report') }}</x-nav-link>
-        <x-nav-link class="not-active-menu" href="#">{{ __('Daily Report') }}</x-nav-link>
+
+        <x-nav-link  class="{{ Route::is('bet.bet-winning') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('bet.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
+
+        <x-nav-link  class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+        
         <x-nav-link class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
         <x-nav-link class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }}"
