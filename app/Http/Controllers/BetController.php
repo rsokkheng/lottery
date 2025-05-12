@@ -23,7 +23,6 @@ class BetController extends Controller
     public function getBetNumber(Request $request)
     {
         try {
-
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
@@ -65,10 +64,14 @@ class BetController extends Controller
                     "id" => 3,
                 ]
             ];
-            $data =$this->betModel->with([
+            $data =$this->betModel
+                ->with([
                 'beReceipt',
                 'user',
-                'betNumber.betNumberWin',
+                    'betNumber'=> function ($q) {
+                        $q->orderBy('id');
+                    },
+                    'betNumber.betNumberWin',
                 'bePackageConfig',
                 'betLotterySchedule'
             ])->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
@@ -84,8 +87,15 @@ class BetController extends Controller
                 $q->whereHas('betNumber', function ($query) use ($number) {
                     $query->where('generated_number', $number);
                 });
-            })->get();
-            
+            })
+//                ->where(function ($q){
+//                    $q->where('bet_date','2025-05-10')
+//                        ->whereIn('bet_receipt_id',[115,116,117]);
+//                })
+                ->orderBy('company_id')
+                ->orderBy('bet_receipt_id')
+                ->orderBy('bet_schedule_id')
+                ->get();
             return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
         } catch (\Exception $exception) {
             throwException($exception);
