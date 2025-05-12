@@ -96,9 +96,9 @@
             <tbody>
                 @foreach($bets as $bet)
                 <tr>
-                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['number'] }}</td>
-                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['company'] }}</td>
-                    <td style="letter-spacing: 1px; font-size:15px; font-weight:600">{{ $bet['amount'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px;">{{ $bet['number'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px;">{{ $bet['company'] }}</td>
+                    <td style="letter-spacing: 1px; font-size:15px;">{{ $bet['amount'] }}</td>
                 </tr>
                 @endforeach
                 <!-- Total Amount row -->
