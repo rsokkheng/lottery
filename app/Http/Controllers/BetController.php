@@ -23,7 +23,6 @@ class BetController extends Controller
     public function getBetNumber(Request $request)
     {
         try {
-
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
@@ -63,10 +62,13 @@ class BetController extends Controller
                 ["label" => "6PM Company", "id" => 3],
             ];
             $data =$this->betModel
-            ->with([
+                ->with([
                 'beReceipt',
                 'user',
-                'betNumber.betNumberWin.betWinning',
+                    'betNumber'=> function ($q) {
+                        $q->orderBy('id');
+                    },
+                    'betNumber.betNumberWin',
                 'bePackageConfig',
                 'betLotterySchedule'
             ])->when(!in_array('admin', $roles) && !in_array('manager', $roles),
@@ -91,10 +93,14 @@ class BetController extends Controller
                 $q->whereHas('betNumber', function ($query) use ($number) {
                     $query->where('generated_number', $number);
                 });
-            })->get();
-
-            
-            return view('bet.bet-number', compact('data', 'date','company','company_id','digit_type','digits','number','members','member_id'));
+            })
+                ->orderBy('company_id')
+                ->orderBy('bet_receipt_id')
+                ->orderBy('bet_schedule_id')
+                ->orderBy('number_format')
+                ->orderBy('total_amount','DESC')
+                ->get();
+            return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
