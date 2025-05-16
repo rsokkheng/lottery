@@ -98,130 +98,29 @@
                     </thead>
                     <tbody>
                     @if(isset($data) && count($data)>0)
-                        @php
-                        $totalTurnover =0;
-                        $totalCommission=0;
-                        $totalNetAmount=0;
-                        $No = 1;
-                        $winLose=0;
-                        $totalWinLose=0;
-
-                        $showBets = [];
-                        $checkBet = [];
-                        @endphp
-                        @foreach($data as $key => $betNumber)
-                            @php
-                                print_r($betNumber->bet_number_id.'---'.$betNumber->company_id.'---'.$betNumber->bet_schedule_id.'---'.$betNumber->generated_number);
-                                echo '<br>';
-                                $betNumberAmount = 0;
-                                $betNumberGame = "";
-
-
-                                if($betNumber->a_amount >0){
-                                    $betNumberAmount = $betNumber->a_amount;
-                                    $betNumberGame = "A";
-                                }
-                                if($betNumber->b_amount >0){
-                                    $betNumberAmount = $betNumber->b_amount;
-                                    $betNumberGame = "B";
-                                }
-                                if($betNumber->ab_amount >0){
-                                    $betNumberAmount = $betNumber->ab_amount;
-                                    $betNumberGame = "A+B";
-                                }
-                                if($betNumber->roll_amount >0){
-                                    $betNumberAmount = $betNumber->roll_amount;
-                                    $betNumberGame = "Roll";
-                                }
-                                 if($betNumber->roll7_amount >0){
-                                    $betNumberAmount = $betNumber->roll7_amount;
-                                    $betNumberGame = "Roll7";
-                                }
-                                 if($betNumber->roll_parlay_amount >0){
-                                    $betNumberAmount = $betNumber->roll_parlay_amount;
-                                    $betNumberGame = "Roll Parlay";
-                                }
-                                 $commission = $betNumber->number_turnover-($betNumber->number_turnover *$betNumber?->rate/100);
-                                 $netAmount =$betNumber->number_turnover * $betNumber?->rate/100;
-                                 $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
-                                 $totalCommission +=$commission;
-                                 $totalNetAmount +=$netAmount;
-                                 $totalTurnover +=$betNumber->number_turnover;
-                                 $winLose = $prizeAmount - $netAmount;
-                                 $totalWinLose +=$winLose;
-
-                                 $getRow = [
-                                    'company_id'=>$betNumber->company_id,
-                                    'bet_schedule_id'=>$betNumber->bet_schedule_id,
-                                    'win_number' => $betNumber->generated_number,
-                                    'amount'=> $betNumberAmount,
-                                    'turnover'=> $betNumber->number_turnover,
-                                    'commission'=> $commission,
-                                    'net_amount'=> $netAmount,
-                                    'prizeAmount'=> $prizeAmount,
-                                    'winLose'=> $winLose,
-                                    'game' => $betNumberGame,
-                                    'province_en'=> $betNumber->province_en,
-                                    'digit_format'=> $betNumber->digit_format,
-                                    'price'=> $betNumber->price,
-                                    'rate'=> $betNumber->rate
-                                ];
-                                 $getShowBet = [];
-//                                  dump($betNumberGame);
-                                 if(empty($checkBet)){
-                                    $checkBet = $getRow;
-                                 }else{
-                                     if($checkBet['company_id'] === $betNumber->company_id && $checkBet['bet_schedule_id'] === $betNumber->bet_schedule_id && $checkBet['game'] === $betNumberGame && $checkBet['win_number'] === $betNumber->generated_number){
-                                         $checkBet['amount'] += $betNumberAmount;
-                                         $checkBet['turnover'] += $betNumber->number_turnover;
-                                         $checkBet['commission'] += $commission;
-                                         $checkBet['net_amount'] += $netAmount;
-                                         $checkBet['prizeAmount'] += $prizeAmount;
-                                         $checkBet['winLose'] += $winLose;
-                                     }else{
-                                         $getShowBet = $checkBet;
-                                         $showBets[] = $checkBet;
-                                         $checkBet = $getRow;
-                                     }
-                                 }
-
-
-//                                 if($key+1 == count($data)){
-//                                     if(empty($showBet)){
-//                                        $getShowBet[] = $checkBet;
-//                                     }
-//                                 }
-
-
-                            @endphp
-                        @endforeach
-
-                        @foreach($showBets as $showBet)
-                            @if((count($showBet)>0))
+                        @foreach($data as $key=>$betNumber)
                                 <tr class="border border-gray-300 hover:bg-gray-100">
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['bet_date']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['win_number']}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['digit_format']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['game']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['province_en']}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($showBet['amount'] ?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['price']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($showBet['rate'] ?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['turnover'] ?? 0}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['commission']}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['net_amount']}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{ $showBet['winLose'] < 0 ? 'text-red-500' : ''}}">{{$showBet['winLose']}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$key+1}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->bet_date??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->generated_number??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->digit_format??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->bet_game??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->province_en??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumber->get_roll_amount?? 0, 2) }}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->price??0}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->number_turnover?? 0}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{number_format($betNumber->commission?? 0, 2)}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{number_format($betNumber->net_amount?? 0, 2)}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{number_format($betNumber->win_lose?? 0, 2) < 0 ? 'text-red-500' : ''}}">{{number_format($betNumber->win_lose?? 0, 2)}}</td>
                                 </tr>
-                            @endif
                         @endforeach
-
                         <tr class="border border-gray-300 hover:bg-gray-100">
                             <td colspan="9"></td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalTurnover, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalCommission, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalWinLose < 0 ? 'text-red-500' : ''}}">{{number_format( $totalWinLose, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['turnover'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalNetAmount['commission'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['net_amount'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalNetAmount['win_lose'] < 0 ? 'text-red-500' : ''}}">{{number_format( $totalNetAmount['win_lose'], 3, '.', '')}}</td>
                         </tr>
                     @else
                         <tr class="border border-gray-300 hover:bg-gray-100">
