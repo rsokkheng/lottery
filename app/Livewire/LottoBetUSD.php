@@ -6,12 +6,9 @@ use App\Enums\MultiplierEnum;
 use App\Enums\MultiplierHashtagEnum;
 use App\Enums\MultiplierHashtagHNEnum;
 use App\Enums\MultiplierHNEnum;
-use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
-use App\Models\BetNumber;
 use App\Models\BetNumberUSD;
-use App\Models\BetReceipt;
 use App\Models\BetReceiptUSD;
 use App\Models\BetUSD;
 use App\Models\BetUserWallet;
@@ -82,16 +79,15 @@ class LottoBetUSD extends Component
     public $packageRate = [];
     public $lengthNum = [];
     public $isCheckHN = [];
-    public $roll7AmountProvisional =0;
+    public $roll7AmountProvisional = 0;
 
     public $betUserWallet;
 
     public function mount(
-        BetUSD                            $betModel,
+        BetUSD                         $betModel,
         BetLotterySchedule             $betLotteryScheduleModel,
         BetLotteryPackageConfiguration $betPackageConfiguration,
-        BetReceiptUSD                     $betReceipt,
-
+        BetReceiptUSD                  $betReceipt,
     )
     {
         // Initialization logic if needed
@@ -531,7 +527,7 @@ class LottoBetUSD extends Component
                                             $betNumber2 = [
                                                 'generated_number' => $genNumber,
                                                 'digit_length' => strlen($genNumber),
-                                                'total_amount'=> $total_amount,
+                                                'total_amount' => $total_amount,
                                             ];
 
                                             $data = array_merge($betNumber1, $betNumber2, $amounts);
@@ -801,7 +797,7 @@ class LottoBetUSD extends Component
     {
         $this->totalProvisional = 0;
         $this->totalProvisionalHN = 0;
-        $this->roll7AmountProvisional =0;
+        $this->roll7AmountProvisional = 0;
         $this->isCheckHN[$key] = false;
         foreach ($this->schedules as $keys => $schedule) {
             if ($this->province_body_check[$keys][$key]) {
@@ -940,8 +936,7 @@ class LottoBetUSD extends Component
                     if ($this->roll7_amount[$key] > 0) {
                         if ($this->roll7_check[$key]) {
                             $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
-                        }
-                        else {
+                        } else {
                             if ($isAsterisk) {
                                 $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
                             } else {
@@ -975,7 +970,7 @@ class LottoBetUSD extends Component
         $this->amountHN[$key] = $this->totalProvisionalHN;
         $this->amountNotHN[$key] = $this->totalProvisional;
         $this->total_amount[$key] = $this->totalProvisional + $this->totalProvisionalHN;
-        if(!$this->isCheckHN[$key] ){
+        if (!$this->isCheckHN[$key]) {
             $this->total_amount[$key] += $this->roll7AmountProvisional;
         }
         // invoice

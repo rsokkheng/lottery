@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class BetNumberUSD extends Model
 {
     use HasFactory;
+    protected $table = 'bet_number_usd';
     protected $guarded = [];
 }
