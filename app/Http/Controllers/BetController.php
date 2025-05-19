@@ -27,7 +27,10 @@ class BetController extends Controller
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
+   
             $user = Auth::user()??0;
+            $member_id = $request->get('member_id');
+            $member_id = ($member_id === 'undefined' || empty($member_id)) ? null : $member_id;
             $digits = BetLotteryPackageConfiguration::query()
             ->where('package_id', $user->package_id)
             ->orderBy('id')->get(['id', 'bet_type','has_special']);
@@ -44,17 +47,29 @@ class BetController extends Controller
             if ($request->has('digit_type')) {
                 $digit_type = $request->get('digit_type');
             }
-            $member_id = $request->get('member_id');
-            if ($member_id === 'undefined' || empty($member_id)) {
-                $member_id = null;
-            }
             $roles = [];
             if ($user) {
-                $user = User::find($user->id); // If needed to reload relations
+                $user = User::with('roles')->find($user->id); // reload with roles
                 $roles = $user->roles->pluck('name')->toArray();
             }
+            
+            // Get member list based on role
+            $members = collect(); // default empty collection
+           if (in_array('admin', $roles)) {
+                // Admin sees users who are not admin or manager
+                $members = User::with('manager') // Eager load manager relationship
+                    ->whereDoesntHave('roles', function ($q) {
+                        $q->whereIn('name', ['admin', 'manager']);
+                    })->get();
+            } elseif (in_array('manager', $roles)) {
+                // Manager sees their own members (exclude admins)
+                $members = User::with('manager')
+                    ->where('manager_id', $user->id)
+                    ->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'admin');
+                    })->get();
+            }
             $number = $request->number ?? null;
-
             $company = [
                 ["label" => "All Company", "id" => null],
                 ["label" => "4PM Company", "id" => 1],
@@ -65,26 +80,25 @@ class BetController extends Controller
                 ->with([
                 'beReceipt',
                 'user',
-                    'betNumber'=> function ($q) {
-                        $q->orderBy('id');
-                    },
-                    'betNumber.betNumberWin',
+                'betNumber'=> function ($q) {
+                    $q->orderBy('id');
+                },
+                'betNumber.betNumberWin',
                 'bePackageConfig',
                 'betLotterySchedule'
-            ])->when(!in_array('admin', $roles) && !in_array('manager', $roles),
-                function ($q) use ($member_id, $user) {
-                    $q->where('user_id', $member_id ?? $user->id);
-                }
-            )->when(
-                in_array('admin', $roles) || in_array('manager', $roles),
-                function ($q) use ($member_id) {
-                    if (!is_null($member_id)) {
-                        $q->where('user_id', $member_id);
-                    }
-                }
-            )->when(!is_null($date), function ($q) use ($date) {
-                $q->where('bet_date', '>=', Carbon::parse($date)->startOfDay())
-                  ->where('bet_date', '<=', Carbon::parse($date)->endOfDay());
+            ])->when(in_array('manager', $roles), function ($q) use ($user) {
+                // Get all users under this manager
+                $memberIds = User::where('manager_id', $user->id)
+                                ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                                ->pluck('id')
+                                ->toArray();
+                $q->whereIn('user_id', $memberIds);
+            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })->when(!is_null($member_id), function ($q) use ($member_id) {
+                $q->where('user_id', $member_id);
+            })->when($date, function ($q) use ($date) {
+                $q->whereDate('bet_date', $date);
             })->when(!is_null($digit_type), function ($q) use ($digit_type) {
                 $q->where('digit_format', $digit_type);
             })->when(!is_null($company_id), function ($q) use ($company_id) {
@@ -94,13 +108,13 @@ class BetController extends Controller
                     $query->where('generated_number', $number);
                 });
             })
-                ->orderBy('company_id')
-                ->orderBy('bet_receipt_id')
-                ->orderBy('bet_schedule_id')
-                ->orderBy('number_format')
-                ->orderBy('total_amount','DESC')
-                ->get();
-            return view('bet.bet-number', compact('data', 'date','company','company_id','digits','number'));
+            ->orderBy('company_id')
+            ->orderBy('bet_receipt_id')
+            ->orderBy('bet_schedule_id')
+            ->orderBy('number_format')
+            ->orderBy('total_amount','DESC')
+            ->get();
+            return view('bet.bet-number', compact('data', 'date','company','company_id','digit_type','digits','number','members','member_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();

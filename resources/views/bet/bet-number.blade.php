@@ -1,19 +1,24 @@
+@php
+  $isAdmin = in_array('admin', $roles ?? []);
+@endphp
+
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
     <div class="flex-col bg-white rounded-lg px-4 py-4">
         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg">
             @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty())
              <div class="w-full lg:w-48">
-                <select id="member" class="rounded w-full">
-                     <option value="">All Members</option>
-                    @foreach($members as $member)
-                        @if($member_id == $member['id'])
-                            <option selected value="{{ $member['id'] }}">{{ $member['name'] }}</option>
-                        @else
-                            <option value="{{ $member['id'] }}">{{ $member['name'] }}</option>
+             <select id="member" name="member_id" class="rounded w-full">
+                <option value="">All Members</option>
+                @foreach($members as $member)
+                    <option value="{{ $member->id }}" {{ $member_id == $member->id ? 'selected' : '' }}>
+                        {{ $member->name }}
+                        @if($isAdmin && $member->manager)
+                            - {{ $member->manager->name }}
                         @endif
-                    @endforeach
-                </select>
+                    </option>
+                @endforeach
+            </select>
             </div>
             @endif
 
@@ -99,14 +104,13 @@
                     <tbody>
                     @if(isset($data) && count($data)>0)
                         @php
-                        $totalTurnover =0;
-                        $totalCommission=0;
-                        $totalNetAmount=0;
-                        $No = 1;
-                        $winLose=0;
-                        $totalWinLose=0;
-
-                        $checkBet = [];
+                            $totalTurnover =0;
+                            $totalCommission=0;
+                            $totalNetAmount=0;
+                            $No = 1;
+                            $winLose=0;
+                            $totalWinLose=0;
+                            $checkBet = [];
                         @endphp
                         @foreach($data as  $row)
                             @foreach($row->betNumber as $key => $bet)
@@ -151,62 +155,22 @@
                                  $totalTurnover +=$betNumber->total_amount;
                                  $winLose = $prizeAmount - $netAmount;
                                  $totalWinLose +=$winLose;
-
-                                 $getRow = [
-                                    'company_id'=>$row['company_id'],
-                                    'bet_receipt_id'=>$row['bet_receipt_id'],
-                                    'bet_schedule_id'=>$row['bet_schedule_id'],
-                                    'win_number' => $betNumber->generated_number,
-                                    'amount'=> $betNumberAmount,
-                                    'turnover'=> $bet->total_amount,
-                                    'commission'=> $commission,
-                                    'net_amount'=> $netAmount,
-                                    'prizeAmount'=> $prizeAmount,
-                                    'winLose'=> $winLose,
-                                    'game' => $betNumberGame
-                                ];
-                                  $showBet = [];
-                                  if($isCheck){
-                                       $showBet = $getRow;
-                                  }else{
-                                      if(empty($checkBet)){
-                                        $checkBet = $getRow;
-                                     }else{
-                                         if($checkBet['company_id'] === $row['company_id'] && $checkBet['bet_receipt_id'] === $row['bet_receipt_id'] && $checkBet['bet_schedule_id'] === $row['bet_schedule_id'] && $checkBet['game'] === $betNumberGame && $checkBet['win_number'] === $row['number_format']){
-                                             $checkBet['amount'] += $betNumberAmount;
-                                             $checkBet['turnover'] += $bet->total_amount;
-                                             $checkBet['commission'] += $commission;
-                                             $checkBet['net_amount'] += $netAmount;
-                                             $checkBet['prizeAmount'] += $prizeAmount;
-                                             $checkBet['winLose'] += $winLose;
-                                                $showBet = $checkBet;
-                                         }else{
-                                             if($checkBet['game'] !== $betNumberGame){
-                                                  $showBet = $getRow;
-                                             }else{
-                                                $checkBet = $getRow;
-                                             }
-                                         }
-                                     }
-                                  }
                             @endphp
-                            @if((count($showBet)>0) || $key+1 == count($data))
-                                <tr class="border border-gray-300 hover:bg-gray-100">
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$No++}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bet_date']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['win_number']}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['digit_format']??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumberGame??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($showBet['amount'] ?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['turnover'] ?? 0}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['commission']}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$showBet['net_amount']}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{ $showBet['winLose'] < 0 ? 'text-red-500' : ''}}">{{$showBet['winLose']}}</td>
-                                </tr>
-                            @endif
+                            
+                            <tr class="border border-gray-300 hover:bg-gray-100">
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$No++}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bet_date']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->generated_number}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['digit_format']??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumberGame??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
+                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$commission}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$netAmount}}</td>
+                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas {{ $winLose < 0 ? 'text-red-500' : ''}}">{{$winLose}}</td>
 
                             @endforeach
                         @endforeach

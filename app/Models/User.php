@@ -24,6 +24,7 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'package_id',
+        'manager_id',
         'name',
         'email',
         'password',
@@ -63,5 +64,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(BetUserWallet::class);
     }
+    // Each user belongs to a manager
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    // Each manager has many users under them
+    public function members()
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
+
    
 }

@@ -124,8 +124,9 @@
 <script>
     function searchReceipt(url){
         const date = $('#date').val();
+        const com_id = $('#company').find(":selected").val();
         if(date.length){
-            window.location = url +'?date='+date;
+            window.location = url +'?date='+date +'&com_id=' + com_id;
         }
     }
 </script>
