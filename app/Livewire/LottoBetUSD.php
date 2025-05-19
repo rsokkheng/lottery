@@ -6,11 +6,11 @@ use App\Enums\MultiplierEnum;
 use App\Enums\MultiplierHashtagEnum;
 use App\Enums\MultiplierHashtagHNEnum;
 use App\Enums\MultiplierHNEnum;
-use App\Models\Bet;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\BetLotterySchedule;
-use App\Models\BetNumber;
-use App\Models\BetReceipt;
+use App\Models\BetNumberUSD;
+use App\Models\BetReceiptUSD;
+use App\Models\BetUSD;
 use App\Models\BetUserWallet;
 use App\Models\User;
 use Carbon\Carbon;
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
-class LottoBet extends Component
+class LottoBetUSD extends Component
 {
     protected $betModel;
     protected $betLotteryScheduleModel;
@@ -79,16 +79,15 @@ class LottoBet extends Component
     public $packageRate = [];
     public $lengthNum = [];
     public $isCheckHN = [];
-    public $roll7AmountProvisional =0;
+    public $roll7AmountProvisional = 0;
 
     public $betUserWallet;
 
     public function mount(
-        Bet                            $betModel,
+        BetUSD                         $betModel,
         BetLotterySchedule             $betLotteryScheduleModel,
         BetLotteryPackageConfiguration $betPackageConfiguration,
-        BetReceipt                     $betReceipt,
-
+        BetReceiptUSD                  $betReceipt,
     )
     {
         // Initialization logic if needed
@@ -124,7 +123,7 @@ class LottoBet extends Component
 
     public function render()
     {
-        return view('livewire.lotto-bet');
+        return view('livewire.lotto-bet-usd');
     }
 
     public function initializeProperty()
@@ -426,7 +425,7 @@ class LottoBet extends Component
                                 'bet_date' => $this->currentDate,
                                 'total_amount' => $schedule['code'] == "HN" ? $this->amountHN[$key] : $this->amountNotHN[$key],
                             ];
-                            $respone = Bet::create($betItem);
+                            $respone = BetUSD::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
                             }
@@ -488,7 +487,7 @@ class LottoBet extends Component
                                         ];
 
                                         $data = array_merge($betNumber1, $betNumber2);
-                                        BetNumber::create($data);
+                                        BetNumberUSD::create($data);
                                     }
                                 } else {
                                     $betNumber2 = [
@@ -497,7 +496,7 @@ class LottoBet extends Component
                                         'total_amount' => $this->roll_parlay_amount[$key] * $multiplierHashtag,
                                     ];
                                     $data = array_merge($betNumber1, $betNumber2);
-                                    BetNumber::create($data);
+                                    BetNumberUSD::create($data);
                                 }
                             } else if (strpos($number, '*') !== false) {
                                 foreach ($betTypes as $type => $info) {
@@ -528,11 +527,11 @@ class LottoBet extends Component
                                             $betNumber2 = [
                                                 'generated_number' => $genNumber,
                                                 'digit_length' => strlen($genNumber),
-                                                'total_amount'=> $total_amount,
+                                                'total_amount' => $total_amount,
                                             ];
 
                                             $data = array_merge($betNumber1, $betNumber2, $amounts);
-                                            BetNumber::create($data);
+                                            BetNumberUSD::create($data);
                                         }
                                     }
                                 }
@@ -574,7 +573,7 @@ class LottoBet extends Component
                                             ];
 
                                             $data = array_merge($betNumber1, $betNumber2, $amounts, $checkeds);
-                                            BetNumber::create($data);
+                                            BetNumberUSD::create($data);
                                         }
                                     }
                                 }
@@ -586,7 +585,7 @@ class LottoBet extends Component
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            dump($e->getMessage());
+            log::info($e->getMessage());
         }
         if ($isCreateBetSuccess) {
             $this->handleReset();
@@ -798,7 +797,7 @@ class LottoBet extends Component
     {
         $this->totalProvisional = 0;
         $this->totalProvisionalHN = 0;
-        $this->roll7AmountProvisional =0;
+        $this->roll7AmountProvisional = 0;
         $this->isCheckHN[$key] = false;
         foreach ($this->schedules as $keys => $schedule) {
             if ($this->province_body_check[$keys][$key]) {
@@ -937,8 +936,7 @@ class LottoBet extends Component
                     if ($this->roll7_amount[$key] > 0) {
                         if ($this->roll7_check[$key]) {
                             $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * $this->permutationsLength[$key];
-                        }
-                        else {
+                        } else {
                             if ($isAsterisk) {
                                 $this->roll7AmountProvisional += $this->roll7_amount[$key] * MultiplierEnum::ROLL7 * 10;
                             } else {
@@ -972,7 +970,7 @@ class LottoBet extends Component
         $this->amountHN[$key] = $this->totalProvisionalHN;
         $this->amountNotHN[$key] = $this->totalProvisional;
         $this->total_amount[$key] = $this->totalProvisional + $this->totalProvisionalHN;
-        if(!$this->isCheckHN[$key] ){
+        if (!$this->isCheckHN[$key]) {
             $this->total_amount[$key] += $this->roll7AmountProvisional;
         }
         // invoice
