@@ -316,7 +316,7 @@ class LottoBet extends Component
             $this->enableCheckRollParlay[$key] = false;
         } elseif ($length == 3) {
             if ($isThreeNumTheSame) {
-                $this->enableChanelRollParlay[$key] = false;
+                $this->enableChanelRollParlay[$key] = true;
                 $this->enableCheckRollParlay[$key] = false;
             } else {
                 $this->roll_parlay_check[$key] = false;
