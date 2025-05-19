@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Bet extends Model
+class BetUSD extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $table = 'bets';
-    public function betNumber():HasMany
+    protected $table = 'bet_usd';
+    public function betNumberUSD():HasMany
     {
-        return $this->hasMany(BetNumber::class);
+        return $this->hasMany(BetNumberUSD::class);
     }
 
     public function betLotterySchedule():BelongsTo
@@ -30,13 +30,13 @@ class Bet extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function beReceipt(): BelongsTo
+    public function beReceiptUSD(): BelongsTo
     {
-        return $this->belongsTo(BetReceipt::class, 'bet_receipt_id');
+        return $this->belongsTo(BetReceiptUSD::class, 'bet_receipt_id');
     }
 
-    public function betWinning(): HasMany
+    public function betWinningUSD(): HasMany
     {
-        return $this->hasMany(BetWinning::class, 'bet_id', 'id');
+        return $this->hasMany(BetWinningUSD::class, 'bet_id', 'id');
     }
 }
