@@ -10,8 +10,8 @@
                 <thead>
                     <tr style="font-size: 14px;">
                         <th>#</th>
-                        <th>Role Name</th>
-                        <th>Manager</th>
+                        <th>Role</th>
+                        <th>Manage By</th>
                         <th>Account ID</th>
                         <th>Name</th>
                         <th>Package</th>

@@ -93,8 +93,9 @@ class UserController extends Controller
     }
     public function edit($id)
     {
+        $roles = Role::all();
         $user = User::where('id',decrypt($id))->first();
-        return view('admin.user.edit',compact('user'));
+        return view('admin.user.edit',compact('user','roles'));
     }
     public function update(Request $request, User $user)
     {
