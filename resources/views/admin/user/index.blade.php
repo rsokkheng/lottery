@@ -11,14 +11,11 @@
                     <tr style="font-size: 14px;">
                         <th>#</th>
                         <th>Role Name</th>
+                        <th>Manager</th>
                         <th>Account ID</th>
                         <th>Name</th>
                         <th>Package</th>
-                        <th>Available Credit</th>
-                        <th>Bet Credit</th>
-                        <th>Cash Balance</th>
                         <th>Register Date</th>
-                        <th>Last Login</th>
                         <th>Action</th>
                   
                     </tr>
@@ -28,28 +25,32 @@
                     @foreach ($data as $key => $user)
                         <tr>
                             <td>{{ $key+1 }}</td>
-                            <td> @foreach ($user->roles as $role)
-                                    <span class="badge bg-success">{{ $role->name }}</span>
-                                @endforeach
+                            <td>@foreach ($user->roles as $role)
+                                @php
+                                    switch ($role->name) {
+                                        case 'admin':
+                                            $badgeClass = 'bg-success'; // green
+                                            break;
+                                        case 'manager':
+                                            $badgeClass = 'bg-primary'; // blue
+                                            break;
+                                        case 'member':
+                                            $badgeClass = 'bg-danger'; // red
+                                            break;
+                                        default:
+                                            $badgeClass = 'bg-secondary'; // default gray
+                                    }
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">{{ $role->name }}</span>
+                            @endforeach
+
                             </td>
+                            <td>{{ optional($user->manager)->name ?? '—' }} {{-- Manager's name --}}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->package->package_code }}</td>
-                            <td> @foreach ($user->userWallet as $wallet)
-                                    <span>{{ $wallet->available_credit}}</span>
-                                @endforeach
-                            </td>
-                            <td>@foreach ($user->userWallet as $wallet)
-                                    <span>{{ $wallet->given_credit }}</span>
-                                @endforeach
-                            </td>
-                            <td>
-                            @foreach ($user->userWallet as $wallet)
-                                    <span>{{ $wallet->balance }}</span>
-                                @endforeach
-                            </td>
+                        
                             <td>{{ $user->created_at }}</td>
-                            <td>{{ $user->updated_at }}</td>
                             <td>
                                 <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
                                 <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST" onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">

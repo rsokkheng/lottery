@@ -7,28 +7,51 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\BetLotteryPackage;
 use App\Models\BetUserWallet;
-use App\Models\Menu;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function __construct()
     {
-        $roles = Role::all();
         $packages = BetLotteryPackage::all();
-        view()->share('roles',$roles);
         view()->share('packages', $packages);
     }
     public function index()
     {
-        $data = User::with('package','roles','userWallet')->where('record_status_id','=',1)->orderBy('id','ASC')->get();
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            // For admin: show all users
+            $data = User::with('package', 'roles', 'userWallet','manager')
+                        ->where('record_status_id', '=', 1)
+                        ->orderBy('id', 'ASC')
+                        ->get();
+        } elseif ($user->hasRole('manager')) {
+            // For manager: show only users under the manager and exclude admins
+            $data = User::with('package', 'roles', 'userWallet','manager')
+                        ->where('record_status_id', '=', 1)
+                        ->where('manager_id', '=', $user->id)  // Only show users managed by this manager
+                        ->whereDoesntHave('roles', function($query) {
+                            $query->where('name', 'admin');  // Exclude admin role
+                        })
+                        ->orderBy('id', 'ASC')
+                        ->get();
+        
+        }
+       
         return view('admin.user.index', compact('data'));
     }
     public function create()
     {
-        return view('admin.user.create');
+        $user = Auth::user();
+        if ($user->hasRole('admin')) {
+            $roles = Role::where('name', 'manager')->get();
+        } elseif ($user->hasRole('manager')) {
+            $roles = Role::where('name', 'member')->get();
+        } else {
+            $roles = collect(); // or handle unauthorized
+        }
+        return view('admin.user.create',compact('roles'));
     }
     public function store(Request $request)
     {
@@ -42,6 +65,7 @@ class UserController extends Controller
         ]);
         $user = User::create([
             'package_id' => $request->package_id,
+            'manager_id' => Auth::user()->id??0,
             'name' => $request->name,
             'username' => $request->username,
             'email' => $request->username.'@gmail.com',
@@ -53,6 +77,15 @@ class UserController extends Controller
             'user_id' => $user->id,
             'currency' => "VDN",
             'status' => "Active",
+            'beginning' => 0,
+            'net_win_loss' => 0,
+            'deposit' => 0,
+            'withdraw' => 0,
+            'balance' => 0,
+            'given_credit' => 0,
+            'available_credit' => 0,
+            'adjustment' => 0,
+            'outstanding' => 0,
         ]);
         
         $user->assignRole($request->role);
