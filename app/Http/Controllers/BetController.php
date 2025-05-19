@@ -151,14 +151,31 @@ class BetController extends Controller
                 $digit_type = $request->get('digit_type');
             }
             $member_id = $request->get('member_id');
-            if ($member_id === 'undefined' || empty($member_id)) {
-                $member_id = null;
-            }
+            $member_id = ($member_id === 'undefined' || empty($member_id)) ? null : $member_id;
             $roles = [];
             if ($user) {
-                $user = User::find($user->id); // If needed to reload relations
+                $user = User::with('roles')->find($user->id); // reload with roles
                 $roles = $user->roles->pluck('name')->toArray();
             }
+
+
+              // Get member list based on role
+            $members = collect(); // default empty collection
+            if (in_array('admin', $roles)) {
+                // Admin sees users who are not admin or manager
+                $members = User::with('manager') // Eager load manager relationship
+                    ->whereDoesntHave('roles', function ($q) {
+                        $q->whereIn('name', ['admin', 'manager']);
+                    })->get();
+            } elseif (in_array('manager', $roles)) {
+                // Manager sees their own members (exclude admins)
+                $members = User::with('manager')
+                    ->where('manager_id', $user->id)
+                    ->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'admin');
+                    })->get();
+            }
+
             $number = $request->number ?? null;
 
             $company = [
@@ -226,19 +243,19 @@ class BetController extends Controller
                 ->join('bet_package_configurations as config','config.id','=', 'bets.bet_package_config_id')
                 ->join('bet_lottery_schedules as schedules','schedules.id','=', 'bets.bet_schedule_id')
                 ->join('users','users.id','=', 'bets.user_id')
-                ->when(!in_array('admin', $roles) && !in_array('manager', $roles),
-                    function ($q) use ($member_id, $user) {
-                        $q->where('users.id', $member_id ?? $user->id);
-                    }
-                )->when(
-                    in_array('admin', $roles) || in_array('manager', $roles),
-                    function ($q) use ($member_id) {
-                        if (!is_null($member_id)) {
-                            $q->where('users.id', $member_id);
-                        }
-                    }
-                )->when(!is_null($date), function ($q) use ($date) {
-                    $q->where('bets.bet_date',Carbon::parse($date)->format('Y-m-d'));
+                ->when(in_array('manager', $roles), function ($q) use ($user) {
+                    // Get all users under this manager
+                    $memberIds = User::where('manager_id', $user->id)
+                                    ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                                    ->pluck('id')
+                                    ->toArray();
+                    $q->whereIn('user_id', $memberIds);
+                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })->when(!is_null($member_id), function ($q) use ($member_id) {
+                    $q->where('user_id', $member_id);
+                })->when($date, function ($q) use ($date) {
+                    $q->whereDate('bet_date', $date);
                 })->when(!is_null($digit_type), function ($q) use ($digit_type) {
                     $q->where('bets.digit_format', $digit_type);
                 })->when(!is_null($company_id), function ($q) use ($company_id) {
