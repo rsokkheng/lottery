@@ -103,83 +103,29 @@
                     </thead>
                     <tbody>
                     @if(isset($data) && count($data)>0)
-                        @php
-                            $totalTurnover =0;
-                            $totalCommission=0;
-                            $totalNetAmount=0;
-                            $No = 1;
-                            $winLose=0;
-                            $totalWinLose=0;
-                            $checkBet = [];
-                        @endphp
-                        @foreach($data as  $row)
-                            @foreach($row->betNumber as $key => $bet)
-                            @php
-                                $betNumber =$bet;
-                                $betNumberAmount = 0;
-                                $betNumberGame ="";
-
-                                $isCheck = false;
-                                if($betNumber->a_check || $betNumber->b_check || $betNumber->ab_check || $betNumber->roll_check || $betNumber->roll7_check || $betNumber->roll_parlay_check){
-                                    $isCheck = true;
-                                }
-                                if($betNumber->a_amount >0){
-                                    $betNumberAmount+=$betNumber->a_amount;
-                                    $betNumberGame .= "A";
-                                }
-                                if($betNumber->b_amount >0){
-                                    $betNumberAmount+=$betNumber->b_amount;
-                                    $betNumberGame .= "B";
-                                }
-                                if($betNumber->ab_amount >0){
-                                    $betNumberAmount+=$betNumber->ab_amount;
-                                    $betNumberGame .= "A+B";
-                                }
-                                if($betNumber->roll_amount >0){
-                                    $betNumberAmount+=$betNumber->roll_amount;
-                                    $betNumberGame .= "Roll";
-                                }
-                                 if($betNumber->roll7_amount >0){
-                                    $betNumberAmount+=$betNumber->roll7_amount;
-                                    $betNumberGame .= "Roll7";
-                                }
-                                 if($betNumber->roll_parlay_amount >0){
-                                    $betNumberAmount+=$betNumber->roll_parlay_amount;
-                                    $betNumberGame .= "Roll Parlay";
-                                }
-                                 $commission = $betNumber->total_amount-($betNumber->total_amount *$row['bePackageConfig']?->rate/100);
-                                 $netAmount =$betNumber->total_amount * $row['bePackageConfig']?->rate/100;
-                                 $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
-                                 $totalCommission +=$commission;
-                                 $totalNetAmount +=$netAmount;
-                                 $totalTurnover +=$betNumber->total_amount;
-                                 $winLose = $prizeAmount - $netAmount;
-                                 $totalWinLose +=$winLose;
-                            @endphp
-                            
-                            <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$No++}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bet_date']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->generated_number}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['digit_format']??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumberGame??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row->betLotterySchedule->province_en}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($betNumberAmount ?? 0, 2) }}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$row['bePackageConfig']?->price??''}}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{ number_format($row['bePackageConfig']?->rate ?? 0, 2) }}</td>
-                                <td class="py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$betNumber->total_amount ?? 0}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$commission}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas">{{$netAmount}}</td>
-                                <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap sm:text-bas {{ $winLose < 0 ? 'text-red-500' : ''}}">{{$winLose}}</td>
-
-                            @endforeach
+                        @foreach($data as $key=>$betNumber)
+                                <tr class="border border-gray-300 hover:bg-gray-100">
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$key+1}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->bet_date??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->generated_number??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->digit_format??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->bet_game??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->province_en??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumber->get_roll_amount?? 0, 2) }}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->price??0}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{$betNumber->number_turnover?? 0}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{number_format($betNumber->commission?? 0, 2)}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas">{{number_format($betNumber->net_amount?? 0, 2)}}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-bas {{number_format($betNumber->win_lose?? 0, 2) < 0 ? 'text-red-500' : ''}}">{{number_format($betNumber->win_lose?? 0, 2)}}</td>
+                                </tr>
                         @endforeach
                         <tr class="border border-gray-300 hover:bg-gray-100">
                             <td colspan="9"></td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalTurnover, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalCommission, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount, 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalWinLose < 0 ? 'text-red-500' : ''}}">{{number_format(  $totalWinLose, 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['turnover'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalNetAmount['commission'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['net_amount'], 3, '.', '')}}</td>
+                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalNetAmount['win_lose'] < 0 ? 'text-red-500' : ''}}">{{number_format( $totalNetAmount['win_lose'], 3, '.', '')}}</td>
                         </tr>
                     @else
                         <tr class="border border-gray-300 hover:bg-gray-100">
