@@ -16,6 +16,7 @@
                         <th>Name</th>
                         <th>Package</th>
                         <th>Register Date</th>
+                        <th>Status</th>
                         <th>Action</th>
                   
                     </tr>
@@ -51,6 +52,10 @@
                             <td>{{ $user->package->package_code }}</td>
                         
                             <td>{{ $user->created_at }}</td>
+                            <td class="{{ $user->record_status_id == 1 ? 'text-blue-500' : 'text-red-500' }}">
+                                {{ $user->record_status_id == 1 ? 'Active' : 'Suspend' }}
+                            </td>
+
                             <td>
                                 @if($role->name != 'admin')
                                     <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 

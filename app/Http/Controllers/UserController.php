@@ -23,13 +23,11 @@ class UserController extends Controller
         if ($user->hasRole('admin')) {
             // For admin: show all users
             $data = User::with('package', 'roles', 'userWallet','manager')
-                        ->where('record_status_id', '=', 1)
                         ->orderBy('id', 'ASC')
                         ->get();
         } elseif ($user->hasRole('manager')) {
             // For manager: show only users under the manager and exclude admins
             $data = User::with('package', 'roles', 'userWallet','manager')
-                        ->where('record_status_id', '=', 1)
                         ->where('manager_id', '=', $user->id)  // Only show users managed by this manager
                         ->whereDoesntHave('roles', function($query) {
                             $query->where('name', 'admin');  // Exclude admin role
