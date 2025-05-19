@@ -58,7 +58,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->given_credit }} (VND)
+                        {{ $betUserWallet->given_credit }} (USD)
                     </td>
                 </tr>
                 <tr>
@@ -67,7 +67,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->beginning }} (VND)
+                        {{ $betUserWallet->beginning }} (USD)
                     </td>
                 </tr>
                 <tr>
@@ -76,7 +76,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $totalInvoice }} (VND)
+                        {{ $totalInvoice }} (USD)
                     </td>
                 </tr>
                 <tr>
@@ -84,7 +84,7 @@
 
                         {{ __('Total Due') }}
                     </td>
-                    <td class="border border-gray-500 px-4 py-2 text-right">{{ $totalDue }} (VND)</td>
+                    <td class="border border-gray-500 px-4 py-2 text-right">{{ $totalDue }} (USD)</td>
                 </tr>
                 </tbody>
             </table>
