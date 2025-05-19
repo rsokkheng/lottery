@@ -283,7 +283,7 @@ class BetController extends Controller
                 ->groupBy('config.bet_type')
                 ->groupBy('schedules.province_en')
                 ->groupBy('bet_numbers.total_amount')
-                    ->orderBy('bet_numbers.total_amount','DESC')
+                    ->orderBy('get_roll_amount','DESC')
                 ->lazy()
                 ->each(function ($betNumber) use (&$data, &$totalNetAmount){
                     $betNumber->win_lose = $betNumber->total_amount_number_win - $betNumber->net_amount;

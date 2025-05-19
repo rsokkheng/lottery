@@ -10,8 +10,8 @@
                 <thead>
                     <tr style="font-size: 14px;">
                         <th>#</th>
-                        <th>Role Name</th>
-                        <th>Manager</th>
+                        <th>Role</th>
+                        <th>Manage By</th>
                         <th>Account ID</th>
                         <th>Name</th>
                         <th>Package</th>
@@ -52,12 +52,14 @@
                         
                             <td>{{ $user->created_at }}</td>
                             <td>
-                                <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
-                                <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST" onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
+                                @if($role->name != 'admin')
+                                    <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
+                                    <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST" onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">
+                                        @method('DELETE')
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                @endif
                             </td>
 
                         </tr>
