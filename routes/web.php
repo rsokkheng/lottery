@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/lotto_vn/bet-usd', \App\Livewire\LottoBetUSD::class)->name('bet.input');
+// Route::get('/lotto_vn/bet-usd', \App\Livewire\LottoBetUSD::class)->name('bet.input');
 //    Route::get('/lotto_vn/result', [\App\Http\Controllers\LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
 //    Route::get('/lotto_vn/receipt-list', [\App\Http\Controllers\BetReceiptController::class, 'index'])->name('bet.receipt-list');
 //    Route::get('/lotto_vn/bet-list', [\App\Http\Controllers\BetReceiptController::class, 'betList'])->name('bet.bet-list');
