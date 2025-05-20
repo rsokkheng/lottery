@@ -124,7 +124,7 @@ class BetReportController extends Controller
                     "id" => 3,
                 ]
             ];
-            if ($company_id == null){
+    
                 $data = DB::table(DB::raw('(
                     SELECT 
                         be.bet_receipt_id,
@@ -161,7 +161,7 @@ class BetReportController extends Controller
                 })
                 ->groupBy(DB::raw('DATE(re.date), bee.draw_day, bee.name'))
                 ->get(); 
-            }
+            
             
             return view('reports.daily', compact('data', 'date','company','company_id'));
         } catch (\Exception $exception) {
