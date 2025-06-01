@@ -701,7 +701,7 @@ class LottoBet extends Component
     {
         $isHN = false;
         if ($this->lengthNum[$key_num] == 3) {
-            if ($this->roll7_amount[$key_num] > 0) {
+            if ($this->roll7_amount[$key_num] !=null) {
                 $this->store_roll7_amount[$key_num] = $this->roll7_amount[$key_num];
             }
             foreach ($this->schedules as $key => $item) {
