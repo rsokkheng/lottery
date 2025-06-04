@@ -20,7 +20,7 @@ class BetReceiptUSD extends Model
 
     public function betsUSD(): HasMany
     {
-        return $this->hasMany(BetUSD::class);
+        return $this->hasMany(BetUSD::class, 'bet_receipt_id', 'id');
     }
 
     public function betWinningUSD(){

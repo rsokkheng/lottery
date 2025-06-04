@@ -14,7 +14,7 @@ class BetUSD extends Model
     protected $table = 'bet_usd';
     public function betNumberUSD():HasMany
     {
-        return $this->hasMany(BetNumberUSD::class);
+        return $this->hasMany(BetNumberUSD::class, 'bet_id', 'id');
     }
 
     public function betLotterySchedule():BelongsTo

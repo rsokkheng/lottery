@@ -14,6 +14,7 @@
 <div class="min-h-screen bg-gray-100">
     <div class="w-full">
      @include('layouts.navigation')
+{{--     @include('layouts.navigation_usd')--}}
     </div>
     <!-- Page Heading -->
     @isset($header)

@@ -42,12 +42,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-// Route::get('/lotto_vn/bet-usd', \App\Livewire\LottoBetUSD::class)->name('bet.input');
-//    Route::get('/lotto_vn/result', [\App\Http\Controllers\LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
-//    Route::get('/lotto_vn/receipt-list', [\App\Http\Controllers\BetReceiptController::class, 'index'])->name('bet.receipt-list');
-//    Route::get('/lotto_vn/bet-list', [\App\Http\Controllers\BetReceiptController::class, 'betList'])->name('bet.bet-list');
-//    Route::get('/lotto_vn/bet-number', [\App\Http\Controllers\BetController::class, 'getBetNumber'])->name('bet.bet-number');
-//    Route::get('/lotto_vn/bet-winning', [\App\Http\Controllers\LotteryResultController::class, 'getWinningReport'])->name('bet.bet-winning');
+    Route::get('/lotto_vn/bet-usd', \App\Livewire\LottoBetUSD::class)->name('bet-usd.input');
+    //   Route::get('/lotto_vn/result', [\App\Http\Controllers\LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
+    Route::get('/lotto_vn/receipt-list-usd', [\App\Http\Controllers\BetReceiptUSDController::class, 'index'])->name('bet-usd.receipt-list');
+    Route::get('/lotto_vn/bet-list-usd', [\App\Http\Controllers\BetReceiptUSDController::class, 'betList'])->name('bet-usd.bet-list');
+    Route::get('/lotto_vn/bet-number-usd', [\App\Http\Controllers\BetUSDController::class, 'getBetNumber'])->name('bet-usd.bet-number');
+    Route::get('/lotto_vn/bet-winning-usd', [\App\Http\Controllers\LotteryResultController::class, 'getWinningReport'])->name('bet-usd.bet-winning');
 //    Route::get('/lotto_vn/report-sammary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
 //    Route::get('/lotto_vn/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
 //    Route::get('/lotto_vn/bet/{id}', [\App\Http\Controllers\BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
