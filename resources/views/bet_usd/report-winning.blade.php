@@ -37,7 +37,7 @@
             </div>
             <div class="flex w-full">
                 <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        onclick="searchWinning('{{ route('bet.bet-winning') }}')">
+                        onclick="searchWinning('{{ route('bet-usd.bet-winning') }}')">
                     <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg"
                          stroke="#ffffff">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>

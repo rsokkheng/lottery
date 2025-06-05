@@ -104,11 +104,11 @@
                 <!-- Total Amount row -->
                 <tr class="total-row">
                     <td colspan="2">Total Amount</td>
-                    <td>{{ number_format($total_amount, 2) }} (VND)</td>
+                    <td>{{ number_format($total_amount, 2) }} (USD)</td>
                 </tr>
                 <tr class="total-row">
                     <td colspan="2">Due Amount</td>
-                    <td>{{ number_format($due_amount, 2) }} (VND)</td>
+                    <td>{{ number_format($due_amount, 2) }} (USD)</td>
                 </tr>
             </tbody>
         </table>
@@ -123,7 +123,7 @@
     function handlePrint() {
         window.print();
         window.onafterprint = function () {
-            window.location.href = '{{ route('bet.input') }}';
+            window.location.href = '{{ route('bet-usd.input') }}';
         };
     }
 </script>

@@ -69,7 +69,7 @@
             </div>
             <div class="w-full sm:w-16">
                 <button class="wax-w-auto flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2 rounded hover:bg-blue-600"
-                        onclick="searchReceipt('{{ route('bet.bet-number') }}')">
+                        onclick="searchReceipt('{{ route('bet-usd.bet-number') }}')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                          stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round"

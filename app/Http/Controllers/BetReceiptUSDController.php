@@ -447,8 +447,8 @@ private function addAmount(&$amountArray, $value, $check, $label)
     public function payReceipt($no)
     {
         if($no){
-            $id = BetReceipt::query()->where('receipt_no', $no)->first()?->id;
-            BetWinning::query()->whereHas('betReceiptUSD', function ($q) use ($id){
+            $id = BetReceiptUSD::query()->where('receipt_no', $no)->first()?->id;
+            BetWinningUSD::query()->whereHas('betReceiptUSD', function ($q) use ($id){
                 $q->where('bet_receipt_id', $id);
             })->update(['paid_at'=> date('Y-m-d H:i:s'), 'paid_status'=>2]);
             return response()->json([

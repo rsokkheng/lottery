@@ -47,12 +47,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lotto_vn/receipt-list-usd', [\App\Http\Controllers\BetReceiptUSDController::class, 'index'])->name('bet-usd.receipt-list');
     Route::get('/lotto_vn/bet-list-usd', [\App\Http\Controllers\BetReceiptUSDController::class, 'betList'])->name('bet-usd.bet-list');
     Route::get('/lotto_vn/bet-number-usd', [\App\Http\Controllers\BetUSDController::class, 'getBetNumber'])->name('bet-usd.bet-number');
-    Route::get('/lotto_vn/bet-winning-usd', [\App\Http\Controllers\LotteryResultController::class, 'getWinningReport'])->name('bet-usd.bet-winning');
+    Route::get('/lotto_vn/bet-winning-usd', [\App\Http\Controllers\LotteryResultUSDController::class, 'getWinningReport'])->name('bet-usd.bet-winning');
 //    Route::get('/lotto_vn/report-sammary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
 //    Route::get('/lotto_vn/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
 //    Route::get('/lotto_vn/bet/{id}', [\App\Http\Controllers\BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
-//    Route::get('/bet_receipt/{receipt_no}', [\App\Http\Controllers\BetReceiptController::class, 'printReceiptNo']);
-//    Route::get('/bet_receipt_pay/{receipt_no}', [\App\Http\Controllers\BetReceiptController::class, 'payReceipt']);
+    Route::get('/bet_receipt_usd/{receipt_no}', [\App\Http\Controllers\BetReceiptUSDController::class, 'printReceiptNo']);
+    Route::get('/bet_receipt_pay_usd/{receipt_no}', [\App\Http\Controllers\BetReceiptUSDController::class, 'payReceipt']);
 });
 
 

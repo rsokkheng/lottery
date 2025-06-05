@@ -24,7 +24,7 @@
             </div>
             <div class="w-full sm:w-16">
                 <button class="flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2  rounded hover:bg-blue-600"
-                        onclick="searchReceipt('{{ route('bet.receipt-list') }}')">
+                        onclick="searchReceipt('{{ route('bet-usd.receipt-list') }}')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                          stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -211,8 +211,8 @@
                     }
 
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2)+ ' (VND)';
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2)+ ' (VND)';
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2)+ ' (USD)';
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2)+ ' (USD)';
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -222,7 +222,7 @@
                 alert("Receipt number not found!");
                 return;
             }
-            var printWindow = window.open('/bet_receipt/' + receiptNo, '_blank');
+            var printWindow = window.open('/bet_receipt_usd/' + receiptNo, '_blank');
 
             if (!printWindow) {
                 alert('Popup blocked! Please allow popups for this site.');
@@ -241,7 +241,7 @@
 
         function payReceipt(){
             let receipt_no = $('#receipt_no').text();
-            fetch(`/bet_receipt_pay/${receipt_no}`)
+            fetch(`/bet_receipt_pay_usd/${receipt_no}`)
                 .then(response => response.json())
                 .then(data => {
                     if(data?.success){
