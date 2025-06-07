@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\UserCurrency;
 use App\Models\BetUserWallet;
 use App\Models\BetLotteryPackage;
 use Laravel\Sanctum\HasApiTokens;
@@ -75,6 +76,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'manager_id');
     }
-
+    public function currencies()
+    {
+        return $this->hasMany(UserCurrency::class);
+    }
    
 }

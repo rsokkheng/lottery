@@ -142,23 +142,50 @@
         @foreach ($betMenus as $menu)
             <div class="col-12 col-md-6 col-lg-4">
                 <li class="product_list position-relative">
-                @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
-                     <a href="{{ url('lotto_vn/bet') }}">
-                    <img src="{{ asset('uploads/images/' .$menu->image ?? 'uploads/default_banner.jpg') }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
-                    </a>
-                @else
-                 <a href="{{ url('lotto_vn/receipt-list') }}">
-                    <img src="{{ asset('uploads/images/' .$menu->image ?? 'uploads/default_banner.jpg') }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
-                    </a>
-                @endif
-                    <div class="pro_text position-absolute w-100 h-100 top-0 start-0 d-flex">
-                        <h3 style="color: yellow; font-weight: 600;" class="bg-opacity-50 px-3 py-2 rounded">
-                            {{ $menu->title ?? 'LOTTO' }}
-                        </h3>
-                    </div>
+                    @auth
+                        @php
+                            $user = auth()->user();
+                            $hasVND = $user->currencies()->where('currency', 'VND')->exists();
+                            $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+                            $isAdminOrManager = $user->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty();
+                        @endphp
+
+                        @php
+                            $link = null;
+
+                            if (!$isAdminOrManager) {
+                                // Normal user
+                                if ($hasVND && !$hasUSD) {
+                                    $link = url('lotto_vn/bet');
+                                } elseif ($hasUSD && !$hasVND) {
+                                    $link = url('lotto_usd/bet');
+                                }
+                            } else {
+                                // Admin or Manager
+                                if ($hasVND && !$hasUSD) {
+                                    $link = url('lotto_vn/receipt-list');
+                                } elseif ($hasUSD && !$hasVND) {
+                                    $link = url('lotto_usd/receipt-list');
+                                }
+                            }
+                        @endphp
+
+                        @if($link)
+                            <a href="{{ $link }}">
+                                <img src="{{ asset('uploads/images/' . ($menu->image ?? 'default_banner.jpg')) }}" class="img-fluid lotto-img" alt="{{ $menu->title ?? 'Lotto Image' }}">
+                            </a>
+                        @endif
+
+                        <div class="pro_text position-absolute w-100 h-100 top-0 start-0 d-flex">
+                            <h3 style="color: yellow; font-weight: 600;" class="bg-opacity-50 px-3 py-2 rounded">
+                                {{ $menu->title ?? 'LOTTO' }}
+                            </h3>
+                        </div>
+                    @endauth
                 </li>
             </div>
         @endforeach
+
     </div>
 </div>
 

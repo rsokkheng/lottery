@@ -13,8 +13,25 @@
 <body class="font-sans antialiased">
 <div class="min-h-screen bg-gray-100">
     <div class="w-full">
-{{--     @include('layouts.navigation')--}}
-     @include('layouts.navigation_usd')
+
+    @auth
+        @php
+            $user = auth()->user();
+            $hasVND = $user->currencies()->where('currency', 'VND')->exists();
+            $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+        @endphp
+
+        @if($hasVND && !$hasUSD)
+            @include('layouts.navigation') {{-- Only VND --}}
+        @elseif($hasUSD && !$hasVND)
+            @include('layouts.navigation_usd') {{-- Only USD --}}
+        @elseif($hasVND && $hasUSD)
+            {{-- Default to one, or let user choose via session --}}
+            @include('layouts.nonavigation') {{-- Default to VND --}}
+        @endif
+    @endauth
+
+
     </div>
     <!-- Page Heading -->
     @isset($header)
