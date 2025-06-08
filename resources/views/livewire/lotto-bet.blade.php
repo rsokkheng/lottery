@@ -1,18 +1,47 @@
 <div>
     {{-- notification save success   --}}
-    <div x-data="{ show: false, message: '' }"
-         x-show="show"
-         x-transition.opacity
-         @bet-saved.window="show = true; message = $event.detail.message; setTimeout(() => show = false, 3000)"
-         class="fixed top-4 right-4 z-50"
+    <div 
+    x-data="{ show: false, message: '', type: '' }"
+    x-show="show"
+    x-transition.opacity
+    @bet-saved.window="
+        show = true;
+        message = $event.detail.message;
+        type = $event.detail.type || 'success';
+        setTimeout(() => show = false, 3000);"
+    class="fixed top-4 right-4 z-50"
+>
+    <div
+        class="px-4 py-2 rounded shadow-lg flex items-center gap-2"
+        :class="{
+            'bg-green-500 text-white': type === 'success',
+            'bg-red-500 text-white': type === 'error',
+            'bg-yellow-500 text-white': type === 'warning'
+        }"
     >
-        <div class="bg-green-500 text-white px-4 py-2 rounded shadow-lg flex items-center gap-2">
+        <template x-if="type === 'success'">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span x-text="message"></span>
-        </div>
+        </template>
+
+        <template x-if="type === 'error'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </template>
+
+        <template x-if="type === 'warning'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17h.01M12 3a9 9 0 110 18 9 9 0 010-18z" />
+            </svg>
+        </template>
+
+        <span x-text="message"></span>
     </div>
+</div>
+
+
     {{--End notification--}}
 
     <div class="grid grid-cols-1 xl:grid-cols-[30%_68%] gap-4 xl:mx-auto bg-white shadow-md py-4 rounded-lg space-x-2">
@@ -58,7 +87,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->given_credit }} (VND)
+                        {{ $betAccount->bet_credit ?? 0 }} (VND)
                     </td>
                 </tr>
                 <tr>
@@ -67,7 +96,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->beginning }} (VND)
+                        {{ $totalOutstanding }} (VND)
                     </td>
                 </tr>
                 <tr>

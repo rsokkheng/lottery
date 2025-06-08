@@ -27,6 +27,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::resource('permission',PermissionController::class);
         Route::resource('bet-lottery-package',BetLotteryPackageController::class);
         Route::resource('lottery-result',LotteryResultController::class);
+        Route::post('/balance/report/transaction', [BalanceReportController::class, 'handleTransaction'])->name('balance-report.transaction');
         Route::get('result/index-mien-nam',[LotteryResultController::class, 'indexMienNam'])->name('result.index-mien-nam');
         Route::get('result/create-mien-nam',[LotteryResultController::class, 'createMienNam'])->name('result.create-mien-nam');
         Route::get('result/index-mien-trung',[LotteryResultController::class, 'indexMienTrung'])->name('result.index-mien-trung');

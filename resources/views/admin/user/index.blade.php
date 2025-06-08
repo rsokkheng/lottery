@@ -8,13 +8,16 @@
         <div class="card-body">
             <table class="table table-striped" id="userTable">
                 <thead>
-                    <tr style="font-size: 14px;">
-                        <th>#</th>
-                        <th>Role</th>
+                    <tr style="font-size: 12px;">
+                        <th style="width: 3%;">#</th>
+                        <th style="width: 5%;">Role</th>
                         <th>Manage By</th>
                         <th>Account ID</th>
                         <th>Name</th>
-                        <th>Package</th>
+                        <th>Currency</th>
+                        <th>Available Credit</th>
+                        <th>Bet Credit</th>
+                        <th>Cash Balance</th>
                         <th>Register Date</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -24,7 +27,7 @@
                 <tbody>
                    
                     @foreach ($data as $key => $user)
-                        <tr>
+                        <tr style="font-size: 14px;">
                             <td>{{ $key+1 }}</td>
                             <td>@foreach ($user->roles as $role)
                                 @php
@@ -49,8 +52,10 @@
                             <td>{{ optional($user->manager)->name ?? '—' }} {{-- Manager's name --}}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->package->package_code }}</td>
-                        
+                            <td>{{ $user?->accountManagement?->currency }}</td>
+                            <td>{{ $user?->accountManagement?->available_credit }}</td>
+                            <td>{{ $user?->accountManagement?->bet_credit }}</td>
+                            <td>{{ $user?->accountManagement?->cash_balance }}</td>
                             <td>{{ $user->created_at }}</td>
                             <td class="{{ $user->record_status_id == 1 ? 'text-blue-500' : 'text-red-500' }}">
                                 {{ $user->record_status_id == 1 ? 'Active' : 'Suspend' }}

@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetReceipt;
-use App\Models\BetWinning;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\HelperEnum;
+use App\Models\BetReceipt;
+use App\Models\BetWinning;
 use Illuminate\Http\Request;
+use App\Models\BalanceReport;
 use App\Models\LotteryResult;
 use App\Models\LotterySchedule;
 use App\Models\BetWinningRecord;
+use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\BalanceReportOutstanding;
 use Spatie\Permission\Models\Permission;
+use App\Models\BetLotteryPackageConfiguration;
 use function PHPUnit\Framework\throwException;
 
 class LotteryResultController extends Controller
@@ -265,6 +269,7 @@ class LotteryResultController extends Controller
             DB::beginTransaction();
             $form = $request->all();
             $betResult = new LotteryResult();
+            $BetConfigCompany = BetLotterySchedule::where('region_slug',$request->result_region)->first();
             if (isset($form['data']) && count($form['data'])) {
                 $resultRegion = $form['result_region']??'';
                 $resultDate = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
@@ -317,10 +322,60 @@ class LotteryResultController extends Controller
                         ->orderBy('winning.bet_receipt_id')
                         ->groupBy('winning.bet_receipt_id')
                         ->each(function ($winning){
-                            BetReceipt::query()->find($winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
-                        });
+                            BetReceipt::where('id', $winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
+
+                            $recieptUser = BetReceipt::where('id', $winning->bet_receipt_id)->first();
+                            
+                            if ($recieptUser) {
+                                $user = User::find($recieptUser->user_id);
+                                if ($user) {
+                                    // Get previous day's balance
+                                    $previousBalance = BalanceReport::where('user_id', $recieptUser->user_id)
+                                        ->where('report_date', date('Y-m-d', strtotime('-1 day')))
+                                        ->sum('balance') ?? 0;
+                            
+                                    // Check if record exists to determine beginning balance
+                                    $existingRecord = BalanceReport::where('user_id', $recieptUser->user_id)
+                                        ->where('report_date', date('Y-m-d'))
+                                        ->first();
+                            
+                                    if ($existingRecord) {
+                                        // Update existing - add to net_win and recalculate balance
+                                        $newNetWin = $existingRecord->net_win + $winning->sum_amount;
+                                        $newBalance = $existingRecord->beginning + $newNetWin - $existingRecord->net_lose + 
+                                                     $existingRecord->deposit - $existingRecord->withdraw + $existingRecord->adjustment;
+                                        
+                                        $existingRecord->update([
+                                            'name_user' => $user->name,
+                                            'net_win' => $newNetWin,
+                                            'balance' => $newBalance,
+                                        ]);
+                                    } else {
+                                        // Create new record
+                                        BalanceReport::create([
+                                            'user_id' => $recieptUser->user_id,
+                                            'name_user' => $user->name,
+                                            'beginning' => $previousBalance,
+                                            'net_lose' => 0,
+                                            'net_win' => $winning->sum_amount,
+                                            'deposit' => 0,
+                                            'withdraw' => 0,
+                                            'adjustment' => 0,
+                                            'balance' => $previousBalance + $winning->sum_amount,
+                                            'report_date' => date('Y-m-d'),
+                                            'outstanding' => 0,
+                                        ]);
+                                    }
+                                }
+                            }
+                    });
                     }
                 }
+                BalanceReportOutstanding::where('date', Carbon::today()->format('Y-m-d'))
+                ->where('company_id', $BetConfigCompany->company_id)
+                ->update([
+                    'amount' => 0,
+                ]);
             }
 
             DB::commit();
@@ -708,9 +763,6 @@ class LotteryResultController extends Controller
 
     public function generateHashWinBet($date, $idSchedules): array
     {
-//        $date = '2025-02-23';
-//        $day = 'Sunday';
-//        $time = '16:30:00';
         $getBetWinningNumber = [];
         DB::table('bets')
             ->select(
