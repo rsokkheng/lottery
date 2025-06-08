@@ -13,7 +13,7 @@ class BetWinningUSD extends Model
     protected $table = 'bet_winning_usd';
 
 
-    public function bets(): BelongsTo
+    public function betsUSD(): BelongsTo
     {
         return $this->belongsTo(BetUSD::class, 'bet_id', 'id');
     }

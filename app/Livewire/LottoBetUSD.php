@@ -398,7 +398,7 @@ class LottoBetUSD extends Component
                     'receipt_no' => $invoiceNumber,
                     'user_id' => $this->user->id ?? 0,
                     'date' => now(),
-                    'currency' => 'VND',
+                    'currency' => 'USD',
                     'total_amount' => $this->totalInvoice,
                     'commission' => $this->totalInvoice - $this->totalDue,
                     'net_amount' => $this->totalDue,
@@ -590,7 +590,7 @@ class LottoBetUSD extends Component
         if ($isCreateBetSuccess) {
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
-            return redirect()->to('/bet_receipt/' . $betReceipt->receipt_no);
+            return redirect()->to('lotto_usd/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
 

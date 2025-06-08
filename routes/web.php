@@ -56,8 +56,8 @@ Route::middleware(['auth', 'verified', 'check.usd'])->prefix('lotto_usd')->group
     Route::get('/report-summary', [BetReportUSDController::class, 'getSummaryReport'])->name('bet-usd.reports.summary');
     Route::get('/report-daily', [BetReportUSDController::class, 'getDailyReport'])->name('bet-usd.reports.daily');
     Route::get('/bet/{id}', [BetReceiptUSDController::class, 'getBetByReceiptId'])->name('bet-usd.bet-by-id');
-    Route::get('/bet_receipt_usd/{receipt_no}', [BetReceiptUSDController::class, 'printReceiptNo']);
-    Route::get('/bet_receipt_pay_usd/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
+    Route::get('/bet_receipt/{receipt_no}', [BetReceiptUSDController::class, 'printReceiptNo']);
+    Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
 });
 
 
