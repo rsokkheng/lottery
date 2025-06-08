@@ -2,22 +2,23 @@
 
 namespace App\Livewire;
 
-use App\Enums\MultiplierEnum;
-use App\Enums\MultiplierHashtagEnum;
-use App\Enums\MultiplierHashtagHNEnum;
-use App\Enums\MultiplierHNEnum;
+use Carbon\Carbon;
 use App\Models\Bet;
-use App\Models\BetLotteryPackageConfiguration;
-use App\Models\BetLotterySchedule;
+use Livewire\Component;
 use App\Models\BetNumber;
 use App\Models\BetReceipt;
+use App\Enums\MultiplierEnum;
+use App\Models\BalanceReport;
 use App\Models\BetUserWallet;
-use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
+use App\Enums\MultiplierHNEnum;
+use App\Models\AccountManagement;
+use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Livewire\Component;
+use App\Enums\MultiplierHashtagEnum;
+use Illuminate\Support\Facades\Auth;
+use App\Enums\MultiplierHashtagHNEnum;
+use App\Models\BalanceReportOutstanding;
+use App\Models\BetLotteryPackageConfiguration;
 
 class LottoBet extends Component
 {
@@ -81,7 +82,13 @@ class LottoBet extends Component
     public $isCheckHN = [];
     public $roll7AmountProvisional =0;
 
-    public $betUserWallet;
+    public $betAccount;
+
+    public $outstandingSummary;
+
+    public $totalOutstanding;
+
+
 
     public function mount(
         Bet                            $betModel,
@@ -115,7 +122,19 @@ class LottoBet extends Component
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
-        $this->betUserWallet = BetUserWallet::where('user_id', $this->user->id)->first();
+        $this->betAccount = AccountManagement::where('user_id', $this->user->id)->first();
+        $this->outstandingSummary = DB::table('balance_report_outstandings')
+            ->select(
+                'user_id',
+                DB::raw('DATE(date) as report_date'),
+                DB::raw('SUM(amount) as total_outstanding')
+            )
+            ->whereDate('date', Carbon::today()) 
+            ->where('user_id', $this->user->id)
+            ->groupBy('user_id', DB::raw('DATE(date)'))
+            ->orderByDesc('report_date')
+            ->get();
+        $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
         $this->initializeProperty();
 
 
@@ -392,8 +411,36 @@ class LottoBet extends Component
         try {
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
+                $account = AccountManagement::where('user_id', auth()->id())->first();
+                if (!$account) {
+                    $this->dispatch('bet-saved', message: 'គណនីមិនមាន', type: 'error');
+                    return back();
+                }
+                $newBalance = round($account->bet_credit - $this->totalDue, 2);
+                if ($newBalance < 0) {
+                    $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
+                    return back();
+                }else{
+                    // ✅ Update AccountManagement
+                    $account->bet_credit -= $this->totalDue;
+                    $account->save();
+                    // create initial report if not exist
+                    BalanceReport::create([
+                            'user_id' => auth()->id(),
+                            'name_user' => auth()->user()->name,
+                            'beginning' => 0,
+                            'net_lose' => $this->totalDue,
+                            'net_win' => 0,
+                            'deposit' => 0,
+                            'withdraw' => 0,
+                            'adjustment' => 0,
+                            'balance' => 0,
+                            'report_date' => $this->currentDate,
+                            'outstanding' => $this->totalDue,
+                        ]);
+                }            
                 // generate no invoice
-                $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 6, '0', STR_PAD_LEFT);
+                $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 8, '0', STR_PAD_LEFT);
                 // create bet receipt
                 $betReceipt = $this->betReceipt->create([
                     'receipt_no' => $invoiceNumber,
@@ -404,14 +451,13 @@ class LottoBet extends Component
                     'commission' => $this->totalInvoice - $this->totalDue,
                     'net_amount' => $this->totalDue,
                     'compensate' => 0
-
                 ]);
             }
 
             foreach ($this->number as $key => $number) {
                 if (!empty($number)) {
                     $has_spacial = $this->roll_parlay_check[$key] ? 1 : 0;
-                    $betPackageConId = $this->betPackageConfiguration::where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->pluck('id')->first();
+                    $betPackage = $this->betPackageConfiguration::where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->first();
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key]) > 0) {
                             //insert bet
@@ -420,7 +466,7 @@ class LottoBet extends Component
                                 'company_id' => $schedule->company_id,
                                 'user_id' => $this->user->id ?? 0,
                                 'bet_schedule_id' => $schedule->id,
-                                'bet_package_config_id' => $betPackageConId,
+                                'bet_package_config_id' => $betPackage->id ?? 0,
                                 'number_format' => $number,
                                 'digit_format' => $this->digit[$key],
                                 'bet_date' => $this->currentDate,
@@ -429,6 +475,13 @@ class LottoBet extends Component
                             $respone = Bet::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
+                                BalanceReportOutstanding::create([
+                                    'user_id' => $this->user->id ?? 0,
+                                    'company_id' => $schedule->company_id,
+                                    'amount' => $schedule['code'] == "HN" ? ($this->amountHN[$key] * $betPackage?->rate/100) : ($this->amountNotHN[$key] * $betPackage?->rate/100),
+                                    'date' => $this->currentDate,
+
+                                ]);
                             }
                             //insert bet number
                             $betNumber1 = [
@@ -591,7 +644,7 @@ class LottoBet extends Component
         if ($isCreateBetSuccess) {
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
-            return redirect()->to('/bet_receipt/' . $betReceipt->receipt_no);
+            return redirect()->to('lotto_vn/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
 

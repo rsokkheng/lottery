@@ -222,7 +222,7 @@
                 alert("Receipt number not found!");
                 return;
             }
-            var printWindow = window.open('/bet_receipt/' + receiptNo, '_blank');
+            var printWindow = window.open('/lotto_vn/bet_receipt/' + receiptNo, '_blank');
 
             if (!printWindow) {
                 alert('Popup blocked! Please allow popups for this site.');
