@@ -12,7 +12,6 @@
                     <tr style="font-size: 12px;">
                         <th>#</th>
                         <th>Name</th>
-                        <th>Beginning</th>
                         <th>Net W/L</th>
                         <th>Deposit</th>
                         <th>Withdraw</th>
@@ -33,7 +32,6 @@
                             <tr style="font-size: 13px;">
                                 <td>{{ $key+1 }}</td>
                                 <td>{{ $user->name }}</td>
-                                <td>{{ $user->beginning }}</td>
                                 <td>
                                  @if ($diff < 0)
                                     <h6 style="color: red;">{{ number_format( $diff, 3, '.', '') }}</h6>
@@ -50,7 +48,13 @@
                                  @endif
                                </td>
                                 <td>{{ $user->adjustment }}</td>
-                                <td>{{ $user->balance }}</td>
+                                <td>
+                                @if ( $user->balance < 0)
+                                    <h6 style="color: red;">{{ $user->balance }}</h6>
+                                 @else
+                                 <h6 >{{ $user->balance }}</h6>
+                                 @endif
+                               </td>
                                 <td style="color: blue;">{{ $user->outstanding }}</td>
                                 <td>
                                 @if ($user->record_status_id == 1)
@@ -67,7 +71,6 @@
                                         data-type="deposit"
                                         data-name="{{ $user->name }}"
                                         data-balance-amount="{{ $user->balance }}"
-                                        data-balance-beginning="{{ $user->beginning }}"
                                         data-id="{{ encrypt($user->user_id) }}"
                                         data-withdraw-max="{{ $user->withdraw_max }}"
                                         data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
@@ -80,7 +83,6 @@
                                         data-type="withdraw"
                                         data-name="{{ $user->name }}"
                                         data-balance-amount="{{ $user->balance }}"
-                                        data-balance-beginning="{{ $user->beginning }}"
                                         data-id="{{ encrypt($user->user_id) }}"
                                         data-withdraw-max="{{ $user->withdraw_max }}"
                                         data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
@@ -121,10 +123,6 @@
             <input type="text" class="form-control" id="modal-member-name" readonly>
           </div>
 
-          <div class="mb-3">
-            <label for="modal-amount" class="form-label">Begin Balance</label>
-            <input type="number" class="form-control" id="modal-beginning-amount" readonly>
-          </div>
 
           <div class="mb-3">
             <label for="modal-amount" class="form-label">Current Balance</label>
@@ -181,7 +179,6 @@
         const userId = $(this).data('id');
         const balanceAccount = $(this).data('balance-account-id');
         const balanceAmount = $(this).data('balance-amount');
-        const beginningAmount = $(this).data('balance-beginning');
         const withdrawMax = $(this).data('withdraw-max');
         const depositMax = $(this).data('deposit-max');
 
@@ -199,7 +196,6 @@
         $('#modal-member-name').val(name);
         $('#modal-name-user').val(name);
         $('#modal-current-amount').val(balanceAmount);
-        $('#modal-beginning-amount').val(beginningAmount);
 
         // Set max values on the amount input
         $('#amount')

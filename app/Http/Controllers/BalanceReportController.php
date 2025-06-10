@@ -33,37 +33,35 @@ class BalanceReportController extends Controller
             $currency = "USD";
         }
         $data = DB::table('balance_reports as br')
-            ->join('users as u', 'u.id', '=', 'br.user_id')
-            ->join('user_currencies as cu', 'u.id', '=', 'cu.user_id')
-            ->join('account_management as ac', 'ac.user_id', '=', 'u.id')
-            ->leftJoin('balance_report_outstandings as out', 'out.user_id', '=', 'u.id')
-            ->leftJoin('balance_reports as prev_br', function($join) {
-                $join->on('prev_br.user_id', '=', 'br.user_id')
-                    ->whereRaw('prev_br.report_date = DATE_SUB(br.report_date, INTERVAL 1 DAY)');
-            })
-            ->select(
-                'u.id as user_id',
-                'u.name',
-                'ac.id as balance_account_id',
-                'u.record_status_id',
-                DB::raw('COALESCE(SUM(prev_br.balance), 0) as beginning'),
-                DB::raw('SUM(br.net_lose) as net_lose'),
-                DB::raw('SUM(br.net_win) as net_win'),
-                DB::raw('SUM(br.deposit) as deposit'),
-                DB::raw('SUM(br.withdraw) as withdraw'),
-                DB::raw('SUM(br.adjustment) as adjustment'),
-                DB::raw('COALESCE(SUM(prev_br.balance), 0) + SUM(br.net_win) - SUM(br.net_lose) + SUM(br.deposit) - SUM(br.withdraw) + SUM(br.adjustment) as balance'),
-                DB::raw('COALESCE(SUM(out.amount), 0) as outstanding'),
-                DB::raw('(COALESCE(SUM(prev_br.balance), 0) + SUM(br.deposit) - SUM(br.withdraw) + SUM(br.adjustment)) - (COALESCE(SUM(br.outstanding), 0) - COALESCE(SUM(out.amount), 0)) as withdraw_max')
-            )
-            ->where('cu.currency', $currency)
-            ->groupBy(
-                'u.id',
-                'u.record_status_id',
-                'u.name',
-                'ac.id'
-            )
-            ->get();
+        ->join('users as u', 'u.id', '=', 'br.user_id')
+        ->join('user_currencies as cu', 'u.id', '=', 'cu.user_id')
+        ->join('account_management as ac', 'ac.user_id', '=', 'u.id')
+        ->leftJoin(DB::raw('(SELECT user_id, SUM(amount) as amount FROM balance_report_outstandings GROUP BY user_id) as ou'), 'ou.user_id', '=', 'u.id')
+        ->select(
+            'u.id as user_id',
+            'u.name',
+            'ac.id as balance_account_id',
+            'u.record_status_id',
+            DB::raw('SUM(br.net_lose) as net_lose'),
+            DB::raw('SUM(br.net_win) as net_win'),
+            DB::raw('SUM(br.deposit) as deposit'),
+            DB::raw('SUM(br.withdraw) as withdraw'),
+            DB::raw('SUM(br.adjustment) as adjustment'),
+            DB::raw('COALESCE(SUM(br.net_win), 0) - COALESCE(SUM(br.net_lose), 0) + COALESCE(SUM(br.deposit), 0) - COALESCE(SUM(br.withdraw), 0) + COALESCE(SUM(br.adjustment), 0) as balance'),
+            DB::raw('COALESCE(ou.amount, 0) as outstanding'),
+            DB::raw('(COALESCE(SUM(br.deposit), 0) - COALESCE(SUM(br.withdraw), 0) + COALESCE(SUM(br.adjustment), 0)) - COALESCE(ou.amount, 0) as withdraw_max')
+        )
+        ->where('cu.currency', $currency)
+        ->groupBy(
+            'u.id',
+            'u.record_status_id',
+            'u.name',
+            'ac.id',
+            'ou.amount'
+        )
+        ->get();
+    
+
         
         return view('admin.balance-report.index', compact('data'));
     }
@@ -149,13 +147,11 @@ class BalanceReportController extends Controller
             'name_user' => $request->name_user,
             'report_date' => Carbon::today()->format('Y-m-d'),
             'balance' => $request->amount,
-            'beginning' => 0,
             'net_lose' => 0,
             'net_win' => 0,
             'deposit' => $request->transaction_type === 'deposit' ? $request->amount : 0,
             'withdraw' => $request->transaction_type === 'withdraw' ? $request->amount : 0,
             'adjustment' => 0,
-            'outstanding' => 0,
             'text' => $request->remark,
             'created_by' => Auth::user()->id ?? 0,
             'created_at' => now(),

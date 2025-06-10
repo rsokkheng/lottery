@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\HelperEnum;
+use App\Models\AccountManagement;
 use App\Models\BetReceipt;
 use App\Models\BetWinning;
 use Illuminate\Http\Request;
@@ -329,12 +330,19 @@ class LotteryResultController extends Controller
                             if ($recieptUser) {
                                 $user = User::find($recieptUser->user_id);
                                 if ($user) {
+                                    $acountManagement = AccountManagement::where('user_id', $recieptUser->user_id)->first();
+                                    if ($acountManagement) {
+                                        // Update existing - add to net_win and recalculate balance
+                                        $acountManagement->update([
+                                            'balance' => $winning->sum_amount,
+                                        ]);
+                                    }
                                     // Get previous day's balance
                                     $previousBalance = BalanceReport::where('user_id', $recieptUser->user_id)
                                         ->where('report_date', date('Y-m-d', strtotime('-1 day')))
                                         ->sum('balance') ?? 0;
                             
-                                    // Check if record exists to determine beginning balance
+                                    // Check if record exists to determine  balance
                                     $existingRecord = BalanceReport::where('user_id', $recieptUser->user_id)
                                         ->where('report_date', date('Y-m-d'))
                                         ->first();
@@ -342,7 +350,7 @@ class LotteryResultController extends Controller
                                     if ($existingRecord) {
                                         // Update existing - add to net_win and recalculate balance
                                         $newNetWin = $existingRecord->net_win + $winning->sum_amount;
-                                        $newBalance = $existingRecord->beginning + $newNetWin - $existingRecord->net_lose + 
+                                        $newBalance =  $newNetWin - $existingRecord->net_lose + 
                                                      $existingRecord->deposit - $existingRecord->withdraw + $existingRecord->adjustment;
                                         
                                         $existingRecord->update([
@@ -355,7 +363,6 @@ class LotteryResultController extends Controller
                                         BalanceReport::create([
                                             'user_id' => $recieptUser->user_id,
                                             'name_user' => $user->name,
-                                            'beginning' => $previousBalance,
                                             'net_lose' => 0,
                                             'net_win' => $winning->sum_amount,
                                             'deposit' => 0,
@@ -363,7 +370,6 @@ class LotteryResultController extends Controller
                                             'adjustment' => 0,
                                             'balance' => $previousBalance + $winning->sum_amount,
                                             'report_date' => date('Y-m-d'),
-                                            'outstanding' => 0,
                                         ]);
                                     }
                                 }

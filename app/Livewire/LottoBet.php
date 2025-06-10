@@ -9,7 +9,6 @@ use App\Models\BetNumber;
 use App\Models\BetReceipt;
 use App\Enums\MultiplierEnum;
 use App\Models\BalanceReport;
-use App\Models\BetUserWallet;
 use App\Enums\MultiplierHNEnum;
 use App\Models\AccountManagement;
 use App\Models\BetLotterySchedule;
@@ -428,7 +427,6 @@ class LottoBet extends Component
                     BalanceReport::create([
                             'user_id' => auth()->id(),
                             'name_user' => auth()->user()->name,
-                            'beginning' => 0,
                             'net_lose' => $this->totalDue,
                             'net_win' => 0,
                             'deposit' => 0,
@@ -436,7 +434,6 @@ class LottoBet extends Component
                             'adjustment' => 0,
                             'balance' => 0,
                             'report_date' => $this->currentDate,
-                            'outstanding' => $this->totalDue,
                         ]);
                 }            
                 // generate no invoice

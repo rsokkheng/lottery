@@ -1,3 +1,8 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+    $auth = Auth::user();
+@endphp
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <x-admin>
     @section('title', 'Users')
     <div class="card">
@@ -27,6 +32,10 @@
                 <tbody>
                    
                     @foreach ($data as $key => $user)
+                    @php
+                            $lastBalance =  $user?->accountManagement?->bet_credit - $user?->accountManagement?->available_credit ;
+                        @endphp
+                  
                         <tr style="font-size: 14px;">
                             <td>{{ $key+1 }}</td>
                             <td>@foreach ($user->roles as $role)
@@ -55,23 +64,37 @@
                             <td>{{ $user?->accountManagement?->currency }}</td>
                             <td>{{ $user?->accountManagement?->available_credit }}</td>
                             <td>{{ $user?->accountManagement?->bet_credit }}</td>
-                            <td>{{ $user?->accountManagement?->cash_balance }}</td>
+                            <td>{{ $lastBalance}}</td>
                             <td>{{ $user->created_at }}</td>
                             <td class="{{ $user->record_status_id == 1 ? 'text-blue-500' : 'text-red-500' }}">
                                 {{ $user->record_status_id == 1 ? 'Active' : 'Suspend' }}
                             </td>
 
                             <td>
-                                @if($role->name != 'admin')
-                                    <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a> 
-                                    <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST" onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">
-                                        @method('DELETE')
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
-                                @endif
+                            @if($auth->hasRole('admin') || $auth->hasRole('manager'))
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                            id="dropdownMenu{{ $user->id }}" data-bs-toggle="dropdown" aria-expanded="false"> ⚙️
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu{{ $user->id }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('admin.user.edit', encrypt($user->id)) }}">Edit</a><br>
+                                        </li>
+                                        <li>
+                                            <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                            </form>
+                                        </li>
+                                        <li>
+                                        <a class="dropdown-item" href="{{ route('admin.user.show', $user->id) }}">Setting</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            @endif
                             </td>
-
                         </tr>
                     @endforeach
                 </tbody>
@@ -79,7 +102,9 @@
         </div>
     </div>
     @section('js')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
+            
             $(function() {
                 $('#userTable').DataTable({
                     "paging": true,

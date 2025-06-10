@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserCurrency;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\UserBetLimit;
+use App\Models\UserCurrency;
 use Illuminate\Http\Request;
 use App\Models\BalanceReport;
 use Illuminate\Validation\Rule;
@@ -85,16 +86,36 @@ class UserController extends Controller
         BalanceReport::create([
             'user_id' => $user->id,
             'name_user' => $user->name,
-            'beginning' => 0,
             'net_lose' => 0,
             'net_win' => 0,
             'deposit' => 0,
             'withdraw' => 0,
             'adjustment' => 0,
             'balance' => 0,
-            'outstanding' => 0,
             'report_date' => Carbon::today()->format('Y-m-d'),
         ]);
+        if($user){
+                $defaultSettings = [
+                    '2D'  => ['min_bet' => 0.10, 'max_bet' => 500],
+                    '3D'  => ['min_bet' => 0.10, 'max_bet' => 250],
+                    '4D'  => ['min_bet' => 0.10, 'max_bet' => 50],
+                    'RP2' => ['min_bet' => 0.10, 'max_bet' => 120],
+                    'RP3' => ['min_bet' => 0.10, 'max_bet' => 50],
+                ];
+                
+                foreach ($defaultSettings as $digitKey => $settings) {
+                    UserBetLimit::updateOrCreate(
+                        [
+                            'user_id'   => $user->id,
+                            'digit_key' => $digitKey,
+                        ],
+                        [
+                            'min_bet' => $settings['min_bet'],
+                            'max_bet' => $settings['max_bet'],
+                        ]
+                    );
+            }
+        }
 
         $user->assignRole($request->role);
         return redirect()->route('admin.user.index')->with('success','User created successfully.');
@@ -137,7 +158,6 @@ class UserController extends Controller
                 $account->available_credit = $newCredit;
                 $account->bet_credit -= $newCredit;
             }
-            $account->cash_balance = 0;
             $account->currency = $request->currency ?? null;
             $account->save();
         }
@@ -160,4 +180,166 @@ class UserController extends Controller
         User::where('id', decrypt($id))->update(['record_status_id' => 0]);
         return redirect()->back()->with('success','User deleted successfully.');
     }
+    public function show($id)
+    {
+        $user = User::where('id', $id)->first();
+        
+        // Get existing settings for this user
+        $settings = UserBetLimit::where('user_id', $id)->get();
+        
+        // Define the mapping between database digit_key and display labels
+        $digitKeys = [
+            '2D'  => '2D',
+            '3D'  => '3D', 
+            '4D'  => '4D',
+            'RP2' => 'PL2',
+            'RP3' => 'PL3',
+        ];
+        
+        // Format the settings for the view
+        $formatted = [];
+        foreach ($digitKeys as $dbKey => $displayLabel) {
+            // Find existing setting for this digit type
+            $existingSetting = $settings->where('digit_key', $dbKey)->first();
+            
+            $formatted[$dbKey] = [
+                'label' => $displayLabel,
+                'data'  => $existingSetting, // This will be null if no setting exists
+                'min_bet' => $existingSetting ? $existingSetting->min_bet : null,
+                'max_bet' => $existingSetting ? $existingSetting->max_bet : null,
+            ];
+        }
+        return view('admin.user.show', compact('user', 'formatted'));
+    }
+
+public function saveSetting(Request $request)
+{
+    $data = $request->all();
+    
+    // Validate the request
+    $request->validate([
+        'id' => 'required|exists:users,id',
+        'min_digit_2' => 'nullable|numeric|min:0',
+        'max_digit_2' => 'nullable|numeric|min:0',
+        'min_digit_3' => 'nullable|numeric|min:0',
+        'max_digit_3' => 'nullable|numeric|min:0',
+        'min_digit_4' => 'nullable|numeric|min:0',
+        'max_digit_4' => 'nullable|numeric|min:0',
+        'min_digit_rp2' => 'nullable|numeric|min:0',
+        'max_digit_rp2' => 'nullable|numeric|min:0',
+        'min_digit_rp3' => 'nullable|numeric|min:0',
+        'max_digit_rp3' => 'nullable|numeric|min:0',
+    ]);
+    
+    // Define the mapping between form fields and database values
+    $digitMappings = [
+        'digit_2'   => '2D',
+        'digit_3'   => '3D', 
+        'digit_4'   => '4D',
+        'digit_rp2' => 'RP2',
+        'digit_rp3' => 'RP3',
+    ];
+    
+    foreach ($digitMappings as $fieldKey => $dbDigitKey) {
+        $minKey = 'min_' . $fieldKey; // min_digit_2, min_digit_rp2, etc.
+        $maxKey = 'max_' . $fieldKey; // max_digit_2, max_digit_rp2, etc.
+        
+        $minValue = $data[$minKey] ?? null;
+        $maxValue = $data[$maxKey] ?? null;
+        
+        // Skip if both values are empty
+        if (is_null($minValue) && is_null($maxValue)) {
+            continue;
+        }
+        
+        // Validate that max is greater than min if both are provided
+        if (!is_null($minValue) && !is_null($maxValue) && $maxValue < $minValue) {
+            return redirect()->back()
+                ->withErrors(['error' => "Maximum bet for {$dbDigitKey} must be greater than minimum bet"])
+                ->withInput();
+        }
+        
+        // Create or update UserBetLimit
+        UserBetLimit::updateOrCreate(
+            [
+                'user_id'   => $request->id,
+                'digit_key' => $dbDigitKey, // Store as '2D', '3D', etc.
+            ],
+            [
+                'min_bet' => $minValue,
+                'max_bet' => $maxValue,
+            ]
+        );
+    }
+    
+    return redirect()->route('admin.user.index')
+        ->with('success', 'Betting limits updated successfully.');
+}
+
+// Alternative method if you want to handle default package logic
+public function saveSettingWithPackageType(Request $request)
+{
+    $data = $request->all();
+    $packageType = $request->input('package_type', 'custom');
+    
+    // If default package is selected, you might want to set predefined values
+    if ($packageType === 'default') {
+        $defaultSettings = [
+            '2D'  => ['min_bet' => 0, 'max_bet' => 0],
+            '3D'  => ['min_bet' => 0, 'max_bet' => 0],
+            '4D'  => ['min_bet' => 0, 'max_bet' => 0],
+            'RP2' => ['min_bet' => 0, 'max_bet' => 0],
+            'RP3' => ['min_bet' => 0, 'max_bet' => 0],
+        ];
+        
+        foreach ($defaultSettings as $digitKey => $settings) {
+            UserBetLimit::updateOrCreate(
+                [
+                    'user_id'   => $request->id,
+                    'digit_key' => $digitKey,
+                ],
+                [
+                    'min_bet' => $settings['min_bet'],
+                    'max_bet' => $settings['max_bet'],
+                ]
+            );
+        }
+    } else {
+        // Use the custom logic from above
+        $digitMappings = [
+            'digit_2'   => '2D',
+            'digit_3'   => '3D', 
+            'digit_4'   => '4D',
+            'digit_rp2' => 'RP2',
+            'digit_rp3' => 'RP3',
+        ];
+        
+        foreach ($digitMappings as $fieldKey => $dbDigitKey) {
+            $minKey = 'min_' . $fieldKey;
+            $maxKey = 'max_' . $fieldKey;
+            
+            $minValue = $data[$minKey] ?? null;
+            $maxValue = $data[$maxKey] ?? null;
+            
+            if (is_null($minValue) && is_null($maxValue)) {
+                continue;
+            }
+            
+            UserBetLimit::updateOrCreate(
+                [
+                    'user_id'   => $request->id,
+                    'digit_key' => $dbDigitKey,
+                ],
+                [
+                    'min_bet' => $minValue,
+                    'max_bet' => $maxValue,
+                ]
+            );
+        }
+    }
+    
+    return redirect()->route('admin.user.index')
+        ->with('success', 'Betting limits updated successfully.');
+}
+
 }
