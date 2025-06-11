@@ -323,57 +323,7 @@ class LotteryResultController extends Controller
                         ->orderBy('winning.bet_receipt_id')
                         ->groupBy('winning.bet_receipt_id')
                         ->each(function ($winning){
-                            BetReceipt::where('id', $winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
-
-                            $recieptUser = BetReceipt::where('id', $winning->bet_receipt_id)->first();
-                            
-                            if ($recieptUser) {
-                                $user = User::find($recieptUser->user_id);
-                                if ($user) {
-                                    $acountManagement = AccountManagement::where('user_id', $recieptUser->user_id)->first();
-                                    if ($acountManagement) {
-                                        // Update existing - add to net_win and recalculate balance
-                                        $acountManagement->update([
-                                            'balance' => $winning->sum_amount,
-                                        ]);
-                                    }
-                                    // Get previous day's balance
-                                    $previousBalance = BalanceReport::where('user_id', $recieptUser->user_id)
-                                        ->where('report_date', date('Y-m-d', strtotime('-1 day')))
-                                        ->sum('balance') ?? 0;
-                            
-                                    // Check if record exists to determine  balance
-                                    $existingRecord = BalanceReport::where('user_id', $recieptUser->user_id)
-                                        ->where('report_date', date('Y-m-d'))
-                                        ->first();
-                            
-                                    if ($existingRecord) {
-                                        // Update existing - add to net_win and recalculate balance
-                                        $newNetWin = $existingRecord->net_win + $winning->sum_amount;
-                                        $newBalance =  $newNetWin - $existingRecord->net_lose + 
-                                                     $existingRecord->deposit - $existingRecord->withdraw + $existingRecord->adjustment;
-                                        
-                                        $existingRecord->update([
-                                            'name_user' => $user->name,
-                                            'net_win' => $newNetWin,
-                                            'balance' => $newBalance,
-                                        ]);
-                                    } else {
-                                        // Create new record
-                                        BalanceReport::create([
-                                            'user_id' => $recieptUser->user_id,
-                                            'name_user' => $user->name,
-                                            'net_lose' => 0,
-                                            'net_win' => $winning->sum_amount,
-                                            'deposit' => 0,
-                                            'withdraw' => 0,
-                                            'adjustment' => 0,
-                                            'balance' => $previousBalance + $winning->sum_amount,
-                                            'report_date' => date('Y-m-d'),
-                                        ]);
-                                    }
-                                }
-                            }
+                        BetReceipt::where('id', $winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
                     });
                     }
                 }
@@ -383,8 +333,19 @@ class LotteryResultController extends Controller
                     'amount' => 0,
                 ]);
             }
-
             DB::commit();
+            $winAmountsByUser = BetReceipt::whereDate('date', Carbon::today()->format('Y-m-d'))
+            ->selectRaw('user_id, SUM(compensate) as total_win_amount')
+            ->groupBy('user_id')
+            ->get();
+            foreach ($winAmountsByUser as $userWin) {
+                $user = AccountManagement::where('user_id', $userWin->user_id)->first();
+                if ($user) {
+                    // Update user's cash_balance
+                    $user->cash_balance = ($user->cash_balance ?? 0) + $userWin->total_win_amount;
+                    $user->save();
+                }
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'save success'

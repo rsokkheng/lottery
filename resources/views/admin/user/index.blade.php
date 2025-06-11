@@ -33,7 +33,7 @@
                    
                     @foreach ($data as $key => $user)
                     @php
-                            $lastBalance =  $user?->accountManagement?->bet_credit - $user?->accountManagement?->available_credit ;
+                            $lastBalance =  $user?->accountManagement?->cash_balance;
                         @endphp
                   
                         <tr style="font-size: 14px;">

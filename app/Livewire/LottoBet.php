@@ -87,6 +87,7 @@ class LottoBet extends Component
 
     public $totalOutstanding;
 
+    public $packagePrice;
 
 
     public function mount(
@@ -133,7 +134,11 @@ class LottoBet extends Component
             ->groupBy('user_id', DB::raw('DATE(date)'))
             ->orderByDesc('report_date')
             ->get();
-        $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
+            $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
+            $this->packagePrice = $this->betPackageConfiguration
+            ->where('package_id', $this->user->package_id)
+            ->whereIn('bet_type', ['2D', '3D', '4D'])
+            ->pluck('price', 'bet_type');
         $this->initializeProperty();
 
 
