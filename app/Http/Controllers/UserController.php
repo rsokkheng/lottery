@@ -25,23 +25,37 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('admin')) {
-            // For admin: show all users with the same currency
-            $data = User::with('package', 'roles', 'manager', 'accountManagement')
-                        ->where('currency', $user->currency)
-                        ->orderBy('id', 'ASC')
-                        ->get();
-        } elseif ($user->hasRole('manager')) {
-            // For manager: show only users under the manager and exclude admins, with same currency
-            $data = User::with('package', 'roles', 'manager', 'accountManagement')
-                        ->where('manager_id', $user->id)
-                        ->where('currency', $user->currency)
-                        ->whereDoesntHave('roles', function ($query) {
-                            $query->where('name', 'admin');
-                        })
-                        ->orderBy('id', 'ASC')
-                        ->get();
+        // Get current user's currency
+        $currentCurrency = $user->currencies()->first();
+        
+        if (!$currentCurrency) {
+            // Handle case where current user has no currency record
+            $data = collect(); // empty collection
+        } else {
+            if ($user->hasRole('admin')) {
+                // Admin: show users with the same currency
+                $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
+                            ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                                $query->where('currency', $currentCurrency->currency);
+                            })
+                            ->orderBy('id', 'ASC')
+                            ->get();
+        
+            } elseif ($user->hasRole('manager')) {
+                // Manager: same currency, same manager, and not admin
+                $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
+                            ->where('manager_id', $user->id)
+                            ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                                $query->where('currency', $currentCurrency->currency);
+                            })
+                            ->whereDoesntHave('roles', function ($query) {
+                                $query->where('name', 'admin');
+                            })
+                            ->orderBy('id', 'ASC')
+                            ->get();
+            }
         }
+        
         
         return view('admin.user.index', compact('data'));
     }

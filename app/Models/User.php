@@ -79,7 +79,7 @@ class User extends Authenticatable
     }
     public function currencies()
     {
-        return $this->hasMany(UserCurrency::class);
+        return $this->hasOne(UserCurrency::class);
     }
     // App\Models\User.php
 

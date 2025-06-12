@@ -61,7 +61,7 @@
                             <td>{{ optional($user->manager)->name ?? '—' }} {{-- Manager's name --}}</td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user?->accountManagement?->currency }}</td>
+                            <td>{{ $user?->currencies?->currency }}</td>
                             <td>{{ $user?->accountManagement?->available_credit }}</td>
                             <td>{{ $user?->accountManagement?->bet_credit }}</td>
                             <td>{{ $lastBalance}}</td>
