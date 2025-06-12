@@ -24,19 +24,25 @@ class UserController extends Controller
     public function index()
     {
         $user = Auth::user();
+
         if ($user->hasRole('admin')) {
-            // For admin: show all users
-            $data = User::with('package', 'roles','manager','accountManagement')
+            // For admin: show all users with the same currency
+            $data = User::with('package', 'roles', 'manager', 'accountManagement')
+                        ->where('currency', $user->currency)
                         ->orderBy('id', 'ASC')
                         ->get();
         } elseif ($user->hasRole('manager')) {
-            // For manager: show only users under the manager and exclude admins
-        $data = User::with('package', 'roles','manager','accountManagement')
-                    ->where('manager_id', '=', $user->id)  // Only show users managed by this manager
-                    ->whereDoesntHave('roles', function($query) {
-                        $query->where('name', 'admin');  // Exclude admin role
-                    })->orderBy('id', 'ASC')->get();
+            // For manager: show only users under the manager and exclude admins, with same currency
+            $data = User::with('package', 'roles', 'manager', 'accountManagement')
+                        ->where('manager_id', $user->id)
+                        ->where('currency', $user->currency)
+                        ->whereDoesntHave('roles', function ($query) {
+                            $query->where('name', 'admin');
+                        })
+                        ->orderBy('id', 'ASC')
+                        ->get();
         }
+        
         return view('admin.user.index', compact('data'));
     }
     public function create()
