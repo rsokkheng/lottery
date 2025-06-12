@@ -417,7 +417,7 @@ class LottoBet extends Component
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
                 $account = AccountManagement::where('user_id', auth()->id())->first();
                 if (!$account) {
-                    $this->dispatch('bet-saved', message: 'គណនីមិនមាន', type: 'error');
+                    $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
                 }
                 $newBalance = round($account->bet_credit - $this->totalDue, 2);
