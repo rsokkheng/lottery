@@ -345,7 +345,24 @@ class LotteryResultController extends Controller
                     $user->cash_balance = ($user->cash_balance ?? 0) + $userWin->total_win_amount;
                     $user->save();
                 }
+                if($userWin->total_win_amount > 0){
+                    $UserWin = User::find($userWin->user_id);
+                    BalanceReport::create([
+                        'user_id' => $UserWin->id,
+                        'name_user' => $UserWin->name,
+                        'net_lose' => 0,
+                        'net_win' => $userWin->total_win_amount,
+                        'deposit' => 0,
+                        'withdraw' => 0,
+                        'adjustment' => 0,
+                        'balance' => 0,
+                        'report_date' => Carbon::today()->format('Y-m-d'),
+                    ]);
+                    log::info($UserWin);
+                }
+
             }
+             
             return response()->json([
                 'success' => true,
                 'message' => 'save success'
