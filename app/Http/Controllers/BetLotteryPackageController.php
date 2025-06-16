@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetLotteryPackage;
-use App\Models\BetLotteryPackageConfiguration;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\BetLotteryPackage;
+use Illuminate\Support\Facades\Auth;
+use App\Models\BetLotteryPackageConfiguration;
 
 class BetLotteryPackageController extends Controller
 {
@@ -62,6 +63,8 @@ class BetLotteryPackageController extends Controller
         BetLotteryPackageConfiguration::where('id', $request->id)->update([
             'rate' => $request->rate,
             'price' => $request->price,
+            'updated_at' => now(),
+            'updated_by' => Auth::user()->id??0,
         ]);
         return redirect()->route('admin.bet-lottery-package.index')->with('success','Package updated successfully.');   
     }
