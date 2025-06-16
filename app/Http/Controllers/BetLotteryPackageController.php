@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BetLotteryPackage;
+use App\Models\BetLotteryPackageConfiguration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -49,7 +50,7 @@ class BetLotteryPackageController extends Controller
 
     public function edit($category)
     {
-        $data = BetLotteryPackage::where('id',decrypt($category))->first();
+        $data = BetLotteryPackageConfiguration::where('id',decrypt($category))->first();
         return view('admin.bet-lottery-package.edit',compact('data'));
     }
 
@@ -58,23 +59,11 @@ class BetLotteryPackageController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate([
-            'name'=>'required|max:255',
+        BetLotteryPackageConfiguration::where('id', $request->id)->update([
+            'rate' => $request->rate,
+            'price' => $request->price,
         ]);
-        $baseSlug = Str::slug($request->name);
-        $uniqueSlug = $baseSlug;
-        $counter = 1;
-        
-        while (BetLotteryPackage::where('slug', $uniqueSlug)->where('id', '!=', $request->id)->exists()) {
-            $uniqueSlug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-
-        BetLotteryPackage::where('id', $request->id)->update([
-            'name' => $request->name,
-            'slug' => $uniqueSlug,
-        ]);
-        return redirect()->route('admin.bet-lottery-package.index')->with('info','Category updated successfully.');   
+        return redirect()->route('admin.bet-lottery-package.index')->with('success','Package updated successfully.');   
     }
 
     public function destroy($id)

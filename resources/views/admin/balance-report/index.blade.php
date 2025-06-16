@@ -2,6 +2,19 @@
 
 <!-- DataTables CSS (optional) -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<style>
+    @media (max-width: 768px) {
+        table td, table th {
+            font-size: 11px !important;
+            white-space: nowrap;
+        }
+
+        .btn {
+            font-size: 11px;
+            padding: 2px 6px;
+        }
+    }
+</style>
 <x-admin>
     @section('title', 'Account Balance')
     <div class="card">
