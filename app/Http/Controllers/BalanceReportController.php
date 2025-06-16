@@ -70,21 +70,20 @@ class BalanceReportController extends Controller
                     - COALESCE(ou.amount, 0) as withdraw_max
                 ')
             )
-            ->where('cu.currency', $currency)
-            ->groupBy(
+            ->where('cu.currency', $currency);
+            if ($user->hasRole('manager')) {
+                $data->where('u.manager_id', $user->id);
+            }
+            // Only group after conditional logic
+            $data = $data->groupBy(
                 'u.id',
                 'u.record_status_id',
                 'u.name',
                 'ac.id',
                 'br.report_date',
                 'ou.amount'
-            )
-            ->get();
+            )->get();
 
-
-    
-
-        
         return view('admin.balance-report.index', compact('data'));
     }
     public function create()

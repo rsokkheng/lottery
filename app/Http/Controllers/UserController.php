@@ -13,6 +13,7 @@ use App\Models\AccountManagement;
 use App\Models\BetLotteryPackage;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -361,5 +362,28 @@ public function saveSettingWithPackageType(Request $request)
     return redirect()->route('admin.user.index')
         ->with('success', 'Betting limits updated successfully.');
 }
+
+public function editPassword(User $user)
+{
+    return view('admin.user.change-password', compact('user'));
+}
+
+public function updatePassword(Request $request, User $user)
+{
+    $request->validate([
+        'your_password' => ['required'],
+        'new_password' => ['required', 'min:6'],
+    ]);
+
+    if (!Hash::check($request->your_password, auth()->user()->password)) {
+        return back()->withErrors(['your_password' => 'Your current password is incorrect.']);
+    }
+
+    $user->password = bcrypt($request->new_password);
+    $user->save();
+
+    return redirect()->route('admin.user.index')->with('success', 'Password updated successfully.');
+}
+
 
 }

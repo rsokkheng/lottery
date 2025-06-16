@@ -90,6 +90,9 @@
                                         </li>
                                         <li>
                                         <a class="dropdown-item" href="{{ route('admin.user.show', $user->id) }}">Setting</a>
+                                        </li><br>
+                                        <li>
+                                        <a class="dropdown-item" href="{{ route('admin.user.change-password', $user->id) }}">Change Password</a>
                                         </li>
                                     </ul>
                                 </div>

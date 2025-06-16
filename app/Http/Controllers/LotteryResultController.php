@@ -334,33 +334,35 @@ class LotteryResultController extends Controller
                 ]);
             }
             DB::commit();
-            $winAmountsByUser = BetReceipt::whereDate('date', Carbon::today()->format('Y-m-d'))
+            $reportDate = Carbon::today()->format('Y-m-d');
+            $winAmountsByUser = BetReceipt::whereDate('date', $reportDate)
             ->selectRaw('user_id, SUM(compensate) as total_win_amount')
             ->groupBy('user_id')
             ->get();
             foreach ($winAmountsByUser as $userWin) {
                 $user = AccountManagement::where('user_id', $userWin->user_id)->first();
                 if ($user) {
-                    // Update user's cash_balance
-                    $user->cash_balance = ($user->cash_balance ?? 0) + $userWin->total_win_amount;
+                    $user->cash_balance = $userWin->total_win_amount;
                     $user->save();
                 }
-                if($userWin->total_win_amount > 0){
-                    $UserWin = User::find($userWin->user_id);
-                    BalanceReport::create([
-                        'user_id' => $UserWin->id,
-                        'name_user' => $UserWin->name,
-                        'net_lose' => 0,
-                        'net_win' => $userWin->total_win_amount,
-                        'deposit' => 0,
-                        'withdraw' => 0,
-                        'adjustment' => 0,
-                        'balance' => 0,
-                        'report_date' => Carbon::today()->format('Y-m-d'),
-                    ]);
-                    log::info($UserWin);
+                if ($userWin->total_win_amount > 0) {
+                    $User = User::find($userWin->user_id);
+                    DB::table('balance_reports')->updateOrInsert(
+                        [
+                            'user_id' => $User->id,
+                            'report_date' => $reportDate,
+                        ],
+                        [
+                            'name_user' => $User->name,
+                            'net_lose' => 0,
+                            'net_win' => $userWin->total_win_amount,
+                            'deposit' => 0,
+                            'withdraw' => 0,
+                            'adjustment' => 0,
+                            'balance' => 0,
+                        ]
+                    );
                 }
-
             }
              
             return response()->json([
