@@ -9,7 +9,6 @@ use App\Models\BetNumber;
 use App\Models\BetReceipt;
 use App\Enums\MultiplierEnum;
 use App\Models\BalanceReport;
-use App\Models\BetUserWallet;
 use App\Enums\MultiplierHNEnum;
 use App\Models\AccountManagement;
 use App\Models\BetLotterySchedule;
@@ -88,6 +87,7 @@ class LottoBet extends Component
 
     public $totalOutstanding;
 
+    public $packagePrice;
 
 
     public function mount(
@@ -134,7 +134,11 @@ class LottoBet extends Component
             ->groupBy('user_id', DB::raw('DATE(date)'))
             ->orderByDesc('report_date')
             ->get();
-        $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
+            $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
+            $this->packagePrice = $this->betPackageConfiguration
+            ->where('package_id', $this->user->package_id)
+            ->whereIn('bet_type', ['2D', '3D', '4D'])
+            ->pluck('price', 'bet_type');
         $this->initializeProperty();
 
 
@@ -413,7 +417,7 @@ class LottoBet extends Component
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
                 $account = AccountManagement::where('user_id', auth()->id())->first();
                 if (!$account) {
-                    $this->dispatch('bet-saved', message: 'គណនីមិនមាន', type: 'error');
+                    $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
                 }
                 $newBalance = round($account->bet_credit - $this->totalDue, 2);
@@ -428,7 +432,6 @@ class LottoBet extends Component
                     BalanceReport::create([
                             'user_id' => auth()->id(),
                             'name_user' => auth()->user()->name,
-                            'beginning' => 0,
                             'net_lose' => $this->totalDue,
                             'net_win' => 0,
                             'deposit' => 0,
@@ -436,7 +439,6 @@ class LottoBet extends Component
                             'adjustment' => 0,
                             'balance' => 0,
                             'report_date' => $this->currentDate,
-                            'outstanding' => $this->totalDue,
                         ]);
                 }            
                 // generate no invoice
@@ -458,6 +460,7 @@ class LottoBet extends Component
                 if (!empty($number)) {
                     $has_spacial = $this->roll_parlay_check[$key] ? 1 : 0;
                     $betPackage = $this->betPackageConfiguration::where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->first();
+                    $rate = $betPackage?->rate / 100;
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key]) > 0) {
                             //insert bet
@@ -475,10 +478,11 @@ class LottoBet extends Component
                             $respone = Bet::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
+                                $amountOutstanding = $this->calculateAmountOutstanding($number, $key, $schedule['code'], $rate);
                                 BalanceReportOutstanding::create([
                                     'user_id' => $this->user->id ?? 0,
                                     'company_id' => $schedule->company_id,
-                                    'amount' => $schedule['code'] == "HN" ? ($this->amountHN[$key] * $betPackage?->rate/100) : ($this->amountNotHN[$key] * $betPackage?->rate/100),
+                                    'amount' => $amountOutstanding,
                                     'date' => $this->currentDate,
 
                                 ]);
@@ -646,6 +650,131 @@ class LottoBet extends Component
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
             return redirect()->to('lotto_vn/bet_receipt/' . $betReceipt->receipt_no);
         }
+    }
+
+    private function calculateAmountOutstanding($number, $key, $code, $rate)
+    {
+        $betTypes = [
+            'a' => [
+                'amount' => $this->a_amount[$key] ?? 0,
+                'check' => $this->a_check[$key],
+            ],
+            'b' => [
+                'amount' => $this->b_amount[$key] ?? 0,
+                'check' => $this->b_check[$key],
+            ],
+            'ab' => [
+                'amount' => $this->ab_amount[$key] ?? 0,
+                'check' => $this->ab_check[$key],
+            ],
+            'roll' => [
+                'amount' => $this->roll_amount[$key] ?? 0,
+                'check' => $this->roll_check[$key],
+            ],
+            'roll7' => [
+                'amount' => $this->roll7_amount[$key] ?? 0,
+                'check' => $this->roll7_check[$key],
+            ],
+            'roll_parlay' => [
+                'amount' => $this->roll_parlay_amount[$key] ?? 0,
+                'check' => $this->roll_parlay_check[$key],
+            ],
+        ];
+
+        $amount = 0;
+        if (strpos($number, '#') !== false) {
+            if($this->roll_parlay_amount[$key]> 0) {
+                $multiplier = 1;
+                $permuLength = 1;
+                $countHashtag = substr_count($number, '#');
+                if ($this->roll_parlay_check[$key] == true && $countHashtag ==2) {
+                    $permuLength = 2;
+                }
+                if ($code == "HN") {
+                    $multiplier = match ($countHashtag) {
+                        1 => MultiplierHashtagHNEnum::one,
+                        2 => MultiplierHashtagHNEnum::two,
+                        3 => MultiplierHashtagHNEnum::three,
+                        default => 1
+                    };
+                } else {
+                    $multiplier = match ($countHashtag) {
+                        1 => MultiplierHashtagEnum::one,
+                        2 => MultiplierHashtagEnum::two,
+                        3 => MultiplierHashtagEnum::three,
+                        default => 1
+                    };
+                }
+                $amount += $this->roll_parlay_amount[$key] * $multiplier * $permuLength;
+            }
+
+        } elseif (strpos($number, '*') !== false) {
+            $length = strlen($number);
+            foreach ($betTypes as $type => $info) {
+                $multiplier = 1;
+                $permuLength = 10;
+                if ($info['amount'] > 0) {
+                    if ($code == "HN") {
+                        $multiplier = match ($type) {
+                            'a' => $length == 2 ? MultiplierHNEnum::A : 0,
+                            'ab' => $length == 2 ? MultiplierHNEnum::AB :
+                                ($length == 3 ? MultiplierHNEnum::AB_3D : 0),
+                            'roll' => $length == 2 ? MultiplierHNEnum::ROLL :
+                                ($length == 3 ? MultiplierHNEnum::ROLL_3D :
+                                    ($length == 4 ? MultiplierHNEnum::ROLL_4D : 0)),
+                            default => 1,
+                        };
+                    } else {
+                        $multiplier = match ($type) {
+                            'ab' => $length == 2 ? MultiplierEnum::AB :
+                                ($length == 3 ? MultiplierEnum::AB : 0),
+                            'roll' => $length == 2 ? MultiplierEnum::ROLL :
+                                ($length == 3 ? MultiplierEnum::ROLL_3D :
+                                    ($length == 4 ? MultiplierEnum::ROLL_4D : 0)),
+                            'roll7' => $length == 3 ? MultiplierEnum::ROLL7 : 0,
+                            default => 1,
+                        };
+                    }
+                    $amount += $info['amount'] * $multiplier * $permuLength;
+                }
+            }
+
+        } else {
+            $length = strlen($number);
+            foreach ($betTypes as $type => $info) {
+                $multiplier = 1;
+                $permuLength = 1;
+                if ($info['amount'] > 0) {
+                    if($info['check']> 0){
+                        $permuLength = $this->permutationsLength[$key];
+                    }
+                    if ($code == "HN") {
+                        $multiplier = match ($type) {
+                            'a' => $length == 2 ? MultiplierHNEnum::A : 0,
+                            'ab' => $length == 2 ? MultiplierHNEnum::AB :
+                                ($length == 3 ? MultiplierHNEnum::AB_3D : 0),
+                            'roll' => $length == 2 ? MultiplierHNEnum::ROLL :
+                                ($length == 3 ? MultiplierHNEnum::ROLL_3D :
+                                    ($length == 4 ? MultiplierHNEnum::ROLL_4D : 0)),
+                            default => 1,
+                        };
+                    } else {
+                        $multiplier = match ($type) {
+                            'ab' => $length == 2 ? MultiplierEnum::AB :
+                                ($length == 3 ? MultiplierEnum::AB : 0),
+                            'roll' => $length == 2 ? MultiplierEnum::ROLL :
+                                ($length == 3 ? MultiplierEnum::ROLL_3D :
+                                    ($length == 4 ? MultiplierEnum::ROLL_4D : 0)),
+                            'roll7' => $length == 3 ? MultiplierEnum::ROLL7 : 0,
+                            default => 1,
+                        };
+                    }
+                    $amount += $info['amount'] * $multiplier * $permuLength;
+                }
+            }
+        }
+        return ($amount* $rate);
+
     }
 
     private function calculateBetNumberTotalAmount($numberLength, $amount, $code, $type)

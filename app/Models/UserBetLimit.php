@@ -6,20 +6,16 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class BalanceReport extends Model
+class UserBetLimit extends Model
 {
     use HasFactory;
-    protected $table = 'balance_reports';
+    protected $table = 'user_bet_limits';
     protected $fillable = [
         'user_id',
-        'name_user',
-        'net_lose',
-        'net_win',
-        'deposit',
-        'withdraw',
-        'adjustment',
-        'balance',
-        'report_date',
+        'digit_key',
+        'min_bet',
+        'max_bet',
+       
     ];
 
     // Optional: relationship to User

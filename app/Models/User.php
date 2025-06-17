@@ -79,7 +79,7 @@ class User extends Authenticatable
     }
     public function currencies()
     {
-        return $this->hasMany(UserCurrency::class);
+        return $this->hasOne(UserCurrency::class);
     }
     // App\Models\User.php
 
@@ -90,6 +90,10 @@ class User extends Authenticatable
     public function balanceReports()
     {
         return $this->hasMany(BalanceReport::class);
+    }
+    public function balanceReportOutStandings()
+    {
+        return $this->hasMany(BalanceReportOutstanding::class);
     }
 
    

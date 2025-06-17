@@ -13,9 +13,9 @@
                     <tr>
                         <th>Package</th>
                         <th>Bet Type</th>
-                        <th>Bet Term</th>
                         <th>Rate</th>
                         <th>Price</th>
+                        <th>Create Date</th>
                         <th>Action</th>
                         <th></th>
                     </tr>
@@ -26,17 +26,13 @@
                         <tr>
                             <td>{{ $cat->package_code }}</td>
                             <td>{{ $pack->bet_type }}</td>
-                            <td>{{ $pack->bet_pattern }}</td>
+
                             <td>{{ $pack->rate }}</td>
                             <td>{{ $pack->price }}</td>
-                            <td><a href="{{ route('admin.bet-lottery-package.edit', encrypt($cat->id)) }}"
+                            <td>{{ $pack->created_at }}</td>
+                            <td><a href="{{ route('admin.bet-lottery-package.edit', encrypt($pack->id)) }}"
                                     class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a>
-                                <form action="{{ route('admin.bet-lottery-package.destroy', encrypt($cat->id)) }}" method="POST"
-                                    onsubmit="return confirm('Are sure want to delete?')" style="display: inline-block;">
-                                    @method('DELETE')
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
+                              
                             </td>
                         </tr>
                         @endforeach

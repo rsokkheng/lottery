@@ -114,7 +114,7 @@ class LottoBetUSD extends Component
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
-        $this->betUserWallet = BetUserWallet::where('user_id', $this->user->id)->first();
+       
         $this->initializeProperty();
 
 

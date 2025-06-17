@@ -120,9 +120,11 @@
             <div class="flex p-2 items-center">
                 <div class="px-2 text-[12px]">Chi Chu:</div>
                 <div>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('2so x 75') }}</span>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('3so x 650') }}</span>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('4so x 6000') }}</span>
+                @foreach ($packagePrice as $betType => $price)
+                    <span class="border border-gray-500 text-[12px] px-1 py-1">
+                        {{ __($betType . ' x ' . $price) }}
+                    </span>
+                @endforeach
                 </div>
             </div>
             <p class="text-[12px] pb-2 text-center font-bold">{{ __('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY') }}
