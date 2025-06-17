@@ -50,8 +50,8 @@
                         class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
-                        href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
+                        class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('bet-usd.result-show') }}">{{ __('Results') }}</x-nav-link>
             </div>
 
             {{--   Menu size tablet   --}}
@@ -71,8 +71,8 @@
                         class="{{ Route::is('bet-usd.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet-usd.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
-                        href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
+                        class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('bet-usd.result-show') }}">{{ __('Results') }}</x-nav-link>
 
                 <ul class="flex space-x-4">
                     <li class="relative">
@@ -171,8 +171,8 @@
         
         <x-nav-link class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
-        <x-nav-link class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }}"
-                    href="{{ route('bet.result-show') }}">{{ __('Results') }}</x-nav-link>
+        <x-nav-link class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('bet-usd.result-show') }}">{{ __('Results') }}</x-nav-link>
 
         <!-- Mobile Account Menu -->
         <div class="relative">
