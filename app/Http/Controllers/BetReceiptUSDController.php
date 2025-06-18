@@ -9,8 +9,6 @@ use App\Models\User;
 use App\Models\BetReceiptUSD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Log;
 use function PHPUnit\Framework\throwException;
 
 class BetReceiptUSDController extends Controller

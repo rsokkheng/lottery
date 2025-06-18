@@ -37,7 +37,7 @@
                         class="{{ Route::is('bet-usd.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet-usd.receipt-list') }}">{{ __('Receipt List') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('be-usdt.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        class="{{ Route::is('bet-usd.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet-usd.bet-list') }}">{{ __('Bet List') }}</x-nav-link>
                 <x-nav-link
                         class="{{ Route::is('bet-usd.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
@@ -45,10 +45,10 @@
                 <x-nav-link
                         class="{{ Route::is('bet-usd.bet-winning') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('bet-usd.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
                 <x-nav-link
-                class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                class="{{ Route::is('bet-usd.reports.daily') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
-                        href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
+                        class="{{ Route::is('bet-usd.reports.summary') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('bet-usd.reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
                 <x-nav-link
                         class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('bet-usd.result-show') }}">{{ __('Results') }}</x-nav-link>
@@ -98,12 +98,12 @@
                             <li>
                                 <x-nav-link
                                         class="black"
-                                        href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                                        href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
                             </li>
                             <li>
                                 <x-nav-link
                                         class="black"
-                                        href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
+                                        href="{{ route('bet-usd.reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
                             </li>
                         </ul>
                     </li>
@@ -166,11 +166,11 @@
         <x-nav-link  class="{{ Route::is('bet-usd.bet-winning') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet-usd.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
 
-        <x-nav-link  class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }}"
-                    href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+        <x-nav-link  class="{{ Route::is('bet-usd.reports.daily') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
         
-        <x-nav-link class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }}"
-                    href="{{ route('reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
+        <x-nav-link class="{{ Route::is('bet-usd.reports.summary') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('bet-usd.reports.summary') }}">{{ __('Summary Report') }}</x-nav-link>
         <x-nav-link class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet-usd.result-show') }}">{{ __('Results') }}</x-nav-link>
 

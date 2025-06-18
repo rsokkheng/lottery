@@ -82,7 +82,7 @@ class BetReportUSDController extends Controller
                 ->groupBy(DB::raw('DATE(re.date), bee.draw_day'))
                 ->get();
            
-            return view('reports.summary', compact('data', 'date'));
+            return view('report_usd.summary', compact('data', 'date'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
@@ -163,7 +163,7 @@ class BetReportUSDController extends Controller
                 ->get(); 
             
             
-            return view('reports.daily', compact('data', 'date','company','company_id'));
+            return view('report_usd.daily', compact('data', 'date','company','company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
