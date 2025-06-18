@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\Bet;
+use App\Models\BetUSD;
 use App\Models\User;
-use App\Models\BetReceipt;
+use App\Models\BetReceiptUSD;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +13,11 @@ use function PHPUnit\Framework\throwException;
 
 class BetReportUSDController extends Controller
 {
-    public BetReceipt $model;
-    public Bet $betModel;
+    public BetReceiptUSD $model;
+    public BetUSD $betModel;
     public $currentDate;
 
-    public function __construct(BetReceipt $model, Bet $betModel)
+    public function __construct(BetReceiptUSD $model, BetUSD $betModel)
     {
         $this->model = $model;
         $this->betModel = $betModel;
@@ -45,11 +45,11 @@ class BetReportUSDController extends Controller
                 SELECT 
                     be.bet_receipt_id,
                     se.draw_day 
-                FROM bets be
+                FROM bet_usd be
                 INNER JOIN bet_lottery_schedules se  ON se.id = be.bet_schedule_id
                 GROUP BY be.bet_receipt_id, se.draw_day
                  ) as bee'))
-                ->join('bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
+                ->join('bet_receipt_usd as re', 're.id', '=', 'bee.bet_receipt_id')
                 ->selectRaw('
                     DATE(re.date) AS date,
                     bee.draw_day,
@@ -130,12 +130,12 @@ class BetReportUSDController extends Controller
                         be.bet_receipt_id,
                         se.draw_day,
                         user.name
-                    FROM bets be
+                    FROM bet_usd be
                     INNER JOIN bet_lottery_schedules se ON se.id = be.bet_schedule_id
                     INNER JOIN users as user ON user.id = be.user_id
                     GROUP BY be.bet_receipt_id, se.draw_day, user.name
                 ) as bee'))
-                ->join('bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
+                ->join('bet_receipt_usd as re', 're.id', '=', 'bee.bet_receipt_id')
                 ->selectRaw('
                     DATE(re.date) AS date,
                     bee.draw_day,
