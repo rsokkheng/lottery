@@ -35,12 +35,12 @@ class BetReportController extends Controller
                 $user = User::find($user->id);
                 $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
             }
-            
+
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
-            
+
             $data = DB::table(DB::raw('(
                 SELECT 
                     be.bet_receipt_id,
@@ -61,9 +61,9 @@ class BetReportController extends Controller
                 ')->when(in_array('manager', $roles), function ($q) use ($user) {
                     // Get all users under this manager
                     $memberIds = User::where('manager_id', $user->id)
-                                    ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
-                                    ->pluck('id')
-                                    ->toArray();
+                        ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                        ->pluck('id')
+                        ->toArray();
                     $q->whereIn('user_id', $memberIds);
                 })->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
                     // Apply filter for date range
@@ -78,62 +78,54 @@ class BetReportController extends Controller
                     // Apply filter for specific date
                     $q->whereDate('re.date', '=', Carbon::parse($date)->format('Y-m-d'));
                 })
-              
                 ->groupBy(DB::raw('DATE(re.date), bee.draw_day'))
                 ->get();
-           
+
             return view('reports.summary', compact('data', 'date'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
         }
     }
+
     public function getDailyReport(Request $request)
     {
         try {
+            $company = [
+                ["id" => 0, "label" => "All Company"],
+                ["id" => 1, "label" => "4PM Company"],
+                ["id" => 2, "label" => "5PM Company"],
+                ["id" => 3, "label" => "6PM Company"]
+            ];
 
-            $date = $request->get('date') ?? null;
+            $date = $this->currentDate;
+            $company_id = null;
+
             $user = Auth::user() ?? 0;
             if ($user) {
                 $user = User::find($user->id);
                 $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
             }
-            $date = $this->currentDate;
+
             if ($request->has('date')) {
                 $date = $request->get('date');
+
             }
-            $company_id = null;
+
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
-            $company = [
-                [
-                    "label" => "All Company",
-                    "id" => 0,
-                ],
-                [
-                    "label" => "4PM Company",
-                    "id" => 1,
-                ],
-                [
-                    "label" => "5PM Company",
-                    "id" => 2,
-                ],
-                [
-                    "label" => "6PM Company",
-                    "id" => 3,
-                ]
-            ];
-    
-                $data = DB::table(DB::raw('(
+
+            $data = DB::table(DB::raw('(
                     SELECT 
                         be.bet_receipt_id,
                         se.draw_day,
+                        se.company_id,
                         user.name
                     FROM bets be
                     INNER JOIN bet_lottery_schedules se ON se.id = be.bet_schedule_id
                     INNER JOIN users as user ON user.id = be.user_id
-                    GROUP BY be.bet_receipt_id, se.draw_day, user.name
+                    GROUP BY be.bet_receipt_id, se.draw_day, se.company_id, user.name
                 ) as bee'))
                 ->join('bet_receipts as re', 're.id', '=', 'bee.bet_receipt_id')
                 ->selectRaw('
@@ -148,22 +140,24 @@ class BetReportController extends Controller
                 ')
                 ->when(in_array('manager', $roles), function ($q) use ($user) {
                     $memberIds = User::where('manager_id', $user->id)
-                                    ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
-                                    ->pluck('id')
-                                    ->toArray();
+                        ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                        ->pluck('id')
+                        ->toArray();
                     $q->whereIn('re.user_id', $memberIds);
                 })
                 ->when($date, function ($q) use ($date) {
                     $q->whereDate('re.date', '=', Carbon::parse($date)->format('Y-m-d'));
                 })
+                ->when($company_id>0 ,function ($q) use($company_id){
+                    $q->where('bee.company_id', $company_id);
+                })
                 ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                     $q->where('re.user_id', $user->id);
                 })
                 ->groupBy(DB::raw('DATE(re.date), bee.draw_day, bee.name'))
-                ->get(); 
-            
-            
-            return view('reports.daily', compact('data', 'date','company','company_id'));
+                ->get();
+
+            return view('reports.daily', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
