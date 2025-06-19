@@ -459,7 +459,8 @@ class LottoBetUSD extends Component
             foreach ($this->number as $key => $number) {
                 if (!empty($number)) {
                     $has_spacial = $this->roll_parlay_check[$key] ? 1 : 0;
-                    $betPackage = $this->betPackageConfiguration::where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->first();
+                    $betPackage = $this->betPackageConfiguration::where('package_id','=',$this->user->package_id)
+                    ->where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->first();
                     $rate = $betPackage?->rate / 100;
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key]) > 0) {
