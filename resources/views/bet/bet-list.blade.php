@@ -109,12 +109,12 @@
                                 $betNumberGame .= "Roll Parlay";
                             }
 
-                            $commission = $row->total_amount-($row->total_amount *$row['bePackageConfig']?->rate/100);
-                            $netAmount =$row->total_amount * $row['bePackageConfig']?->rate/100;
+                            $commission = $bet->total_amount-($bet->total_amount *$row['bePackageConfig']?->rate/100);
+                            $netAmount =$bet->total_amount * $row['bePackageConfig']?->rate/100;
                             $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
                             $totalCommission +=$commission;
                             $totalNetAmount +=$netAmount;
-                            $totalTurnover +=$row->total_amount;
+                            $totalTurnover +=$bet->total_amount;
                             $winLose = $prizeAmount - $netAmount;
                             $totalWinLose +=$winLose;
                             

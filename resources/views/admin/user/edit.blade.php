@@ -61,15 +61,28 @@
                             <x-error>package</x-error>
                         </div>
                     </div>
+
                      {{-- Credit --}}
-                     <div class="col-lg-6">
+                    <div class="col-lg-6">
                         <div class="form-group">
-                            <label class="form-label">Give Credit:* </label>
-                            <input type="number" class="form-control" name="available_credit" required autocomplete="off"
-                            value="{{ $user->accountManagement->available_credit ?? 0}}">
+                            <label class="form-label">
+                                Give Credit:* {{ $user->accountManagement->bet_credit ?? 0 }}
+                            </label>
+                            <input type="number"
+                                class="form-control"
+                                id="amount_bet_credit"
+                                name="available_credit"
+                                required
+                                autocomplete="off"
+                                value="{{ $user->accountManagement->available_credit ?? 0 }}"
+                                data-max="{{ $user->accountManagement->bet_credit ?? 0 }}">
+                            <small id="amount-error" class="text-danger d-none">
+                                The credit amount cannot exceed the allowed limit.
+                            </small>
                             <x-error>given_credit</x-error>
                         </div>
-                    </div>                    
+                    </div>
+               
                     
                     @auth
                     @php
@@ -105,7 +118,7 @@
                 @endauth
                     <div class="col-lg-12">
                         <div class="float-right">
-                            <button class="btn btn-primary" type="submit">Save</button>
+                            <button class="btn btn-primary" id="btn-save" type="submit">Save</button>
                         </div>
                     </div>
                 </div>
@@ -113,3 +126,19 @@
         </div>
     </div>
 </x-admin>
+<script>
+    $(document).ready(function () {
+        $('#amount_bet_credit').on('input', function () {
+            const enteredAmount = parseFloat($(this).val()) || 0;
+            const maxAmount = parseFloat($(this).data('max')) || 0;
+
+            if (enteredAmount > maxAmount) {
+                $('#amount-error').removeClass('d-none');
+                $('#btn-save').prop('disabled', true);
+            } else {
+                $('#amount-error').addClass('d-none');
+                $('#btn-save').prop('disabled', false);
+            }
+        });
+    });
+</script>
