@@ -110,7 +110,7 @@
                             }
 
                             $commission = $bet->total_amount-($bet->total_amount *$row['bePackageConfig']?->rate/100);
-                            $netAmount =$bet->total_amount * $row['bePackageConfig']?->rate/100;
+                            $netAmount =  $bet->total_amount * $row['bePackageConfig']?->rate/100;
                             $prizeAmount = ($betNumber?->betNumberWin?->betWinning->win_amount ?? 0);
                             $totalCommission +=$commission;
                             $totalNetAmount +=$netAmount;
