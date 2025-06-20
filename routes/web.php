@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified', 'check.vnd'])->prefix('lotto_vn')->group(
     Route::get('/bet-winning', [LotteryResultController::class, 'getWinningReport'])->name('bet.bet-winning');
     Route::get('/report-summary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
     Route::get('/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
+    Route::get('/report-daily/sumary', [BetReportController::class, 'getDailyReportManager'])->name('reports.daily-manager');
     Route::get('/bet/{id}', [BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
     Route::get('/bet_receipt/{receipt_no}', [BetReceiptController::class, 'printReceiptNo']);
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptController::class, 'payReceipt']);
