@@ -535,14 +535,32 @@ class LottoBetUSD extends Component
 
 
                             if (strpos($number, '#') !== false) {
-                                $multiplierHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
+                                $multiplierHashtag =0;
+                                $countHashtag = substr_count($number, '#');
+                                if($schedule->code=="HN") {
+                                    $multiplierHashtag = match ($countHashtag) {
+                                        1 => MultiplierHashtagHNEnum::one,
+                                        2 => MultiplierHashtagHNEnum::two,
+                                        3 => MultiplierHashtagHNEnum::three,
+                                        default => 1
+                                    };
+                                }else
+                                {
+                                    $multiplierHashtag = match ($countHashtag) {
+                                        1 => MultiplierHashtagEnum::one,
+                                        2 => MultiplierHashtagEnum::two,
+                                        3 => MultiplierHashtagEnum::three,
+                                        default => 1
+                                    };
+                                }
                                 if ($this->roll_parlay_check[$key] == true) {
+                                    $multiplierOneHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
                                     $parts = $this->generateSharpNumber($number);
                                     foreach ($parts as $part) {
                                         $betNumber2 = [
                                             'generated_number' => $part,
                                             'digit_length' => $this->digit[$key],
-                                            'total_amount' => $this->roll_parlay_amount[$key] * $multiplierHashtag,
+                                            'total_amount' => $this->roll_parlay_amount[$key] * $multiplierOneHashtag,
                                         ];
 
                                         $data = array_merge($betNumber1, $betNumber2);
