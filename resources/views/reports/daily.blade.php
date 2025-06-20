@@ -88,7 +88,7 @@
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->total_amount, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($commission, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300"> {{ number_format($netAmount, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format( $compensate, 3, '.', '') }}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format( $row->Compensate, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">
                                         <span class="{{ $diff < 0 ? 'text-red-500' : 'text-black' }}">
                                             {{ number_format( $diff, 3, '.', '') }}
