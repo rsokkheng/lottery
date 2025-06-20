@@ -70,13 +70,12 @@
                                 @php
                                     $netAmount  =  $row->total_amount * ($row->rate/100);
                                     $commission = $row->total_amount-($row->total_amount * $row->rate/100);
-                                    $compensate += $row->Compensate ?? 0;
-                                    $diff =  $compensate - $netAmount ;
+                                    $diff =  $row->Compensate - $netAmount ;
                                     $totalInvoice += (float)($row->total_receipts ?? 0);
                                     $turNover += (float)($row->total_amount ?? 0);
                                     $totalCommission += (float)($commission ?? 0);
                                     $totalNetAmount += (float)( $netAmount ?? 0);
-                                    $totalCompensate += (float)($compensate ?? 0);
+                                    $totalCompensate += (float)($row->Compensate ?? 0);
                                     $totalWinLose += $diff;
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
