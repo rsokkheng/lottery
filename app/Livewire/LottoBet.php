@@ -474,7 +474,7 @@ class LottoBet extends Component
                                 'number_format' => $number,
                                 'digit_format' => $this->digit[$key],
                                 'bet_date' => $this->currentDate,
-                                'total_amount' => $schedule['code'] == "HN" ? $this->amountHN[$key] : $this->amountNotHN[$key],
+                                'total_amount' => $this->calculateAmountOutstanding($number, $key, $schedule['code'], 1),
                             ];
                             $respone = Bet::create($betItem);
                             if ($respone) {
