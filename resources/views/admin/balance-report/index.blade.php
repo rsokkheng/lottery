@@ -217,7 +217,7 @@
             .val(''); // clear previous input
 
         // Update max info label
-        const labelText = type === 'deposit' ? `Max: ${depositMax}` : `Max: ${withdrawMax}`;
+        const labelText = type === 'deposit' ? ` Deposit : ${depositMax}` : `Withdraw: ${withdrawMax}`;
         $('#modal-withdraw-deposit').text(labelText);
 
         // Hide error message on open
