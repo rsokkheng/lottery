@@ -1077,7 +1077,7 @@ class LotteryResultController extends Controller
                     $prepareData['commission'] = $commission;
                     $prepareData['net_amount'] = $netAmount;
                     if(in_array($record->bet_type, ['RP2','RP3','RP4'])){
-                        $compensate = ($record->odds * $record->count_bet_number) / 2;
+                        $compensate = $record->compensate;
                     }else{
                         $compensate = $record->compensate;
                     }
