@@ -32,7 +32,7 @@ Route::prefix('/otp')->middleware( 'guest')->name('otp.')->controller(LoginWithO
     Route::post('login/verification','loginWithOtp')->name('loginWithOtp');
 });
 
-Route::middleware(['auth', 'verified', 'check.vnd'])->prefix('lotto_vn')->group(function () {
+Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->group(function () {
     Route::get('/bet', \App\Livewire\LottoBet::class)->name('bet.input');
     Route::get('/result', [LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
     Route::get('/receipt-list', [BetReceiptController::class, 'index'])->name('bet.receipt-list');
@@ -47,7 +47,7 @@ Route::middleware(['auth', 'verified', 'check.vnd'])->prefix('lotto_vn')->group(
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptController::class, 'payReceipt']);
 });
 
-Route::middleware(['auth', 'verified', 'check.usd'])->prefix('lotto_usd')->group(function () {
+Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->group(function () {
     Route::get('/bet', \App\Livewire\LottoBetUSD::class)->name('bet-usd.input');
     Route::get('/result', [LotteryResultUSDController::class, 'getBetResultBy'])->name('bet-usd.result-show');
     Route::get('/receipt-list', [BetReceiptUSDController::class, 'index'])->name('bet-usd.receipt-list');
@@ -57,8 +57,8 @@ Route::middleware(['auth', 'verified', 'check.usd'])->prefix('lotto_usd')->group
     Route::get('/report-summary', [BetReportUSDController::class, 'getSummaryReport'])->name('bet-usd.reports.summary');
     Route::get('/report-daily', [BetReportUSDController::class, 'getDailyReport'])->name('bet-usd.reports.daily');
     Route::get('/bet/{id}', [BetReceiptUSDController::class, 'getBetByReceiptId'])->name('bet-usd.bet-by-id');
-    Route::get('/bet_receipt_usd/{receipt_no}', [BetReceiptUSDController::class, 'printReceiptNo']);
-    Route::get('/bet_receipt_pay_usd/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
+    Route::get('/bet_receipt/{receipt_no}', [BetReceiptUSDController::class, 'printReceiptNo']);
+    Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
 });
 
 

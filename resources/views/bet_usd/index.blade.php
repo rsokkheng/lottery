@@ -31,13 +31,13 @@
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
                                 Total Amount
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">0 (VND)</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">0 (USD)</td>
                         </tr>
                         <tr>
                             <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
                                 Total Due
                             </td>
-                            <td class="border border-gray-500 px-4 py-2 text-right">0 (VND)</td>
+                            <td class="border border-gray-500 px-4 py-2 text-right">0 (USD)</td>
                         </tr>
                         </tbody>
                     </table>

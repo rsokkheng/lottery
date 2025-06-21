@@ -428,7 +428,7 @@ class LotteryResultUSDController extends Controller
                 'date_show' => $showDate,
                 'form_result' => $formResult
             ];
-            return view('bet.result-show', compact('data'));
+            return view('bet_usd.result-show', compact('data'));
         }catch (\Exception $exception){
             throwException($exception);
             return $exception->getMessage();

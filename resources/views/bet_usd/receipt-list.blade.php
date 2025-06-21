@@ -181,7 +181,7 @@
 
         function handleShowBet(id) {
 
-            fetch(`/lotto_vn/bet/${id}`)
+            fetch(`/lotto_usd/bet/${id}`)
                 .then(response => response.json())
                 .then(data => {
                     let totalAmount =data?.totalAmount;
@@ -222,7 +222,7 @@
                 alert("Receipt number not found!");
                 return;
             }
-            var printWindow = window.open('/bet_receipt_usd/' + receiptNo, '_blank');
+            var printWindow = window.open('/lotto_usd/bet_receipt/' + receiptNo, '_blank');
 
             if (!printWindow) {
                 alert('Popup blocked! Please allow popups for this site.');
@@ -241,7 +241,7 @@
 
         function payReceipt(){
             let receipt_no = $('#receipt_no').text();
-            fetch(`/bet_receipt_pay_usd/${receipt_no}`)
+            fetch(`/lotto_usd/bet_receipt_pay/${receipt_no}`)
                 .then(response => response.json())
                 .then(data => {
                     if(data?.success){

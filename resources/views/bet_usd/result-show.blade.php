@@ -18,7 +18,7 @@
     <div class="flex max-md:flex-col bg-white rounded-lg px-5 py-5">
             <div class="flex w-auto px-2 mb-4">
                     <div class="flex-column">
-                        <a class="hidden" id="href_show_result" href="{{ route('bet.result-show') }}"></a>
+                        <a class="hidden" id="href_show_result" href="{{ route('bet-usd.result-show') }}"></a>
                         <div class="flex py-1 justify-start">
                             <h6 class="font-bold text-center">Today: <span>{{\Carbon\Carbon::today()->format('d/m/Y')}}</span></h6>
                         </div>

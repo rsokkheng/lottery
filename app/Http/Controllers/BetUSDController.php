@@ -134,7 +134,7 @@ class BetUSDController extends Controller
                     'bet_usd.bet_schedule_id'
                 )
                 ->join('bet_usd','bet_usd.id','=', 'bet_number_usd.bet_id')
-                ->leftJoin('bet_winning_records as winning_records','winning_records.bet_number_id','=', 'bet_number_usd.id')
+                ->leftJoin('bet_winning_record_usd as winning_records','winning_records.bet_number_id','=', 'bet_number_usd.id')
                 ->join('bet_package_configurations as config','config.id','=', 'bet_usd.bet_package_config_id')
                 ->join('bet_lottery_schedules as schedules','schedules.id','=', 'bet_usd.bet_schedule_id')
                 ->join('users','users.id','=', 'bet_usd.user_id')

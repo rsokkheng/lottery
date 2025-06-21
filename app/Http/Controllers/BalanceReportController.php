@@ -48,6 +48,7 @@ class BalanceReportController extends Controller
                 'u.id as user_id',
                 DB::raw('DATE(br.report_date) as report_date'),
                 'u.name',
+                'u.username',
                 'ac.id as balance_account_id',
                 'u.record_status_id',
                 DB::raw('COALESCE(SUM(br.net_lose), 0) as net_lose'),

@@ -1,18 +1,47 @@
 <div>
     {{-- notification save success   --}}
-    <div x-data="{ show: false, message: '' }"
-         x-show="show"
-         x-transition.opacity
-         @bet-saved.window="show = true; message = $event.detail.message; setTimeout(() => show = false, 3000)"
-         class="fixed top-4 right-4 z-50"
+    <div
+            x-data="{ show: false, message: '', type: '' }"
+            x-show="show"
+            x-transition.opacity
+            @bet-saved.window="
+        show = true;
+        message = $event.detail.message;
+        type = $event.detail.type || 'success';
+        setTimeout(() => show = false, 3000);"
+            class="fixed top-4 right-4 z-50"
     >
-        <div class="bg-green-500 text-white px-4 py-2 rounded shadow-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
+        <div
+                class="px-4 py-2 rounded shadow-lg flex items-center gap-2"
+                :class="{
+            'bg-green-500 text-white': type === 'success',
+            'bg-red-500 text-white': type === 'error',
+            'bg-yellow-500 text-white': type === 'warning'
+        }"
+        >
+            <template x-if="type === 'success'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </template>
+
+            <template x-if="type === 'error'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </template>
+
+            <template x-if="type === 'warning'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17h.01M12 3a9 9 0 110 18 9 9 0 010-18z" />
+                </svg>
+            </template>
+
             <span x-text="message"></span>
         </div>
     </div>
+
+
     {{--End notification--}}
 
     <div class="grid grid-cols-1 xl:grid-cols-[30%_68%] gap-4 xl:mx-auto bg-white shadow-md py-4 rounded-lg space-x-2">
@@ -58,7 +87,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->given_credit }} (USD)
+                        {{ $betAccount->bet_credit ?? 0 }} (USD)
                     </td>
                 </tr>
                 <tr>
@@ -67,7 +96,7 @@
                     </td>
                     <td class="border border-gray-500 px-4 py-2 text-right">
 
-                        {{ $betUserWallet->beginning }} (USD)
+                        {{ $totalOutstanding }} (USD)
                     </td>
                 </tr>
                 <tr>
@@ -91,9 +120,11 @@
             <div class="flex p-2 items-center">
                 <div class="px-2 text-[12px]">Chi Chu:</div>
                 <div>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('2so x 75') }}</span>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('3so x 650') }}</span>
-                    <span class="border border-gray-500 text-[12px]  px-1 py-1">{{ __('4so x 6000') }}</span>
+                    @foreach ($packagePrice as $betType => $price)
+                        <span class="border border-gray-500 text-[12px] px-1 py-1">
+                        {{ __($betType . ' x ' . $price) }}
+                    </span>
+                    @endforeach
                 </div>
             </div>
             <p class="text-[12px] pb-2 text-center font-bold">{{ __('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY') }}
@@ -498,4 +529,3 @@
 
 
 </script>
-

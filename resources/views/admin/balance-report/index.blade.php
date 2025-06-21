@@ -23,8 +23,9 @@
             <table class="table table-striped" id="userTable">
                 <thead>
                     <tr style="font-size: 12px;">
-                        <th>#</th>
-                        <th>Name</th>
+                        <th style="width: 3%;">#</th>
+                        <th style="width: 5%;">Name</th>
+                        <th>AccountID</th>
                         <th>Net W/L</th>
                         <th>Deposit</th>
                         <th>Withdraw</th>
@@ -45,6 +46,7 @@
                             <tr style="font-size: 13px;">
                                 <td>{{ $key+1 }}</td>
                                 <td>{{ $user->name }}</td>
+                                <td>{{ $user->username }}</td>
                                 <td>
                                  @if ($diff < 0)
                                     <h6 style="color: red;">{{ number_format( $diff, 3, '.', '') }}</h6>
@@ -77,30 +79,44 @@
                                  @endif
                                  </td>
                                  <td>
-                                    <button 
-                                        class="btn btn-sm btn-primary openModal" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#transactionModal"
-                                        data-type="deposit"
-                                        data-name="{{ $user->name }}"
-                                        data-balance-amount="{{ $user->balance }}"
-                                        data-id="{{ encrypt($user->user_id) }}"
-                                        data-withdraw-max="{{ $user->withdraw_max }}"
-                                        data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
-                                    >Deposit</button>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="transactionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    ⚙️
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="transactionDropdown">
+                                        <li>
+                                            <a href="#" 
+                                            style="color: blue; margin-bottom: 5px;"
+                                            class="dropdown-item openModal"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#transactionModal"
+                                            data-type="deposit"
+                                            data-name="{{ $user->name }}"
+                                            data-balance-amount="{{ $user->balance }}"
+                                            data-id="{{ encrypt($user->user_id) }}"
+                                            data-withdraw-max="{{ $user->withdraw_max }}"
+                                            data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
+                                            >Deposit</a>
+                                        </li>
+                                        <li></li>
+                                        <li>
+                                            <a href="#" 
+                                            style="color: red;"
+                                            class="dropdown-item openModal"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#transactionModal"
+                                            data-type="withdraw"
+                                            data-name="{{ $user->name }}"
+                                            data-balance-amount="{{ $user->balance }}"
+                                            data-id="{{ encrypt($user->user_id) }}"
+                                            data-withdraw-max="{{ $user->withdraw_max }}"
+                                            data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
+                                            >Withdraw</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
 
-                                    <button 
-                                        class="btn btn-sm btn-danger openModal" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#transactionModal"
-                                        data-type="withdraw"
-                                        data-name="{{ $user->name }}"
-                                        data-balance-amount="{{ $user->balance }}"
-                                        data-id="{{ encrypt($user->user_id) }}"
-                                        data-withdraw-max="{{ $user->withdraw_max }}"
-                                        data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
-                                    >Withdraw</button>
-                                </td>
 
                             </tr>
                     @endforeach

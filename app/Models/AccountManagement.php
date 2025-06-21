@@ -19,6 +19,8 @@ class AccountManagement extends Model
         'bet_credit',
         'cash_balance',
         'currency',
+        'created_by',
+        'updated_by'
     ];
 
     // 🔁 Relationship: belongs to User
