@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BetReportController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\BetReportUSDController;
 use App\Http\Controllers\BalanceReportController;
 use App\Http\Controllers\LotteryResultController;
 use App\Http\Controllers\BetLotteryPackageController;
@@ -62,6 +63,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     });
     Route::middleware(['role:admin'])->group(function(){
         Route::get('/report-daily/report-vnd', [BetReportController::class, 'getDailyReportVND'])->name('report.index');
-        Route::get('/report-daily/report-usd', [BetReportController::class, 'getDailyReporUSD'])->name('reports.daily-usd');
+        Route::get('/report-daily/report-usd', [BetReportUSDController::class, 'getDailyReportUSD'])->name('report.daily-usd');
     });
 });

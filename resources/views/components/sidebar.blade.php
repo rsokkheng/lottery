@@ -1,3 +1,8 @@
+@php
+        $user = auth()->user();
+        $hasVND = $user->currencies()->where('currency', 'VND')->exists();
+        $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+    @endphp
 <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
@@ -35,13 +40,26 @@
             </li>
             @endrole
             @hasanyrole('admin')
-            <li class="nav-item">
-                <a href="{{ route('admin.report.index') }}"
+            @if ($hasVND)
+                <li class="nav-item">
+                    <a href="{{ route('admin.report.index') }}"
                     class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-file-invoice"></i>
-                    <p>Daily Report</p>
-                </a>
-            </li>
+                        <i class="nav-icon fas fa-file-invoice"></i>
+                        <p>Daily Report (VND)</p>
+                    </a>
+                </li>
+            @endif
+
+            @if ($hasUSD)
+                <li class="nav-item">
+                    <a href="{{ route('admin.report.daily-usd') }}"
+                    class="nav-link {{ Route::is('admin.report.daily-usd') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                        <p>Daily Report (USD)</p>
+                    </a>
+                </li>
+            @endif
+
             @endrole
             @hasanyrole('admin|manager')
             <li class="nav-item">
