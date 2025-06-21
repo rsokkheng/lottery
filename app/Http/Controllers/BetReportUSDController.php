@@ -114,44 +114,46 @@ class BetReportUSDController extends Controller
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
+
+
             $data = DB::table('bet_usd')
-                ->select(
-                    'users.name AS account',
-                    'users.id AS user_id',
-                    'bet_package_configurations.rate as rate',
-                    DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
-                    DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
-                    DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
-                    DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                    DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
-                )
-                ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
-                ->join('users', 'users.id', '=', 'bet_usd.user_id')
-                ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
-                ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
-                ->when(in_array('manager', $roles), function ($q) use ($user) {
-                    $memberIds = User::where('manager_id', $user->id)
-                        ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
-                        ->pluck('id')
-                        ->toArray();
-                    $q->whereIn('bet_usd.user_id', $memberIds);
-                })
-                ->when($date, function ($q) use ($date) {
-                    $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
-                })
-                ->when($company_id > 0, function ($q) use ($company_id) {
-                    $q->where('bet_usd.company_id', $company_id);
-                })
-                ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
-                    $q->where('bet_usd.user_id', $user->id);
-                })
-                ->groupBy(
-                    'bet_usd.user_id',
-                    'users.name',
-                    'bet_package_configurations.rate',
-                    DB::raw('DATE(bet_usd.bet_date)')
-                )
-                ->get();
+            ->select(
+                'users.name AS account',
+                'users.id AS user_id',
+                'bet_package_configurations.rate as rate',
+                DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
+                DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
+                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+            )
+            ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
+            ->join('users', 'users.id', '=', 'bet_usd.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
+            ->when(in_array('manager', $roles), function ($q) use ($user) {
+                $memberIds = User::where('manager_id', $user->id)
+                    ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
+                    ->pluck('id')
+                    ->toArray();
+                $q->whereIn('bet_usd.user_id', $memberIds);
+            })
+            ->when($date, function ($q) use ($date) {
+                $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
+            })
+            ->when($company_id > 0, function ($q) use ($company_id) {
+                $q->where('bet_usd.company_id', $company_id);
+            })
+            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('bet_usd.user_id', $user->id);
+            })
+            ->groupBy(
+                'bet_usd.user_id',
+                'users.name',
+                'bet_package_configurations.rate',
+                DB::raw('DATE(bet_usd.bet_date)')
+            )
+            ->get();
 
             return view('report_usd.daily', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {

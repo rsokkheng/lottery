@@ -62,28 +62,33 @@
                                 $totalCommission = 0;
                                 $totalNetAmount = 0;
                                 $totalWinLose = 0;
+                                $netAmount =0;
+                                $commission = 0;
+                                $compensate = 0;
                             @endphp
                             @foreach($data as $key => $row)
                                 @php
-                                    $diff = $row->Compensate - $row->NetAmount ;
-                                    $totalInvoice += (float)($row->total ?? 0);
-                                    $turNover += (float)($row->Turnover ?? 0);
-                                    $totalCommission += (float)($row->Commission ?? 0);
-                                    $totalNetAmount += (float)($row->NetAmount ?? 0);
-                                    $totalCompensate += (float)($row->Compensate ?? 0);
-
+                                    $netAmount  =  $row->total_amount * ($row->rate/100);
+                                    $commission = $row->total_amount-($row->total_amount * $row->rate/100);
+                                    $compensate += $row->Compensate ?? 0;
+                                    $diff =  $compensate - $netAmount ;
+                                    $totalInvoice += (float)($row->total_receipts ?? 0);
+                                    $turNover += (float)($row->total_amount ?? 0);
+                                    $totalCommission += (float)($commission ?? 0);
+                                    $totalNetAmount += (float)( $netAmount ?? 0);
+                                    $totalCompensate += (float)($compensate ?? 0);
                                     $totalWinLose += $diff;
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->date }}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->draw_day }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->name }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->total }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->Turnover, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->Commission, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300"> {{ number_format($row->NetAmount, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->Compensate, 3, '.', '') }}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{ $row->account }}</td>
+                                    <td class="py-2 px-1 border border-gray-300">{{ $row->total_receipts }}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->total_amount, 3, '.', '') }}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($commission, 3, '.', '') }}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300"> {{ number_format($netAmount, 3, '.', '') }}</td>
+                                    <td class="text-right py-2 px-1 border border-gray-300">{{ number_format( $compensate, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">
                                         <span class="{{ $diff < 0 ? 'text-red-500' : 'text-black' }}">
                                             {{ number_format( $diff, 3, '.', '') }}

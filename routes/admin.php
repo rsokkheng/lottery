@@ -22,6 +22,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::middleware(['role:admin|manager'])->group(function(){
         Route::resource('menu',MenuController::class);
         Route::resource('balance-report',BalanceReportController::class);
+      //  Route::get('balance-report/detail/{user_id}',BalanceReportController::class);
         Route::post('admin/user/setting', [UserController::class, 'saveSetting'])->name('user.setting');
         Route::resource('user',UserController::class);
         Route::get('user/{user}/change-password', [UserController::class, 'editPassword'])->name('user.change-password');

@@ -20,6 +20,9 @@ class BalanceReport extends Model
         'adjustment',
         'balance',
         'report_date',
+        'created_by',
+        'updated_by'
+
     ];
 
     // Optional: relationship to User
