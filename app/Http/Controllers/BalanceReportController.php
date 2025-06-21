@@ -180,4 +180,52 @@ class BalanceReportController extends Controller
         ]);
         return back()->with('success', ucfirst($request->transaction_type) . ' successful'); 
     }
+    public function detailByUser($user_id,Request $request){
+        $filter = $request->get('filter');
+
+        $query = BalanceReport::where('user_id', $user_id);
+    
+        switch ($filter) {
+            case 'today':
+                $query->whereDate('report_date', Carbon::today());
+                break;
+            case 'yesterday':
+                $query->whereDate('report_date', Carbon::yesterday());
+                break;
+            case 'this_week':
+                $query->whereBetween('report_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                break;
+            case 'last_week':
+                $query->whereBetween('report_date', [
+                    Carbon::now()->subWeek()->startOfWeek(),
+                    Carbon::now()->subWeek()->endOfWeek()
+                ]);
+                break;
+            case 'this_month':
+                $query->whereMonth('report_date', Carbon::now()->month)
+                      ->whereYear('report_date', Carbon::now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('report_date', Carbon::now()->subMonth()->month)
+                      ->whereYear('report_date', Carbon::now()->subMonth()->year);
+                break;
+        }
+    
+        $data = $query
+            ->groupBy('user_id', 'report_date')
+            ->selectRaw('
+                report_date,
+                user_id,
+                SUM(net_win) as total_net_win,
+                SUM(net_lose) as total_net_lose,
+                SUM(deposit) as total_deposit,
+                SUM(withdraw) as total_withdraw,
+                SUM(adjustment) as total_adjustment,
+                SUM(balance) as total_balance
+            ')
+            ->orderByDesc('report_date')
+            ->get();
+    
+        return view('admin.balance-report.detail', compact('data', 'user_id'));
+    }
 }

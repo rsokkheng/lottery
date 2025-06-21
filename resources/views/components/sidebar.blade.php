@@ -33,6 +33,17 @@
                     </p>
                 </a>
             </li>
+            @endrole
+            @hasanyrole('admin')
+            <li class="nav-item">
+                <a href="{{ route('admin.report.index') }}"
+                    class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-file-invoice"></i>
+                    <p>Daily Report</p>
+                </a>
+            </li>
+            @endrole
+            @hasanyrole('admin|manager')
             <li class="nav-item">
                 <a href="{{ route('admin.bet-lottery-package.index') }}"
                     class="nav-link {{ Route::is('admin.bet-lottery-package.index') ? 'active' : '' }}">

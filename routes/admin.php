@@ -8,6 +8,7 @@ use App\Http\Controllers\RoleController;
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BetReportController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\BalanceReportController;
 use App\Http\Controllers\LotteryResultController;
@@ -22,7 +23,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::middleware(['role:admin|manager'])->group(function(){
         Route::resource('menu',MenuController::class);
         Route::resource('balance-report',BalanceReportController::class);
-      //  Route::get('balance-report/detail/{user_id}',BalanceReportController::class);
+        Route::get('balance-report/detail/{user_id}',[BalanceReportController::class, 'detailByUser'])->name('balance-report.detail');
         Route::post('admin/user/setting', [UserController::class, 'saveSetting'])->name('user.setting');
         Route::resource('user',UserController::class);
         Route::get('user/{user}/change-password', [UserController::class, 'editPassword'])->name('user.change-password');
@@ -58,5 +59,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
             Session::get('locale');
         });
 
+    });
+    Route::middleware(['role:admin'])->group(function(){
+        Route::get('/report-daily/report-vnd', [BetReportController::class, 'getDailyReportVND'])->name('report.index');
+        Route::get('/report-daily/report-usd', [BetReportController::class, 'getDailyReporUSD'])->name('reports.daily-usd');
     });
 });

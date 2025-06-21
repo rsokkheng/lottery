@@ -98,10 +98,10 @@
                                             data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
                                             >Deposit</a>
                                         </li>
-                                        <li></li>
+                                
                                         <li>
                                             <a href="#" 
-                                            style="color: red;"
+                                            style="color: red;margin-bottom: 5px;"
                                             class="dropdown-item openModal"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#transactionModal"
@@ -112,6 +112,12 @@
                                             data-withdraw-max="{{ $user->withdraw_max }}"
                                             data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
                                             >Withdraw</a>
+                                        </li>  
+                                        <li>
+                                            <a href="{{ route('admin.balance-report.detail',$user->user_id) }}" 
+                                            style="color: black;"
+                                            class="dropdown-item"
+                                            >Detail</a>
                                         </li>
                                     </ul>
                                 </div>
