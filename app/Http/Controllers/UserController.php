@@ -36,24 +36,27 @@ class UserController extends Controller
             if ($user->hasRole('admin')) {
                 // Admin: show users with the same currency
                 $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-                            ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                                $query->where('currency', $currentCurrency->currency);
-                            })
-                            ->orderBy('id', 'ASC')
-                            ->get();
+                ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                    $query->where('currency', $currentCurrency->currency);
+                })
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->whereIn('name', ['member', 'admin']);
+                })
+                ->orderBy('id', 'ASC')
+                ->get();
         
             } elseif ($user->hasRole('manager')) {
                 // Manager: same currency, same manager, and not admin
                 $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-                            ->where('manager_id', $user->id)
-                            ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                                $query->where('currency', $currentCurrency->currency);
-                            })
-                            ->whereDoesntHave('roles', function ($query) {
-                                $query->where('name', 'admin');
-                            })
-                            ->orderBy('id', 'ASC')
-                            ->get();
+                ->where('manager_id', $user->id)
+                ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                    $query->where('currency', $currentCurrency->currency);
+                })
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->where('name', 'admin');
+                })
+                ->orderBy('id', 'ASC')
+                ->get();
             }
         }
         
