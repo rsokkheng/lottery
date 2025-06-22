@@ -46,6 +46,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::post('result/store-winning-result-usd',[LotteryResultUSDController::class, 'storeWinningResult'])->name('result.store-winning-result-usd');
         Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
         Route::get('generate-win-result',[LotteryResultController::class, 'callGenerateWinNumber']);
+        Route::post('result/store-winning-record',[\App\Http\Controllers\WinningRecordController::class, 'storeWinningRecord'])->name('result.store-winning-record');
+
         Route::get('/set-lang/{locale}', function (string $locale) {
             try {
                 if (! in_array($locale, ['en', 'vi'])) {

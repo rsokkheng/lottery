@@ -197,17 +197,17 @@
                         result_region: $("#result-show-type").val(),
                         _token: "{{ csrf_token() }}"
                     };
-                    let currency = $("#get_currency").val();
-                    console.log(currency)
-                    let url_ = ''
-                    if(currency === 'USD'){
-                        url_ = '/admin/result/store-winning-result-usd';
-                    }else{
-                        url_ = '/admin/result/store-winning-result-vnd';
-                    }
-                    console.log(url_)
+                    // let currency = $("#get_currency").val();
+                    // console.log(currency)
+                    // let url_ = ''
+                    // if(currency === 'USD'){
+                    //     url_ = '/admin/result/store-winning-result-usd';
+                    // }else{
+                    //     url_ = '/admin/result/store-winning-result-vnd';
+                    // }
+                    // console.log(url_)
                     $.ajax({
-                        url: url_,
+                        url: '/admin/result/store-winning-record',
                         type: 'POST',
                         data: formData,
                         dataType: 'json',
