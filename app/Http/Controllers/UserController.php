@@ -25,16 +25,11 @@ class UserController extends Controller
     public function index()
     {
         $user = Auth::user();
-
-        // Get current user's currency
         $currentCurrency = $user->currencies()->first();
-        
         if (!$currentCurrency) {
-            // Handle case where current user has no currency record
-            $data = collect(); // empty collection
+            $data = collect();
         } else {
             if ($user->hasRole('admin')) {
-                // Admin: show users with the same currency
                 $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
                 ->whereHas('currencies', function ($query) use ($currentCurrency) {
                     $query->where('currency', $currentCurrency->currency);
@@ -44,9 +39,7 @@ class UserController extends Controller
                 })
                 ->orderBy('id', 'ASC')
                 ->get();
-        
             } elseif ($user->hasRole('manager')) {
-                // Manager: same currency, same manager, and not admin
                 $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
                 ->where('manager_id', $user->id)
                 ->whereHas('currencies', function ($query) use ($currentCurrency) {
@@ -59,8 +52,6 @@ class UserController extends Controller
                 ->get();
             }
         }
-        
-        
         return view('admin.user.index', compact('data'));
     }
     public function create()
@@ -386,6 +377,15 @@ public function updatePassword(Request $request, User $user)
     $user->save();
 
     return redirect()->route('admin.user.index')->with('success', 'Password updated successfully.');
+}
+public function usersUnderManager($manager_id)
+{
+    $managerName = User::find($manager_id);
+    $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
+            ->where('manager_id', $manager_id)
+            ->orderBy('id', 'ASC')
+            ->get();
+    return view('admin.user.under-manager', compact('data','managerName'));
 }
 
 

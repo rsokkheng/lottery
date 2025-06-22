@@ -29,6 +29,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::resource('user',UserController::class);
         Route::get('user/{user}/change-password', [UserController::class, 'editPassword'])->name('user.change-password');
         Route::put('user/{user}/change-password', [UserController::class, 'updatePassword'])->name('user.update-password');
+        Route::get('/users/under-manager/{manager_id}', [UserController::class, 'usersUnderManager'])->name('user.under-manager');
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
         Route::resource('bet-lottery-package',BetLotteryPackageController::class);
