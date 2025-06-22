@@ -8,6 +8,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -26,8 +27,9 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
+
+        Session::put('currency',auth()->user()->currencies()?->first()?->currency);
 
         return redirect()->intended(RouteServiceProvider::HOME)->with('success','Login successsfully.');
     }
