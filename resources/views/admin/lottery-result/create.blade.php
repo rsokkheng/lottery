@@ -84,6 +84,7 @@
                                 </tbody>
                             </table>
                             <div class="d-flex mt-4 justify-content-end">
+                                <input type="hidden" id="get_currency" value="{{session('currency')}}" />
                                 <button type="submit" id="btnSaveResult" class="m-2 btn btn-success btn-md">Save</button>
                                 <button type="button" id="btnClearResult" class="m-2 btn btn-secondary btn-md">Clear</button>
                             </div>
@@ -96,28 +97,6 @@
     @section('js')
         <script>
             $(function(){
-
-                // const $inputs = $('.split-input');
-                // $inputs.on('paste', function (e) {
-                //     e.preventDefault();
-                //
-                //     const pasteData = (e.originalEvent.clipboardData || window.clipboardData)
-                //         .getData('text')
-                //         .replace(/\D/g, '');
-                //
-                //     const startIndex = $inputs.index(this);
-                //     let offset = 0;
-                //
-                //     // Clear values from current input onward
-                //     $inputs.slice(startIndex).val('');
-                //
-                //     $inputs.slice(startIndex).each(function () {
-                //         const maxLen = parseInt($(this).attr('maxlength'), 10) || 0;
-                //         const chunk = pasteData.substring(offset, offset + maxLen);
-                //         $(this).val(chunk);
-                //         offset += maxLen;
-                //     });
-                // });
 
 
                 $('table').on('paste', 'input', function (e) {
@@ -218,9 +197,17 @@
                         result_region: $("#result-show-type").val(),
                         _token: "{{ csrf_token() }}"
                     };
-
+                    let currency = $("#get_currency").val();
+                    console.log(currency)
+                    let url_ = ''
+                    if(currency === 'USD'){
+                        url_ = '/admin/result/store-winning-result-usd';
+                    }else{
+                        url_ = '/admin/result/store-winning-result-vnd';
+                    }
+                    console.log(url_)
                     $.ajax({
-                        url: '/admin/result/store-winning-result',
+                        url: url_,
                         type: 'POST',
                         data: formData,
                         dataType: 'json',

@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetReceipt;
-use App\Models\BetWinning;
+use App\Models\BetReceiptUSD;
+use App\Models\BetWinningRecordUSD;
+use App\Models\BetWinningUSD;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\HelperEnum;
 use Illuminate\Http\Request;
 use App\Models\LotteryResult;
 use App\Models\LotterySchedule;
-use App\Models\BetWinningRecord;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use function PHPUnit\Framework\throwException;
@@ -281,12 +280,12 @@ class LotteryResultUSDController extends Controller
 //                $time = '16:30:00';
                 $resultTime = $this->getBetTime($resultRegion);
                 $scheduleIdsByCurrentBet = $this->getPluckIdSchedule($dayName, $resultTime);
-                $oldBetWinningRecords = BetWinningRecord::query()->whereHas('betLotteryResult', function ($query) use ($resultDate, $scheduleIdsByCurrentBet){
+                $oldBetWinningRecords = BetWinningRecordUSD::query()->whereHas('betLotteryResult', function ($query) use ($resultDate, $scheduleIdsByCurrentBet){
                         $query->where('draw_date', $resultDate)
                             ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet);
                     });
                 $oldBetWinningRecords->each(function ($record){
-                    $record->betWinning()->forceDelete();
+                    $record->betWinningUSD()->forceDelete();
                 });
                 $oldBetWinningRecords->forceDelete();
                 foreach ($form['data'] as $item) {
@@ -306,18 +305,17 @@ class LotteryResultUSDController extends Controller
                 }
                 $getNormalWinNumber = $this->generateNormalWinBet($resultDate, $scheduleIdsByCurrentBet);
                 $getHashWinNumber = $this->generateHashWinBet($resultDate, $scheduleIdsByCurrentBet);
-//                $insertWinNumber = [...$getHashWinNumber];
                 $insertWinNumber = [...$getNormalWinNumber,...$getHashWinNumber];
                 if(count($insertWinNumber)) {
                     $recordsCreated = $this->insertBetWinning($insertWinNumber);
                     if (count($recordsCreated)) {
-                        DB::table('bet_winning as winning')
+                        DB::table('bet_winning_usd as winning')
                         ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
                         ->whereDate('winning.created_at', date('Y-m-d'))
                         ->orderBy('winning.bet_receipt_id')
                         ->groupBy('winning.bet_receipt_id')
                         ->each(function ($winning){
-                            BetReceipt::query()->find($winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
+                            BetReceiptUSD::query()->find($winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
                         });
                     }
                 }
@@ -477,8 +475,8 @@ class LotteryResultUSDController extends Controller
                 }
 
                 $matchThese = ['bet_id'=>$item['bet_id']??0,'bet_receipt_id'=>$item['receipt_id']];
-                $betWin = BetWinning::query()->updateOrCreate($matchThese,['win_amount'=>$sumAmount]);
-                $save[] = BetWinningRecord::query()->insert([
+                $betWin = BetWinningUSD::query()->updateOrCreate($matchThese,['win_amount'=>$sumAmount]);
+                $save[] = BetWinningRecordUSD::query()->insert([
                     'bet_winning_id'=> $betWin->id,
                     'bet_number_id' => $item['bet_number_id'],
                     'result_id' => $item['result_id'],
@@ -516,7 +514,7 @@ class LotteryResultUSDController extends Controller
 //        }
 //        dd($original,$countDuplicate);
 
-        $data1 = $this->generateNormalWinBet($date, $scheduleIds);
+//        $data1 = $this->generateNormalWinBet($date, $scheduleIds);
 //        $data2 = $this->generateHashWinBet($date, $scheduleIds);
 //        $data = [...$data1, ...$data2];
 //        return $this->insertBetWinning($data);
@@ -598,24 +596,24 @@ class LotteryResultUSDController extends Controller
 //        $day = 'Sunday';
 //        $time = '16:30:00';
         $getBetWinningNumber = [];
-         DB::table('bets')
+         DB::table('bet_usd')
             ->select(
-                'bet_numbers.*',
+                'bet_number_usd.*',
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
-                'bets.bet_schedule_id',
-                'bets.number_format as original_number',
+                'bet_usd.bet_schedule_id',
+                'bet_usd.number_format as original_number',
                 'schedule.region_slug',
-                'bets.bet_receipt_id'
+                'bet_usd.bet_receipt_id'
             )
-            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
-            ->join('bet_lottery_schedules as schedule','schedule.id','=','bets.bet_schedule_id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
-            ->whereIn('bets.bet_schedule_id',$idSchedules)
+            ->join('bet_number_usd','bet_number_usd.bet_id','=', 'bet_usd.id')
+            ->join('bet_lottery_schedules as schedule','schedule.id','=','bet_usd.bet_schedule_id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_usd.bet_package_config_id')
+            ->whereIn('bet_usd.bet_schedule_id',$idSchedules)
             ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
-//             ->where('bets.id', 9)
-            ->orderBy('bets.id')
-            ->orderBy('bet_numbers.id')
+//             ->where('bet_usd.id', 9)
+            ->orderBy('bet_usd.id')
+            ->orderBy('bet_number_usd.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
@@ -712,22 +710,22 @@ class LotteryResultUSDController extends Controller
 //        $day = 'Sunday';
 //        $time = '16:30:00';
         $getBetWinningNumber = [];
-        DB::table('bets')
+        DB::table('bet_usd')
             ->select(
-                'bet_numbers.*',
+                'bet_number_usd.*',
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
                 'pkg_con.has_special as has_special',
-                'bets.bet_schedule_id as bet_schedule_id',
-                'bets.number_format as original_number',
-                'bets.bet_receipt_id'
+                'bet_usd.bet_schedule_id as bet_schedule_id',
+                'bet_usd.number_format as original_number',
+                'bet_usd.bet_receipt_id'
             )
-            ->join('bet_numbers','bet_numbers.bet_id','=', 'bets.id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
-            ->whereIn('bets.bet_schedule_id', $idSchedules)
+            ->join('bet_number_usd','bet_number_usd.bet_id','=', 'bet_usd.id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_usd.bet_package_config_id')
+            ->whereIn('bet_usd.bet_schedule_id', $idSchedules)
             ->whereIn('pkg_con.bet_type', ['RP2','RP3','RP4'])
-            ->orderBy('bets.id')
-            ->orderBy('bet_numbers.id')
+            ->orderBy('bet_usd.id')
+            ->orderBy('bet_number_usd.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $numberArr = explode("#", $bet->generated_number);

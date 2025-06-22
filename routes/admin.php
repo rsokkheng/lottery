@@ -13,6 +13,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\BetReportUSDController;
 use App\Http\Controllers\BalanceReportController;
 use App\Http\Controllers\LotteryResultController;
+use App\Http\Controllers\LotteryResultUSDController;
 use App\Http\Controllers\BetLotteryPackageController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
@@ -40,7 +41,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('result/create-mien-trung',[LotteryResultController::class, 'createMienTrung'])->name('result.create-mien-trung');
         Route::get('result/index-mien-bac',[LotteryResultController::class, 'indexMienBac'])->name('result.index-mien-bac');
         Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
-        Route::post('result/store-winning-result',[LotteryResultController::class, 'storeWinningResult'])->name('result.store-winning-result');
+        Route::post('result/store-winning-result-vnd',[LotteryResultController::class, 'storeWinningResult'])->name('result.store-winning-result');
+        Route::post('result/store-winning-result-usd',[LotteryResultUSDController::class, 'storeWinningResult'])->name('result.store-winning-result-usd');
         Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
         Route::get('generate-win-result',[LotteryResultController::class, 'callGenerateWinNumber']);
         Route::get('/set-lang/{locale}', function (string $locale) {
