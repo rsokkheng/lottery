@@ -74,4 +74,7 @@ class Kernel extends HttpKernel
         'check.vnd' => CheckVNDCurrency::class,
 
     ];
+    protected $routeMiddleware = [
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+    ];
 }

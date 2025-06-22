@@ -33,7 +33,7 @@ Route::prefix('/otp')->middleware( 'guest')->name('otp.')->controller(LoginWithO
 });
 
 Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->group(function () {
-    Route::get('/bet', \App\Livewire\LottoBet::class)->name('bet.input');
+    Route::get('/bet', \App\Livewire\LottoBet::class)->middleware('role:member')->name('bet.input');
     Route::get('/result', [LotteryResultController::class, 'getBetResultBy'])->name('bet.result-show');
     Route::get('/receipt-list', [BetReceiptController::class, 'index'])->name('bet.receipt-list');
     Route::get('/bet-list', [BetReceiptController::class, 'betList'])->name('bet.bet-list');
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->gr
 });
 
 Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->group(function () {
-    Route::get('/bet', \App\Livewire\LottoBetUSD::class)->name('bet-usd.input');
+    Route::get('/bet', \App\Livewire\LottoBetUSD::class)->middleware('role:member')->name('bet-usd.input');
     Route::get('/result', [LotteryResultUSDController::class, 'getBetResultBy'])->name('bet-usd.result-show');
     Route::get('/receipt-list', [BetReceiptUSDController::class, 'index'])->name('bet-usd.receipt-list');
     Route::get('/bet-list', [BetReceiptUSDController::class, 'betList'])->name('bet-usd.bet-list');
