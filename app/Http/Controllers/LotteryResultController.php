@@ -1076,11 +1076,11 @@ class LotteryResultController extends Controller
                     $prepareData['turnover'] = $record->turnover;
                     $prepareData['commission'] = $commission;
                     $prepareData['net_amount'] = $netAmount;
-                    if(in_array($record->bet_type, ['RP2','RP3','RP4'])){
-                        $compensate = ($record->odds * $record->count_bet_number) / 2;
-                    }else{
+//                    if(in_array($record->bet_type, ['RP2','RP3','RP4'])){
+//                        $compensate = ($record->odds * $record->count_bet_number) / 2;
+//                    }else{
                         $compensate = $record->compensate;
-                    }
+//                    }
                     $prepareData['compensate'] = $compensate;
                     $data[] = $prepareData;
 
