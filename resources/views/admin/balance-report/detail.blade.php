@@ -51,13 +51,15 @@
             <table class="table table-striped" >
                 <thead>
                     <tr style="font-size: 12px;">
-                        <th>Date</th>
+                        <th >Date</th>
+                        <th>Add By</th>
                         <th>Weekday</th>
                         <th>Net W/L</th>
                         <th>Deposit</th>
                         <th>Withdraw</th>
                         <th>Adjustment</th>
                         <th>Balance</th>
+                        <th>Text</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,7 +71,9 @@
                       
                             <tr style="font-size: 13px;">
        
-                                <td>{{ $user->report_date }}</td>
+                                <td>{{ $user->created_at }}</td>
+                                <td>{{ $user->created_by }}</td>
+                               
                                 <td>{{ \Carbon\Carbon::parse($user->report_date)->format('l') }}</td>
                                 <td>
                                  @if ($diff < 0)
@@ -94,6 +98,7 @@
                                  <h6 >{{ $user->total_balance }}</h6>
                                  @endif
                                </td>
+                               <td>{{ $user->text}}</td>
                               
                             </tr>
                     @endforeach

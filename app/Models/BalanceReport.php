@@ -12,6 +12,7 @@ class BalanceReport extends Model
     protected $table = 'balance_reports';
     protected $fillable = [
         'user_id',
+        'text',
         'name_user',
         'net_lose',
         'net_win',
