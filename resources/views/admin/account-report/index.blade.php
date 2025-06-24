@@ -61,7 +61,7 @@
                         <th>Withdraw</th>
                         <th>Adjustment</th>
                         <th>Balance</th>
-                        <th>Text</th>
+                        <th>Remark</th>
                     </tr>
                 </thead>
                 <tbody>
