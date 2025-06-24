@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountReportController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -69,5 +70,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::middleware(['role:admin'])->group(function(){
         Route::get('/report-daily/report-vnd', [BetReportController::class, 'getDailyReportVND'])->name('report.index');
         Route::get('/report-daily/report-usd', [BetReportUSDController::class, 'getDailyReportUSD'])->name('report.daily-usd');
+        Route::get('/account-report/transaction-vnd', [AccountReportController::class, 'index'])->name('account-report.index');
+        Route::get('/account-report/transation-usd', [AccountReportController::class, 'transactionUSD'])->name('account-report.transation-usd');
     });
 });

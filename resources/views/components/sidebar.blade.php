@@ -41,6 +41,13 @@
             @endrole
             @hasanyrole('admin')
             @if ($hasVND)
+              <li class="nav-item">
+                    <a href="{{ route('admin.account-report.index') }}"
+                    class="nav-link {{ Route::is('admin.account-report.index') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-invoice"></i>
+                        <p>Transaction Report (VND)</p>
+                    </a>
+                </li> 
                 <li class="nav-item">
                     <a href="{{ route('admin.report.index') }}"
                     class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
@@ -48,9 +55,17 @@
                         <p>Daily Report (VND)</p>
                     </a>
                 </li>
+               
             @endif
 
             @if ($hasUSD)
+                <li class="nav-item">
+                    <a href="{{ route('admin.account-report.transation-usd') }}"
+                    class="nav-link {{ Route::is('admin.account-report.transation-usd') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                        <p>Transaction Report (USD)</p>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.report.daily-usd') }}"
                     class="nav-link {{ Route::is('admin.report.daily-usd') ? 'active' : '' }}">
@@ -58,6 +73,7 @@
                         <p>Daily Report (USD)</p>
                     </a>
                 </li>
+               
             @endif
 
             @endrole
