@@ -9,35 +9,39 @@
         </div>
         <div class="card-body">
             <table class="table table-striped" id="categoryTable">
-                <thead>
-                    <tr>
-                        <th>Package</th>
-                        <th>Bet Type</th>
-                        <th>Rate</th>
-                        <th>Price</th>
-                        <th>Create Date</th>
-                        <th>Action</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($data as $cat)
-                    @foreach ($cat->packageConfiges as $pack)
+            <thead>
+                <tr>
+                    <th  class="text-center">Package</th>
+                    <th>Bet Type</th>
+                    <th>Rate</th>
+                    <th>Price</th>
+                    <th>Create Date</th>
+                    <th>Action</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data as $cat)
+                    @php $rowspan = count($cat->packageConfiges); @endphp
+                    @foreach ($cat->packageConfiges as $index => $pack)
                         <tr>
-                            <td>{{ $cat->package_code }}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $rowspan }}">{{ $cat->package_code }}</td>
+                            @endif
                             <td>{{ $pack->bet_type }}</td>
-
                             <td>{{ $pack->rate }}</td>
                             <td>{{ $pack->price }}</td>
                             <td>{{ $pack->created_at }}</td>
-                            <td><a href="{{ route('admin.bet-lottery-package.edit', encrypt($pack->id)) }}"
+                            <td>
+                                <a href="{{ route('admin.bet-lottery-package.edit', encrypt($pack->id)) }}"
                                     class="btn btn-sm btn-primary" style="display: inline-block; margin-right: 5px;">Edit</a>
-                              
                             </td>
+                            <td></td>
                         </tr>
-                        @endforeach
                     @endforeach
-                </tbody>
+                @endforeach
+            </tbody>
+
             </table>
         </div>
     </div>
