@@ -31,12 +31,14 @@ class LotteryResultController extends Controller
     public string $currentDayName;
     public array $rollA = ['GiaiTam'];
     public array $rollB = ['GiaiDB'];
+    public array $rollA3D = ['GiaiBay'];
 
     public array $rolls = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB'];
     public array $roll7 = ['GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiDB'];  // Roll 7 only have 6 prizes but GiaiTu check win result for only first row
     public array $rollParlay = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB']; // check all prizes
 
     public array $HanoiRollA = ['GiaiBay'];
+    public array $HanoiRollA3D = ['GiaiSau'];
     public array $HanoiRollB = ['GiaiDB'];
     public array $companies = [
         [
@@ -585,17 +587,21 @@ class LotteryResultController extends Controller
     }
 
 
-    public function getBetRoll($a, $b, $ab, $roll7, $roll, $rollParlay)
+    public function getBetRoll($a, $b, $ab, $roll7, $roll, $rollParlay, $betType)
     {
         $getRoll = [];
+        $rollA = $this->rollA;
+        if($betType === '3D'){
+            $rollA = $this->rollA3D;
+        }
         if ((float)$a){
-            $getRoll = $this->rollA;
+            $getRoll = $rollA;
         }
         if ((float)$b){
             $getRoll = $this->rollB;
         }
         if ((float)$ab){
-            $getRoll = [...$this->rollA, ...$this->rollB];
+            $getRoll = [...$rollA, ...$this->rollB];
         }
         if ((float)$roll7){
             $getRoll = $this->roll7;
@@ -654,15 +660,19 @@ class LotteryResultController extends Controller
             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
             ->whereIn('bets.bet_schedule_id',$idSchedules)
             ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
-//             ->where('bets.id', 9)
+             ->where('bets.id', 8232)
+             ->where('bet_numbers.id', 12122)
             ->orderBy('bets.id')
             ->orderBy('bet_numbers.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
-                $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
+                $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount, $bet->bet_type);
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
+//                    if($bet->bet_type === '3D'){
+//                        $rollA = $this->HanoiRollA3D;
+//                    }
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
                         $getBetRoll = $rollA;
@@ -708,9 +718,7 @@ class LotteryResultController extends Controller
                         }
                     }
                 }
-
             });
-
         return $getBetWinningNumber;
     }
 

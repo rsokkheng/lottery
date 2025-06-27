@@ -25,12 +25,14 @@ class LotteryResultUSDController extends Controller
     public string $currentDayName;
     public array $rollA = ['GiaiTam'];
     public array $rollB = ['GiaiDB'];
+    public array $rollA3D = ['GiaiBay'];
 
     public array $rolls = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB'];
     public array $roll7 = ['GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiDB'];  // Roll 7 only have 6 prizes but GiaiTu check win result for only first row
     public array $rollParlay = ['GiaiTam', 'GiaiBay','GiaiSau','GiaiNam','GiaiTu','GiaiBa','GiaiNhi','GiaiNhat','GiaiDB']; // check all prizes
 
     public array $HanoiRollA = ['GiaiBay'];
+    public array $HanoiRollA3D = ['GiaiSau'];
     public array $HanoiRollB = ['GiaiDB'];
     public array $companies = [
         [
@@ -542,17 +544,21 @@ class LotteryResultUSDController extends Controller
     }
 
 
-    public function getBetRoll($a, $b, $ab, $roll7, $roll, $rollParlay)
+    public function getBetRoll($a, $b, $ab, $roll7, $roll, $rollParlay, $betType)
     {
+        $rollA = $this->rollA;
+        if($betType === '3D'){
+            $rollA = $this->rollA3D;
+        }
         $getRoll = [];
         if ((float)$a){
-            $getRoll = $this->rollA;
+            $getRoll = $rollA;
         }
         if ((float)$b){
             $getRoll = $this->rollB;
         }
         if ((float)$ab){
-            $getRoll = [...$this->rollA, ...$this->rollB];
+            $getRoll = [...$rollA, ...$this->rollB];
         }
         if ((float)$roll7){
             $getRoll = $this->roll7;
@@ -616,10 +622,13 @@ class LotteryResultUSDController extends Controller
             ->orderBy('bet_number_usd.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
-                $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
+                $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount, $bet->bet_type);
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
+//                    if($bet->bet_type === '3D'){
+//                        $rollA = $this->HanoiRollA3D;
+//                    }
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
                         $getBetRoll = $rollA;
