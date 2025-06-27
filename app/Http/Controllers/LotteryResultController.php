@@ -660,8 +660,7 @@ class LotteryResultController extends Controller
             ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
             ->whereIn('bets.bet_schedule_id',$idSchedules)
             ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
-             ->where('bets.id', 8232)
-             ->where('bet_numbers.id', 12122)
+//             ->where('bets.id', 8232)
             ->orderBy('bets.id')
             ->orderBy('bet_numbers.id')
             ->lazy()
@@ -670,9 +669,9 @@ class LotteryResultController extends Controller
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
-//                    if($bet->bet_type === '3D'){
-//                        $rollA = $this->HanoiRollA3D;
-//                    }
+                    if($bet->bet_type === '3D'){
+                        $rollA = $this->HanoiRollA3D;
+                    }
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
                         $getBetRoll = $rollA;

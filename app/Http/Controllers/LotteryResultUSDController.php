@@ -626,9 +626,9 @@ class LotteryResultUSDController extends Controller
                 $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->ab_amount, $bet->roll7_amount, $bet->roll_amount, $bet->roll_parlay_amount);
                 if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
                     $rollA = $this->HanoiRollA;
-//                    if($bet->bet_type === '3D'){
-//                        $rollA = $this->HanoiRollA3D;
-//                    }
+                    if($bet->bet_type === '3D'){
+                        $rollA = $this->HanoiRollA3D;
+                    }
                     $rollB = $this->HanoiRollB;
                     if((float)$bet->a_amount){
                         $getBetRoll = $rollA;
