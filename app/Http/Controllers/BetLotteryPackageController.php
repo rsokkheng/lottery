@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\BetLotteryPackage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BetLotteryPackageConfiguration;
 
@@ -49,9 +50,16 @@ class BetLotteryPackageController extends Controller
         return redirect()->route('admin.bet-lottery-package.index')->with('success','Category created successfully.');
     }
 
-    public function edit($category)
+    public function edit($id)
     {
-        $data = BetLotteryPackageConfiguration::where('id',decrypt($category))->first();
+        $data = DB::table('bet_package_configurations')
+        ->join('bet_lottery_packages', 'bet_package_configurations.package_id', '=', 'bet_lottery_packages.id')
+        ->select(
+            'bet_package_configurations.*',
+            'bet_lottery_packages.package_code as package_code' // example column
+        )
+        ->where('bet_package_configurations.id', '=', decrypt($id))
+        ->first(); 
         return view('admin.bet-lottery-package.edit',compact('data'));
     }
 

@@ -10,37 +10,42 @@
                             <a href="{{ route('admin.bet-lottery-package.index') }}" class="btn btn-info btn-sm">Back</a>
                         </div>
                     </div>
-                    <form class="needs-validation" novalidate action="{{ route('admin.bet-lottery-package.update',$data) }}" method="POST">
+                    <form class="needs-validation" novalidate method="POST" action="{{ route('admin.bet-lottery-package.update', $data->id) }}">
                         @method('PUT')
                         @csrf
                         <input type="hidden" name="id" value="{{ $data->id }}">
-                        <div class="col-lg-12">
-                        <label for="name">Package</label>
-                        <input type="text" class="form-control"
-                            required value="{{ $data->package_id==1 ? 'AA' : 'AJ' }}" readonly>
+
+                        <div class="form-group col-lg-12">
+                            <label for="package_code">Package</label>
+                            <input type="text" class="form-control" name="package_code"
+                                required value="{{ $data->package_code }}" readonly>
                         </div>
-                        <div class="col-lg-12">
-                        <label for="name">Digit</label>
-                        <input type="text" class="form-control"
-                           equired value="{{ $data->bet_type }}" readonly>
+
+                        <div class="form-group col-lg-12">
+                            <label for="bet_type">Digit</label>
+                            <input type="text" class="form-control" name="bet_type"
+                                required value="{{ $data->bet_type }}" readonly>
                         </div>
-                        <div class="col-lg-12">
-                        <label for="name">Rate</label>
-                        <input type="text" class="form-control" id="rate" name="rate"
-                            required value="{{ $data->rate }}" >
+
+                        <div class="form-group col-lg-12">
+                            <label for="rate">Rate</label>
+                            <input type="text" class="form-control" id="rate" name="rate"
+                                required value="{{ $data->rate }}">
+                            @error('rate') <div class="text-danger">{{ $message }}</div> @enderror
                         </div>
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <label for="name">Price</label>
-                                <input type="text" class="form-control" id="price" name="price"
-                                    placeholder="Enter Packagename" required value="{{ $data->price }}">
-                            </div>
-                            <x-error>name</x-error>
+
+                        <div class="form-group col-lg-12">
+                            <label for="price">Price</label>
+                            <input type="text" class="form-control" id="price" name="price"
+                                required value="{{ $data->price }}">
+                            @error('price') <div class="text-danger">{{ $message }}</div> @enderror
                         </div>
+
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary float-right">Update</button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
