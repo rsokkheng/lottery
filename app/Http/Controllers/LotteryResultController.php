@@ -131,8 +131,8 @@ class LotteryResultController extends Controller
                 "GiaiBa" => ["name"=>"Giải ba", "order_count"=>6, "input_length" => 5, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-black text-2xl font-bold  max-md:text-xl'],
                 "GiaiTu" => ["name"=>"Giải tư", "order_count"=>4, "input_length" => 4, "col_count"=>2, "row_count"=>2, "tailwind_class"=>'text-black text-2xl font-bold  max-md:text-xl'],
                 "GiaiNam" => ["name"=>"Giải năm", "order_count"=>6, "input_length" => 4, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-black text-2xl font-bold  max-md:text-xl'],
-                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 3, "col_count"=>3, "row_count"=>1, "tailwind_class"=>'text-blue-800 text-5xl max-md:text-2xl'],
-                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>4, "input_length" => 2, "col_count"=>4, "row_count"=>1, "tailwind_class"=>'text-red-600 text-5xl max-md:text-2xl'],
+                "GiaiSau" => ["name"=>"Giải sáu", "order_count"=>3, "input_length" => 3, "col_count"=>3, "row_count"=>1, "tailwind_class"=>'text-blue-800  font-bold  text-4xl max-md:text-2xl'],
+                "GiaiBay" => ["name"=>"Giải bảy", "order_count"=>4, "input_length" => 2, "col_count"=>4, "row_count"=>1, "tailwind_class"=>'text-red-600 font-bold  text-4xl max-md:text-2xl'],
             ];
         }else{
             return [
