@@ -82,7 +82,12 @@
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->draw_day }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->account }}</td>
+                                    <td class="py-2 px-1 border border-gray-300">
+                                        <a href="{{ route('reports.daily-member-agent', ['id' => $row->manager_id]) }}" class="text-blue-600 hover:underline">
+                                            {{ $row->account }}
+                                        </a>
+                                    </td>
+
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->total_receipts }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->total_amount, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($commission, 3, '.', '') }}</td>

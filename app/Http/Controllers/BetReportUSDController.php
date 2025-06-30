@@ -285,4 +285,70 @@ class BetReportUSDController extends Controller
             return $exception->getMessage();
         }
     }
+    public function getDailyReportMeberAgent(Request $request)
+    {
+        try {
+            $company = [
+                ["id" => 0, "label" => "All Company"],
+                ["id" => 1, "label" => "4PM Company"],
+                ["id" => 2, "label" => "5PM Company"],
+                ["id" => 3, "label" => "6PM Company"]
+            ];
+
+            $date = $this->currentDate;
+            $company_id = null;
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
+            $memberId = $request->id;
+            $memberIds = User::where('manager_id', $memberId)->pluck('id')->toArray();
+            if ($request->has('date')) {
+                $date = $request->get('date');
+
+            }
+            $managerName = User::find($memberId );
+            if ($request->has('com_id')) {
+                $company_id = $request->get('com_id');
+            }
+            $data = DB::table('bet_usd')
+            ->select(
+                'users.name AS account',
+                'users.id AS user_id',
+                'bet_package_configurations.rate as rate',
+                DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
+                DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
+                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+            )
+            ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
+            ->join('users', 'users.id', '=', 'bet_usd.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
+            ->whereIn('bet_usd.user_id', $memberIds) 
+            ->when($date, function ($q) use ($date) {
+                $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
+            })
+            ->when($company_id > 0, function ($q) use ($company_id) {
+                $q->where('bet_usd.company_id', $company_id);
+            })
+            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('bet_usd.user_id', $user->id);
+            })
+            ->groupBy(
+                'bet_usd.user_id',
+                'users.name',
+                'bet_package_configurations.rate',
+                DB::raw('DATE(bet_usd.bet_date)')
+            )
+            ->get();
+
+            return view('report_usd.daily-member-agent', compact('data', 'date', 'company', 'company_id','memberId','managerName'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
 }

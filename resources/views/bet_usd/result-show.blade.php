@@ -81,7 +81,7 @@
                                                             <div class="flex w-full justify-content-between">  <!-- open tag dev for new row -->
                                                                 @endif
                                                                 <div class="flex w-full justify-center">
-                                                                    <h6 style="font-size: 20px; font-weight: 600;" @class([$row['tailwind_class']??'', 'text-bold'])>
+                                                                    <h6 @class([$row['tailwind_class']??'', 'text-bold'])>
                                                                         {{ $row['winning_number']??'****'}}
                                                                     </h6>
                                                                 </div>
@@ -94,7 +94,7 @@
                                                 @else
                                                     @foreach($province['row_result'] as $row)
                                                         <div class="flex w-full justify-center">
-                                                            <h6 style="font-size: 20px; font-weight: 600;" @class([$row['tailwind_class']??'', 'text-bold'])>
+                                                            <h6  @class([$row['tailwind_class']??'', 'text-bold'])>
                                                                 {{ $row['winning_number']??'****'}}
                                                             </h6>
                                                         </div>

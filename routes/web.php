@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->gr
     Route::get('/report-summary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
     Route::get('/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
     Route::get('/report-daily/sumary', [BetReportController::class, 'getDailyReportManager'])->name('reports.daily-manager');
+    Route::get('/report-daily/agenct/{id}', [BetReportController::class, 'getDailyReportMeberAgent'])->name('reports.daily-member-agent');
     Route::get('/bet/{id}', [BetReceiptController::class, 'getBetByReceiptId'])->name('bet.bet-by-id');
     Route::get('/bet_receipt/{receipt_no}', [BetReceiptController::class, 'printReceiptNo']);
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptController::class, 'payReceipt']);
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->g
     Route::get('/report-summary', [BetReportUSDController::class, 'getSummaryReport'])->name('bet-usd.reports.summary');
     Route::get('/report-daily', [BetReportUSDController::class, 'getDailyReport'])->name('bet-usd.reports.daily');
     Route::get('/report-daily/sumary', [BetReportUSDController::class, 'getDailyReportManager'])->name('bet-usd.reports.daily-manager');
+    Route::get('/report-daily/agenct/{id}', [BetReportUSDController::class, 'getDailyReportMeberAgent'])->name('bet-usd.reports.daily-member-agent');
     Route::get('/bet/{id}', [BetReceiptUSDController::class, 'getBetByReceiptId'])->name('bet-usd.bet-by-id');
     Route::get('/bet_receipt/{receipt_no}', [BetReceiptUSDController::class, 'printReceiptNo']);
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
