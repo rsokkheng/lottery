@@ -183,7 +183,7 @@ class BalanceReportController extends Controller
     public function detailByUser($user_id,Request $request){
         $filter = $request->get('filter');
 
-        $query = BalanceReport::join('users', 'users.id', '=', 'balance_reports.created_by')
+        $query = BalanceReport::leftJoin('users', 'users.id', '=', 'balance_reports.created_by')
         ->where('user_id', $user_id);
     
         switch ($filter) {
@@ -216,13 +216,11 @@ class BalanceReportController extends Controller
         ->groupBy(
             'balance_reports.user_id',
             'balance_reports.report_date',
-            'balance_reports.created_at',
             'users.name',
             'balance_reports.text'
         )
         ->selectRaw('
             balance_reports.report_date,
-            balance_reports.created_at,
             users.name as created_by,
             balance_reports.text,
             balance_reports.user_id,

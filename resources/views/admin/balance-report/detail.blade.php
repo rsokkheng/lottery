@@ -71,7 +71,7 @@
                       
                             <tr style="font-size: 13px;">
        
-                                <td>{{ $user->created_at }}</td>
+                                <td>{{ $user->report_date }}</td>
                                 <td>{{ $user->created_by }}</td>
                                
                                 <td>{{ \Carbon\Carbon::parse($user->report_date)->format('l') }}</td>
