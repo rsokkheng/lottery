@@ -48,66 +48,113 @@
         </a>
     </div>
         <div class="card-body">
-            <table class="table table-striped" >
-                <thead>
-                    <tr style="font-size: 12px;">
-                        <th >Date</th>
-                        <th>Add By</th>
-                        <th>Weekday</th>
-                        <th>Net Win</th>
-                        <th>Net los</th>
-                        <th>Net W/L</th>
-                        <th>Deposit</th>
-                        <th>Withdraw</th>
-                        <th>Adjustment</th>
-                        <th>Balance</th>
-                        <th>Text</th>
+        <table class="table table-striped">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th>Report Date</th>
+                    <th>Created By</th>
+                    <th>Day</th>
+                    <th>Net Win</th>
+                    <th>Net Lose</th>
+                    <th>Net W/L</th>
+                    <th>Deposit</th>
+                    <th>Withdraw</th>
+                    <th>Adjustment</th>
+                    <th>Balance</th>
+                    <th>Text</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $sum_net_win = 0;
+                    $sum_net_lose = 0;
+                    $sum_diff = 0;
+                    $sum_deposit = 0;
+                    $sum_withdraw = 0;
+                    $sum_adjustment = 0;
+                    $sum_balance = 0;
+                @endphp
+
+                @foreach ($data as $key => $user)
+                    @php
+                        $diff = $user->total_net_win - $user->total_net_lose;
+
+                        $sum_net_win += $user->total_net_win;
+                        $sum_net_lose += $user->total_net_lose;
+                        $sum_diff += $diff;
+                        $sum_deposit += $user->total_deposit;
+                        $sum_withdraw += $user->total_withdraw;
+                        $sum_adjustment += $user->total_adjustment;
+                        $sum_balance += $user->total_balance;
+                    @endphp
+
+                    <tr style="font-size: 13px;">
+                        <td>{{ $user->report_date }}</td>
+                        <td>{{ $user->created_by }}</td>
+                        <td>{{ \Carbon\Carbon::parse($user->report_date)->format('l') }}</td>
+                        <td>{{ number_format($user->total_net_win, 2, '.', '') }}</td>
+                        <td style="color: red;">-{{ number_format($user->total_net_lose, 2, '.', '') }}</td>
+                        <td>
+                            @if ($diff < 0)
+                                <h6 style="color: red;">{{ number_format($diff, 2, '.', '') }}</h6>
+                            @else
+                                {{ number_format($diff, 2, '.', '') }}
+                            @endif
+                        </td>
+                        <td>{{ number_format($user->total_deposit, 2, '.', '') }}</td>
+                        <td>
+                            @if ($user->total_withdraw > 0)
+                                <h6 style="color: red;">-{{ number_format($user->total_withdraw, 2, '.', '') }}</h6>
+                            @else
+                                {{ number_format($user->total_withdraw, 2, '.', '') }}
+                            @endif
+                        </td>
+                        <td>{{ number_format($user->total_adjustment, 2, '.', '') }}</td>
+                        <td>
+                            @if ($user->total_balance < 0)
+                                <h6 style="color: red;">{{ number_format($user->total_balance, 2, '.', '') }}</h6>
+                            @else
+                                <h6>{{ number_format($user->total_balance, 2, '.', '') }}</h6>
+                            @endif
+                        </td>
+                        <td>{{ $user->text }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                  
-                    @foreach ($data as $key => $user)
-                        @php
-                            $diff = $user->total_net_win - $user->total_net_lose;
-                        @endphp
-                      
-                            <tr style="font-size: 13px;">
-       
-                                <td>{{ $user->report_date }}</td>
-                                <td>{{ $user->created_by }}</td>
-                               
-                                <td>{{ \Carbon\Carbon::parse($user->report_date)->format('l') }}</td>
-                                <td>{{ $user->total_net_win }}</td>
-                                <td style="color: red;">-{{ $user->total_net_lose }}</td>
-                                <td>
-                                 @if ($diff < 0)
-                                    <h6 style="color: red;">{{ number_format( $diff, 3, '.', '') }}</h6>
-                                 @else
-                                 {{ number_format( $diff, 3, '.', '') }}
-                                 @endif
-                                </td>
-                                <td>{{ $user->total_deposit }}</td>
-                                <td>
-                                 @if ($user->total_withdraw > 0)
-                                    <h6 style="color: red;">- {{ $user->total_withdraw }}</h6>
-                                 @else
-                                    {{ $user->total_withdraw }}
-                                 @endif
-                               </td>
-                                <td>{{ $user->total_adjustment }}</td>
-                                <td>
-                                @if ( $user->total_balance < 0)
-                                    <h6 style="color: red;">{{ $user->total_balance }}</h6>
-                                 @else
-                                 <h6 >{{ $user->total_balance }}</h6>
-                                 @endif
-                               </td>
-                               <td>{{ $user->text}}</td>
-                              
-                            </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                @endforeach
+            </tbody>
+
+            <tfoot>
+                <tr style="font-size: 13px; font-weight: bold; background-color: #f3f4f6;">
+                    <td colspan="3" class="text-center">Total</td>
+                    <td>{{ number_format($sum_net_win, 2, '.', '') }}</td>
+                    <td style="color: red;">-{{ number_format($sum_net_lose, 2, '.', '') }}</td>
+                    <td>
+                        @if ($sum_diff < 0)
+                            <span style="color: red;">{{ number_format($sum_diff, 2, '.', '') }}</span>
+                        @else
+                            {{ number_format($sum_diff, 2, '.', '') }}
+                        @endif
+                    </td>
+                    <td>{{ number_format($sum_deposit, 2, '.', '') }}</td>
+                    <td>
+                        @if ($sum_withdraw > 0)
+                            <span style="color: red;">-{{ number_format($sum_withdraw, 2, '.', '') }}</span>
+                        @else
+                            {{ number_format($sum_withdraw, 2, '.', '') }}
+                        @endif
+                    </td>
+                    <td>{{ number_format($sum_adjustment, 2, '.', '') }}</td>
+                    <td>
+                        @if ($sum_balance < 0)
+                            <span style="color: red;">{{ number_format($sum_balance, 2, '.', '') }}</span>
+                        @else
+                            {{ number_format($sum_balance, 2, '.', '') }}
+                        @endif
+                    </td>
+                    <td>-</td>
+                </tr>
+            </tfoot>
+        </table>
+
         </div>
     </div>
 </x-admin>
