@@ -135,53 +135,64 @@ class WinningRecordController extends Controller
 
             }
 
-            $reportDate = Carbon::today()->format('Y-m-d');
+            $reportDate = $resultDate ?? Carbon::today()->format('Y-m-d');
             $winAmountsByUser = BetReceipt::whereDate('date', $reportDate)
-                ->selectRaw('user_id, SUM(compensate) as total_win_amount')
-                ->groupBy('user_id')
-                ->get();
-
-            $winAmountsByUserUSD = BetReceiptUSD::whereDate('date', $reportDate)
-                ->selectRaw('user_id, SUM(compensate) as total_win_amount')
-                ->groupBy('user_id')
-                ->get();
-
-            $winAmountMerged = $winAmountsByUser->merge($winAmountsByUserUSD)
-                ->groupBy('user_id')
+                    ->selectRaw('CAST(user_id AS UNSIGNED) as user_id, SUM(compensate) as total_win_amount')
+                    ->groupBy('user_id')
+                    ->get();
+                
+                $winAmountsByUserUSD = BetReceiptUSD::whereDate('date', $reportDate)
+                    ->selectRaw('CAST(user_id AS UNSIGNED) as user_id, SUM(compensate) as total_win_amount')
+                    ->groupBy('user_id')
+                    ->get();
+                
+                $merged = collect($winAmountsByUser)->merge($winAmountsByUserUSD);
+                
+                // Force consistent user_id and clean group/sum
+                $winAmountMerged = $merged
+                ->groupBy(function ($item) {
+                    return (int) $item->user_id;
+                })
                 ->map(function ($group) {
-                    return (object)[
-                        'user_id' => $group->first()->user_id,
+                    return (object) [
+                        'user_id' => (int) $group->first()->user_id,
                         'total_win_amount' => $group->sum('total_win_amount'),
                     ];
                 })
-                ->values(); // optional, to reset index
+                ->filter(function ($item) {
+                    return $item->total_win_amount > 0;
+                })
+                ->values(); // reset the index
 
-            foreach ($winAmountMerged as $userWin) {
-                $user = AccountManagement::where('user_id', $userWin->user_id)->first();
-                if ($user) {
-                    $user->cash_balance = $userWin->total_win_amount;
-                    $user->save();
+                if ($winAmountMerged->isNotEmpty()) {
+                    foreach ($winAmountMerged as $userWin) {
+                        $accountBalance = AccountManagement::where('user_id', $userWin->user_id)->first();
+                        if ($accountBalance) {
+                            $accountBalance->cash_balance = ($accountBalance->cash_balance ?? 0) + $userWin->total_win_amount;
+                            $accountBalance->bet_credit   = ($accountBalance->bet_credit ?? 0) + $userWin->total_win_amount;
+                            $accountBalance->save();
+                        }
+                        if ($userWin->total_win_amount > 0) {
+                            $User = User::find($userWin->user_id);
+                            DB::table('balance_reports')->updateOrInsert(
+                                [
+                                    'user_id' => $User->id,
+                                    'report_date' => $reportDate,
+                                ],
+                                [
+                                    'name_user' => $User->name,
+                                    'net_lose' => 0,
+                                    'net_win' => $userWin->total_win_amount,
+                                    'deposit' => 0,
+                                    'withdraw' => 0,
+                                    'adjustment' => 0,
+                                    'balance' => 0,
+                                ]
+                            );
+                        }
+                    }
                 }
-                if ($userWin->total_win_amount > 0) {
-                    $User = User::find($userWin->user_id);
-                    DB::table('balance_reports')->updateOrInsert(
-                        [
-                            'user_id' => $User->id,
-                            'report_date' => $reportDate,
-                        ],
-                        [
-                            'name_user' => $User->name,
-                            'net_lose' => 0,
-                            'net_win' => $userWin->total_win_amount,
-                            'deposit' => 0,
-                            'withdraw' => 0,
-                            'adjustment' => 0,
-                            'balance' => 0,
-                        ]
-                    );
-                }
-            }
-
+                
 
             DB::commit();
             return response()->json([
