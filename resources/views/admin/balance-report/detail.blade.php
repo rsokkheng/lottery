@@ -54,6 +54,8 @@
                         <th >Date</th>
                         <th>Add By</th>
                         <th>Weekday</th>
+                        <th>Net Win</th>
+                        <th>Net los</th>
                         <th>Net W/L</th>
                         <th>Deposit</th>
                         <th>Withdraw</th>
@@ -75,6 +77,8 @@
                                 <td>{{ $user->created_by }}</td>
                                
                                 <td>{{ \Carbon\Carbon::parse($user->report_date)->format('l') }}</td>
+                                <td>{{ $user->total_net_win }}</td>
+                                <td style="color: red;">-{{ $user->total_net_lose }}</td>
                                 <td>
                                  @if ($diff < 0)
                                     <h6 style="color: red;">{{ number_format( $diff, 3, '.', '') }}</h6>
