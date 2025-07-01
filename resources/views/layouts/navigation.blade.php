@@ -50,6 +50,9 @@
                 @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())  <x-nav-link
                         class="{{ Route::is('reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>
+                        <x-nav-link
+                        class="{{ Route::is('reports.monthly-tracking') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('reports.monthly-tracking') }}">{{ __('Monthly Report') }}</x-nav-link>
                 @endif
                 <x-nav-link
                         class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
@@ -112,6 +115,11 @@
                                 <x-nav-link
                                         class="black"
                                         href="{{ route('reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>
+                            </li>
+                            <li>
+                                <x-nav-link
+                                        class="black"
+                                        href="{{ route('reports.monthly-tracking') }}">{{ __('Monthly Report') }}</x-nav-link>
                             </li>
                             @endif
                             <li>
@@ -185,6 +193,8 @@
         @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
         <x-nav-link  class="{{ Route::is('reports.daily-manager') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>
+        <x-nav-link  class="{{ Route::is('reports.monthly-tracking') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('reports.monthly-tracking') }}">{{ __('Monthly Report') }}</x-nav-link>
         @endif
         
         <x-nav-link class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }}"

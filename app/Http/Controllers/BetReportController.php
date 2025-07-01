@@ -151,6 +151,7 @@ class BetReportController extends Controller
                 'bet_package_configurations.rate',
                 DB::raw('DATE(bets.bet_date)')
             )
+            ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
             ->get();
             return view('reports.daily', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
@@ -214,6 +215,7 @@ class BetReportController extends Controller
                 'bet_package_configurations.rate',
                 DB::raw('DATE(bets.bet_date)')
             )
+            ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
             ->get();
             return view('reports.manager-daily', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
@@ -277,6 +279,7 @@ class BetReportController extends Controller
                 'bet_package_configurations.rate',
                 DB::raw('DATE(bets.bet_date)')
             )
+            ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
             ->get();
             return view('admin.report.index', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
@@ -344,9 +347,85 @@ class BetReportController extends Controller
                 'bet_package_configurations.rate',
                 DB::raw('DATE(bets.bet_date)')
             )
+            ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
             ->get();
 
             return view('reports.member-agenct', compact('data', 'date', 'company', 'company_id','memberId','managerName'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+    public function getMonthlyTracking(Request $request)
+    {
+        try {
+            $dateFilter = $request->get('date');
+            $startDate = null;
+            $endDate = null;
+            switch ($dateFilter) {
+                case 'today':
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+
+                case 'yesterday':
+                    $startDate = Carbon::yesterday();
+                    $endDate = Carbon::yesterday();
+                    break;
+
+                case 'this_week':
+                    $startDate = Carbon::now()->startOfWeek();
+                    $endDate = Carbon::now()->endOfWeek();
+                    break;
+
+                case 'last_week':
+                    $startDate = Carbon::now()->subWeek()->startOfWeek();
+                    $endDate = Carbon::now()->subWeek()->endOfWeek();
+                    break;
+
+                case 'this_month':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    break;
+
+                case 'last_month':
+                    $startDate = Carbon::now()->subMonth()->startOfMonth();
+                    $endDate = Carbon::now()->subMonth()->endOfMonth();
+                    break;
+
+                default:
+                    // If no filter provided, use today
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+            }
+
+            $data = DB::table('bets')
+                ->select(
+                    'manag.name AS account',
+                    'users.manager_id AS manager_id',
+                    'bet_package_configurations.rate as rate',
+                    DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
+                    DB::raw('SUM(bets.total_amount) AS total_amount'),
+                    DB::raw('COALESCE(SUM(bet_winning.win_amount), 0) AS Compensate'),
+                )
+                ->leftJoin('bet_winning', 'bet_winning.bet_id', '=', 'bets.id')
+                ->join('users', 'users.id', '=', 'bets.user_id')
+                ->join('users as manag', 'users.manager_id', '=', 'manag.id')
+                ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+                ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
+                ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('bets.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+                })
+                ->groupBy(
+                    'users.manager_id',
+                    'manag.name',
+                    'bet_package_configurations.rate',
+                )
+                ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
+                ->get();
+
+            return view('reports.monthly', compact('data'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
