@@ -127,7 +127,7 @@ class BetReportUSDController extends Controller
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
-            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->when(in_array('manager', $roles), function ($q) use ($user) {
                 $memberIds = User::where('manager_id', $user->id)
@@ -199,7 +199,7 @@ class BetReportUSDController extends Controller
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('users as manag', 'users.manager_id', '=', 'manag.id')
-            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->when($date, function ($q) use ($date) {
                 $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
@@ -263,7 +263,7 @@ class BetReportUSDController extends Controller
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('users as manag', 'users.manager_id', '=', 'manag.id')
-            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->when($date, function ($q) use ($date) {
                 $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
@@ -328,7 +328,7 @@ class BetReportUSDController extends Controller
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
-            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->whereIn('bet_usd.user_id', $memberIds) 
             ->when($date, function ($q) use ($date) {
@@ -411,7 +411,7 @@ class BetReportUSDController extends Controller
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
-            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'users.package_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('bet_usd.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
