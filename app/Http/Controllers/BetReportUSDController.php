@@ -116,14 +116,15 @@ class BetReportUSDController extends Controller
             }
             $data = DB::table('bet_usd')
             ->select(
-                'users.name AS account',
+                'users.username AS account',
                 'users.id AS user_id',
-                'bet_package_configurations.rate as rate',
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
                 DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
@@ -147,13 +148,11 @@ class BetReportUSDController extends Controller
             })
             ->groupBy(
                 'bet_usd.user_id',
-                'users.name',
-                'bet_package_configurations.rate',
+                'users.username',
                 DB::raw('DATE(bet_usd.bet_date)')
             )
             ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
             ->get();
-
             return view('report_usd.daily', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
@@ -187,14 +186,15 @@ class BetReportUSDController extends Controller
             }
             $data = DB::table('bet_usd')
             ->select(
-                'manag.name AS account',
+                'manag.username AS account',
                 'users.manager_id AS manager_id',
-                'bet_package_configurations.rate as rate',
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
                 DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
@@ -212,8 +212,7 @@ class BetReportUSDController extends Controller
             })
             ->groupBy(
                 'users.manager_id',
-                'manag.name',
-                'bet_package_configurations.rate',
+                'manag.username',
                 DB::raw('DATE(bet_usd.bet_date)')
             )
             ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
@@ -251,20 +250,27 @@ class BetReportUSDController extends Controller
             }
             $data = DB::table('bet_usd')
             ->select(
-                'manag.name AS account',
-                'users.manager_id AS manager_id',
-                'bet_package_configurations.rate as rate',
+                'users.username AS account',
+                'users.id AS user_id',
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
                 DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
-            ->join('users as manag', 'users.manager_id', '=', 'manag.id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
+            ->when(in_array('manager', $roles), function ($q) use ($user) {
+                $memberIds = User::where('manager_id', $user->id)
+                    ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
+                    ->pluck('id')
+                    ->toArray();
+                $q->whereIn('bet_usd.user_id', $memberIds);
+            })
             ->when($date, function ($q) use ($date) {
                 $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
             })
@@ -275,13 +281,13 @@ class BetReportUSDController extends Controller
                 $q->where('bet_usd.user_id', $user->id);
             })
             ->groupBy(
-                'users.manager_id',
-                'manag.name',
-                'bet_package_configurations.rate',
+                'bet_usd.user_id',
+                'users.username',
                 DB::raw('DATE(bet_usd.bet_date)')
             )
             ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
             ->get();
+           
             return view('admin.report.daily-usd', compact('data', 'date', 'company', 'company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
@@ -317,14 +323,15 @@ class BetReportUSDController extends Controller
             }
             $data = DB::table('bet_usd')
             ->select(
-                'users.name AS account',
+                'users.username AS account',
                 'users.id AS user_id',
-                'bet_package_configurations.rate as rate',
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
                 DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                DB::raw('MAX(schedule.draw_day) as draw_day') // Use MAX() to avoid group conflict
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
@@ -342,8 +349,7 @@ class BetReportUSDController extends Controller
             })
             ->groupBy(
                 'bet_usd.user_id',
-                'users.name',
-                'bet_package_configurations.rate',
+                'users.username',
                 DB::raw('DATE(bet_usd.bet_date)')
             )
             ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
@@ -402,12 +408,13 @@ class BetReportUSDController extends Controller
            
             $data = DB::table('bet_usd')
             ->select(
-                'users.name AS account',
+                'users.username AS account',
                 'users.id AS user_id',
-                'bet_package_configurations.rate as rate',
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
-                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
+                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
@@ -418,8 +425,7 @@ class BetReportUSDController extends Controller
             })
             ->groupBy(
                 'bet_usd.user_id',
-                'users.name',
-                'bet_package_configurations.rate',
+                'users.username',
             )
             ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
             ->get();

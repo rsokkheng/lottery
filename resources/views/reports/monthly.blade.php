@@ -52,9 +52,9 @@
                                 $compensate = 0;
                             @endphp
                             @foreach($data as $key => $row)
-                                @php
-                                    $netAmount  =  $row->total_amount * ($row->rate/100);
-                                    $commission = $row->total_amount-($row->total_amount * $row->rate/100);
+                            @php
+                                    $netAmount  =  $row->net_amount;
+                                    $commission = $row->commission;
                                     $diff =  $row->Compensate - $netAmount ;
                                     $totalInvoice += (float)($row->total_receipts ?? 0);
                                     $turNover += (float)($row->total_amount ?? 0);

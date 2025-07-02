@@ -67,7 +67,6 @@
                                     $totalCommission += (float)($row->Commission ?? 0);
                                     $totalNetAmount += (float)($row->NetAmount ?? 0);
                                     $totalCompensate += (float)($row->Compensate ?? 0);
-
                                     $totalWinLose += $diff;
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
