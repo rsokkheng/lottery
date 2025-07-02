@@ -390,10 +390,17 @@ public function updatePassword(Request $request, User $user)
 public function usersUnderManager($manager_id)
 {
     $managerName = User::find($manager_id);
-    $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-            ->where('manager_id', $manager_id)
-            ->orderBy('id', 'ASC')
-            ->get();
+    $data = User::select(
+        'users.*',
+        DB::raw('COALESCE(SUM(account_management.bet_credit), 0) AS total_bet_credit'),
+        DB::raw('COALESCE(SUM(account_management.available_credit), 0) AS total_available_credit')
+    )
+    ->leftJoin('account_management', 'users.id', '=', 'account_management.user_id')
+    ->where('users.manager_id', $manager_id)
+    ->groupBy('users.id')  // Important: group by user.id to sum per user
+    ->orderBy('users.id', 'ASC')
+    ->with(['package', 'roles', 'manager', 'accountManagement', 'currencies'])
+    ->get();
     return view('admin.user.under-manager', compact('data','managerName'));
 }
 
