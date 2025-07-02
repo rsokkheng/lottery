@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+    $user = Auth::user();
+@endphp
 <x-admin>
     @section('title', 'Edit User')
     <div class="card">
@@ -39,10 +43,14 @@
                         <div class="form-group">
                             <label for="role" class="form-label">Role:*</label>
                             <select name="role" id="role" class="form-control" required>
-                                <option value="" selected disabled>selecte the role</option>
                                 @foreach ($roles as $role)
-                                    <option value="{{ $role->name }}"
-                                        {{ $user->roles[0]['name'] === $role->name ? 'selected' : '' }}>{{ $role->name }}</option>
+                                    @if (($user->hasRole('admin') && $role->name === 'manager') ||
+                                         ($user->hasRole('manager') && $role->name === 'member'))
+                                        <option value="{{ $role->name }}"
+                                            {{ old('role') === $role->name ? 'selected' : '' }}>
+                                            {{ ucfirst($role->name) }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             <x-error>role</x-error>
@@ -66,7 +74,7 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">
-                                Give Credit:* {{ $user->accountManagement->bet_credit ?? 0 }}
+                                Give Credit:* {{ $user->total_bet_credit ?? 0 }}
                             </label>
                             <input type="number"
                                 class="form-control"
@@ -74,8 +82,8 @@
                                 name="available_credit"
                                 required
                                 autocomplete="off"
-                                value="{{ $user->accountManagement->available_credit ?? 0 }}"
-                                data-max="{{ $user->accountManagement->bet_credit ?? 0 }}">
+                                value="{{ $user->total_available_credit ?? 0 }}"
+                                data-max="{{ $user->total_bet_credit ?? 0 }}">
                             <small id="amount-error" class="text-danger d-none">
                                 The credit amount cannot exceed the allowed limit.
                             </small>

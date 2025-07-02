@@ -5,53 +5,32 @@
     </style>
     <div class="flex-col bg-white rounded-lg px-4 py-4">
             <div class="flex w-full space-x-2">
-                <div class="">
-                    <div class="relative max-w-sm">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                            </svg>
-                        </div>
-                        <input id="date" value="{{ $date }}" datepicker datepicker-buttons datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text" class="border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10" placeholder="Select date" >
-                    </div>
-                </div>
-                <div class="">
-                <div class="w-full lg:w-48">
-                    <select id="company" class="rounded w-full">
-                        @foreach($company as $val)
-                            @if($company_id == $val['id'])
-                                <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                            @else
-                                <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                </div>
-                <div class="">
-                    <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="searchReceipt('{{ route('bet-usd.reports.daily-member-agent', ['id' => $memberId]) }}')">
-                        <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z" fill="#ffffff"></path> </g></svg>
-                        {{__('Search')}}
-                    </button>
-                </div>
-                <div class="">
-               
-                <a href="{{ route('bet-usd.reports.daily-manager') }}" style="text-decoration: none;" class="text-blue-600 hover:underline inline-flex items-center">
-                 <span style="padding: 5px; background-color: red; color: white;">Back</span> <span>{{ $managerName->username }}</span> 
+            <div class="">
+            @php
+                $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
+            @endphp
+
+            <select id="dateFilter" class="px-8 py-2 border rounded bg-white text-gray-700 shadow" onchange="applyDateFilter(this)">
+                <option value="today" {{ $selectedDate === 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
+                <option value="yesterday" {{ $selectedDate === 'yesterday' ? 'selected' : '' }}>{{ __('Yesterday') }}</option>
+                <option value="this_week" {{ $selectedDate === 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
+                <option value="last_week" {{ $selectedDate === 'last_week' ? 'selected' : '' }}>{{ __('Last Week') }}</option>
+                <option value="this_month" {{ $selectedDate === 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
+                <option value="last_month" {{ $selectedDate === 'last_month' ? 'selected' : '' }}>{{ __('Last Month') }}</option>
+            </select>
+
+            </div>
+            <a href="{{ route('reports.monthly-tracking') }}" style="text-decoration: none;" class="text-blue-600 hover:underline inline-flex items-center">
+                 <span style="padding: 5px; background-color: red; color: white;">Back</span> <span>{{ $managerName->username}}</span> 
                 </a>
-
-                </div>
-
-
             </div>
             <div class="flex w-full">
                 <div class="w-full overflow-auto py-4">
-                <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
+                    <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                         <thead>
                             <tr class="bg-blue-500 border text-white font-bold text-nowrap">
                                 <th class="py-2 border border-white">{{__('No')}}</th>
                                 <th class="py-2 border border-white">{{__('Date')}}</th>
-                                <th class="py-2 border border-white">{{__('Weekday')}}</th>
                                 <th class="py-2 border border-white">{{__('Account')}}</th>
                                 <th class="py-2 border border-white">{{__('Invoice')}}</th>
                                 <th class="py-2 border border-white">{{__('Turnover')}}</th>
@@ -76,7 +55,7 @@
                             @endphp
                             @foreach($data as $key => $row)
                             @php
-                                    $netAmount  = $row->net_amount;
+                                    $netAmount  =  $row->net_amount;
                                     $commission = $row->commission;
                                     $diff =  $row->Compensate - $netAmount ;
                                     $totalInvoice += (float)($row->total_receipts ?? 0);
@@ -89,8 +68,10 @@
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->draw_day }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->account }}</td>
+                                    <td class="py-2 px-1 border border-gray-300">
+                                    {{ $row->account }}
+                                    </td>
+
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->total_receipts }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($row->total_amount, 3, '.', '') }}</td>
                                     <td class="text-right py-2 px-1 border border-gray-300">{{ number_format($commission, 3, '.', '') }}</td>
@@ -105,7 +86,7 @@
                             @endforeach
 
                             <tr class="border border-gray-300 hover:bg-gray-100 bg-gray-200 font-bold">
-                                <td colspan="4" class="text-center py-2 px-2 border border-gray-300">Total</td>
+                                <td colspan="3" class="text-center py-2 px-2 border border-gray-300">Total</td>
                                 <td class="text-center py-2 px-2 border border-gray-300">{{ $totalInvoice }}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $turNover, 3, '.', '') }}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300"> {{ number_format($totalCommission, 3, '.', '') }}</td>
@@ -134,12 +115,11 @@
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
 
 <script>
-    function searchReceipt(url){
-        const date = $('#date').val();
-        const com_id = $('#company').find(":selected").val();
-        if(date.length){
-            window.location = url +'?date='+date +'&com_id=' + com_id;
-        }
-    }
+function applyDateFilter(selectElement) {
+    const value = selectElement.value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('date', value);
+    window.location.href = url.toString();
+}
 </script>
 </x-app-layout>

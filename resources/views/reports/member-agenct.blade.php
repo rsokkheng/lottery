@@ -34,14 +34,9 @@
                         {{__('Search')}}
                     </button>
                 </div>
-                 <a href="{{ route('reports.daily-manager') }}" class="text-blue-600 hover:underline inline-flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a1 1 0 01-.707-1.707L15.586 10 9.293 3.707a1 1 0 011.414-1.414l7 7a1 1 0 010 1.414l-7 7A1 1 0 0110 18z" clip-rule="evenodd" />
-                    </svg>
-                    {{ $managerName->name }}
+                 <a href="{{ route('reports.daily-manager') }}" style="text-decoration: none;" class="text-blue-600 hover:underline inline-flex items-center">
+                 <span style="padding: 5px; background-color: red; color: white;">Back</span> <span>{{ $managerName->username}}</span> 
                 </a>
-
-                
 
             </div>
             <div class="flex w-full">

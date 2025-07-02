@@ -408,8 +408,8 @@ class BetReportController extends Controller
 
             $data = DB::table('bets')
                 ->select(
-                    'users.username AS account',
-                    'users.id AS user_id',
+                    'manag.username AS account',
+                    'users.manager_id AS manager_id',
                     DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                     DB::raw('SUM(bets.total_amount) AS total_amount'),
                     DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -425,13 +425,178 @@ class BetReportController extends Controller
                     $q->whereBetween('bets.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
                 })
                 ->groupBy(
-                    'bets.user_id',
-                    'users.username',
+                    'manag.username',
+                    'users.manager_id',
                 )
                 ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
                 ->get();
 
             return view('reports.monthly', compact('data'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+    public function getMonthlyByAgent(Request $request){
+        try {
+            $dateFilter = $request->get('date');
+            $startDate = null;
+            $endDate = null;
+            switch ($dateFilter) {
+                case 'today':
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+
+                case 'yesterday':
+                    $startDate = Carbon::yesterday();
+                    $endDate = Carbon::yesterday();
+                    break;
+
+                case 'this_week':
+                    $startDate = Carbon::now()->startOfWeek();
+                    $endDate = Carbon::now()->endOfWeek();
+                    break;
+
+                case 'last_week':
+                    $startDate = Carbon::now()->subWeek()->startOfWeek();
+                    $endDate = Carbon::now()->subWeek()->endOfWeek();
+                    break;
+
+                case 'this_month':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    break;
+
+                case 'last_month':
+                    $startDate = Carbon::now()->subMonth()->startOfMonth();
+                    $endDate = Carbon::now()->subMonth()->endOfMonth();
+                    break;
+
+                default:
+                    // If no filter provided, use today
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+            }
+
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }           
+            $memberId = $request->id;
+            $memberIds = User::where('manager_id', $memberId)->pluck('id')->toArray();
+            $managerName = User::find($memberId );
+            $data = DB::table('bets')
+            ->select(
+                'users.username AS account',
+                'users.id AS user_id',
+                DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
+                DB::raw('SUM(bets.total_amount) AS total_amount'),
+                DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bets.total_amount - (bets.total_amount * bet_package_configurations.rate / 100)) AS commission'),
+                DB::raw('COALESCE(SUM(bet_winning.win_amount), 0) AS Compensate'),
+                DB::raw('DATE(bets.bet_date) AS bet_date'),
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
+            )
+            ->leftJoin('bet_winning', 'bet_winning.bet_id', '=', 'bets.id')
+            ->join('users', 'users.id', '=', 'bets.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
+            ->whereIn('bets.user_id', $memberIds)
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('bets.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+            })
+
+            ->groupBy(
+                'bets.user_id',
+                'users.username',
+                DB::raw('DATE(bets.bet_date)')
+            )
+            ->orderByRaw('DATE(bets.bet_date) DESC')
+            ->get();
+
+            return view('reports.monthly-track-member', compact('data','managerName'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+    public function getMonthlyAllMember(Request $request){
+        try {
+            $dateFilter = $request->get('date');
+            $startDate = null;
+            $endDate = null;
+            switch ($dateFilter) {
+                case 'today':
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+
+                case 'yesterday':
+                    $startDate = Carbon::yesterday();
+                    $endDate = Carbon::yesterday();
+                    break;
+
+                case 'this_week':
+                    $startDate = Carbon::now()->startOfWeek();
+                    $endDate = Carbon::now()->endOfWeek();
+                    break;
+
+                case 'last_week':
+                    $startDate = Carbon::now()->subWeek()->startOfWeek();
+                    $endDate = Carbon::now()->subWeek()->endOfWeek();
+                    break;
+
+                case 'this_month':
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    break;
+
+                case 'last_month':
+                    $startDate = Carbon::now()->subMonth()->startOfMonth();
+                    $endDate = Carbon::now()->subMonth()->endOfMonth();
+                    break;
+
+                default:
+                    // If no filter provided, use today
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today();
+                    break;
+            }
+
+            $user = Auth::user() ?? 0;     
+            $memberIds = User::where('manager_id', $user->id)->pluck('id')->toArray();
+            $managerName = User::find($user->id );
+            $data = DB::table('bets')
+            ->select(
+                'users.username AS account',
+                'users.id AS user_id',
+                DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
+                DB::raw('SUM(bets.total_amount) AS total_amount'),
+                DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bets.total_amount - (bets.total_amount * bet_package_configurations.rate / 100)) AS commission'),
+                DB::raw('COALESCE(SUM(bet_winning.win_amount), 0) AS Compensate'),
+                DB::raw('DATE(bets.bet_date) AS bet_date')
+            )
+            ->leftJoin('bet_winning', 'bet_winning.bet_id', '=', 'bets.id')
+            ->join('users', 'users.id', '=', 'bets.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
+            ->whereIn('bets.user_id', $memberIds)
+            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('bets.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+            })
+
+            ->groupBy(
+                'bets.user_id',
+                'users.username',
+                DB::raw('DATE(bets.bet_date)')
+            )
+            ->orderByRaw('DATE(bets.bet_date) DESC')
+            ->get();
+            return view('reports.monthly-all-member', compact('data','managerName'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();

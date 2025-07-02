@@ -44,9 +44,12 @@
                         href="{{ route('bet-usd.bet-number') }}">{{ __('Bet Number') }}</x-nav-link>
                 <x-nav-link
                         class="{{ Route::is('bet-usd.bet-winning') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('bet-usd.bet-winning') }}">{{ __('Win Report') }}</x-nav-link>
-                        @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
+                 @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
                 <x-nav-link
                         class="{{ Route::is('bet-usd.reports.daily') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                <x-nav-link
+                        class="{{ Route::is('bet-usd.reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('bet-usd.reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
                 @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())  
                 <x-nav-link
                         class="{{ Route::is('bet-usd.reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
@@ -109,6 +112,11 @@
                                 <x-nav-link
                                         class="black"
                                         href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                            </li>
+                            <li>
+                                <x-nav-link
+                                        class="black"
+                                        href="{{ route('bet-usd.reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
                             </li>
                             @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
                             <li>
@@ -191,6 +199,8 @@
         @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
         <x-nav-link  class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet-usd.reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+        <x-nav-link  class="{{ Route::is('bet-usd.reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('bet-usd.reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
         @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
         <x-nav-link  class="{{ Route::is('bet-usd.reports.daily-manager') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('bet-usd.reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>

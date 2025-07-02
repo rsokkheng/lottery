@@ -47,6 +47,9 @@
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
                 <x-nav-link
                         class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} hover:text-white" href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                <x-nav-link
+                        class="{{ Route::is('reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
+                        href="{{ route('reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
                 @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())  <x-nav-link
                         class="{{ Route::is('reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} hover:text-white"
                         href="{{ route('reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>
@@ -109,6 +112,11 @@
                                 <x-nav-link
                                         class="black"
                                         href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+                            </li>
+                            <li>
+                                <x-nav-link
+                                        class="black"
+                                        href="{{ route('reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
                             </li>
                             @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
                             <li>
@@ -190,6 +198,8 @@
         @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
         <x-nav-link  class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('reports.daily') }}">{{ __('Daily Report') }}</x-nav-link>
+       <x-nav-link  class="{{ Route::is('reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }}"
+                    href="{{ route('reports.monthly-allmember') }}">{{ __('Monthly Report') }}</x-nav-link>
         @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
         <x-nav-link  class="{{ Route::is('reports.daily-manager') ? 'active-menu' : 'not-active-menu' }}"
                     href="{{ route('reports.daily-manager') }}">{{ __('Daily Report') }}</x-nav-link>

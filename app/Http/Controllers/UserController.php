@@ -147,7 +147,15 @@ class UserController extends Controller
     public function edit($id)
     {
         $roles = Role::all();
-        $user = User::with('accountManagement')->where('id',decrypt($id))->first();
+        $user = User::select(
+            'users.*',
+            DB::raw('COALESCE(SUM(account_management.bet_credit), 0) AS total_bet_credit'),
+            DB::raw('COALESCE(SUM(account_management.available_credit), 0) AS total_available_credit')
+        )
+        ->leftJoin('account_management', 'account_management.user_id', '=', 'users.id')
+        ->where('users.id', decrypt($id))
+        ->groupBy('users.id') // Place BEFORE ->first()
+        ->first();
         return view('admin.user.edit',compact('user','roles'));
     }
     public function update(Request $request, User $user)

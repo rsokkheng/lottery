@@ -28,7 +28,6 @@
                         <thead>
                             <tr class="bg-blue-500 border text-white font-bold text-nowrap">
                                 <th class="py-2 border border-white">{{__('No')}}</th>
-
                                 <th class="py-2 border border-white">{{__('Account')}}</th>
                                 <th class="py-2 border border-white">{{__('Invoice')}}</th>
                                 <th class="py-2 border border-white">{{__('Turnover')}}</th>
@@ -67,7 +66,9 @@
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
                                   
                                     <td class="py-2 px-1 border border-gray-300">
-                                    {{ $row->account }}
+                                    <a href="{{ route('bet-usd.reports.monthly-tracking-member', ['id' => $row->manager_id]) }}" class="text-blue-600 hover:underline">
+                                            {{ $row->account }}
+                                        </a>
                                     </td>
 
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->total_receipts }}</td>
