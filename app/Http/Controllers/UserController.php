@@ -11,6 +11,7 @@ use App\Models\BalanceReport;
 use Illuminate\Validation\Rule;
 use App\Models\AccountManagement;
 use App\Models\BetLotteryPackage;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -31,27 +32,35 @@ class UserController extends Controller
         } else {
             if ($user->hasRole('admin')) {
                 $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-                ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                    $query->where('currency', $currentCurrency->currency);
-                })
-                ->whereDoesntHave('roles', function ($query) {
-                    $query->whereIn('name', ['member', 'admin']);
-                })
-                ->orderBy('id', 'ASC')
-                ->get();
+                    ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                        $query->where('currency', $currentCurrency->currency);
+                    })
+                    ->whereDoesntHave('roles', function ($query) {
+                        $query->whereIn('name', ['member', 'admin']);
+                    })
+                    ->orderBy('id', 'ASC')
+                    ->get();
             } elseif ($user->hasRole('manager')) {
-                $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-                ->where('manager_id', $user->id)
-                ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                    $query->where('currency', $currentCurrency->currency);
-                })
-                ->whereDoesntHave('roles', function ($query) {
-                    $query->where('name', 'admin');
-                })
-                ->orderBy('id', 'ASC')
-                ->get();
+                $data = User::select(
+                        'users.*',
+                        DB::raw('COALESCE(SUM(account_management.bet_credit), 0) AS total_bet_credit'),
+                        DB::raw('COALESCE(SUM(account_management.available_credit), 0) AS total_available_credit')
+                    )
+                    ->leftJoin('account_management', 'account_management.user_id', '=', 'users.id')
+                    ->where('users.manager_id', $user->id)
+                    ->whereHas('currencies', function ($query) use ($currentCurrency) {
+                        $query->where('currency', $currentCurrency->currency);
+                    })
+                    ->whereDoesntHave('roles', function ($query) {
+                        $query->where('name', 'admin');
+                    })
+                    ->groupBy('users.id')
+                    ->orderBy('users.id', 'ASC')
+                    ->get();
             }
+            
         }
+
         return view('admin.user.index', compact('data'));
     }
     public function create()

@@ -31,9 +31,6 @@
                 <tbody>
                    
                     @foreach ($data as $key => $user)
-                    @php
-                            $lastBalance =  $user?->accountManagement?->cash_balance;
-                        @endphp
                   
                         <tr style="font-size: 14px;">
                             <td>{{ $key+1 }}</td>
@@ -65,10 +62,18 @@
                             </td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user?->currencies?->currency }}</td>
-                            <td>{{ $user?->accountManagement?->available_credit }}</td>
-                            <td>{{ $user?->accountManagement?->bet_credit }}</td>
-                            <td>{{ $lastBalance}}</td>
+                            <td>{{ $user->currencies->first()->currency ?? '' }}</td>
+                            @if ($user->relationLoaded('accountManagement'))
+                                <td>{{ $user->accountManagement->sum('available_credit') }}</td>
+                                <td>{{ $user->accountManagement->sum('bet_credit') }}</td>
+                            @elseif (isset($user->total_available_credit) && isset($user->total_bet_credit))
+                                <td>{{ $user->total_available_credit }}</td>
+                                <td>{{ $user->total_bet_credit }}</td>
+                            @else
+                                <td>0</td>
+                                <td>0</td>
+                            @endif
+                            <td>0</td>
                             <td>{{ $user->created_at }}</td>
                             <td class="{{ $user->record_status_id == 1 ? 'text-blue-500' : 'text-red-500' }}">
                                 {{ $user->record_status_id == 1 ? 'Active' : 'Suspend' }}

@@ -20,6 +20,7 @@ class AccountManagement extends Model
         'cash_balance',
         'currency',
         'created_by',
+        'created_at',
         'updated_by'
     ];
 

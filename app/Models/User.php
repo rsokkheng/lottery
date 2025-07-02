@@ -85,7 +85,7 @@ class User extends Authenticatable
 
     public function accountManagement()
     {
-        return $this->hasOne(AccountManagement::class, 'user_id');
+        return $this->hasMany(AccountManagement::class, 'user_id');
     }
     public function balanceReports()
     {

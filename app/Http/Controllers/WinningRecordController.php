@@ -166,14 +166,39 @@ class WinningRecordController extends Controller
 
                 if ($winAmountMerged->isNotEmpty()) {
                     foreach ($winAmountMerged as $userWin) {
-                        $accountBalance = AccountManagement::where('user_id', $userWin->user_id)->first();
-                        if ($accountBalance) {
-                            $accountBalance->cash_balance = ($accountBalance->cash_balance ?? 0) + $userWin->total_win_amount;
-                            $accountBalance->bet_credit   = ($accountBalance->bet_credit ?? 0) + $userWin->total_win_amount;
-                            $accountBalance->save();
-                        }
+                        $User = User::find($userWin->user_id);
+                        $existingRecord = DB::table('account_management')
+                            ->where('user_id', $User->id)
+                            ->whereDate('created_at', $reportDate)
+                            ->first();
+                        
+                        if ($existingRecord) {
+                            // Update the existing record
+                            DB::table('account_management')
+                                ->where('user_id', $User->id)
+                                ->whereDate('created_at', $reportDate)
+                                ->update([
+                                    'name_user' => $User->name,
+                                    'available_credit' => 0,
+                                    'bet_credit' => $userWin->total_win_amount,
+                                    'cash_balance' => 0,
+                                    'currency' => $User->currencies()->first()->currency,
+                                    'updated_at' => now(),
+                                ]);
+                        } else {
+                            // Insert new record
+                            DB::table('account_management')->insert([
+                                'user_id' => $User->id,
+                                'name_user' => $User->name,
+                                'available_credit' => 0,
+                                'bet_credit' => $userWin->total_win_amount,
+                                'cash_balance' => 0,
+                                'currency' => $User->currencies()->first()->currency,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }                    
                         if ($userWin->total_win_amount > 0) {
-                            $User = User::find($userWin->user_id);
                             DB::table('balance_reports')->updateOrInsert(
                                 [
                                     'user_id' => $User->id,
