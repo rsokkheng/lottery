@@ -24,7 +24,6 @@
                 <thead>
                     <tr style="font-size: 12px;">
                         <th style="width: 3%;">#</th>
-                        <th style="width: 5%;">Name</th>
                         <th>AccountID</th>
                         <th>Net W/L</th>
                         <th>Deposit</th>
@@ -45,7 +44,6 @@
                       
                             <tr style="font-size: 13px;">
                                 <td>{{ $key+1 }}</td>
-                                <td>{{ $user->user_id }}</td>
                                 <td>{{ $user->username }}</td>
                                 <td>
                                  @if ($diff < 0)
