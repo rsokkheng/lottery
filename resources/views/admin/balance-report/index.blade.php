@@ -45,7 +45,7 @@
                       
                             <tr style="font-size: 13px;">
                                 <td>{{ $key+1 }}</td>
-                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->user_id }}</td>
                                 <td>{{ $user->username }}</td>
                                 <td>
                                  @if ($diff < 0)
@@ -91,10 +91,10 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#transactionModal"
                                             data-type="deposit"
-                                            data-name="{{ $user->name }}"
-                                            data-balance-amount="{{ $user->balance }}"
+                                            data-name="{{ $user->username }}"
+                                            data-balance-amount="{{ $user->bet_credit }}"
                                             data-id="{{ encrypt($user->user_id) }}"
-                                            data-withdraw-max="{{ $user->withdraw_max }}"
+                                            data-withdraw-max="{{ $user->bet_credit }}"
                                             data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
                                             >Deposit</a>
                                         </li>
@@ -106,10 +106,10 @@
                                             data-bs-toggle="modal" 
                                             data-bs-target="#transactionModal"
                                             data-type="withdraw"
-                                            data-name="{{ $user->name }}"
-                                            data-balance-amount="{{ $user->balance }}"
+                                            data-name="{{ $user->username }}"
+                                            data-balance-amount="{{ $user->bet_credit }}"
                                             data-id="{{ encrypt($user->user_id) }}"
-                                            data-withdraw-max="{{ $user->withdraw_max }}"
+                                            data-withdraw-max="{{ $user->bet_credit }}"
                                             data-balance-account-id="{{ encrypt($user->balance_account_id) }}"
                                             >Withdraw</a>
                                         </li>  
@@ -160,7 +160,7 @@
 
 
           <div class="mb-3">
-            <label for="modal-amount" class="form-label">Current Balance</label>
+            <label for="modal-amount" class="form-label">Credit Balance</label>
             <input type="number" class="form-control"  id="modal-current-amount" readonly>
           </div>
 

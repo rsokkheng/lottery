@@ -33,57 +33,52 @@ class BalanceReportController extends Controller
             $currency = "USD";
         }
         $data = DB::table('users as u')
-            ->join('user_currencies as cu', 'u.id', '=', 'cu.user_id')
-            ->join('account_management as ac', 'ac.user_id', '=', 'u.id')
-            ->leftJoin(DB::raw('
-                (SELECT user_id, SUM(amount) as amount 
-                FROM balance_report_outstandings 
-                GROUP BY user_id
-                ) as ou'), 'ou.user_id', '=', 'u.id')
-            ->leftJoin('balance_reports as br', function ($join) {
-                $join->on('br.user_id', '=', 'u.id')
-                    ->whereDate('br.report_date', now()->toDateString()); // 👈 filter inside the join
-            })
-            ->select(
-                'u.id as user_id',
-                DB::raw('DATE(br.report_date) as report_date'),
-                'u.name',
-                'u.username',
-                'ac.id as balance_account_id',
-                'u.record_status_id',
-                DB::raw('COALESCE(SUM(br.net_lose), 0) as net_lose'),
-                DB::raw('COALESCE(SUM(br.net_win), 0) as net_win'),
-                DB::raw('COALESCE(SUM(br.deposit), 0) as deposit'),
-                DB::raw('COALESCE(SUM(br.withdraw), 0) as withdraw'),
-                DB::raw('COALESCE(SUM(br.adjustment), 0) as adjustment'),
-                DB::raw('
-                    COALESCE(SUM(br.net_win), 0) 
-                    - COALESCE(SUM(br.net_lose), 0) 
-                    + COALESCE(SUM(br.deposit), 0) 
-                    - COALESCE(SUM(br.withdraw), 0) 
-                    + COALESCE(SUM(br.adjustment), 0) as balance
-                '),
-                DB::raw('COALESCE(ou.amount, 0) as outstanding'),
-                DB::raw('
-                    (COALESCE(SUM(br.deposit), 0) 
-                    - COALESCE(SUM(br.withdraw), 0) 
-                    + COALESCE(SUM(br.adjustment), 0)) 
-                    - COALESCE(ou.amount, 0) as withdraw_max
-                ')
-            )
-            ->where('cu.currency', $currency);
-            if ($user->hasRole('manager')) {
-                $data->where('u.manager_id', $user->id);
-            }
-            // Only group after conditional logic
-            $data = $data->groupBy(
-                'u.id',
-                'u.record_status_id',
-                'u.name',
-                'ac.id',
-                'br.report_date',
-                'ou.amount'
-            )->get();
+        ->join('user_currencies as cu', 'u.id', '=', 'cu.user_id')
+        ->join(DB::raw('
+            (SELECT user_id, MIN(id) as account_id, SUM(bet_credit) as total_bet_credit
+             FROM account_management
+             GROUP BY user_id
+            ) as ac_grouped'), 'ac_grouped.user_id', '=', 'u.id')
+        ->join('account_management as ac', 'ac.id', '=', 'ac_grouped.account_id')
+        ->leftJoin(DB::raw('
+            (SELECT user_id, SUM(amount) as amount
+             FROM balance_report_outstandings
+             GROUP BY user_id
+            ) as ou'), 'ou.user_id', '=', 'u.id')
+        ->leftJoin('balance_reports as br', function ($join) {
+            $join->on('br.user_id', '=', 'u.id')
+                ->whereDate('br.report_date', now()->toDateString());
+        })
+        ->select(
+            'u.id as user_id',
+            DB::raw('DATE(br.report_date) as report_date'),
+            'u.username',
+            'ac.id as balance_account_id',
+            'u.record_status_id',
+            DB::raw('COALESCE(SUM(br.net_lose), 0) as net_lose'),
+            DB::raw('COALESCE(SUM(br.net_win), 0) as net_win'),
+            DB::raw('COALESCE(SUM(br.deposit), 0) as deposit'),
+            DB::raw('COALESCE(SUM(br.withdraw), 0) as withdraw'),
+            DB::raw('COALESCE(SUM(br.adjustment), 0) as adjustment'),
+            DB::raw('ac_grouped.total_bet_credit as bet_credit'),
+            DB::raw('COALESCE(SUM(br.balance), 0) as balance'),
+            DB::raw('COALESCE(ou.amount, 0) as outstanding')
+        )
+        ->where('cu.currency', $currency);
+    
+    if ($user->hasRole('manager')) {
+        $data->where('u.manager_id', $user->id);
+    }
+    
+    $data = $data->groupBy(
+        'u.id',
+        'u.username',
+        'ac.id',
+        'br.report_date',
+        'u.record_status_id',
+        'ac_grouped.total_bet_credit',
+        'ou.amount'
+    )->get();
 
         return view('admin.balance-report.index', compact('data'));
     }
