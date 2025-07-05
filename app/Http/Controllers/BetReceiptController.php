@@ -182,283 +182,186 @@ private function addAmount(&$amountArray, $value, $check, $label)
     
 }
 
+public function getBetByReceiptId($id)
+{
+    $result = $this->model->with([
+        'bets.betLotterySchedule',
+        'bets.betNumber',
+        'betWinning',
+        'bets' => function ($q) {
+            $q->orderBy('id');
+        }
+    ])->findOrFail($id);
+    
+    $betIdWin = $this->betWinning->newQuery()
+        ->whereHas('bets', function ($q) use ($id){
+            $q->where('bet_receipt_id', $id);
+        })
+        ->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
+    
+    $items = [];
+    $amount = '';
 
-    public function getBetByReceiptId($id)
-    {
-        $result = $this->model->with([
-            'bets.betLotterySchedule',
-            'bets.betNumber',
-            'betWinning',
-            'bets' => function ($q) {
-                $q->orderBy('id');
-            }
-        ])->findOrFail($id);
-        $betIdWin = $this->betWinning->newQuery()
-            ->whereHas('bets', function ($q) use ($id){
-                $q->where('bet_receipt_id', $id);
-            })
-            ->orderBy('bet_id')->pluck('bet_id')->unique()->toArray();
-        $items = [];
-        $amount = '';
-
-        foreach ($result->bets as $bet){
-
-            foreach ($bet['betNumber'] as $betNumber){
-                $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
-                $this->addAmount($amount, $betNumber->b_amount ?? 0, $betNumber->b_check ?? false, "B");
-                $this->addAmount($amount, $betNumber->ab_amount ?? 0, $betNumber->ab_check ?? false, "AB");
-                $this->addAmount($amount, $betNumber->roll_amount ?? 0, $betNumber->roll_check ?? false, "R");
-                $this->addAmount($amount, $betNumber->roll7_amount ?? 0, $betNumber->roll7_check ?? false, "R7");
-                $this->addAmount($amount, $betNumber->roll_parlay_amount ?? 0, $betNumber->roll_parlay_check ?? false, "RP");
-            }
-            $companyCode = $bet['betLotterySchedule']?->code;
-            $isWin = in_array($bet->id, $betIdWin);
-            if(count($items)){
-                $itemsFilter = array_filter($items, function ($val) use ($bet){
-                    return $val['number'] === $bet['number_format'];
-                });
-
-                if(empty($itemsFilter)){
-                    $items[] =[
-                        'number' => $bet['number_format'],
-                        'company' => $companyCode,
-                        'amount' => $amount,
-                        'is_win' => $isWin
-                    ];
-                }else{
-                    $items[] =[
-                        'number' => $bet['number_format'],
-                        'company' => $companyCode,
-                        'amount' => $amount,
-                        'is_win' => $isWin
-                    ];
-                }
-            }else{
-                $items[] =[
-                    'number' => $bet['number_format'],
-                    'company' => $companyCode,
-                    'amount' => $amount,
-                    'is_win' => $isWin
-                ];
-            }
-            $amount = '';
+    foreach ($result->bets as $bet){
+        foreach ($bet['betNumber'] as $betNumber){
+            $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
+            $this->addAmount($amount, $betNumber->b_amount ?? 0, $betNumber->b_check ?? false, "B");
+            $this->addAmount($amount, $betNumber->ab_amount ?? 0, $betNumber->ab_check ?? false, "AB");
+            $this->addAmount($amount, $betNumber->roll_amount ?? 0, $betNumber->roll_check ?? false, "R");
+            $this->addAmount($amount, $betNumber->roll7_amount ?? 0, $betNumber->roll7_check ?? false, "R7");
+            $this->addAmount($amount, $betNumber->roll_parlay_amount ?? 0, $betNumber->roll_parlay_check ?? false, "RP");
         }
         
-
-        $isPaid = $result->betWinning?->first()?->paid_status;
-        $companyMap =$bet['betLotterySchedule']?->id;
-        if(count($items) > 1){
-            $grouped = collect($items)
-                ->flatMap(function ($item) {
-                    // Split amount string into parts like "30(R)"
-                    $amounts = explode(',', $item['amount']);
-                    return collect($amounts)->map(function ($amt) use ($item) {
-                        if (preg_match('/^([\d.]+)\((\w+)\)$/', trim($amt), $matches)) {
-                            return [
-                                'number' => $item['number'],
-                                'company' => $item['company'],
-                                'type' => $matches[2],
-                                'amount' => $matches[1],
-                                'is_win' => $item['is_win'],
-                            ];
-                        }
-                        return null;
-                    })->filter();
-                })
-                // Step 1: Group by number + company + type to sum only within the same company
-                ->groupBy(function ($item) {
-                    return "{$item['number']}_{$item['company']}_{$item['type']}";
-                })
-                ->map(function ($group) {
-                    $first = $group->first();
-                    return [
-                        'number' => $first['number'],
-                        'company' => $first['company'],
-                        'type' => $first['type'],
-                        'amount' => $group->sum('amount'),
-                        'is_win' => $group->contains('is_win', true),
-                    ];
-                })
-                // Step 2: Group by number to prepare merging company display
-                ->groupBy('number')
-                ->map(function ($groupedItems, $number) use ($companyMap) {
-                    // Collect unique company names for this number
-                    $companyNames = $groupedItems->pluck('company')
-                        ->unique()
-                        ->map(fn($id) => $companyMap[$id] ?? $id)
-                        ->implode(', ');
-
-                    // Group by type + amount to avoid duplicating identical values across companies
-                    $amountGrouped = $groupedItems
-                        ->groupBy(function ($item) {
-                            return "{$item['type']}_{$item['amount']}";
-                        })
-                        ->map(function ($items) {
-                            // If multiple companies have the same amount+type, just show once
-                            $first = $items->first();
-                            return "{$first['amount']}({$first['type']})";
-                        })
-                        ->values()
-                        ->implode(', ');
-
-                    return [
-                        'number' => $number,
-                        'company' => $companyNames,
-                        'amount' => $amountGrouped,
-                        'is_win' => $groupedItems->contains('is_win', true),
-                    ];
-                })
-                ->values();
-            }else{
-                $grouped = $items;
-            }
-
-        return response()->json([
-            'no_receipt' => $result?->receipt_no,
-            'totalAmount' => $result?->total_amount,
-            'dueAmount' => $result?->net_amount,
-            'is_paid' => $isPaid == 2,
-            'items' => $grouped,
-        ]);
-   
-
-    }
-    public function printReceiptNo($receiptNo)
-    {
-        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber','user'])
-            ->where('receipt_no', '=', $receiptNo)
-            ->first();
-
-        if (empty($result)) {
-            return abort(404, 'Receipt not found');
-        }
-
-        $items = [];
+        $companyCode = $bet['betLotterySchedule']?->code;
+        $isWin = in_array($bet->id, $betIdWin);
+        $createdAt = $bet->created_at;
+        $digitFormat = $bet->digit_format;
+        $totalAmount = $bet->total_amount;
+        
+        $items[] = [
+            'number' => $bet['number_format'],
+            'digit_format' => $digitFormat,
+            'company' => $companyCode,
+            'amount' => $amount,
+            'total_amount' => $totalAmount,
+            'is_win' => $isWin,
+            'created_at' => $createdAt
+        ];
         $amount = '';
-        foreach ($result->bets as $bet){
-            foreach ($bet['betNumber'] as $betNumber){
-                $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
-                $this->addAmount($amount, $betNumber->b_amount ?? 0, $betNumber->b_check ?? false, "B");
-                $this->addAmount($amount, $betNumber->ab_amount ?? 0, $betNumber->ab_check ?? false, "AB");
-                $this->addAmount($amount, $betNumber->roll_amount ?? 0, $betNumber->roll_check ?? false, "R");
-                $this->addAmount($amount, $betNumber->roll7_amount ?? 0, $betNumber->roll7_check ?? false, "R7");
-                $this->addAmount($amount, $betNumber->roll_parlay_amount ?? 0, $betNumber->roll_parlay_check ?? false, "RP");
-            }
-            $companyCode = $bet['betLotterySchedule']?->code;
-            if(count($items)){
-                $itemsFilter = array_filter($items, function ($val) use ($bet, $companyCode){
-                    return $val['number'] === $bet['number_format'];
-                });
-
-                if(empty($itemsFilter)){
-                    $items[] =[
-                        'number' => $bet['number_format'],
-                        'company' => $companyCode,
-                        'amount' => $amount,
-                    ];
-                }else{
-                    $items[] =[
-                        'number' => $bet['number_format'],
-                        'company' => $companyCode,
-                        'amount' => $amount,
-                    ];
-                }
-            }else{
-                $items[] =[
-                    'number' => $bet['number_format'],
-                    'company' => $companyCode,
-                    'amount' => $amount,
-                ];
-            }
-            $amount = '';
-        }
-
-        $companyMap =$bet['betLotterySchedule']?->id;
+    }
+    
+    $isPaid = $result->betWinning?->first()?->paid_status;
+    $companyMap = $bet['betLotterySchedule']?->id;
+    
+    if(count($items) > 1){
         $grouped = collect($items)
-            ->flatMap(function ($item) {
-                // Split amount string into parts like "30(R)"
-                $amounts = explode(',', $item['amount']);
-                return collect($amounts)->map(function ($amt) use ($item) {
-                    if (preg_match('/^([\d.]+)\((\w+)\)$/', trim($amt), $matches)) {
-                        return [
-                            'number' => $item['number'],
-                            'company' => $item['company'],
-                            'type' => $matches[2],
-                            'amount' => $matches[1],
-                        ];
-                    }
-                    return null;
-                })->filter();
-            })
-            // Step 1: Group by number + company + type to sum only within the same company
+            // Group by number_format + digit_format + total_amount + created_at (matching SQL GROUP BY)
             ->groupBy(function ($item) {
-                return "{$item['number']}_{$item['company']}_{$item['type']}";
+                $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i:s');
+                return "{$item['number']}_{$item['digit_format']}_{$item['total_amount']}_{$createdAtTimestamp}";
             })
             ->map(function ($group) {
                 $first = $group->first();
+                
+                // Collect unique company names for this group
+                $companyNames = $group->pluck('company')
+                    ->unique()
+                    ->implode(', ');
+
                 return [
                     'number' => $first['number'],
-                    'company' => $first['company'],
-                    'type' => $first['type'],
-                    'amount' => $group->sum('amount'),
-                ];
-            })
-            // Step 2: Group by number to prepare merging company display
-            ->groupBy('number')
-            ->map(function ($groupedItems, $number) use ($companyMap) {
-                // Collect unique company names for this number
-                $companyNames = $groupedItems->pluck('company')
-                    ->unique()
-                    ->map(fn($id) => $companyMap[$id] ?? $id)
-                    ->implode(', ');
-
-                // Group by type + amount to avoid duplicating identical values across companies
-                $amountGrouped = $groupedItems
-                    ->groupBy(function ($item) {
-                        return "{$item['type']}_{$item['amount']}";
-                    })
-                    ->map(function ($items) {
-                        // If multiple companies have the same amount+type, just show once
-                        $first = $items->first();
-                        return "{$first['amount']}({$first['type']})";
-                    })
-                    ->values()
-                    ->implode(', ');
-
-                return [
-                    'number' => $number,
+                    'digit_format' => $first['digit_format'],
                     'company' => $companyNames,
-                    'amount' => $amountGrouped,
+                    'amount' => $first['amount'],
+                    'total_amount' => $first['total_amount'],
+                    'is_win' => $group->contains('is_win', true),
+                    'created_at' => $first['created_at'],
                 ];
             })
             ->values();
-
-        return view('bet.print_receipt', [
-            'receipt_no' => $result->receipt_no,
-            'total_amount' => $result->total_amount,
-            'due_amount' => $result->net_amount,
-            'bets' =>$grouped,
-            'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
-            'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
-            'receipt_by' => $result?->user?->name,
-        ]);
+    } else {
+        $grouped = $items;
     }
 
-    public function payReceipt($no)
-    {
-        if($no){
-            $id = BetReceipt::query()->where('receipt_no', $no)->first()?->id;
-            BetWinning::query()->whereHas('betReceipt', function ($q) use ($id){
-                $q->where('bet_receipt_id', $id);
-            })->update(['paid_at'=> date('Y-m-d H:i:s'), 'paid_status'=>2]);
-            return response()->json([
-                'success'=> true,
-                'message'=> 'Receipt was paid.'
-            ]);
+    return response()->json([
+        'no_receipt' => $result?->receipt_no,
+        'totalAmount' => $result?->total_amount,
+        'dueAmount' => $result?->net_amount,
+        'is_paid' => $isPaid == 2,
+        'items' => $grouped,
+    ]);
+}
+public function printReceiptNo($receiptNo)
+{
+        $result = $this->model->with(['bets.betLotterySchedule', 'bets.betNumber','user'])
+        ->where('receipt_no', '=', $receiptNo)
+        ->first();
+
+    if (empty($result)) {
+        return abort(404, 'Receipt not found');
+    }
+
+    $items = [];
+    $amount = '';
+    foreach ($result->bets as $bet){
+        foreach ($bet['betNumber'] as $betNumber){
+            $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
+            $this->addAmount($amount, $betNumber->b_amount ?? 0, $betNumber->b_check ?? false, "B");
+            $this->addAmount($amount, $betNumber->ab_amount ?? 0, $betNumber->ab_check ?? false, "AB");
+            $this->addAmount($amount, $betNumber->roll_amount ?? 0, $betNumber->roll_check ?? false, "R");
+            $this->addAmount($amount, $betNumber->roll7_amount ?? 0, $betNumber->roll7_check ?? false, "R7");
+            $this->addAmount($amount, $betNumber->roll_parlay_amount ?? 0, $betNumber->roll_parlay_check ?? false, "RP");
         }
+        
+        $companyCode = $bet['betLotterySchedule']?->code;
+        $digitFormat = $bet->digit_format;
+        $totalAmount = $bet->total_amount;
+        $createdAt = $bet->created_at;
+        
+        $items[] = [
+            'number' => $bet['number_format'],
+            'digit_format' => $digitFormat,
+            'company' => $companyCode,
+            'amount' => $amount,
+            'total_amount' => $totalAmount,
+            'created_at' => $createdAt,
+        ];
+        
+        $amount = '';
+    }
+
+    // Group by number_format + digit_format + total_amount + created_at (matching SQL GROUP BY)
+    $grouped = collect($items)
+        ->groupBy(function ($item) {
+            $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i:s');
+            return "{$item['number']}_{$item['digit_format']}_{$item['total_amount']}_{$createdAtTimestamp}";
+        })
+        ->map(function ($group) {
+            $first = $group->first();
+            
+            // Collect unique company names for this group
+            $companyNames = $group->pluck('company')
+                ->unique()
+                ->filter() // Remove null/empty values
+                ->implode(', ');
+
+            return [
+                'number' => $first['number'],
+                'digit_format' => $first['digit_format'],
+                'company' => $companyNames,
+                'amount' => $first['amount'],
+                'total_amount' => $first['total_amount'],
+                'created_at' => $first['created_at'],
+            ];
+        })
+        ->values();
+
+    return view('bet.print_receipt', [
+        'receipt_no' => $result->receipt_no,
+        'total_amount' => $result->total_amount,
+        'due_amount' => $result->net_amount,
+        'bets' => $grouped,
+        'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
+        'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
+        'receipt_by' => $result?->user?->name,
+    ]);
+}
+
+public function payReceipt($no)
+{
+    if($no){
+        $id = BetReceipt::query()->where('receipt_no', $no)->first()?->id;
+        BetWinning::query()->whereHas('betReceipt', function ($q) use ($id){
+            $q->where('bet_receipt_id', $id);
+        })->update(['paid_at'=> date('Y-m-d H:i:s'), 'paid_status'=>2]);
         return response()->json([
-        'success'=> false,
-            'message'=> 'No receipt for pay.'
+            'success'=> true,
+            'message'=> 'Receipt was paid.'
         ]);
     }
+    return response()->json([
+    'success'=> false,
+        'message'=> 'No receipt for pay.'
+    ]);
+}
 }

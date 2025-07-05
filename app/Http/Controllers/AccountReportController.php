@@ -3,16 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\BalanceReport;
-use Illuminate\Validation\Rule;
-use App\Models\AccountManagement;
-use App\Models\BetLotteryPackage;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+
 
 class AccountReportController extends Controller
 {

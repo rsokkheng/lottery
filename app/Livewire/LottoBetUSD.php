@@ -122,7 +122,7 @@ class LottoBetUSD extends Component
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
-        $this->betAccount = AccountManagement::where('user_id', $this->user->id)->first();
+        $this->betAccount = AccountManagement::where('user_id', $this->user->id)->sum('bet_credit');
         $this->outstandingSummary = DB::table('balance_report_outstandings')
             ->select(
                 'user_id',
