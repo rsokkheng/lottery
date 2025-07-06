@@ -420,7 +420,7 @@ class LottoBet extends Component
                     $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
                 }
-                $newBalance = round($account->bet_credit - $this->totalDue, 2);
+                $newBalance = round( $this->betAccount - $this->totalDue, 2);
                 if ($newBalance < 0) {
                     $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
                     return back();
