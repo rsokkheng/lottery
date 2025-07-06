@@ -4,22 +4,43 @@
 
     </style>
     <div class="flex-col bg-white rounded-lg px-4 py-4">
-            <div class="flex w-full space-x-2">
-            <div class="">
-            @php
-                $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
-            @endphp
+           <div class="flex w-full space-x-2">
+                <div class="">
+                @php
+                    $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
+                @endphp
 
-            <select id="dateFilter" class="px-8 py-2 border rounded bg-white text-gray-700 shadow" onchange="applyDateFilter(this)">
-                <option value="today" {{ $selectedDate === 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
-                <option value="yesterday" {{ $selectedDate === 'yesterday' ? 'selected' : '' }}>{{ __('Yesterday') }}</option>
-                <option value="this_week" {{ $selectedDate === 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
-                <option value="last_week" {{ $selectedDate === 'last_week' ? 'selected' : '' }}>{{ __('Last Week') }}</option>
-                <option value="this_month" {{ $selectedDate === 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
-                <option value="last_month" {{ $selectedDate === 'last_month' ? 'selected' : '' }}>{{ __('Last Month') }}</option>
-            </select>
-
-            </div>
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <label for="startDate" class="block text-sm text-gray-700">Start Date</label>
+                            <input 
+                                id="startDate" 
+                                value="{{ $startDate }}"
+                                datepicker datepicker-buttons datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
+                                class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-sm text-gray-700">End Date</label>
+                            <input 
+                                id="endDate" 
+                                value="{{ $endDate }}"
+                                datepicker datepicker-buttons datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
+                                class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
+                        </div>
+                        <div>
+                            <button onclick="applyDateFilter()" class="px-6 py-2 bg-blue-600 text-white rounded shadow" style="margin-top: 20px;">
+                            Search
+                            </button>
+                        </div>
+                        <div>
+                        <button 
+                                onclick="clearDateFilter()" 
+                                class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow" style="margin-top: 20px;">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="flex w-full">
                 <div class="w-full overflow-auto py-4">
@@ -112,11 +133,27 @@
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
 
 <script>
-function applyDateFilter(selectElement) {
-    const value = selectElement.value;
-    const url = new URL(window.location.href);
-    url.searchParams.set('date', value);
-    window.location.href = url.toString();
-}
+ function applyDateFilter() {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+
+        if (start && end) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('startDate', start);
+            url.searchParams.set('endDate', end);
+            // Optional: remove old 'date' param if it existed
+            url.searchParams.delete('date');
+            window.location.href = url.toString();
+        } else {
+            alert('Please select both start and end dates.');
+        }
+    }
+    function clearDateFilter() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('startDate');
+        url.searchParams.delete('endDate');
+        url.searchParams.delete('date');
+        window.location.href = url.toString();
+    }
 </script>
 </x-app-layout>

@@ -364,47 +364,17 @@ class BetReportUSDController extends Controller
     public function getMonthlyTracking(Request $request)
     {
         try {
-            $dateFilter = $request->get('date');
-            $startDate = null;
-            $endDate = null;
-            switch ($dateFilter) {
-                case 'today':
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            $startDate = request()->get('startDate');
+            $endDate = request()->get('endDate');
 
-                case 'yesterday':
-                    $startDate = Carbon::yesterday();
-                    $endDate = Carbon::yesterday();
-                    break;
-
-                case 'this_week':
-                    $startDate = Carbon::now()->startOfWeek();
-                    $endDate = Carbon::now()->endOfWeek();
-                    break;
-
-                case 'last_week':
-                    $startDate = Carbon::now()->subWeek()->startOfWeek();
-                    $endDate = Carbon::now()->subWeek()->endOfWeek();
-                    break;
-
-                case 'this_month':
-                    $startDate = Carbon::now()->startOfMonth();
-                    $endDate = Carbon::now()->endOfMonth();
-                    break;
-
-                case 'last_month':
-                    $startDate = Carbon::now()->subMonth()->startOfMonth();
-                    $endDate = Carbon::now()->subMonth()->endOfMonth();
-                    break;
-
-                default:
-                    // If no filter provided, use today
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            if ($startDate && $endDate) {
+                $startDate = Carbon::parse($startDate)->format('Y-m-d');
+                $endDate = Carbon::parse($endDate)->format('Y-m-d');
+            } else {
+                $startDate = Carbon::parse($this->currentDate)->format('Y-m-d');
+                $endDate = Carbon::parse($this->currentDate)->format('Y-m-d');
             }
-
+            
             $data = DB::table('bet_usd')
                 ->select(
                     'manag.username AS account',
@@ -421,8 +391,8 @@ class BetReportUSDController extends Controller
                 ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
                 ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
                 ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                    $q->whereBetween('bet_usd.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
-                })
+                    $q->whereBetween('bet_usd.bet_date', [$startDate, $endDate]);
+                }) 
                 ->groupBy(
                     'manag.username',
                     'users.manager_id',
@@ -430,7 +400,7 @@ class BetReportUSDController extends Controller
                 ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
                 ->get();
 
-            return view('report_usd.monthly', compact('data'));
+            return view('report_usd.monthly', compact('data','startDate','endDate'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
@@ -438,45 +408,15 @@ class BetReportUSDController extends Controller
     }
     public function getMonthlyByAgent(Request $request){
         try {
-            $dateFilter = $request->get('date');
-            $startDate = null;
-            $endDate = null;
-            switch ($dateFilter) {
-                case 'today':
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            $startDate = request()->get('startDate');
+            $endDate = request()->get('endDate');
 
-                case 'yesterday':
-                    $startDate = Carbon::yesterday();
-                    $endDate = Carbon::yesterday();
-                    break;
-
-                case 'this_week':
-                    $startDate = Carbon::now()->startOfWeek();
-                    $endDate = Carbon::now()->endOfWeek();
-                    break;
-
-                case 'last_week':
-                    $startDate = Carbon::now()->subWeek()->startOfWeek();
-                    $endDate = Carbon::now()->subWeek()->endOfWeek();
-                    break;
-
-                case 'this_month':
-                    $startDate = Carbon::now()->startOfMonth();
-                    $endDate = Carbon::now()->endOfMonth();
-                    break;
-
-                case 'last_month':
-                    $startDate = Carbon::now()->subMonth()->startOfMonth();
-                    $endDate = Carbon::now()->subMonth()->endOfMonth();
-                    break;
-
-                default:
-                    // If no filter provided, use today
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            if ($startDate && $endDate) {
+                $startDate = Carbon::parse($startDate)->format('Y-m-d');
+                $endDate = Carbon::parse($endDate)->format('Y-m-d');
+            } else {
+                $startDate = Carbon::parse($this->currentDate)->format('Y-m-d');
+                $endDate = Carbon::parse($this->currentDate)->format('Y-m-d');
             }
 
             $user = Auth::user() ?? 0;
@@ -505,9 +445,8 @@ class BetReportUSDController extends Controller
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->whereIn('bet_usd.user_id', $memberIds)
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('bet_usd.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+                $q->whereBetween('bet_usd.bet_date', [$startDate, $endDate]);
             })
-
             ->groupBy(
                 'bet_usd.user_id',
                 'users.username',
@@ -515,7 +454,7 @@ class BetReportUSDController extends Controller
             )
             ->orderByRaw('DATE(bet_usd.bet_date) DESC')
             ->get();
-            return view('report_usd.monthly-track-member', compact('data','managerName'));
+            return view('report_usd.monthly-track-member', compact('data','managerName','startDate','endDate'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
@@ -523,47 +462,16 @@ class BetReportUSDController extends Controller
     }
     public function getMonthlyAllMember(Request $request){
         try {
-            $dateFilter = $request->get('date');
-            $startDate = null;
-            $endDate = null;
-            switch ($dateFilter) {
-                case 'today':
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            $startDate = request()->get('startDate');
+            $endDate = request()->get('endDate');
 
-                case 'yesterday':
-                    $startDate = Carbon::yesterday();
-                    $endDate = Carbon::yesterday();
-                    break;
-
-                case 'this_week':
-                    $startDate = Carbon::now()->startOfWeek();
-                    $endDate = Carbon::now()->endOfWeek();
-                    break;
-
-                case 'last_week':
-                    $startDate = Carbon::now()->subWeek()->startOfWeek();
-                    $endDate = Carbon::now()->subWeek()->endOfWeek();
-                    break;
-
-                case 'this_month':
-                    $startDate = Carbon::now()->startOfMonth();
-                    $endDate = Carbon::now()->endOfMonth();
-                    break;
-
-                case 'last_month':
-                    $startDate = Carbon::now()->subMonth()->startOfMonth();
-                    $endDate = Carbon::now()->subMonth()->endOfMonth();
-                    break;
-
-                default:
-                    // If no filter provided, use today
-                    $startDate = Carbon::today();
-                    $endDate = Carbon::today();
-                    break;
+            if ($startDate && $endDate) {
+                $startDate = Carbon::parse($startDate)->format('Y-m-d');
+                $endDate = Carbon::parse($endDate)->format('Y-m-d');
+            } else {
+                $startDate = Carbon::parse($this->currentDate)->format('Y-m-d');
+                $endDate = Carbon::parse($this->currentDate)->format('Y-m-d');
             }
-
             $user = Auth::user() ?? 0;     
             $memberIds = User::where('manager_id', $user->id)->pluck('id')->toArray();
             $managerName = User::find($user->id );
@@ -584,9 +492,8 @@ class BetReportUSDController extends Controller
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
             ->whereIn('bet_usd.user_id', $memberIds)
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('bet_usd.bet_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
+                $q->whereBetween('bet_usd.bet_date', [$startDate, $endDate]);
             })
-
             ->groupBy(
                 'bet_usd.user_id',
                 'users.username',
@@ -594,7 +501,7 @@ class BetReportUSDController extends Controller
             )
             ->orderByRaw('DATE(bet_usd.bet_date) DESC')
             ->get();
-            return view('report_usd.monthly-all-member', compact('data','managerName'));
+            return view('report_usd.monthly-all-member', compact('data','managerName','startDate','endDate'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
