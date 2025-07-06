@@ -30,6 +30,7 @@
                         <th>Withdraw</th>
                         <th>Adjustment</th>
                         <th>Balance</th>
+                        <th>Credit Balance</th>
                         <th>Outstanding</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -68,6 +69,7 @@
                                  <h6 >{{ $user->balance }}</h6>
                                  @endif
                                </td>
+                               <td>{{ $user->bet_credit }}</td>
                                 <td style="color: blue;">{{ $user->outstanding }}</td>
                                 <td>
                                 @if ($user->record_status_id == 1)
