@@ -48,14 +48,14 @@
                         <p>Transaction Report (VND)</p>
                     </a>
                 </li> 
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{{ route('admin.report.index') }}"
                     class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-invoice"></i>
                         <p>Daily Report (VND)</p>
                     </a>
                 </li>
-               
+                -->
             @endif
 
             @if ($hasUSD)
@@ -66,14 +66,14 @@
                         <p>Transaction Report (USD)</p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{{ route('admin.report.daily-usd') }}"
                     class="nav-link {{ Route::is('admin.report.daily-usd') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-invoice-dollar"></i>
                         <p>Daily Report (USD)</p>
                     </a>
                 </li>
-               
+                -->
             @endif
 
             @endrole
