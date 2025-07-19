@@ -24,7 +24,7 @@ class BetReportUSDController extends Controller
         $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
-    public function getSummaryReport(Request $request)
+    public function getSummaryReportsss(Request $request)
     {
         try {
 
@@ -87,7 +87,72 @@ class BetReportUSDController extends Controller
             return $exception->getMessage();
         }
     }
-
+    public function getSummaryReport(Request $request)
+    {
+        try {
+            $start_date = request()->get('start_date');
+            $end_date = request()->get('end_date');
+            $date = $this->currentDate;
+            if ($start_date && $end_date) {
+                $startDate = Carbon::parse($start_date)->format('Y-m-d');
+                $end_date = Carbon::parse($end_date)->format('Y-m-d');
+            } else {
+                $start_date= Carbon::parse($this->currentDate)->format('Y-m-d');
+                $end_date = Carbon::parse($this->currentDate)->format('Y-m-d');
+            }
+            $user = Auth::user() ?? 0;
+            if ($user) {
+                $user = User::find($user->id);
+                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+            }
+            if ($request->has('date')) {
+                $date = $request->get('date');
+            }
+            $data = DB::table('bet_usd')
+            ->select(
+                DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total'),
+                DB::raw('SUM(bet_usd.total_amount) AS Turnover'),
+                DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS NetAmount'),
+                DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS Commission'),
+                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('DATE(bet_usd.bet_date) AS date'),
+                DB::raw('MAX(schedule.draw_day) AS draw_day')
+            )
+            ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
+            ->join('users', 'users.id', '=', 'bet_usd.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
+            ->when(in_array('manager', $roles), function ($q) use ($user) {
+                // Get all users under this manager
+                $memberIds = User::where('manager_id', $user->id)
+                    ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                    ->pluck('id')
+                    ->toArray();
+                $q->whereIn('user_id', $memberIds);
+            })->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
+                // Apply filter for date range
+                $q->whereBetween('bet_usd.bet_date', [
+                    Carbon::parse($start_date)->startOfDay()->format('Y-m-d H:i:s'),
+                    Carbon::parse($end_date)->endOfDay()->format('Y-m-d H:i:s')
+                ]);
+            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->when($date && !$start_date && !$end_date, function ($q) use ($date) {
+                // Apply filter for specific date
+                $q->whereDate('bet_usd.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
+            })
+            ->groupBy(
+                DB::raw('DATE(bet_usd.bet_date)')
+            )
+            ->orderByRaw('COUNT(DISTINCT bet_usd.bet_receipt_id) DESC')
+            ->get();
+            return view('report_usd.summary', compact('data', 'date','start_date','end_date'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
     public function getDailyReport(Request $request)
     {
         try {
