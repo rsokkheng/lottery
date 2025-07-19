@@ -205,10 +205,10 @@
         searching: true,
         ordering: false,
         responsive: true,
+        autoWidth: false
     });
-
     // Handle modal open and populate form
-    $('.openModal').on('click', function () {
+    $(document).on('click', '.openModal', function () {
         const type = $(this).data('type');
         const name = $(this).data('name');
         const userId = $(this).data('id');
