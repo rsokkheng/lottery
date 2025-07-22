@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\BetLotteryPackageConfiguration;
 
 class UserController extends Controller
 {
@@ -145,19 +146,25 @@ class UserController extends Controller
         return redirect()->route('admin.user.index')->with('success','User created successfully.');
     }
     public function edit($id)
-    {
-        $roles = Role::all();
-        $user = User::select(
-            'users.*',
-            DB::raw('COALESCE(SUM(account_management.bet_credit), 0) AS total_bet_credit'),
-            DB::raw('COALESCE(SUM(account_management.available_credit), 0) AS total_available_credit')
-        )
-        ->leftJoin('account_management', 'account_management.user_id', '=', 'users.id')
-        ->where('users.id', decrypt($id))
-        ->groupBy('users.id') // Place BEFORE ->first()
-        ->first();
-        return view('admin.user.edit',compact('user','roles'));
-    }
+        {
+            $currentUser = auth()->user();
+            
+            // Filter roles based on current user's role
+            if ($currentUser->hasRole('admin')) {
+                $roles = Role::whereIn('name', ['manager', 'member'])->get();
+            } elseif ($currentUser->hasRole('manager')) {
+                $roles = Role::where('name', 'member')->get();
+            } else {
+                $roles = collect(); // Empty collection if no permissions
+            }
+            
+            $user = User::with('roles')
+                ->withSum('accountManagement as total_bet_credit', 'bet_credit')
+                ->withSum('accountManagement as total_available_credit', 'available_credit')
+                ->findOrFail(decrypt($id));
+
+            return view('admin.user.edit', compact('user', 'roles'));
+        }
     public function update(Request $request, User $user)
     {
         $request->validate([
@@ -412,5 +419,34 @@ public function usersUnderManager($manager_id)
     return view('admin.user.under-manager', compact('data','managerName'));
 }
 
-
+public function viewPackageLotto($id)
+    {
+        $package = User::findOrFail(decrypt($id));
+        $bpCode = BetLotteryPackage::findOrFail($package->package_id)->package_code;
+        $data = BetLotteryPackageConfiguration::select([
+            DB::raw("
+                CASE
+                    WHEN bet_type = 'RP3' AND has_special = 0 THEN 'PL3'
+                    WHEN bet_type IN ('2D', '3D', '4D') THEN bet_type
+                    ELSE 'PL2'
+                END AS bet_type
+            "),
+            DB::raw("
+                CASE
+                    WHEN bet_type IN ('RP2', 'RP3', 'RP4', '2D', '3D', '4D') THEN rate
+                    ELSE NULL
+                END AS bet_rate
+            "),
+            DB::raw("
+                CASE
+                    WHEN bet_type IN ('RP2', 'RP3', 'RP4', '2D', '3D', '4D') THEN price
+                    ELSE NULL
+                END AS bet_price
+            "),
+        ])
+        ->where('package_id', $package->package_id)
+        ->orderBy('bet_type', 'asc')
+        ->get();
+        return view('admin.user.package-view', compact('data','package','bpCode'));
+    }
 }

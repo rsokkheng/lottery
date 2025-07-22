@@ -1,7 +1,3 @@
-@php
-    use Illuminate\Support\Facades\Auth;
-    $user = Auth::user();
-@endphp
 <x-admin>
     @section('title', 'Edit User')
     <div class="card">
@@ -44,16 +40,13 @@
                             <label for="role" class="form-label">Role:*</label>
                             <select name="role" id="role" class="form-control" required>
                                 @foreach ($roles as $role)
-                                    @if (($user->hasRole('admin') && $role->name === 'manager') ||
-                                         ($user->hasRole('manager') && $role->name === 'member'))
-                                        <option value="{{ $role->name }}"
-                                            {{ old('role') === $role->name ? 'selected' : '' }}>
-                                            {{ ucfirst($role->name) }}
-                                        </option>
-                                    @endif
+                                    <option value="{{ $role->name }}" 
+                                        {{ old('role', $user->roles->first()->name ?? '') === $role->name ? 'selected' : '' }}>
+                                        {{ ucfirst($role->name) }}
+                                    </option>
                                 @endforeach
                             </select>
-                            <x-error>role</x-error>
+                        <x-error>role</x-error>
                         </div>
                     </div>
                     <div class="col-lg-6">

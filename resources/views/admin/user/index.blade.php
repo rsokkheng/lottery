@@ -90,6 +90,9 @@
                                             <a class="dropdown-item" href="{{ route('admin.user.edit', encrypt($user->id)) }}">Edit</a><br>
                                         </li>
                                         <li>
+                                            <a class="dropdown-item" href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}">Lotto VN</a><br>
+                                        </li>
+                                        <li>
                                             <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST"
                                                 onsubmit="return confirm('Are you sure you want to delete?')">
                                                 @csrf
