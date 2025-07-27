@@ -765,7 +765,7 @@ class BetReportController extends Controller
         $item->commission += $betNumber->commission;
         $item->compensate += $betNumber->compensate;
         $item->net_amount += $betNumber->net_amount;
-        $item->win_lose += $betNumber->win_lose;
+        $item->win_lose   += $betNumber->win_lose;
         $item->number_turnover += $betNumber->number_turnover;
         $item->get_roll_amount += $betNumber->get_roll_amount;
     }

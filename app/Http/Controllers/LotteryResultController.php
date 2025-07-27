@@ -509,19 +509,26 @@ class LotteryResultController extends Controller
                     }else{
                         if(in_array($item['bet_type'],['RP2','RP3','RP4'])) {
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
+                                $sumAmount = $item['prize_amount'];
+                                $betAmount = $item;
+                            }else{
                                 $sumAmount += $item['prize_amount'];
                                 $betAmount = $item;
                             }
                         }else{
-                            $sumAmount += $item['prize_amount'];
-                            $betAmount = $item;
+                            if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
+                                $sumAmount = $item['prize_amount'];
+                                $betAmount = $item;
+                            }else{
+                                $sumAmount += $item['prize_amount'];
+                                $betAmount = $item;
+                            }
                         }
                     }
                 }
-
                 $matchThese = ['bet_id'=>$item['bet_id']??0,'bet_number_id' => $item['bet_number_id'],'bet_receipt_id'=>$item['receipt_id']];
                 $betWin = BetWinning::query()->updateOrCreate($matchThese,[
-                    'win_amount'=>$sumAmount,
+                    'win_amount' => $sumAmount,
                     'bet_number_id' => $item['bet_number_id'],
                 ]);
                 $save[] = BetWinningRecord::query()->insert([
