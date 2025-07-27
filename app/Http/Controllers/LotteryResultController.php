@@ -509,9 +509,6 @@ class LotteryResultController extends Controller
                     }else{
                         if(in_array($item['bet_type'],['RP2','RP3','RP4'])) {
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
-                                $sumAmount = $item['prize_amount'];
-                                $betAmount = $item;
-                            }else{
                                 $sumAmount += $item['prize_amount'];
                                 $betAmount = $item;
                             }
