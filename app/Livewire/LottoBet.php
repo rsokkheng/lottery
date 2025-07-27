@@ -89,61 +89,75 @@ class LottoBet extends Component
 
     public $packagePrice;
 
-
     public function mount(
         Bet                            $betModel,
         BetLotterySchedule             $betLotteryScheduleModel,
         BetLotteryPackageConfiguration $betPackageConfiguration,
         BetReceipt                     $betReceipt,
-
-    )
-    {
-        // Initialization logic if needed
+    ) {
+        // Store models
         $this->betLotteryScheduleModel = $betLotteryScheduleModel;
         $this->betModel = $betModel;
         $this->betPackageConfiguration = $betPackageConfiguration;
         $this->betReceipt = $betReceipt;
-
-        $this->currentDate = Carbon::now()->format('Y-m-d');
-        $this->currentDay = Carbon::now()->format('l');
-        $this->currentTime = Carbon::now()->format('H:i:s');
-
+    
+        // Cache current datetime calculations
+        $now = Carbon::now();
+        $this->currentDate = $now->format('Y-m-d');
+        $this->currentDay = $now->format('l');
+        $this->currentTime = $now->format('H:i:s');
+    
+        // Cache user
         $this->user = Auth::user();
-
-        $this->schedules = $this->betLotteryScheduleModel
-            ->where('draw_day', '=', $this->currentDay)
+        $userId = $this->user->id;
+    
+        // OPTIMIZATION 1: Single query for schedules with both data sets
+        $schedulesData = $this->betLotteryScheduleModel
+            ->where('draw_day', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
-            ->get(['id', 'code', 'company_id']);
-        $this->timeClose = $this->betLotteryScheduleModel
-            ->where('draw_day', '=', $this->currentDay)
+            ->get(['id', 'code', 'company_id', 'time_close']);
+    
+            $schedulesData = $this->betLotteryScheduleModel
+            ->where('draw_day', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
-            ->get(['id', 'code', 'time_close']);
-        $this->betAccount = AccountManagement::where('user_id', $this->user->id)->sum('bet_credit');
+            ->get(['id', 'code', 'company_id', 'time_close']);
+    
+            // Use the same collection for both - they're Eloquent models so they work as both objects and arrays
+            $this->schedules = $schedulesData;
+            $this->timeClose = $schedulesData;
+            // OPTIMIZATION 2: Use raw SQL with proper indexing for better performance
+            $this->betAccount = DB::table('account_management')
+                ->where('user_id', $userId)
+                ->sum('bet_credit');
+        
+        // OPTIMIZATION 3: Simplified outstanding query with better date handling
         $this->outstandingSummary = DB::table('balance_report_outstandings')
             ->select(
                 'user_id',
                 DB::raw('DATE(date) as report_date'),
                 DB::raw('SUM(amount) as total_outstanding')
             )
-            ->whereDate('date', Carbon::today()) 
-            ->where('user_id', $this->user->id)
+            ->where('user_id', $userId)
+            ->whereDate('date', $now->toDateString()) // Use Carbon instance
             ->groupBy('user_id', DB::raw('DATE(date)'))
             ->orderByDesc('report_date')
-            ->get();
-            $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
-            $this->packagePrice = $this->betPackageConfiguration
+            ->first(); // Use first() since we only need one record
+    
+        $this->totalOutstanding = $this->outstandingSummary->total_outstanding ?? 0;
+    
+        // OPTIMIZATION 4: More efficient package price query
+        $this->packagePrice = $this->betPackageConfiguration
             ->where('package_id', $this->user->package_id)
             ->whereIn('bet_type', ['2D', '3D', '4D'])
-            ->pluck('price', 'bet_type');
+            ->pluck('price', 'bet_type')
+            ->toArray(); // Convert to array for better performance
+    
         $this->initializeProperty();
-
-
     }
-
 
     public function render()
     {

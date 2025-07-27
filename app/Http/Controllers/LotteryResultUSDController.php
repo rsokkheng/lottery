@@ -476,8 +476,11 @@ class LotteryResultUSDController extends Controller
                     }
                 }
 
-                $matchThese = ['bet_id'=>$item['bet_id']??0,'bet_receipt_id'=>$item['receipt_id']];
-                $betWin = BetWinningUSD::query()->updateOrCreate($matchThese,['win_amount'=>$sumAmount]);
+                $matchThese = ['bet_id'=>$item['bet_id']??0,'bet_number_id' => $item['bet_number_id'],'bet_receipt_id'=>$item['receipt_id']];
+                $betWin = BetWinningUSD::query()->updateOrCreate($matchThese,[
+                    'win_amount'=>$sumAmount,
+                    'bet_number_id' => $item['bet_number_id'],
+                ]);
                 $save[] = BetWinningRecordUSD::query()->insert([
                     'bet_winning_id'=> $betWin->id,
                     'bet_number_id' => $item['bet_number_id'],
@@ -924,7 +927,7 @@ class LotteryResultUSDController extends Controller
                     'users.name as account'
                 )
                 ->join('bet_number_usd','bet_number_usd.id','=', 'record.bet_number_id')
-                ->join('bet_winning_usd','bet_winning_usd.id','=', 'record.bet_winning_id')
+                ->join('bet_winning_usd','bet_winning_usd.bet_number_id','=', 'bet_number_usd.id')
                 ->join('bet_usd','bet_winning_usd.bet_id','=', 'bet_usd.id')
                 ->join('users','users.id','=', 'bet_usd.user_id')
                 ->join('bet_receipt_usd','bet_receipt_usd.id','=', 'bet_winning_usd.bet_receipt_id')
@@ -1045,11 +1048,7 @@ class LotteryResultUSDController extends Controller
                     $prepareData['turnover'] = $record->turnover;
                     $prepareData['commission'] = $commission;
                     $prepareData['net_amount'] = $netAmount;
-                    if(in_array($record->bet_type, ['RP2','RP3','RP4'])){
-                        $compensate = ($record->odds * $record->count_bet_number) / 2;
-                    }else{
-                        $compensate = $record->compensate;
-                    }
+                    $compensate = $record->compensate;
                     $prepareData['compensate'] = $compensate;
                     $data[] = $prepareData;
 

@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->gr
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptController::class, 'payReceipt']);
     Route::get('/report/monthly/tracking', [BetReportController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('reports.monthly-tracking');
     Route::get('/report/monthly/tracking/{id}', [BetReportController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('reports.monthly-tracking-member');
+    Route::get('/report/monthly/tracking/{id}/member', [BetReportController::class, 'getMonthlyByAgentMember'])->name('reports.tracking-agent-member');
     Route::get('/report/monthly/agent/member', [BetReportController::class, 'getMonthlyAllMember'])->middleware('role:manager')->name('reports.monthly-allmember');
 });
 
@@ -67,6 +68,7 @@ Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->g
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptUSDController::class, 'payReceipt']);
     Route::get('/report/monthly/tracking', [BetReportUSDController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('bet-usd.reports.monthly-tracking');
     Route::get('/report/monthly/tracking/{id}', [BetReportUSDController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('bet-usd.reports.monthly-tracking-member');
+    Route::get('/report/monthly/tracking/{id}/member', [BetReportUSDController::class, 'getMonthlyByAgentMember'])->name('bet-usd.reports.tracking-agent-member');
     Route::get('/report/monthly/member/all', [BetReportUSDController::class, 'getMonthlyAllMember'])->middleware('role:manager')->name('bet-usd.reports.monthly-allmember');
 });
 

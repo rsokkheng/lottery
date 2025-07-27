@@ -27,6 +27,20 @@
                                 datepicker datepicker-buttons datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
                                 class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                         </div>
+                        <div class="">
+                        <label class="block text-sm text-gray-700">Company</label>
+                        <div class="w-full lg:w-48">
+                            <select id="company" class="rounded w-full">
+                                @foreach($company as $val)
+                                    @if($company_id == $val['id'])
+                                        <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
+                                    @else
+                                        <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        </div>
                         <div>
                             <button onclick="applyDateFilter()" class="px-6 py-2 bg-blue-600 text-white rounded shadow" style="margin-top: 20px;">
                             Search
@@ -137,12 +151,12 @@
   function applyDateFilter() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
-
+        const com_id = $('#company').find(":selected").val();
         if (start && end) {
             const url = new URL(window.location.href);
             url.searchParams.set('startDate', start);
             url.searchParams.set('endDate', end);
-            // Optional: remove old 'date' param if it existed
+            url.searchParams.set('com_id', com_id); // Add this line
             url.searchParams.delete('date');
             window.location.href = url.toString();
         } else {
@@ -154,6 +168,7 @@
         url.searchParams.delete('startDate');
         url.searchParams.delete('endDate');
         url.searchParams.delete('date');
+        url.searchParams.delete('com_id'); // Optional: also clear com_id
         window.location.href = url.toString();
     }
 </script>
