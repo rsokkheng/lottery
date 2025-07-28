@@ -36,10 +36,10 @@ class BetReceiptController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = Auth::user()??0;
+            $user = Auth::user();
+            $roles = [];
             if ($user) {
-                $user = User::find($user->id);
-                $roles = $user->roles->pluck('name')->toArray(); // Get role names as an array
+                $roles = $user->roles()->pluck('name')->toArray(); // Use relation method to avoid issues
             }
             $date = $this->currentDate;
             if ($request->has('date')) {
@@ -47,7 +47,7 @@ class BetReceiptController extends Controller
             }
             $no = $request->no ?? null;
             // Get all users under this manager
-        $memberIds = User::where('manager_id', $user->id)->pluck('id')->toArray();
+       
         $subQuery = DB::table('bet_numbers as bn')
             ->join('bet_winning as bw', 'bw.bet_number_id', '=', 'bn.id')
             ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win_amount'))
@@ -73,9 +73,15 @@ class BetReceiptController extends Controller
             ->join('users', 'users.id', '=', 'bets.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
-           
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
-                $q->where('bets.user_id', $user->id);
+            ->when(in_array('manager', $roles), function ($q) use ($user) {
+                // Get all users under this manager
+                $memberIds = User::where('users.manager_id', $user->id)
+                                ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
+                                ->pluck('id')
+                                ->toArray();
+                $q->whereIn('user_id', $memberIds);
+            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('users.id', $user->id);
             })
             ->when(!is_null($date), function ($q) use ($date) {
                 $q->where('bets.bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
