@@ -79,7 +79,7 @@ class BetReceiptController extends Controller
                                 ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                 ->pluck('id')
                                 ->toArray();
-                $q->whereIn('user_id', $memberIds);
+                $q->whereIn('users.id', $memberIds);
             })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
                 $q->where('users.id', $user->id);
             })
