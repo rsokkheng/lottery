@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetWinning;
 use Carbon\Carbon;
 use App\Models\Bet;
 use App\Models\User;
 use App\Models\BetReceipt;
+use App\Models\BetWinning;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Log;
 use function PHPUnit\Framework\throwException;
 
 class BetReceiptController extends Controller
@@ -45,41 +46,53 @@ class BetReceiptController extends Controller
                 $date = $request->get('date');
             }
             $no = $request->no ?? null;
-
-            $data = $this->model->newQuery()->with(['user', 'bets.betWinning'])
-                ->when(in_array('manager', $roles), function ($q) use ($user) {
-                    // Get all users under this manager
-                    $memberIds = User::where('manager_id', $user->id)
-                                    ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
-                                    ->pluck('id')
-                                    ->toArray();
-                    $q->whereIn('user_id', $memberIds);
-                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                })->when(!is_null($date), function ($q) use ($date) {
-                    $q->where('date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
-                    $q->where('date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
-                })->when(!is_null($no), function ($q) use ($no) {
-                    $q->where('receipt_no', 'like', $no . '%');
-                })->get()->map(function ($item) {
-                    $checkWinBet = $item->bets->map(function ($bet){
-                        return $bet->betWinning()->count();
-                    })->sum();
-                    return [
-                        'id' => $item->id,
-                        "receipt_no" => $item->receipt_no,
-                        "user_id" => $item->user_id,
-                        "user_username" => $item->user?->username,
-                        "user_name" => $item->user?->name,
-                        "date" => is_null($item->date) ? null : date('Y-m-d H:i:s', strtotime($item->date)),
-                        "currency" => $item->currency,
-                        "total_amount" => $item->total_amount,
-                        "commission" => $item->commission,
-                        "net_amount" => $item->net_amount,
-                        "compensate" => $item->compensate,
-                        "is_win" => (bool)$checkWinBet
-                    ];
-                });
+            // Get all users under this manager
+        $memberIds = User::where('manager_id', $user->id)->pluck('id')->toArray();
+        $subQuery = DB::table('bet_numbers as bn')
+            ->join('bet_winning as bw', 'bw.bet_number_id', '=', 'bn.id')
+            ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win_amount'))
+            ->groupBy('bn.bet_id');
+        
+        $data = DB::table('bets')
+            ->select(
+                'users.username AS account',
+                'users.id AS user_id',
+                'bet_receipts.receipt_no',
+                'bet_receipts.id as receipt_id',
+                DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
+                DB::raw('SUM(bets.total_amount) AS total_amount'),
+                DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                DB::raw('SUM(bets.total_amount - (bets.total_amount * bet_package_configurations.rate / 100)) AS commission'),
+                DB::raw('SUM(IFNULL(win_summary.total_win_amount, 0)) AS compensate'),
+                DB::raw('DATE(bets.bet_date) AS bet_date')
+            )
+            ->leftJoinSub($subQuery, 'win_summary', function ($join) {
+                $join->on('win_summary.bet_id', '=', 'bets.id');
+            })
+            ->join('bet_receipts','bet_receipts.id','=','bets.bet_receipt_id')
+            ->join('users', 'users.id', '=', 'bets.user_id')
+            ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
+           
+            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                $q->where('bets.user_id', $user->id);
+            })
+            ->when(!is_null($date), function ($q) use ($date) {
+                $q->where('bets.bet_date', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'));
+                $q->where('bets.bet_date', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+            })
+            ->when(!is_null($no), function ($q) use ($no) {
+                $q->where('bet_receipts.receipt_no', 'like', $no . '%');
+            })
+            ->groupBy(
+                'users.id',
+                'users.username',
+                'bet_receipts.id',
+                'bet_receipts.receipt_no',
+                DB::raw('DATE(bets.bet_date)')
+            )
+            ->orderByRaw('DATE(bets.bet_date) DESC')
+            ->get();
             return view('bet.receipt-list', compact('data', 'date', 'no'));
         } catch (\Exception $exception) {
             throwException($exception);
