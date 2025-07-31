@@ -468,9 +468,6 @@ class LotteryResultUSDController extends Controller
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
                                 $sumAmount = $item['prize_amount'];
                                 $betAmount = $item;
-                            }else{
-                                $sumAmount += $item['prize_amount'];
-                                $betAmount = $item;
                             }
                         }else{
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
