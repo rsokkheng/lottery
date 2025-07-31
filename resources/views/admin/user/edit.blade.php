@@ -69,7 +69,7 @@
                             <label class="form-label">
                                 Give Credit:* {{ $user->total_bet_credit ?? 0 }}
                             </label>
-                            <input type="number"
+                            <input readonly type="number"
                                 class="form-control"
                                 id="amount_bet_credit"
                                 name="available_credit"

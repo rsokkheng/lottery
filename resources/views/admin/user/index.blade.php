@@ -62,7 +62,7 @@
                             </td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->currencies->first()->currency ?? '' }}</td>
+                            <td>{{ $user->currencies->currency ?? '' }}</td>
                             @if ($user->relationLoaded('accountManagement'))
                                 <td>{{ $user->accountManagement->sum('available_credit') }}</td>
                                 <td>{{ $user->accountManagement->sum('bet_credit') }}</td>

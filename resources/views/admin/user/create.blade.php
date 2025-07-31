@@ -95,8 +95,8 @@
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Give Credit:* </label>
-                            <input type="number" class="form-control" name="available_credit" required autocomplete="off"
-                                value="{{ old('available_credit') }}">
+                            <input type="number" class="form-control" name="available_credit" readonly required autocomplete="off"
+                                value="0">
                             <x-error>given_credit</x-error>
                         </div>
                     </div>                    
