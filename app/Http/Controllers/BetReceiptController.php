@@ -220,6 +220,16 @@ public function getBetByReceiptId($id)
     
     $items = [];
     $amount = '';
+    
+    $sumAmount = DB::table('bets')
+        ->select(
+            DB::raw('SUM(bets.total_amount) AS total_amount'), // typo fixed here: "totatlAmount" → "total_amount"
+            DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount')
+        )
+        ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
+        ->where('bets.bet_receipt_id', $id)
+        ->groupBy('bets.bet_receipt_id')
+        ->first();
 
     foreach ($result->bets as $bet){
         foreach ($bet['betNumber'] as $betNumber){
@@ -284,8 +294,8 @@ public function getBetByReceiptId($id)
 
     return response()->json([
         'no_receipt' => $result?->receipt_no,
-        'totalAmount' => $result?->total_amount,
-        'dueAmount' => $result?->net_amount,
+        'totalAmount' => $sumAmount->total_amount ?? 0,
+        'dueAmount'   => $sumAmount->net_amount ?? 0,
         'is_paid' => $isPaid == 2,
         'items' => $grouped,
     ]);
@@ -299,6 +309,17 @@ public function printReceiptNo($receiptNo)
     if (empty($result)) {
         return abort(404, 'Receipt not found');
     }
+
+
+    $sumAmount = DB::table('bets')
+    ->select(
+        DB::raw('SUM(bets.total_amount) AS total_amount'), // typo fixed here: "totatlAmount" → "total_amount"
+        DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount')
+    )
+    ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
+    ->where('bets.bet_receipt_id', $result->id)
+    ->groupBy('bets.bet_receipt_id')
+    ->first();
 
     $items = [];
     $amount = '';
@@ -354,11 +375,10 @@ public function printReceiptNo($receiptNo)
             ];
         })
         ->values();
-
     return view('bet.print_receipt', [
         'receipt_no' => $result->receipt_no,
-        'total_amount' => $result->total_amount,
-        'due_amount' => $result->net_amount,
+        'total_amount' => $sumAmount->total_amount ?? 0,
+        'due_amount' => $sumAmount->net_amount ?? 0,
         'bets' => $grouped,
         'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
         'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),

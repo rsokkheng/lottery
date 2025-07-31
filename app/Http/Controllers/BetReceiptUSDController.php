@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BetWinningUSD;
 use Carbon\Carbon;
-use App\Models\BetUSD;
 use App\Models\User;
-use App\Models\BetReceiptUSD;
+use App\Models\BetUSD;
 use Illuminate\Http\Request;
+use App\Models\BetReceiptUSD;
+use App\Models\BetWinningUSD;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use function PHPUnit\Framework\throwException;
 
@@ -200,6 +201,17 @@ public function getBetByReceiptId($id)
     $items = [];
     $amount = '';
 
+    $sumAmount = DB::table('bet_usd')
+    ->select(
+        DB::raw('SUM(bet_usd.total_amount) AS total_amount'), // typo fixed here: "totatlAmount" → "total_amount"
+        DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount')
+    )
+    ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
+    ->where('bet_usd.bet_receipt_id', $id)
+    ->groupBy('bet_usd.bet_receipt_id')
+    ->first();
+    
+
     foreach ($result->betsUSD as $bet){
         foreach ($bet['betNumberUSD'] as $betNumber){
             $this->addAmount($amount, $betNumber->a_amount ?? 0, $betNumber->a_check ?? false, "A");
@@ -263,8 +275,8 @@ public function getBetByReceiptId($id)
 
     return response()->json([
         'no_receipt' => $result?->receipt_no,
-        'totalAmount' => $result?->total_amount,
-        'dueAmount' => $result?->net_amount,
+        'totalAmount' => $sumAmount->total_amount ?? 0,
+        'dueAmount'   => $sumAmount->net_amount ?? 0,
         'is_paid' => $isPaid == 2,
         'items' => $grouped,
     ]);
@@ -278,6 +290,17 @@ public function printReceiptNo($receiptNo)
             return abort(404, 'Receipt not found');
         }
 
+
+        $sumAmount = DB::table('bet_usd')
+        ->select(
+            DB::raw('SUM(bet_usd.total_amount) AS total_amount'), // typo fixed here: "totatlAmount" → "total_amount"
+            DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount')
+        )
+        ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
+        ->where('bet_usd.bet_receipt_id', $result->id)
+        ->groupBy('bet_usd.bet_receipt_id')
+        ->first();
+        
         $items = [];
         $amount = '';
         foreach ($result->betsUSD as $bet){
@@ -335,8 +358,8 @@ public function printReceiptNo($receiptNo)
 
         return view('bet_usd.print_receipt', [
             'receipt_no' => $result->receipt_no,
-            'total_amount' => $result->total_amount,
-            'due_amount' => $result->net_amount,
+            'total_amount' => $sumAmount->total_amount ?? 0,
+            'due_amount' => $sumAmount->net_amount ?? 0,
             'bets' => $grouped,
             'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
             'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
