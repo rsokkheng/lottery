@@ -97,7 +97,7 @@ class BetReceiptController extends Controller
                 'bet_receipts.receipt_no',
                 DB::raw('DATE(bets.bet_date)')
             )
-            ->orderByRaw('bet_receipts.receipt_no) ASC')
+            ->orderBy('bet_receipts.receipt_no', 'asc')
             ->get();
             return view('bet.receipt-list', compact('data', 'date', 'no'));
         } catch (\Exception $exception) {
