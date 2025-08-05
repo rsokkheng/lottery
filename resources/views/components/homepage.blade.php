@@ -99,18 +99,18 @@
         <div class="login-form p-3 shadow-sm w-10 w-md-auto">
             <!-- Display Username -->
             <div class="mb-2 text-center text-md-start">
-                <strong>Welcome, {{ Auth::user()->name ?? 'Guest' }}!</strong>
+                <strong>{{ __('message.welcome') }}, {{ Auth::user()->name ?? 'Guest' }}!</strong>
             </div>
 
             <!-- Account Management Link -->
             <div class="mb-2 text-center text-md-start">
-                <a href="{{ url('/admin/dashboard') }}" class="btn btn-secondary btn-sm">Manage Account</a>
+                <a href="{{ url('/admin/dashboard') }}" class="btn btn-secondary btn-sm">{{ __('message.manage_account') }}</a>
             </div>
 
             <!-- Logout Form -->
             <form method="POST" action="{{ route('logout') }}" class="text-center text-md-start">
                 @csrf
-                <button type="submit" class="btn btn-danger btn-sm">Log out</button>
+                <button type="submit" class="btn btn-danger btn-sm">{{ __('message.log_out') }}</button>
             </form>
         </div>
     </div>

@@ -66,17 +66,24 @@
         <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;" >
         </a>
         <div class=" navbar-collapse justify-content-end" id="navbarNav">
+        <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="me-3">
+        <select onchange="location = this.value;" class="form-select form-select-sm bg-dark text-white border-light">
+            <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>🇺🇸 English</option>
+            <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>🇻🇳 Tiếng Việt</option>
+        </select>
+
+            </form>
             <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
                 @csrf
                 <div class="d-flex flex-column me-2">
-                    <input id="username" class="form-control mb-2" type="username" placeholder="Username" name="username" required>
-                    <input id="password" class="form-control mb-2" type="password" name="password" required placeholder="Password">
+                    <input id="username" class="form-control mb-2" type="username" placeholder="{{ __('message.username') }}" name="username" required>
+                    <input id="password" class="form-control mb-2" type="password" name="password" required placeholder="{{ __('message.password') }}">
                     <div class="form-check"> <!-- Checkbox now properly placed below password -->
                         <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label text-white" for="remember">Remember Me</label>
+                        <label class="form-check-label text-white" for="remember">{{ __('message.remember_me') }}</label>
                     </div>
                 </div>
-                <button class="btn btn-warning">Submit</button>
+                <button class="btn btn-warning">{{ __('message.submit') }}</button>
             </form>
         </div>
     </div>

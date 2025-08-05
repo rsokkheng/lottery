@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="w-full sm:w-40">
-                <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full" placeholder="Receipt No">
+                <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full" placeholder="{{ __('message.receipt_no') }}">
             </div>
             <div class="w-full sm:w-16">
                 <button class="flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2  rounded hover:bg-blue-600"

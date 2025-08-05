@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\BetUSDController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\BetReportController;
 use App\Http\Controllers\BetReceiptController;
 use App\Http\Controllers\BetReportUSDController;
@@ -23,7 +24,11 @@ use App\Http\Controllers\LotteryResultUSDController;
 Route::get('/', function () {
     return view('login');
 })->name('login');
-
+Route::get('/lang/{locale}', function ($locale) {
+    session(['locale' => $locale]);
+    app()->setLocale($locale);
+    return redirect()->back();
+})->name('lang.switch');
 // Login with OTP Routes
 Route::prefix('/otp')->middleware( 'guest')->name('otp.')->controller(LoginWithOTPController::class)->group(function(){
     Route::get('/login','login')->name('login');
