@@ -38,4 +38,5 @@ return [
     'win_lose' => 'Thắng/Thua',
     'invoice' => 'Hóa đơn',
     'weekday' => 'Thứ trong tuần',
+    'company' => 'Công ty',
 ];

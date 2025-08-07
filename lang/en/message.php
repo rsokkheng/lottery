@@ -39,4 +39,5 @@ return [
     'win_lose' => 'Win/Lose',
     'invoice' => 'Invoice',
     'weekday' => 'Weekday',
+    'company' => 'Company',
 ];
