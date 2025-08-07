@@ -34,9 +34,10 @@ return [
     'amount' => 'Số tiền',
     'odds' => 'Tỷ lệ cược',
     'net' => 'Thực nhận',
-    'tornover' => 'Doanh thu',
+    'turnover' => 'Doanh thu',
     'win_lose' => 'Thắng/Thua',
     'invoice' => 'Hóa đơn',
     'weekday' => 'Thứ trong tuần',
     'company' => 'Công ty',
+    'due_amount' => 'Tiền để trả',
 ];

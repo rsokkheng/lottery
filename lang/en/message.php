@@ -35,9 +35,10 @@ return [
     'amount' => 'Amount',
     'odds' => 'Odds',
     'net' => 'Net',
-    'tornover' => 'Turnover',
+    'turnover' => 'Turnover',
     'win_lose' => 'Win/Lose',
     'invoice' => 'Invoice',
     'weekday' => 'Weekday',
     'company' => 'Company',
+    'due_amount' => 'Due Amount',
 ];

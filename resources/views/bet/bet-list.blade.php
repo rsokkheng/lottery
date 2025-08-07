@@ -76,7 +76,7 @@
                         <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">{{ __('message.net') }}
                         </th>
                         <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">
-                            {{ __('message.tornover') }}</th>
+                            {{ __('message.turnover') }}</th>
                         <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">
                             {{ __('message.commission') }}</th>
                         <th class="py-2 border border-white  px-2 text-[12px] sm:text-base">
