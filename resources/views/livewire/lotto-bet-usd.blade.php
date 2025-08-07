@@ -172,7 +172,7 @@
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
                     <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
-                        <th class="border border-gray-300">{{ __('No') }}</th>
+                        <th class="border border-gray-300">{{ __('message.no') }}</th>
                         <th class="border border-gray-300 p-2">{{ __('lang.number') }}</th>
                         <th class="border border-gray-300">{{ __('lang.digit') }}</th>
                         <th class="border border-gray-300">{{ __('A') }}</th>

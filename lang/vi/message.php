@@ -19,7 +19,7 @@ return [
     'search' => 'Tìm kiếm',
     'no' => 'STT',
     'receipt_no' => 'Số biên lai',
-    'qccount' => 'Tài khoản',
+    'account' => 'Tài khoản',
     'date' => 'Ngày',
     'currency' => 'Tiền tệ',
     'total_amount' => 'Tổng số tiền',
@@ -39,5 +39,3 @@ return [
     'invoice' => 'Hóa đơn',
     'weekday' => 'Thứ trong tuần',
 ];
-
-

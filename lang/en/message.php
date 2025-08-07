@@ -20,7 +20,7 @@ return [
     'search' => 'Search',
     'no' => 'No',
     'receipt_no' => 'Receipt No',
-    'qccount' => 'Account',
+    'account' => 'Account',
     'date' => 'Date',
     'currency' => 'Currency',
     'total_amount' => 'Total Amount',
