@@ -18,6 +18,7 @@ return [
     'daily_report' => 'Daily Report',
     'summary_report' => 'Summary Report',
     'search' => 'Search',
+    'clear' => 'Clear',
     'no' => 'No',
     'receipt_no' => 'Receipt No',
     'account' => 'Account',

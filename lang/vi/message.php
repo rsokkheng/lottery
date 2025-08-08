@@ -17,6 +17,7 @@ return [
     'daily_report' => 'Báo cáo hàng ngày',
     'summary_report' => 'Báo cáo tổng hợp',
     'search' => 'Tìm kiếm',
+    'clear' => 'Xóa',
     'no' => 'STT',
     'receipt_no' => 'Số biên lai',
     'account' => 'Tài khoản',

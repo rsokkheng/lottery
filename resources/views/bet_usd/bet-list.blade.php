@@ -43,7 +43,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
-                <p> {{ __('message.search') }} </p>
+                <p class="whitespace-nowrap"> {{ __('message.search') }} </p>
             </button>
         </div>
     </div>
@@ -137,7 +137,6 @@
                                     $totalTurnover += $bet->total_amount;
                                     $winLose = $prizeAmount - $netAmount;
                                     $totalWinLose += $winLose;
-
                                 @endphp
                                 <tr
                                     class="border border-gray-300 hover:bg-gray-100 {{ $bet->betNumberWin != null ? 'bg-red-100 hover:bg-black-200 text-black-500' : '' }}">
