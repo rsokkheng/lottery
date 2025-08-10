@@ -41,4 +41,5 @@ return [
     'weekday' => 'Thứ trong tuần',
     'company' => 'Công ty',
     'due_amount' => 'Tiền để trả',
+    'all_company' => 'Tất cả các công ty',
 ];

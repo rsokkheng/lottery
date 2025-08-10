@@ -42,4 +42,5 @@ return [
     'weekday' => 'Weekday',
     'company' => 'Company',
     'due_amount' => 'Due Amount',
+    'all_company' => 'All Company',
 ];

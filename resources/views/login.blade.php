@@ -65,13 +65,13 @@
         <a class="navbar-brand text-warning" href="#">
         <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;" >
         </a>
+        
         <div class=" navbar-collapse justify-content-end" id="navbarNav">
-        <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="me-3">
-        <select onchange="location = this.value;" class="form-select form-select-sm bg-dark text-white border-light">
-            <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>🇺🇸 English</option>
-            <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>🇻🇳 Tiếng Việt</option>
-        </select>
-
+          <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="d-flex flex-column me-4">
+            <select onchange="location = this.value;" style="margin-bottom: 5px;" class="form-select form-select-sm bg-dark text-white " >
+                <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>🇺🇸 English</option>
+                <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>🇻🇳 Tiếng Việt</option>
+            </select>
             </form>
             <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
                 @csrf
