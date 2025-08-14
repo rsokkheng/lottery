@@ -66,6 +66,17 @@
                         href="{{ route('bet-usd.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
             </div>
 
+            <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="d-flex flex-column me-4">
+                <select 
+                    onchange="location = this.value;"  
+                    class="form-select form-select-sm border-0 shadow-none bg-transparent text-white"
+                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: transparent;">
+                    <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>🇺🇸 English</option>
+                    <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>🇻🇳 Tiếng Việt</option>
+                </select>
+            </form>
+
+
             {{--   Menu size tablet   --}}
             <div class="hidden lg:hidden md:flex md:items-center md:space-x-2">
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
