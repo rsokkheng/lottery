@@ -27,7 +27,7 @@ return [
     'outstanding' => 'Chưa Thanh Toán',
     'total-amount' => 'Tổng tiền',
     'total-due' => 'Tổng tiền Cần Trả',
-    'save' => 'Lưu',
+    'save' => 'Save',
     'number' => 'Số Cược',
     'digit' => 'Chữ Số',
     'head' => 'Đầu',

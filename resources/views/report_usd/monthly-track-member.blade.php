@@ -12,7 +12,7 @@
 
                     <div class="flex items-center gap-4">
                         <div>
-                            <label for="startDate" class="block text-sm text-gray-700">Start Date</label>
+                            <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
                             <input 
                                 id="startDate" 
                                 value="{{ $startDate }}"
@@ -20,7 +20,7 @@
                                 class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                         </div>
                         <div>
-                            <label for="endDate" class="block text-sm text-gray-700">End Date</label>
+                            <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
                             <input 
                                 id="endDate" 
                                 value="{{ $endDate }}"
@@ -28,7 +28,7 @@
                                 class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                         </div>
                         <div class="">
-                        <label class="block text-sm text-gray-700">Company</label>
+                        <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
                         <div class="w-full lg:w-48">
                             <select id="company" class="rounded w-full">
                                 @foreach($company as $val)
@@ -43,37 +43,37 @@
                         </div>
                         <div>
                             <button onclick="applyDateFilter()" class="px-6 py-2 bg-blue-600 text-white rounded shadow" style="margin-top: 20px;">
-                            Search
+                            {{ __('message.search') }}
                             </button>
                         </div>
                         <div>
                         <button 
                                 onclick="clearDateFilter()" 
                                 class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow" style="margin-top: 20px;">
-                                Clear
+                                {{ __('message.clear') }}
                             </button>
                         </div>
                     </div>
                 </div>
             <a href="{{ route('bet-usd.reports.monthly-tracking') }}" style="text-decoration: none;margin-top: 20px;" class="text-blue-600 hover:underline inline-flex items-center">
-                 <span style="padding: 5px; background-color: red; color: white;">Back</span> <span>{{ $managerName->username}}</span> 
+                 <span style="padding: 5px; background-color: red; color: white;">{{ __('message.back') }}</span> <span>{{ $managerName->username}}</span> 
                 </a>
             </div>
             <div class="flex w-full">
                 <div class="w-full overflow-auto py-4">
                     <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                         <thead>
-                            <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                                <th class="py-2 border border-white">{{__('No')}}</th>
-                                <th class="py-2 border border-white">{{__('Date')}}</th>
-                                <th class="py-2 border border-white">{{__('Account')}}</th>
-                                <th class="py-2 border border-white">{{__('Invoice')}}</th>
-                                <th class="py-2 border border-white">{{__('Turnover')}}</th>
-                                <th class="py-2 border border-white">{{__('Commission')}}</th>
-                                <th class="py-2 border border-white">{{__('Net Amount')}}</th>
-                                <th class="py-2 border border-white">{{__('Compensate')}}</th>
-                                <th class="py-2 border border-white">{{__('Win/Lose')}}</th>
-                            </tr>
+                        <tr class="bg-blue-500 border text-white font-bold text-nowrap">
+                            <th class="py-2 border border-white">{{ __('message.no') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.date') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.account') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.invoice') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.turnover') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.commission') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.net_amount') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.compensate') }}</th>
+                            <th class="py-2 border border-white">{{ __('message.win_lose') }}</th>
+                        </tr>
                         </thead>
                         <tbody>
                         @if(isset($data) && count($data))

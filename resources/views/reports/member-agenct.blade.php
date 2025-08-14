@@ -31,11 +31,11 @@
                 <div class="">
                     <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onclick="searchReceipt('{{ route('reports.daily-member-agent', ['id' => $memberId]) }}')">
                         <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z" fill="#ffffff"></path> </g></svg>
-                        {{__('Search')}}
+                        {{ __('message.search') }}
                     </button>
                 </div>
                  <a href="{{ route('reports.daily-manager') }}" style="text-decoration: none;" class="text-blue-600 hover:underline inline-flex items-center">
-                 <span style="padding: 5px; background-color: red; color: white;">Back</span> <span>{{ $managerName->username}}</span> 
+                 <span style="padding: 5px; background-color: red; color: white;">{{ __('message.back') }}</span> <span>{{ $managerName->username}}</span> 
                 </a>
 
             </div>
@@ -44,16 +44,16 @@
                     <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                         <thead>
                             <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                                <th class="py-2 border border-white">{{__('No')}}</th>
-                                <th class="py-2 border border-white">{{__('Date')}}</th>
-                                <th class="py-2 border border-white">{{__('Weekday')}}</th>
-                                <th class="py-2 border border-white">{{__('Account')}}</th>
-                                <th class="py-2 border border-white">{{__('Invoice')}}</th>
-                                <th class="py-2 border border-white">{{__('Turnover')}}</th>
-                                <th class="py-2 border border-white">{{__('Commission')}}</th>
-                                <th class="py-2 border border-white">{{__('Net Amount')}}</th>
-                                <th class="py-2 border border-white">{{__('Compensate')}}</th>
-                                <th class="py-2 border border-white">{{__('Win/Lose')}}</th>
+                                <th class="py-2 border border-white">{{__('message.no')}}</th>
+                                <th class="py-2 border border-white">{{__('message.date')}}</th>
+                                <th class="py-2 border border-white">{{__('message.weekday')}}</th>
+                                <th class="py-2 border border-white">{{__('message.account')}}</th>
+                                <th class="py-2 border border-white">{{__('message.invoice')}}</th>
+                                <th class="py-2 border border-white">{{__('message.turnover')}}</th>
+                                <th class="py-2 border border-white">{{__('message.commission')}}</th>
+                                <th class="py-2 border border-white">{{__('message.net_amount')}}</th>
+                                <th class="py-2 border border-white">{{__('message.compensate')}}</th>
+                                <th class="py-2 border border-white">{{__('message.win_lose')}}</th>
                             </tr>
                         </thead>
                         <tbody>

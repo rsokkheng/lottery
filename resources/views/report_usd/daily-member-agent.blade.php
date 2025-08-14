@@ -48,18 +48,17 @@
                 <div class="w-full overflow-auto py-4">
                 <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
                         <thead>
-                            <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                                <th class="py-2 border border-white">{{__('No')}}</th>
-                                <th class="py-2 border border-white">{{__('Date')}}</th>
-                                <th class="py-2 border border-white">{{__('Weekday')}}</th>
-                                <th class="py-2 border border-white">{{__('Account')}}</th>
-                                <th class="py-2 border border-white">{{__('Invoice')}}</th>
-                                <th class="py-2 border border-white">{{__('Turnover')}}</th>
-                                <th class="py-2 border border-white">{{__('Commission')}}</th>
-                                <th class="py-2 border border-white">{{__('Net Amount')}}</th>
-                                <th class="py-2 border border-white">{{__('Compensate')}}</th>
-                                <th class="py-2 border border-white">{{__('Win/Lose')}}</th>
-                            </tr>
+                        <th class="py-2 border border-white">{{__('message.no')}}</th>
+                                <th class="py-2 border border-white">{{__('message.date')}}</th>
+                                <th class="py-2 border border-white">{{__('message.weekday')}}</th>
+                                <th class="py-2 border border-white">{{__('message.account')}}</th>
+                                <th class="py-2 border border-white">{{__('message.invoice')}}</th>
+                                <th class="py-2 border border-white">{{__('message.turnover')}}</th>
+                                <th class="py-2 border border-white">{{__('message.commission')}}</th>
+                                <th class="py-2 border border-white">{{__('message.net_amount')}}</th>
+                                <th class="py-2 border border-white">{{__('message.compensate')}}</th>
+                                <th class="py-2 border border-white">{{__('message.win_lose')}}</th>
+                            
                         </thead>
                         <tbody>
                         @if(isset($data) && count($data))

@@ -6,7 +6,7 @@ return [
     'remember_me' => 'Remember Me',
     'submit' => 'Submit',
     'login' => 'Log in',
-    'welcome' => 'Welcomde',
+    'welcome' => 'Welcome',
     'manage_account' => 'Manager Account',
     'log_out' => 'Logout',
     'bet' => 'Bet',
@@ -43,4 +43,7 @@ return [
     'company' => 'Company',
     'due_amount' => 'Due Amount',
     'all_company' => 'All Company',
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'back' => 'Back'
 ];

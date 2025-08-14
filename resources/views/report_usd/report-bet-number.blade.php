@@ -12,7 +12,7 @@
 
             <div class="flex items-center gap-4">
                 <div>
-                    <label for="startDate" class="block text-sm text-gray-700">Start Date</label>
+                    <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
                     <input 
                         id="startDate" 
                         value="{{ $startDate }}"
@@ -20,7 +20,7 @@
                         class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                 </div>
                 <div>
-                    <label for="endDate" class="block text-sm text-gray-700">End Date</label>
+                    <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
                     <input 
                         id="endDate" 
                         value="{{ $endDate }}"
@@ -28,7 +28,7 @@
                         class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                 </div>
                 <div class="">
-                <label class="block text-sm text-gray-700">Company</label>
+                <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
                 <div class="w-full lg:w-48">
                     <select id="company" class="rounded w-full">
                         @foreach($company as $val)
@@ -43,41 +43,46 @@
                 </div>
                 <div>
                     <button onclick="applyDateFilter()" class="px-6 py-2 bg-blue-600 text-white rounded shadow" style="margin-top: 20px;">
-                    Search
+                    {{ __('message.search') }}
                     </button>
                 </div>
                 <div>
                 <button 
                         onclick="clearDateFilter()" 
                         class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow" style="margin-top: 20px;">
-                        Clear
+                        {{ __('message.clear') }}
                     </button>
                 </div>
                 <a href="javascript:history.back()" style="text-decoration: none; margin-top: 20px;" class="text-blue-600 hover:underline inline-flex items-center">
-                    <span style="padding: 5px; background-color: red; color: white;">Back</span>
+                    <span style="padding: 5px; background-color: red; color: white;">{{ __('message.back') }}</span>
                 </a>
             </div>
         </div>
         <div class="flex w-full">
             <div class="w-full overflow-auto py-4">
                 <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
-                    <thead>
-                    <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('No')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Date')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Number')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Digit')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Game')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Company')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Amount')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Odds')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Net')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Turnover')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Commission')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Net Amount')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Compensate')}}</th>
-                        <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{__('Win/Lose')}}</th>
-                    </tr>
+                <thead>
+                        <tr class="bg-blue-500 border text-white font-bold text-nowrap">
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.no') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.date') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.number') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.digit') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.game') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.company') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.amount') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.odds') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.net') }}</th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.turnover') }}
+                            </th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.commission') }}
+                            </th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.net_amount') }}
+                            </th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.compensate') }}
+                            </th>
+                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.win_lose') }}
+                            </th>
+                        </tr>
                     </thead>
                     <tbody>
                     @if(isset($data) && count($data)>0)

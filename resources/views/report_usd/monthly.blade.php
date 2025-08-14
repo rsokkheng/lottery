@@ -12,19 +12,19 @@
 
                 <div class="flex items-center gap-4">
                     <div>
-                        <label for="startDate" class="block text-sm text-gray-700">Start Date</label>
+                        <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
                         <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
                             datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
                             class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                     </div>
                     <div>
-                        <label for="endDate" class="block text-sm text-gray-700">End Date</label>
+                        <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
                         <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
                             datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
                             class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
                     </div>
                     <div class="">
-                        <label class="block text-sm text-gray-700">Company</label>
+                        <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
                         <div class="w-full lg:w-48">
                             <select id="company" class="rounded w-full">
                                 @foreach ($company as $val)

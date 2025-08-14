@@ -66,6 +66,16 @@
                         href="{{ route('bet.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
             </div>
 
+            <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="d-flex flex-column me-4">
+                <select 
+                    onchange="location = this.value;"  
+                    class="form-select form-select-sm border-0 shadow-none bg-transparent text-white"
+                    style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: transparent;">
+                    <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>🇺🇸 English</option>
+                    <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>🇻🇳 Tiếng Việt</option>
+                </select>
+            </form>
+
             {{--   Menu size tablet   --}}
             <div class="hidden lg:hidden md:flex md:items-center md:space-x-2">
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
@@ -163,6 +173,7 @@
                     <button type="submit"
                             class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 sm:text-[12px]">{{ __('lang.menu.log-out') }}</button>
                 </form>
+                
             </div>
         </div>
 
@@ -234,6 +245,7 @@
                     <button type="submit"
                             class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('lang.menu.log-out') }}</button>
                 </form>
+                
             </div>
         </div>
     </div>

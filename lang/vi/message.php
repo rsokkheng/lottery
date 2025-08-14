@@ -3,7 +3,7 @@ return [
     'username' => 'Tên đăng nhập',
     'password' => 'Mật khẩu',
     'remember_me' => 'Ghi nhớ đăng nhập',
-    'submit' => 'Gửi đi',
+    'submit' => 'Submit',
     'login' => 'Đăng nhập',
     'welcome' => 'Chào mừng',
     'manage_account' => 'Quản lý tài khoản',
@@ -18,7 +18,7 @@ return [
     'summary_report' => 'Báo cáo tổng hợp',
     'search' => 'Tìm kiếm',
     'clear' => 'Xóa',
-    'no' => 'STT',
+    'no' => 'No',
     'receipt_no' => 'Số biên lai',
     'account' => 'Tài khoản',
     'date' => 'Ngày',
@@ -42,4 +42,7 @@ return [
     'company' => 'Công ty',
     'due_amount' => 'Tiền để trả',
     'all_company' => 'Tất cả các công ty',
+    'start_date' => 'Ngày bắt đầu', 
+    'end_date' => 'Ngày kết thúc',
+    'back' => 'Quay lại'
 ];
