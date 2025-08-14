@@ -314,15 +314,20 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand text-warning" href="#">
-            <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
-        </a>
-        
-        <div class="navbar-collapse justify-content-end" id="navbarNav">            
+        <!-- Mobile/Tablet Layout -->
+        <div class="d-lg-none w-100">
+            <!-- Logo centered on mobile/tablet -->
+            <div class="text-center mb-3">
+                <a class="navbar-brand text-warning" href="#">
+                    <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
+                </a>
+            </div>
+            
+            <!-- Login form on mobile/tablet -->
             <div class="login-form">
-                <form action="{{ route('login') }}" method="POST" class="d-flex flex-column flex-lg-row align-items-lg-center">
+                <form action="{{ route('login') }}" method="POST" class="d-flex flex-column">
                     @csrf
-                    <div class="d-flex flex-column me-2">
+                    <div class="mb-3">
                         <div class="position-relative mb-2">
                             <i class="fas fa-user position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
                             <input id="username" class="form-control ps-5" type="username" placeholder="{{ __('message.username') }}" name="username" required>
@@ -331,15 +336,16 @@
                             <i class="fas fa-lock position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
                             <input id="password" class="form-control ps-5" type="password" name="password" required placeholder="{{ __('message.password') }}">
                         </div>
-                        <div class="form-check">
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="remember" name="remember">
                             <label class="form-check-label text-white" for="remember">
                                 <i class="fas fa-remember-me me-1"></i>{{ __('message.remember_me') }}
                             </label>
                         </div>
                     </div>
-                    <div class="d-flex flex-column align-items-center">
-                    <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="mt-6 mb-3">
+                    
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                        <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET">
                             <select onchange="location = this.value;" class="form-select form-select-sm" style="min-width: 140px;">
                                 <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
                                     🇺🇸 English
@@ -349,12 +355,61 @@
                                 </option>
                             </select>
                         </form>
-                        <button class="btn btn-warning ">
+                        <button class="btn btn-warning">
                             <i class="fas fa-sign-in-alt me-2"></i>{{ __('message.submit') }}
                         </button>
-                       
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Desktop Layout -->
+        <div class="d-none d-lg-flex w-100 align-items-center">
+            <!-- Logo on desktop -->
+            <div class="logo me-auto">
+                <a class="navbar-brand text-warning" href="#">
+                    <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
+                </a>
+            </div>
+            
+            <!-- Login form on desktop -->
+            <div class="navbar-collapse justify-content-end" id="navbarNav">
+                <div class="login-form">
+                    <form action="{{ route('login') }}" method="POST" class="d-flex flex-row align-items-center">
+                        @csrf
+                        <div class="d-flex flex-column me-3">
+                            <div class="position-relative mb-2">
+                                <i class="fas fa-user position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
+                                <input id="username" class="form-control ps-5" type="username" placeholder="{{ __('message.username') }}" name="username" required>
+                            </div>
+                            <div class="position-relative mb-2">
+                                <i class="fas fa-lock position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
+                                <input id="password" class="form-control ps-5" type="password" name="password" required placeholder="{{ __('message.password') }}">
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                <label class="form-check-label text-white" for="remember">
+                                    <i class="fas fa-remember-me me-1"></i>{{ __('message.remember_me') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="mb-3">
+                                <select onchange="location = this.value;" class="form-select form-select-sm" style="min-width: 140px;">
+                                    <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
+                                        🇺🇸 English
+                                    </option>
+                                    <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
+                                        🇻🇳 Tiếng Việt
+                                    </option>
+                                </select>
+                            </form>
+                            <button class="btn btn-warning">
+                                <i class="fas fa-sign-in-alt me-2"></i>{{ __('message.submit') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
