@@ -16,7 +16,7 @@
     }
 
     /* Enhanced responsive styles */
-    @media (max-width: 640px) {
+    @media (max-width: 767px) {
         .mobile-nav-link {
             padding: 8px 12px;
             display: block;
@@ -39,11 +39,13 @@
         }
     }
 
-    @media (min-width: 641px) and (max-width: 1023px) {
+    /* iPad Portrait (768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
         .tablet-nav {
             overflow-x: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            flex-wrap: nowrap;
         }
         
         .tablet-nav::-webkit-scrollbar {
@@ -52,15 +54,33 @@
         
         .tablet-nav-container {
             min-width: max-content;
-            padding: 0 8px;
+            padding: 0 4px;
+            display: flex;
+            white-space: nowrap;
+        }
+        
+        .tablet-nav-container .nav-link {
+            flex-shrink: 0;
+            font-size: 12px;
+            padding: 4px 6px !important;
         }
         
         .tablet-dropdown {
             min-width: 200px;
+            position: absolute;
+            z-index: 50;
         }
     }
 
-    @media (min-width: 1024px) {
+    /* iPad Landscape and larger tablets (1025px - 1366px) */
+    @media (min-width: 1025px) and (max-width: 1366px) {
+        .desktop-nav-link {
+            font-size: 14px;
+            padding: 4px 8px !important;
+        }
+    }
+
+    @media (min-width: 1367px) {
         .desktop-nav-link {
             transition: all 0.2s ease-in-out;
         }
@@ -85,10 +105,18 @@
         color: white !important;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 767px) {
         .lang-selector {
             font-size: 12px;
             padding: 2px 4px;
+        }
+    }
+
+    /* iPad specific language selector */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        .lang-selector {
+            font-size: 13px;
+            padding: 3px 6px;
         }
     }
 
@@ -111,15 +139,21 @@
         transition: all 0.2s ease-in-out;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 767px) {
         .logo-container img {
             max-width: 45px !important;
         }
     }
 
-    @media (min-width: 641px) and (max-width: 1023px) {
+    @media (min-width: 768px) and (max-width: 1024px) {
         .logo-container img {
-            max-width: 50px !important;
+            max-width: 55px !important;
+        }
+    }
+
+    @media (min-width: 1025px) {
+        .logo-container img {
+            max-width: 60px !important;
         }
     }
 </style>
@@ -136,8 +170,8 @@
                 </a>
             </div>
 
-            <!-- Desktop Navigation (1024px+) -->
-            <div class="hidden lg:flex lg:items-center lg:space-x-2 xl:space-x-4">
+            <!-- Desktop Navigation (1367px+) -->
+            <div class="hidden xl:flex xl:items-center xl:space-x-2 2xl:space-x-4">
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
                     <x-nav-link
                             class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white desktop-nav-link px-2 py-1"
@@ -178,33 +212,33 @@
                         href="{{ route('bet.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
             </div>
 
-            <!-- Tablet Navigation (768px - 1023px) -->
-            <div class="hidden md:flex lg:hidden tablet-nav">
+            <!-- Tablet Navigation (768px - 1366px) -->
+            <div class="hidden md:flex xl:hidden tablet-nav">
                 <div class="flex items-center space-x-1 tablet-nav-container">
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
                     <x-nav-link
-                            class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                            class="{{ Route::is('bet.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white nav-link px-2 py-1"
                             href="{{ route('bet.input') }}">{{ __('lang.menu.bet') }}</x-nav-link>
                 @endif
                 <x-nav-link
-                        class="{{ Route::is('bet.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                        class="{{ Route::is('bet.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white nav-link px-2 py-1"
                         href="{{ route('bet.receipt-list') }}">{{ __('lang.menu.receipt-list') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('bet.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                        class="{{ Route::is('bet.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white nav-link px-2 py-1"
                         href="{{ route('bet.bet-list') }}">{{ __('lang.menu.bet-list') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('bet.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                        class="{{ Route::is('bet.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white nav-link px-2 py-1"
                         href="{{ route('bet.bet-number') }}">{{ __('lang.menu.bet-number') }}</x-nav-link>
                 <x-nav-link
-                        class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                        class="{{ Route::is('bet.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white nav-link px-2 py-1"
                         href="{{ route('bet.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
 
                 <!-- Reports Dropdown for Tablet -->
                 <div class="relative">
                     <button @click="reportOpen = !reportOpen"
-                            class="not-active-menu hover:text-white text-sm px-2 py-1 flex items-center space-x-1">
+                            class="not-active-menu hover:text-white nav-link px-2 py-1 flex items-center space-x-1">
                         <span>{{ __('Report') }}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>

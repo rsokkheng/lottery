@@ -1,3 +1,5 @@
+
+
 <style>
     .active-menu {
         color: #337ab7 !important;
@@ -14,8 +16,8 @@
         white-space: nowrap;
     }
 
-    /* Enhanced responsive styles */
-    @media (max-width: 640px) {
+    /* Mobile Styles (0-767px) */
+    @media (max-width: 767px) {
         .mobile-nav-link {
             padding: 8px 12px;
             display: block;
@@ -36,30 +38,89 @@
             box-shadow: none !important;
             border: 1px solid rgba(255, 255, 255, 0.2) !important;
         }
+        
+        .logo-container img {
+            max-width: 45px !important;
+        }
+        
+        .lang-selector {
+            font-size: 12px;
+            padding: 2px 4px;
+        }
     }
 
-    @media (min-width: 641px) and (max-width: 1023px) {
-        .tablet-nav {
+    /* iPad Portrait (768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        .ipad-nav {
             overflow-x: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            flex-wrap: nowrap;
         }
         
-        .tablet-nav::-webkit-scrollbar {
+        .ipad-nav::-webkit-scrollbar {
             display: none;
         }
         
-        .tablet-nav-container {
+        .ipad-nav-container {
             min-width: max-content;
-            padding: 0 8px;
+            padding: 0 4px;
+            display: flex;
+            white-space: nowrap;
+            gap: 4px;
         }
         
-        .tablet-dropdown {
-            min-width: 200px;
+        .ipad-nav-link {
+            flex-shrink: 0;
+            font-size: 11px !important;
+            padding: 4px 6px !important;
+            white-space: nowrap;
+        }
+        
+        .ipad-dropdown {
+            min-width: 180px;
+            position: absolute;
+            z-index: 50;
+        }
+        
+        .logo-container img {
+            max-width: 50px !important;
+        }
+        
+        .lang-selector {
+            font-size: 12px;
+            padding: 3px 6px;
+        }
+        
+        .account-text {
+            font-size: 12px !important;
+            max-width: 80px !important;
         }
     }
 
-    @media (min-width: 1024px) {
+    /* iPad Landscape and Large Tablets (1025px - 1366px) */
+    @media (min-width: 1025px) and (max-width: 1366px) {
+        .large-tablet-nav-link {
+            font-size: 13px !important;
+            padding: 5px 8px !important;
+        }
+        
+        .logo-container img {
+            max-width: 55px !important;
+        }
+        
+        .lang-selector {
+            font-size: 13px;
+            padding: 4px 7px;
+        }
+        
+        .account-text {
+            font-size: 13px !important;
+        }
+    }
+
+    /* Desktop (1367px+) */
+    @media (min-width: 1367px) {
         .desktop-nav-link {
             transition: all 0.2s ease-in-out;
         }
@@ -67,9 +128,13 @@
         .desktop-nav-link:hover {
             transform: translateY(-1px);
         }
+        
+        .logo-container img {
+            max-width: 60px !important;
+        }
     }
 
-    /* Language selector responsive styles */
+    /* Language selector base styles */
     .lang-selector {
         background: transparent !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -82,13 +147,6 @@
     .lang-selector option {
         background-color: #3b82f6 !important;
         color: white !important;
-    }
-
-    @media (max-width: 768px) {
-        .lang-selector {
-            font-size: 12px;
-            padding: 2px 4px;
-        }
     }
 
     /* Dropdown improvements */
@@ -110,15 +168,14 @@
         transition: all 0.2s ease-in-out;
     }
 
-    @media (max-width: 640px) {
-        .logo-container img {
-            max-width: 45px !important;
+    /* Force iPad specific handling */
+    @media (max-width: 1024px) and (min-width: 768px) and (orientation: portrait),
+           (max-width: 1366px) and (min-width: 1025px) and (orientation: landscape) {
+        .force-tablet-layout {
+            display: flex !important;
         }
-    }
-
-    @media (min-width: 641px) and (max-width: 1023px) {
-        .logo-container img {
-            max-width: 50px !important;
+        .force-desktop-hide {
+            display: none !important;
         }
     }
 </style>
@@ -126,7 +183,7 @@
 <nav x-data="{ open: false, accountOpen: false, reportOpen: false }" class="bg-blue-600 border-b border-gray-100 py-2 sm:py-3 lg:py-4">
     <!-- Primary Navigation Menu -->
     <div class="flex justify-between items-center px-2 sm:px-4 lg:px-8">
-        <!-- Logo + Desktop Navigation (1024px+) -->
+        <!-- Logo + Navigation Container -->
         <div class="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
             <div class="shrink-0 flex items-center logo-container">
                 <a href="{{ route('bet-usd.input') }}">
@@ -134,8 +191,8 @@
                 </a>
             </div>
 
-            <!-- Desktop Navigation (1024px+) -->
-            <div class="hidden lg:flex lg:items-center lg:space-x-2 xl:space-x-4">
+            <!-- Desktop Navigation (1367px+) -->
+            <div class="hidden 2xl:flex 2xl:items-center 2xl:space-x-2 force-desktop-hide">
                 @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
                     <x-nav-link
                             class="{{ Route::is('bet-usd.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white desktop-nav-link px-2 py-1"
@@ -176,54 +233,54 @@
                         href="{{ route('bet-usd.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
             </div>
 
-            <!-- Tablet Navigation (768px - 1023px) -->
-            <div class="hidden md:flex lg:hidden tablet-nav">
-                <div class="flex items-center space-x-1 tablet-nav-container">
+            <!-- iPad & Tablet Navigation (768px - 1366px) -->
+            <div class="hidden md:flex 2xl:hidden ipad-nav force-tablet-layout">
+                <div class="flex items-center ipad-nav-container">
                     @if(Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isEmpty())
                         <x-nav-link
-                                class="{{ Route::is('bet-usd.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                                class="{{ Route::is('bet-usd.input') ? 'active-menu' : 'not-active-menu' }} hover:text-white ipad-nav-link large-tablet-nav-link"
                                 href="{{ route('bet-usd.input') }}">{{ __('lang.menu.bet') }}</x-nav-link>
                     @endif
                     <x-nav-link
-                            class="{{ Route::is('bet-usd.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                            class="{{ Route::is('bet-usd.receipt-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white ipad-nav-link large-tablet-nav-link"
                             href="{{ route('bet-usd.receipt-list') }}">{{ __('lang.menu.receipt-list') }}</x-nav-link>
                     <x-nav-link
-                            class="{{ Route::is('bet-usd.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                            class="{{ Route::is('bet-usd.bet-list') ? 'active-menu' : 'not-active-menu' }} hover:text-white ipad-nav-link large-tablet-nav-link"
                             href="{{ route('bet-usd.bet-list') }}">{{ __('lang.menu.bet-list') }}</x-nav-link>
                     <x-nav-link
-                            class="{{ Route::is('bet-usd.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                            class="{{ Route::is('bet-usd.bet-number') ? 'active-menu' : 'not-active-menu' }} hover:text-white ipad-nav-link large-tablet-nav-link"
                             href="{{ route('bet-usd.bet-number') }}">{{ __('lang.menu.bet-number') }}</x-nav-link>
                     <x-nav-link
-                            class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white text-sm px-2 py-1"
+                            class="{{ Route::is('bet-usd.result-show') ? 'active-menu' : 'not-active-menu' }} hover:text-white ipad-nav-link large-tablet-nav-link"
                             href="{{ route('bet-usd.result-show') }}">{{ __('lang.menu.result') }}</x-nav-link>
 
-                    <!-- Reports Dropdown for Tablet -->
+                    <!-- Reports Dropdown for iPad/Tablet -->
                     <div class="relative">
                         <button @click="reportOpen = !reportOpen"
-                                class="not-active-menu hover:text-white text-sm px-2 py-1 flex items-center space-x-1">
-                            <span>{{ __('Report') }}</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="not-active-menu hover:text-white ipad-nav-link large-tablet-nav-link flex items-center space-x-1">
+                            <span>{{ __('Reports') }}</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
 
                         <div x-show="reportOpen" @click.away="reportOpen = false"
-                             class="absolute left-0 top-full mt-1 bg-white rounded-md shadow-lg py-1 tablet-dropdown dropdown-menu z-50">
+                             class="absolute left-0 top-full mt-1 bg-white rounded-md shadow-lg py-1 ipad-dropdown dropdown-menu z-50">
                             <a href="{{ route('bet-usd.bet-winning') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.win-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.win-report') }}</a>
                             @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
                             <a href="{{ route('bet-usd.reports.daily') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.daily-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.daily-report') }}</a>
                             <a href="{{ route('bet-usd.reports.monthly-allmember') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.monthly-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.monthly-report') }}</a>
                             @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
                             <a href="{{ route('bet-usd.reports.daily-manager') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.daily-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.daily-report') }}</a>
                             <a href="{{ route('bet-usd.reports.monthly-tracking') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.monthly-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.monthly-report') }}</a>
                             @endif
                             <a href="{{ route('bet-usd.reports.summary') }}"
-                               class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.summary-report') }}</a>
+                               class="block px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dropdown-item">{{ __('lang.menu.summary-report') }}</a>
                         </div>
                     </div>
                 </div>
@@ -232,7 +289,7 @@
 
         <!-- Account Dropdown & Mobile Menu Button (Right Side) -->
         <div class="flex items-center space-x-2">
-            <!-- Language Selector (Desktop/Tablet) -->
+            <!-- Language Selector (iPad/Desktop) -->
             <div class="hidden md:block">
                 <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET">
                     <select 
@@ -244,12 +301,12 @@
                 </form>
             </div>
 
-            <!-- Account Dropdown (Tablet/Desktop) -->
+            <!-- Account Dropdown (iPad/Desktop) -->
             <div class="hidden md:flex md:items-center relative">
                 <button @click="accountOpen = !accountOpen"
-                        class="text-white font-bold text-sm lg:text-base flex items-center space-x-1">
+                        class="text-white font-bold account-text flex items-center space-x-1">
                     <span class="truncate max-w-24 lg:max-w-none">{{ Auth::user()->name ?? 'Guest' }}</span>
-                    <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
@@ -292,7 +349,7 @@
          x-transition:leave-end="opacity-0 transform -translate-y-2"
          class="md:hidden bg-blue-700 px-4 py-3 space-y-2">
         
-        <!-- Mobile Language Selector (nearby account) -->
+        <!-- Mobile Language Selector -->
         <div class="mb-3">
             <label class="block text-white text-sm mb-1">{{ __('Language') }}</label>
             <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET">
@@ -370,3 +427,4 @@
         </div>
     </div>
 </nav>
+
