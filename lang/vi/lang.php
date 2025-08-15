@@ -17,7 +17,8 @@ return [
         'result' => 'Kết quả',
         'change-password' => 'Đổi mật khẩu',
         'manage-account' => 'Quản lý tài khoản',
-        'log-out' => 'Đăng xuất'
+        'log-out' => 'Đăng xuất',
+        'reports' => 'Báo cáo',
     ],
     'mien-nam' => 'Miền Nam',
     'mien-trung' => 'Miền Trung',

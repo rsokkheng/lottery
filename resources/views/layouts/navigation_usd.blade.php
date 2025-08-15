@@ -258,7 +258,7 @@
                     <div class="relative">
                         <button @click="reportOpen = !reportOpen"
                                 class="not-active-menu hover:text-white ipad-nav-link large-tablet-nav-link flex items-center space-x-1">
-                            <span>{{ __('Reports') }}</span>
+                            <span>{{ __('lang.menu.reports') }}</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>

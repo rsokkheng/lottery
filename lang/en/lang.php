@@ -17,7 +17,8 @@ return [
         'result' => 'Results',
         'change-password' => 'Change Password',
         'manage-account' => 'Manage Account',
-        'log-out' => 'Log out'
+        'log-out' => 'Log out',
+        'reports' => 'Reports',
     ],
     'mien-nam' => 'Mien Nam',
     'mien-trung' => 'Mien Trung',
