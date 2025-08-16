@@ -54,8 +54,46 @@
             }
             
             .responsive-table {
-                min-width: 100%;
-                font-size: 0.75rem;
+                width: 100%;
+                table-layout: fixed;
+                font-size: clamp(0.6rem, 2vw, 0.875rem);
+            }
+            
+            .responsive-table td {
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                white-space: normal;
+                padding: 0.25rem;
+            }
+            
+            /* Remove horizontal overflow on mobile */
+            .table-wrapper {
+                overflow-x: hidden;
+            }
+            
+            /* Auto-sizing columns for mobile */
+            .prize-column {
+                width: 15%;
+                font-size: clamp(0.7rem, 2.5vw, 1rem);
+            }
+            
+            .province-column {
+                font-size: clamp(0.6rem, 2vw, 0.875rem);
+            }
+            
+            /* Auto-size winning numbers */
+            .winning-number {
+                font-size: clamp(0.6rem, 1.8vw, 0.875rem) !important;
+                line-height: 1.2;
+            }
+            
+            /* Auto-size province headers */
+            .province-name {
+                font-size: clamp(0.8rem, 3vw, 1.25rem) !important;
+            }
+            
+            .province-code {
+                font-size: clamp(0.6rem, 2vw, 1rem) !important;
             }
         }
     </style>
@@ -97,21 +135,21 @@
 
             <!-- Table Container -->
             <div class="table-container border border-gray-300 rounded-lg overflow-hidden">
-                <div class="table-wrapper">
+                <div class="table-wrapper overflow-y-auto">
                     <table class="responsive-table border-collapse text-center">
                         <thead class="bg-yellow-600 sticky top-0">
                             <tr class="border-gray-300">
-                                <td class="border-2 py-2 px-2 text-lg max-md:text-sm text-white font-bold min-w-[120px]">
+                                <td class="border-2 py-2 px-1 text-lg max-md:text-sm text-white font-bold prize-column">
                                     {{ $data['date_show'] }}
                                     <input type="hidden" value="{{$data['date_show']}}" id="date_result" name="date_result" />
                                 </td>
                                 @foreach($data['form_result']['schedule'] as $val)
-                                    <td class="border-2 text-white font-bold px-1 sm:px-2 min-w-[100px]">
+                                    <td class="border-2 text-white font-bold px-1 province-column">
                                         <div class="flex-col w-full py-2">
-                                            <div class="text-2xl max-md:text-lg">
+                                            <div class="province-name text-2xl max-md:text-lg">
                                                 {{ $val['province'] }}
                                             </div>
-                                            <div class="text-lg max-md:text-sm">
+                                            <div class="province-code text-lg max-md:text-sm">
                                                 ({{ $val['code'] }})
                                             </div>
                                         </div>
@@ -122,11 +160,11 @@
                         <tbody>
                         @foreach($data['form_result']['result'] as $pKey => $prize)
                             <tr class="{{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
-                                <td style="font-size: 20px; font-weight: 600;" class="border border-gray-300 text-black font-bold text-bold text-xl max-md:text-md py-2 px-2 sticky left-0 {{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
+                                <td style="font-size: 20px; font-weight: 600;" class="border border-gray-300 text-black font-bold text-bold text-xl max-md:text-md py-2 px-1 prize-column {{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
                                     {{ $prize['prize_label'] }}
                                 </td>
                                 @foreach($prize['provinces'] as $province)
-                                    <td class="p-1 sm:p-2 border border-gray-300 align-middle">
+                                    <td class="p-1 border border-gray-300 align-middle province-column">
                                         @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)
                                             @php $c=1; $r=1; @endphp
                                             @foreach($province['row_result'] as $key=>$row)
@@ -134,7 +172,7 @@
                                                     <div class="flex w-full justify-content-between gap-1">
                                                 @endif
                                                 <div class="flex w-full justify-center">
-                                                    <h6 @class([$row['tailwind_class']??'', 'text-bold'])>
+                                                    <h6 class="winning-number {{ $row['tailwind_class']??'' }} text-bold">
                                                         {{ $row['winning_number']??'****'}}
                                                     </h6>
                                                 </div>
@@ -147,7 +185,7 @@
                                         @else
                                             @foreach($province['row_result'] as $row)
                                                 <div class="flex w-full justify-center py-1">
-                                                    <h6 @class([$row['tailwind_class']??'', 'text-bold'])>
+                                                    <h6 class="winning-number {{ $row['tailwind_class']??'' }} text-bold">
                                                         {{ $row['winning_number']??'****'}}
                                                     </h6>
                                                 </div>
