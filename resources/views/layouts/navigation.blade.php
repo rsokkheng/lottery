@@ -206,18 +206,9 @@
                    class="{{ Route::is('bet.bet-winning') ? 'active-menu' : 'not-active-menu' }} nav-link">
                     {{ __('lang.menu.win-report') }}
                 </a>
-
-                <!-- All Reports Links (No Dropdown) -->
-                @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
-                    <a href="{{ route('reports.daily') }}" 
-                       class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} nav-link">
-                        {{ __('lang.menu.daily-report') }}
-                    </a>
-                    <a href="{{ route('reports.monthly-allmember') }}" 
-                       class="{{ Route::is('reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }} nav-link">
-                        {{ __('lang.menu.monthly-report') }}
-                    </a>
-                @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
+                @if(Auth::user()->roles->pluck('name')->contains('admin'))
+                    {{-- Admin --}}
+                   
                     <a href="{{ route('reports.daily-manager') }}" 
                        class="{{ Route::is('reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} nav-link">
                         {{ __('lang.menu.daily-report') }}
@@ -226,8 +217,26 @@
                        class="{{ Route::is('reports.monthly-tracking') ? 'active-menu' : 'not-active-menu' }} nav-link">
                         {{ __('lang.menu.monthly-report') }}
                     </a>
+                @elseif(Auth::user()->roles->pluck('name')->contains('manager'))
+                    {{-- Manager --}}
+                     <a href="{{ route('reports.daily') }}" 
+                       class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} nav-link">
+                        {{ __('lang.menu.daily-report') }}
+                    </a>
+                    <a href="{{ route('reports.monthly-allmember') }}" 
+                       class="{{ Route::is('reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }} nav-link">
+                        {{ __('lang.menu.monthly-report') }}
+                    </a>
+  
+                @elseif(Auth::user()->roles->pluck('name')->contains('member'))
+                    {{-- Member --}}
+                    <a href="{{ route('reports.daily') }}" 
+                       class="{{ Route::is('reports.daily') ? 'active-menu' : 'not-active-menu' }} nav-link">
+                        {{ __('lang.menu.daily-report') }}
+                    </a>
                 @endif
-                
+
+              
                 <a href="{{ route('reports.summary') }}" 
                    class="{{ Route::is('reports.summary') ? 'active-menu' : 'not-active-menu' }} nav-link">
                     {{ __('lang.menu.summary-report') }}

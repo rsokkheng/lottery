@@ -208,7 +208,19 @@
                 </a>
 
                 <!-- All Reports Links (No Dropdown) -->
-                @if(Auth::user()->roles->pluck('name')->intersect(['admin'])->isEmpty())
+        
+                @if(Auth::user()->roles->pluck('name')->contains('admin'))
+                    {{-- Admin --}}
+                    <a href="{{ route('bet-usd.reports.daily-manager') }}" 
+                       class="{{ Route::is('bet-usd.reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} nav-link">
+                        {{ __('lang.menu.daily-report') }}
+                    </a>
+                    <a href="{{ route('bet-usd.reports.monthly-tracking') }}" 
+                       class="{{ Route::is('bet-usd.reports.monthly-tracking') ? 'active-menu' : 'not-active-menu' }} nav-link">
+                        {{ __('lang.menu.monthly-report') }}
+                    </a>
+                @elseif(Auth::user()->roles->pluck('name')->contains('manager'))
+                    {{-- Manager --}}
                     <a href="{{ route('bet-usd.reports.daily') }}" 
                        class="{{ Route::is('bet-usd.reports.daily') ? 'active-menu' : 'not-active-menu' }} nav-link">
                         {{ __('lang.menu.daily-report') }}
@@ -217,14 +229,12 @@
                        class="{{ Route::is('bet-usd.reports.monthly-allmember') ? 'active-menu' : 'not-active-menu' }} nav-link">
                         {{ __('lang.menu.monthly-report') }}
                     </a>
-                @elseif(Auth::user()->roles->pluck('name')->intersect(['manager'])->isEmpty())
-                    <a href="{{ route('bet-usd.reports.daily-manager') }}" 
-                       class="{{ Route::is('bet-usd.reports.daily-manager') ? 'active-menu' : 'not-active-menu' }} nav-link">
+  
+                @elseif(Auth::user()->roles->pluck('name')->contains('member'))
+                    {{-- Member --}}
+                    <a href="{{ route('bet-usd.reports.daily') }}" 
+                       class="{{ Route::is('bet-usd.reports.daily') ? 'active-menu' : 'not-active-menu' }} nav-link">
                         {{ __('lang.menu.daily-report') }}
-                    </a>
-                    <a href="{{ route('bet-usd.reports.monthly-tracking') }}" 
-                       class="{{ Route::is('bet-usd.reports.monthly-tracking') ? 'active-menu' : 'not-active-menu' }} nav-link">
-                        {{ __('lang.menu.monthly-report') }}
                     </a>
                 @endif
                 
