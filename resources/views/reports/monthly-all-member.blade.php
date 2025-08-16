@@ -62,7 +62,7 @@
                         <thead>
                             <tr class="bg-blue-500 border text-white font-bold text-nowrap">
                                 <th class="py-2 border border-white">{{__('message.no')}}</th>
-                                <th class="py-2 border border-white">{{__('message.date')}}</th>
+                               
                                 <th class="py-2 border border-white">{{__('message.account')}}</th>
                                 <th class="py-2 border border-white">{{__('message.invoice')}}</th>
                                 <th class="py-2 border border-white">{{__('message.turnover')}}</th>
@@ -99,7 +99,7 @@
                                 @endphp
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
+                                  
                                     <td class="py-2 px-1 border border-gray-300">
                                     <a href="{{ route('reports.tracking-agent-member', ['id' => $row->user_id]) }}" class="text-blue-600 hover:underline">
                                             {{ $row->account }}
@@ -122,7 +122,7 @@
                             @endforeach
 
                             <tr class="border border-gray-300 hover:bg-gray-100 bg-gray-200 font-bold">
-                                <td colspan="3" class="text-center py-2 px-2 border border-gray-300">Total</td>
+                                <td colspan="2" class="text-center py-2 px-2 border border-gray-300">Total</td>
                                 <td class="text-center py-2 px-2 border border-gray-300">{{ $totalInvoice }}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300">{{ number_format( $turNover, 3, '.', '') }}</td>
                                 <td class="text-right py-2 px-2 border border-gray-300"> {{ number_format($totalCommission, 3, '.', '') }}</td>

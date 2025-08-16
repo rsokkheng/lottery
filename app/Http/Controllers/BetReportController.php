@@ -562,8 +562,7 @@ class BetReportController extends Controller
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
                 DB::raw('SUM(bets.total_amount - (bets.total_amount * bet_package_configurations.rate / 100)) AS commission'),
-                DB::raw('SUM(IFNULL(win_summary.total_win_amount, 0)) AS Compensate'),
-                DB::raw('DATE(bets.bet_date) AS bet_date')
+                DB::raw('SUM(IFNULL(win_summary.total_win_amount, 0)) AS Compensate')
             )
             ->leftJoinSub($subQuery, 'win_summary', function ($join) {
                 $join->on('win_summary.bet_id', '=', 'bets.id');
@@ -581,9 +580,8 @@ class BetReportController extends Controller
             ->groupBy(
                 'bets.user_id',
                 'users.username',
-                DB::raw('DATE(bets.bet_date)')
             )
-            ->orderByRaw('DATE(bets.bet_date) DESC')
+            ->orderByDesc(DB::raw('COUNT(DISTINCT bets.bet_receipt_id)'))
             ->get();
             return view('reports.monthly-all-member', compact('data','managerName','startDate','endDate','company','company_id'));
         } catch (\Exception $exception) {
