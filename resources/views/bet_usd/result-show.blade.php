@@ -56,7 +56,7 @@
             .responsive-table {
                 width: 100%;
                 table-layout: fixed;
-                font-size: clamp(0.6rem, 2vw, 0.875rem);
+                font-size: clamp(0.58rem, 1.93vw, 0.85rem);
             }
             
             .responsive-table td {
@@ -64,36 +64,44 @@
                 overflow-wrap: break-word;
                 white-space: normal;
                 padding: 0.25rem;
+                vertical-align: top;
             }
             
-            /* Remove horizontal overflow on mobile */
+            /* Remove horizontal scroll - fit to screen */
             .table-wrapper {
                 overflow-x: hidden;
             }
             
-            /* Auto-sizing columns for mobile */
+            /* Auto-sizing columns for mobile - equal width distribution */
             .prize-column {
-                width: 15%;
-                font-size: clamp(0.7rem, 2.5vw, 1rem);
+                width: 20%;
+                font-size: clamp(0.68rem, 2.42vw, 0.97rem);
             }
             
             .province-column {
-                font-size: clamp(0.6rem, 2vw, 0.875rem);
+                width: 20%;
+                font-size: clamp(0.58rem, 1.93vw, 0.85rem);
             }
             
-            /* Auto-size winning numbers */
+            /* Auto-size winning numbers - reduced by 30% */
             .winning-number {
-                font-size: clamp(0.6rem, 1.8vw, 0.875rem) !important;
-                line-height: 1.2;
+                font-size: clamp(0.58rem, 1.74vw, 0.85rem) !important;
+                line-height: 1.3;
+                margin: 0.1rem 0;
             }
             
-            /* Auto-size province headers */
+            /* Auto-size province headers - reduced by 30% */
             .province-name {
-                font-size: clamp(0.8rem, 3vw, 1.25rem) !important;
+                font-size: clamp(0.77rem, 2.9vw, 1.21rem) !important;
             }
             
             .province-code {
-                font-size: clamp(0.6rem, 2vw, 1rem) !important;
+                font-size: clamp(0.58rem, 1.93vw, 0.97rem) !important;
+            }
+            
+            /* Prize labels reduced by 30% */
+            .prize-label-mobile {
+                font-size: clamp(0.68rem, 2.42vw, 0.97rem) !important;
             }
         }
     </style>
@@ -160,16 +168,16 @@
                         <tbody>
                         @foreach($data['form_result']['result'] as $pKey => $prize)
                             <tr class="{{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
-                                <td style="font-size: 20px; font-weight: 600;" class="border border-gray-300 text-black font-bold text-bold text-xl max-md:text-md py-2 px-1 prize-column {{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
+                                <td style="font-size: 20px; font-weight: 600;" class="border border-gray-300 text-black font-bold text-bold text-xl max-md:text-md py-2 px-1 prize-column prize-label-mobile {{$loop->even ? 'bg-gray-50' : 'bg-white'}}">
                                     {{ $prize['prize_label'] }}
                                 </td>
                                 @foreach($prize['provinces'] as $province)
-                                    <td class="p-1 border border-gray-300 align-middle province-column">
+                                    <td class="p-1 border border-gray-300 align-top province-column">
                                         @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)
                                             @php $c=1; $r=1; @endphp
                                             @foreach($province['row_result'] as $key=>$row)
                                                 @if($c == 1)
-                                                    <div class="flex w-full justify-content-between gap-1">
+                                                    <div class="flex w-full justify-content-between gap-1 mb-1">
                                                 @endif
                                                 <div class="flex w-full justify-center">
                                                     <h6 class="winning-number {{ $row['tailwind_class']??'' }} text-bold">
@@ -184,7 +192,7 @@
                                             @endforeach
                                         @else
                                             @foreach($province['row_result'] as $row)
-                                                <div class="flex w-full justify-center py-1">
+                                                <div class="flex w-full justify-center py-0.5">
                                                     <h6 class="winning-number {{ $row['tailwind_class']??'' }} text-bold">
                                                         {{ $row['winning_number']??'****'}}
                                                     </h6>
