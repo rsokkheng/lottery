@@ -521,9 +521,7 @@ class BetReportUSDController extends Controller
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
                 DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
-                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
-                DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
-                DB::raw('MAX(schedule.draw_day) AS draw_day')
+                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate')
             )
             ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
@@ -538,10 +536,9 @@ class BetReportUSDController extends Controller
             })
             ->groupBy(
                 'bet_usd.user_id',
-                'users.username',
-                DB::raw('DATE(bet_usd.bet_date)')
+                'users.username'
             )
-            ->orderByRaw('DATE(bet_usd.bet_date) DESC')
+            ->orderByDesc(DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id)'))
             ->get();
             return view('report_usd.monthly-track-member', compact('data','managerName','startDate','endDate','company', 'company_id'));
         } catch (\Exception $exception) {
