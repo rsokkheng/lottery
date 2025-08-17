@@ -266,7 +266,7 @@ public function getBetByReceiptId($id)
         $grouped = collect($items)
             // Group by number_format + digit_format + total_amount + created_at (matching SQL GROUP BY)
             ->groupBy(function ($item) {
-                $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i:s');
+                $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i');
                 return "{$item['number']}_{$item['digit_format']}_{$item['total_amount']}_{$createdAtTimestamp}";
             })
             ->map(function ($group) {
@@ -353,7 +353,7 @@ public function printReceiptNo($receiptNo)
     // Group by number_format + digit_format + total_amount + created_at (matching SQL GROUP BY)
     $grouped = collect($items)
         ->groupBy(function ($item) {
-            $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i:s');
+            $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i');
             return "{$item['number']}_{$item['digit_format']}_{$item['total_amount']}_{$createdAtTimestamp}";
         })
         ->map(function ($group) {
