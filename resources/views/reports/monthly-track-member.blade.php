@@ -3,60 +3,73 @@
     <style>
 
     </style>
-    <div class="flex-col bg-white rounded-lg px-4 py-4">
-        <div class="flex w-full space-x-2">
-            <div class="">
-                @php
-                    $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
-                @endphp
+<div class="bg-white rounded-lg px-3 py-4 sm:px-4">
+    <div class="flex flex-col lg:flex-row lg:justify-between gap-4">
+        <!-- Form Section -->
+        <div class="flex-1">
+            @php
+                $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
+            @endphp
 
-                <div class="flex items-center gap-4">
-                    <div>
-                        <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
-                        <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
-                            datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                            class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
-                    </div>
-                    <div>
-                        <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
-                        <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
-                            datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                            class="px-4 py-2 border rounded bg-white text-gray-700 shadow">
-                    </div>
-                    <div class="">
-                        <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
-                        <div class="w-full lg:w-48">
-                            <select id="company" class="rounded w-full">
-                                @foreach ($company as $val)
-                                    @if ($company_id == $val['id'])
-                                        <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                                    @else
-                                        <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="applyDateFilter()" class="px-6 py-2 bg-blue-600 text-white rounded shadow"
-                            style="margin-top: 20px;">
-                            {{ __('message.search') }}
-                        </button>
-                    </div>
-                    <div>
-                        <button onclick="clearDateFilter()" class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow"
-                            style="margin-top: 20px;">
-                            {{ __('message.clear') }}
-                        </button>
-                    </div>
+            <div class="flex flex-wrap gap-4">
+                <!-- Start Date -->
+                <div class="flex-1 min-w-[150px] max-w-[200px]">
+                    <label for="startDate" class="block text-sm text-gray-700 mb-1">{{ __('message.start_date') }}</label>
+                    <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
+                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
+                        class="w-full px-3 py-2 text-sm border rounded bg-white text-gray-700 shadow focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- End Date -->
+                <div class="flex-1 min-w-[150px] max-w-[200px]">
+                    <label for="endDate" class="block text-sm text-gray-700 mb-1">{{ __('message.end_date') }}</label>
+                    <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
+                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
+                        class="w-full px-3 py-2 text-sm border rounded bg-white text-gray-700 shadow focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Company -->
+                <div class="flex-1 min-w-[150px] max-w-[200px]">
+                    <label class="block text-sm text-gray-700 mb-1">{{ __('message.company') }}</label>
+                    <select id="company" class="w-full px-3 py-2 text-sm border rounded bg-white text-gray-700 shadow focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        @foreach ($company as $val)
+                            @if ($company_id == $val['id'])
+                                <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
+                            @else
+                                <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Search Button -->
+                <div class="flex items-end">
+                    <button onclick="applyDateFilter()"
+                        class="px-4 py-2 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition-colors w-full sm:w-auto">
+                        {{ __('message.search') }}
+                    </button>
+                </div>
+
+                <!-- Clear Button -->
+                <div class="flex items-end">
+                    <button onclick="clearDateFilter()"
+                        class="px-4 py-2 text-sm bg-gray-300 text-gray-800 rounded shadow hover:bg-gray-400 transition-colors w-full sm:w-auto">
+                        {{ __('message.clear') }}
+                    </button>
+                </div>
+
+                <!-- Back Button with Manager Name -->
+                <div class="flex items-end">
+                    <a href="{{ route('reports.monthly-tracking') }}" 
+                        class="px-4 py-2 text-sm bg-red-600 text-white rounded shadow hover:bg-red-700 transition-colors w-full sm:w-auto inline-flex items-center justify-center space-x-1">
+                        <span>{{ __('message.back') }}</span>
+                        <span>{{ $managerName->username }}</span>
+                    </a>
                 </div>
             </div>
-            <a href="{{ route('reports.monthly-tracking') }}" style="text-decoration: none; margin-top: 20px; "
-                class="text-blue-600 hover:underline inline-flex items-center">
-                <span style="padding: 5px; background-color: red; color: white;">{{ __('message.back') }}</span>
-                <span>{{ $managerName->username }}</span>
-            </a>
         </div>
+    </div>
+</div>
         <div class="flex w-full">
             <div class="w-full overflow-auto py-4">
                 <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
