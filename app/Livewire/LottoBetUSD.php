@@ -6,9 +6,10 @@ use Carbon\Carbon;
 use App\Models\BetUSD;
 use Livewire\Component;
 use App\Models\BetNumberUSD;
-use App\Models\BetReceiptUSD;
+use App\Models\UserBetLimit;
 use App\Enums\MultiplierEnum;
 use App\Models\BalanceReport;
+use App\Models\BetReceiptUSD;
 use App\Enums\MultiplierHNEnum;
 use App\Models\AccountManagement;
 use App\Models\BetLotterySchedule;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNEnum;
 use App\Models\BalanceReportOutstanding;
 use App\Models\BetLotteryPackageConfiguration;
+use Illuminate\Support\Facades\Log;
 
 class LottoBetUSD extends Component
 {
@@ -463,7 +465,12 @@ class LottoBetUSD extends Component
                     ->where(['bet_type' => $this->digit[$key], 'has_special' => $has_spacial])->first();
                     $rate = $betPackage?->rate / 100;
                     foreach ($this->schedules as $key_prov => $schedule) {
-                        if ($this->province_body_check[$key_prov][$key] && intval($this->total_amount[$key]) > 0) {
+                        if ($this->province_body_check[$key_prov][$key] && $this->total_amount[$key] > 0) {
+                            $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key]);
+                            if ($betLimit) {
+                                $this->dispatch('bet-saved', message: $betLimit, type: 'error');
+                                return back();
+                            }
                             //insert bet
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,
@@ -670,7 +677,75 @@ class LottoBetUSD extends Component
             return redirect()->to('lotto_usd/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
-
+    private function validationBetLimitAmount($number, $key, $digit)
+    {
+        $betTypes = [
+            'a' => [
+                'amount' => $this->a_amount[$key] ?? 0,
+                'check' => $this->a_check[$key],
+            ],
+            'b' => [
+                'amount' => $this->b_amount[$key] ?? 0,
+                'check' => $this->b_check[$key],
+            ],
+            'ab' => [
+                'amount' => $this->ab_amount[$key] ?? 0,
+                'check' => $this->ab_check[$key],
+            ],
+            'roll' => [
+                'amount' => $this->roll_amount[$key] ?? 0,
+                'check' => $this->roll_check[$key],
+            ],
+            'roll7' => [
+                'amount' => $this->roll7_amount[$key] ?? 0,
+                'check' => $this->roll7_check[$key],
+            ],
+            'roll_parlay' => [
+                'amount' => $this->roll_parlay_amount[$key] ?? 0,
+                'check' => $this->roll_parlay_check[$key],
+            ],
+        ];
+        if (strpos($number, '#') !== false) {
+            if($this->roll_parlay_amount[$key] > 0) {
+                $digitKey = ($digit === 'RP3' && $this->roll_parlay_check[$key] != 1) ? 'RP3' : 'RP2';
+                $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
+                        ->where('digit_key', $digitKey)
+                        ->first();
+                    if ($checkBetLimit) {
+                    if ($this->roll_parlay_amount[$key] < $checkBetLimit->min_bet) {
+                        $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
+                        // You can now use $message variable or return it
+                        return $message;
+                    }
+                    if ($this->roll_parlay_amount[$key] > $checkBetLimit->max_bet) {
+                        $message = "Your bet amount exceeds the maximum limit ({$checkBetLimit->max_bet})";
+                        // You can now use $message variable or return it
+                        return $message;
+                    }
+                }
+            }
+        }else{
+            foreach ($betTypes as $info) {
+                if ($info['amount'] > 0) {
+                        $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
+                            ->where('digit_key', $digit)
+                            ->first();
+                        if ($checkBetLimit) {
+                        if ($info['amount'] < $checkBetLimit->min_bet) {
+                            $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
+                            // You can now use $message variable or return it
+                            return $message;
+                        }
+                        if ($info['amount'] > $checkBetLimit->max_bet) {
+                            $message = "Your bet amount exceeds the maximum limit ({$checkBetLimit->max_bet})";
+                            // You can now use $message variable or return it
+                            return $message;
+                        }
+                    }
+                }
+            }
+        }
+    }
     private function calculateAmountOutstanding($number, $key, $code, $rate)
     {
         $betTypes = [
