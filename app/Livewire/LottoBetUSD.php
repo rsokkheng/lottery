@@ -718,7 +718,7 @@ class LottoBetUSD extends Component
                         return $message;
                     }
                     if ($this->roll_parlay_amount[$key] > $checkBetLimit->max_bet) {
-                        $message = "Your bet amount exceeds the maximum limit ({$checkBetLimit->max_bet})";
+                        $message = "Your bet amount exceeds the maximum limit";
                         // You can now use $message variable or return it
                         return $message;
                     }
@@ -737,7 +737,7 @@ class LottoBetUSD extends Component
                             return $message;
                         }
                         if ($info['amount'] > $checkBetLimit->max_bet) {
-                            $message = "Your bet amount exceeds the maximum limit ({$checkBetLimit->max_bet})";
+                            $message = "Your bet amount exceeds the maximum limit";
                             // You can now use $message variable or return it
                             return $message;
                         }
