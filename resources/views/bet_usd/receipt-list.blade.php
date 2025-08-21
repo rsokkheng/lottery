@@ -259,8 +259,8 @@
                     }
 
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (VND)';
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (VND)';
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (USD)';
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (USD)';
                 })
                 .catch(error => console.error('Error:', error));
         }
