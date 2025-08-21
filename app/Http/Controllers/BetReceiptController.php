@@ -51,6 +51,10 @@ class BetReceiptController extends Controller
         $subQuery = DB::table('bet_numbers as bn')
             ->join('bet_winning as bw', 'bw.bet_number_id', '=', 'bn.id')
             ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win_amount'))
+            ->when(!is_null($date), function ($q) use ($date) {
+                $q->where('bw.created_at', '>=', Carbon::parse($date)->startOfDay()->format('Y-m-d H:i:s'))
+                  ->where('bw.created_at', '<=', Carbon::parse($date)->endOfDay()->format('Y-m-d H:i:s'));
+            })
             ->groupBy('bn.bet_id');
         
         $data = DB::table('bets')

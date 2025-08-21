@@ -22,7 +22,7 @@
             </div>
             <div class="w-full sm:w-40">
                 <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full"
-                    placeholder="Receipt No">
+                    placeholder="{{ __('message.receipt_no') }}">
             </div>
             <div class="w-full sm:w-16">
                 <button
@@ -73,43 +73,43 @@
                             @endphp
                             @foreach ($data as $key => $row)
                                 @php
-                                    $totalAmount += $row['total_amount'] ?? 0;
-                                    $totalCommission += $row['commission'] ?? 0;
-                                    $totalNetAmount += $row['net_amount'] ?? 0;
-                                    $totalCompensate += $row['compensate'] ?? 0;
+                                    $totalAmount += $row->total_amount ?? 0;
+                                    $totalCommission += $row->commission ?? 0;
+                                    $totalNetAmount += $row->net_amount ?? 0;
+                                    $totalCompensate += $row->compensate ?? 0;
                                 @endphp
                                 <tr
-                                    class="border border-gray-300 hover:bg-gray-100 {{ $row['is_win'] ? 'bg-red-100 hover:bg-red-200 text-red-500' : '' }} ">
+                                    class="border border-gray-300 hover:bg-gray-100 {{ $row->compensate > 0 ? 'bg-red-100 hover:bg-red-200 text-red-500' : '' }} ">
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
-                                    <td onclick="handleShowBet('{{ $row['id'] }}')"
+                                    <td onclick="handleShowBet('{{ $row->receipt_id }}')"
                                         class="py-2 px-1 border border-gray-300">
                                         <a href="#" data-modal-target="static-modal"
                                             data-modal-toggle="static-modal"
                                             class="active text-blue-800 hover:underline whitespace-nowrap text-[12px] sm:text-base"
                                             data-toggle="modal"
-                                            data-target="#detailModal">{{ $row['receipt_no'] ?? '' }}</a>
+                                            data-target="#detailModal">{{ $row->receipt_no ?? '' }}</a>
                                     </td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $row['user_name'] ?? '' }}</td>
+                                        {{ $row->account ?? '' }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $row['date'] ?? '' }}</td>
+                                        {{ $row->bet_date ?? '' }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $row['currency'] ?? '' }}</td>
+                                        USD</td>
                                     <td
                                         class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row['total_amount'] ?? 0, 3, '.', '') }}</td>
+                                        {{ number_format($row->total_amount, 3, '.', '') }}</td>
                                     <td
                                         class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row['commission'] ?? 0, 3, '.', '') }}</td>
+                                        {{ number_format($row->commission, 3, '.', '') }}</td>
                                     <td
                                         class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row['net_amount'] ?? 0, 3, '.', '') }}</td>
+                                        {{ number_format($row->net_amount, 3, '.', '') }}</td>
                                     <td
                                         class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row['compensate'] ?? 0, 3, '.', '') }}</td>
+                                        {{ number_format($row->compensate, 3, '.', '') }}</td>
                                 </tr>
                             @endforeach
                             <tr class="border border-gray-300 hover:bg-gray-100">
@@ -259,8 +259,8 @@
                     }
 
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (USD)';
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (USD)';
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (VND)';
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (VND)';
                 })
                 .catch(error => console.error('Error:', error));
         }
