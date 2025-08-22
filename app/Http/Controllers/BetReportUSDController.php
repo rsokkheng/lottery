@@ -108,17 +108,23 @@ class BetReportUSDController extends Controller
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
+            $subQuery = DB::table('bet_number_usd as bn')
+            ->join('bet_winning_usd as bw', 'bw.bet_number_id', '=', 'bn.id')
+            ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win_amount'))
+            ->groupBy('bn.bet_id');
             $data = DB::table('bet_usd')
             ->select(
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total'),
                 DB::raw('SUM(bet_usd.total_amount) AS Turnover'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS NetAmount'),
                 DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS Commission'),
-                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('SUM(IFNULL(win_summary.total_win_amount, 0)) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS date'),
                 DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
-            ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
+            ->leftJoinSub($subQuery, 'win_summary', function ($join) {
+                $join->on('win_summary.bet_id', '=', 'bet_usd.id');
+            })
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
@@ -179,6 +185,10 @@ class BetReportUSDController extends Controller
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
+            $subQuery = DB::table('bet_number_usd as bn')
+            ->join('bet_winning_usd as bw', 'bw.bet_number_id', '=', 'bn.id')
+            ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win_amount'))
+            ->groupBy('bn.bet_id');
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
@@ -187,11 +197,13 @@ class BetReportUSDController extends Controller
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
                 DB::raw('SUM(bet_usd.total_amount - (bet_usd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
-                DB::raw('COALESCE(SUM(bet_winning_usd.win_amount), 0) AS Compensate'),
+                DB::raw('SUM(IFNULL(win_summary.total_win_amount, 0)) AS Compensate'),
                 DB::raw('DATE(bet_usd.bet_date) AS bet_date'),
                 DB::raw('MAX(schedule.draw_day) AS draw_day')
             )
-            ->leftJoin('bet_winning_usd', 'bet_winning_usd.bet_id', '=', 'bet_usd.id')
+            ->leftJoinSub($subQuery, 'win_summary', function ($join) {
+                $join->on('win_summary.bet_id', '=', 'bet_usd.id');
+            })
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
