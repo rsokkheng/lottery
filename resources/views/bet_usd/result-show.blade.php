@@ -111,7 +111,7 @@
             <!-- Date Control Section -->
             <div class="date-controls flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <a class="hidden" id="href_show_result" href="{{ route('bet.result-show') }}"></a>
+                    <a class="hidden" id="href_show_result" href="{{ route('bet-usd.result-show') }}"></a>
                     <input type="date" 
                            id="date_input" 
                            class="px-3 py-2 border-2 border-blue-400 rounded focus:border-blue-600 focus:outline-none text-sm sm:text-base w-full sm:w-auto"
