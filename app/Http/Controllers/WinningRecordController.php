@@ -96,7 +96,7 @@ class WinningRecordController extends Controller
                 $getHashWinNumberVND = $this->resultVNDController->generateHashWinBet($resultDate, $scheduleIdsByCurrentBet);
                 $insertWinNumberVND = [...$getNormalWinNumberVND,...$getHashWinNumberVND];
                 if(count($insertWinNumberVND)) {
-                    $recordsCreated = $this->resultVNDController->insertBetWinning($insertWinNumberVND);
+                    $recordsCreated = $this->resultVNDController->insertBetWinning($insertWinNumberVND,$resultDate);
                     if (count($recordsCreated)) {
                         DB::table('bet_winning as winning')
                             ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
@@ -114,7 +114,7 @@ class WinningRecordController extends Controller
                 $getHashWinNumberUSD = $this->resultUSDController->generateHashWinBet($resultDate, $scheduleIdsByCurrentBet);
                 $insertWinNumberUSD = [...$getNormalWinNumberUSD,...$getHashWinNumberUSD];
                 if(count($insertWinNumberUSD)) {
-                    $recordsCreated = $this->resultUSDController->insertBetWinning($insertWinNumberUSD);
+                    $recordsCreated = $this->resultUSDController->insertBetWinning($insertWinNumberUSD,$resultDate);
                     if (count($recordsCreated)) {
                         DB::table('bet_winning_usd as winning')
                             ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))

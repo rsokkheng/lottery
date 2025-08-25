@@ -450,7 +450,7 @@ class LotteryResultUSDController extends Controller
     }
 
 
-    public function insertBetWinning($data){
+    public function insertBetWinning($data,$date){
         $betAmount = [];
         $sumAmount = 0;
         $save = [];
@@ -485,6 +485,7 @@ class LotteryResultUSDController extends Controller
                 $betWin = BetWinningUSD::query()->updateOrCreate($matchThese,[
                     'win_amount'=>$sumAmount,
                     'bet_number_id' => $item['bet_number_id'],
+                    'created_at' => $date,
                 ]);
                 $save[] = BetWinningRecordUSD::query()->insert([
                     'bet_winning_id'=> $betWin->id,
