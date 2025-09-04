@@ -875,8 +875,10 @@ class LotteryResultController extends Controller
 
     public function matchWinNumberFromResults($date, $scheduleId, $number, $roll = []): array
     {
+        
+
         return DB::table('bet_lottery_results')
-            ->select('result_id', DB::raw($number.' as bet_number'))
+              ->select('result_id', DB::raw("'".$number."' as bet_number"))
             ->where('draw_date', $date)
             ->where('lottery_schedule_id', $scheduleId)
             ->whereIn('prize_level', $roll)
@@ -889,7 +891,7 @@ class LotteryResultController extends Controller
     public function matchWinNumberFromResultsRoll7($date, $scheduleId, $number): array
     {
         return DB::table('bet_lottery_results')
-            ->select('result_id', DB::raw($number.' as bet_number'))
+              ->select('result_id', DB::raw("'".$number."' as bet_number"))
 //            ->whereIn('prize_level', ['GiaiBay','GiaiSau','GiaiNam','GiaiDB'])
 //            ->whereIn('prize_level', $this->roll7)
             ->where(function ($q) use ($number, $date, $scheduleId){
