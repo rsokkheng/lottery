@@ -711,11 +711,11 @@ class LottoBetUSD extends Component
                 $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                         ->where('digit_key', $digitKey)
                         ->first();
-                   $amountLimit = BetUSD::join('bet_number_usd', 'bets.id', '=', 'bet_number_usd.bet_id')
-                    ->where('bets.user_id', $this->user->id)
+                   $amountLimit = BetUSD::join('bet_number_usd', 'bet_usd.id', '=', 'bet_number_usd.bet_id')
+                    ->where('bet_usd.user_id', $this->user->id)
                     ->where('bet_number_usd.generated_number', $number)
                     ->where('bet_number_usd.digit_length', $digit)
-                    ->whereDate('bets.bet_date', $this->currentDate)
+                    ->whereDate('bet_usd.bet_date', $this->currentDate)
                     ->selectRaw(' COALESCE(SUM(bet_number_usd.roll_parlay_amount),0) as total')
                     ->value('total');
                     if ($checkBetLimit) {
@@ -737,11 +737,11 @@ class LottoBetUSD extends Component
                         $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                             ->where('digit_key', $digit)
                             ->first();
-                        $amountLimit = BetUSD::join('bet_number_usd', 'bets.id', '=', 'bet_number_usd.bet_id')
-                        ->where('bets.user_id', $this->user->id)
+                        $amountLimit = BetUSD::join('bet_number_usd', 'bet_usd.id', '=', 'bet_number_usd.bet_id')
+                        ->where('bet_usd.user_id', $this->user->id)
                         ->where('bet_number_usd.original_number', $number)
                         ->where('bet_number_usd.digit_length', intval  ($digit))
-                        ->whereDate('bets.bet_date', $this->currentDate)
+                        ->whereDate('bet_usd.bet_date', $this->currentDate)
                         ->selectRaw('
                         COALESCE(SUM(bet_number_usd.a_amount),0) 
                         + COALESCE(SUM(bet_number_usd.b_amount),0) 
