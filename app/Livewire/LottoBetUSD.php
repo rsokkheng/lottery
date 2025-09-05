@@ -711,13 +711,20 @@ class LottoBetUSD extends Component
                 $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                         ->where('digit_key', $digitKey)
                         ->first();
+                   $amountLimit = BetUSD::join('bet_number_usd', 'bets.id', '=', 'bet_number_usd.bet_id')
+                    ->where('bets.user_id', $this->user->id)
+                    ->where('bet_number_usd.generated_number', $number)
+                    ->where('bet_number_usd.digit_length', $digit)
+                    ->whereDate('bets.bet_date', $this->currentDate)
+                    ->selectRaw(' COALESCE(SUM(bet_number_usd.roll_parlay_amount),0) as total')
+                    ->value('total');
                     if ($checkBetLimit) {
                     if ($this->roll_parlay_amount[$key] < $checkBetLimit->min_bet) {
                         $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
                         // You can now use $message variable or return it
                         return $message;
                     }
-                    if ($this->roll_parlay_amount[$key] > $checkBetLimit->max_bet) {
+                    if (($amountLimit + $this->roll_parlay_amount[$key]) > $checkBetLimit->max_bet) {
                         $message = "Your bet amount exceeds the maximum limit";
                         // You can now use $message variable or return it
                         return $message;
@@ -730,13 +737,27 @@ class LottoBetUSD extends Component
                         $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                             ->where('digit_key', $digit)
                             ->first();
+                        $amountLimit = BetUSD::join('bet_number_usd', 'bets.id', '=', 'bet_number_usd.bet_id')
+                        ->where('bets.user_id', $this->user->id)
+                        ->where('bet_number_usd.original_number', $number)
+                        ->where('bet_number_usd.digit_length', intval  ($digit))
+                        ->whereDate('bets.bet_date', $this->currentDate)
+                        ->selectRaw('
+                        COALESCE(SUM(bet_number_usd.a_amount),0) 
+                        + COALESCE(SUM(bet_number_usd.b_amount),0) 
+                        + COALESCE(SUM(bet_number_usd.ab_amount),0) 
+                        + COALESCE(SUM(bet_number_usd.roll_amount),0) 
+                        + COALESCE(SUM(bet_number_usd.roll7_amount),0) 
+                        + COALESCE(SUM(bet_number_usd.roll_parlay_amount),0) as total
+                        ')
+                        ->value('total');
                         if ($checkBetLimit) {
                         if ($info['amount'] < $checkBetLimit->min_bet) {
                             $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
                             // You can now use $message variable or return it
                             return $message;
                         }
-                        if ($info['amount'] > $checkBetLimit->max_bet) {
+                        if (($info['amount'] + $amountLimit) > $checkBetLimit->max_bet) {
                             $message = "Your bet amount exceeds the maximum limit";
                             // You can now use $message variable or return it
                             return $message;
