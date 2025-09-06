@@ -466,7 +466,7 @@ class LottoBetUSD extends Component
                     $rate = $betPackage?->rate / 100;
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key] && $this->total_amount[$key] > 0) {
-                            $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key]);
+                            $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key],$schedule->id);
                             if ($betLimit) {
                                 $this->dispatch('bet-saved', message: $betLimit, type: 'error');
                                 return back();
@@ -677,7 +677,7 @@ class LottoBetUSD extends Component
             return redirect()->to('lotto_usd/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
-    private function validationBetLimitAmount($number, $key, $digit)
+    private function validationBetLimitAmount($number, $key, $digit, $scheduleId)
     {
         $betTypes = [
             'a' => [
@@ -715,6 +715,7 @@ class LottoBetUSD extends Component
                     ->where('bet_usd.user_id', $this->user->id)
                     ->where('bet_number_usd.generated_number', $number)
                     ->where('bet_number_usd.digit_length', $digit)
+                    ->where('bet_usd.bet_schedule_id', $scheduleId)
                     ->whereDate('bet_usd.bet_date', $this->currentDate)
                     ->selectRaw(' COALESCE(SUM(bet_number_usd.roll_parlay_amount),0) as total')
                     ->value('total');
@@ -741,6 +742,7 @@ class LottoBetUSD extends Component
                         ->where('bet_usd.user_id', $this->user->id)
                         ->where('bet_number_usd.original_number', $number)
                         ->where('bet_number_usd.digit_length', intval  ($digit))
+                        ->where('bet_usd.bet_schedule_id', $scheduleId)
                         ->whereDate('bet_usd.bet_date', $this->currentDate)
                         ->selectRaw('
                         COALESCE(SUM(bet_number_usd.a_amount),0) 

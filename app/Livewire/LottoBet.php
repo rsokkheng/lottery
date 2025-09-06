@@ -481,7 +481,7 @@ class LottoBet extends Component
                     $rate = $betPackage?->rate / 100;
                     foreach ($this->schedules as $key_prov => $schedule) {
                         if ($this->province_body_check[$key_prov][$key] && $this->total_amount[$key] > 0) {
-                            $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key]);
+                            $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key],$schedule->id);
                             if ($betLimit) {
                                 $this->dispatch('bet-saved', message: $betLimit, type: 'error');
                                 return back();
@@ -693,7 +693,7 @@ class LottoBet extends Component
             return redirect()->to('lotto_vn/bet_receipt/' . $betReceipt->receipt_no);
         }
     }
-    private function validationBetLimitAmount($number, $key, $digit)
+    private function validationBetLimitAmount($number, $key, $digit, $scheduleId)
     {
         $betTypes = [
             'a' => [
@@ -733,6 +733,7 @@ class LottoBet extends Component
                     ->where('bet_numbers.generated_number', $number)
                     ->where('bet_numbers.digit_length', $digit)
                     ->whereDate('bets.bet_date', $this->currentDate)
+                    ->where('bets.bet_schedule_id', $scheduleId)
                     ->selectRaw(' COALESCE(SUM(bet_numbers.roll_parlay_amount),0) as total')
                     ->value('total');
 
@@ -759,6 +760,7 @@ class LottoBet extends Component
                         ->where('bets.user_id', $this->user->id)
                         ->where('bet_numbers.original_number', $number)
                         ->where('bet_numbers.digit_length', intval  ($digit))
+                        ->where('bets.bet_schedule_id', $scheduleId)
                         ->whereDate('bets.bet_date', $this->currentDate)
                         ->selectRaw('
                         COALESCE(SUM(bet_numbers.a_amount),0) 
