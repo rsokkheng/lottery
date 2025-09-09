@@ -459,7 +459,18 @@ class LottoBet extends Component
                         ]);
                 }            
                 // generate no invoice
-                $invoiceNumber = 'INV-' . str_pad($this->betReceipt->max('id') + 1, 8, '0', STR_PAD_LEFT);
+               // generate invoice number: check if exists, increment if exists, else use max(id)+1
+                $lastReceipt = $this->betReceipt->orderByDesc('id')->first();
+                if ($lastReceipt && isset($lastReceipt->receipt_no)) {
+                    // Extract number from receipt_no (e.g., 'INV-00000001')
+                    $matches = [];
+                    preg_match('/INV-(\d+)/', $lastReceipt->receipt_no, $matches);
+                    $nextNumber = isset($matches[1]) ? ((int)$matches[1] + 1) : ($lastReceipt->id + 1);
+                } else {
+                    $nextNumber = $this->betReceipt->max('id') + 1;
+                }
+                $invoiceNumber = 'INV-' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+                
                 // create bet receipt
                 $betReceipt = $this->betReceipt->create([
                     'receipt_no' => $invoiceNumber,
