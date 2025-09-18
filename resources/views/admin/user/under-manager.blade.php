@@ -75,8 +75,8 @@
                             @endif
                             <td>0</td>
                             <td>{{ $user->created_at }}</td>
-                            <td class="{{ $user->record_status_id == 1 ? 'text-blue-500' : 'text-red-500' }}">
-                                {{ $user->record_status_id == 1 ? 'Active' : 'Suspend' }}
+                            <td class="{{ $user->is_active == 1 ? 'text-blue-500' : 'text-red-500' }}">
+                                {{ $user->is_active == 1 ? 'Active' : 'Suspend' }}
                             </td>
 
                             <td>
@@ -105,6 +105,10 @@
                                         </li><br>
                                         <li>
                                         <a class="dropdown-item" href="{{ route('admin.user.change-password', $user->id) }}">Change Password</a>
+                                        </li>
+                                        <br>
+                                        <li>
+                                        <a class="dropdown-item" href="{{ route('admin.user.suspend', $user->id) }}">Suspend</a>
                                         </li>
                                     </ul>
                                 </div>

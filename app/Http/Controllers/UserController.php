@@ -94,6 +94,10 @@ class UserController extends Controller
             'email' => $request->username.'@gmail.com',
             'phonenumber' => $request->phonenumber,
             'password' => bcrypt($request->password),
+            'record_status_id' => 1,
+            'is_active' => 1,
+            'created_by' => Auth::user()->id??0,
+        
         ]);
 
         UserCurrency::create([
@@ -449,4 +453,28 @@ public function viewPackageLotto($id)
         ->get();
         return view('admin.user.package-view', compact('data','package','bpCode'));
     }
+public function suspendUser(User $user)
+{
+    return view('admin.user.suspend', compact('user'));
+}
+public function processSuspendUser(Request $request, User $user)
+{
+     $request->validate([
+        'your_password' => ['required'],
+        'suspend_status' => ['required', 'in:0,1'],
+    ]);
+
+    if (!Hash::check($request->your_password, auth()->user()->password)) {
+        return back()->withErrors(['your_password' => 'Your current password is incorrect.']);
+    }
+
+    $user->is_active = $request->suspend_status;
+    $user->updated_by = Auth::user()->id ?? null;
+    $user->updated_at = now();
+    $user->save();
+
+    return redirect()->route('admin.user.index')->with('success', 'User suspended successfully.');
+}
+
+
 }

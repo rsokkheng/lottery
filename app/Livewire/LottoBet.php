@@ -430,6 +430,11 @@ class LottoBet extends Component
         $isCreateBetSuccess = false;
         DB::beginTransaction();
         try {
+            $userSuspended = $this->user->is_active;
+            if ($userSuspended==0) {
+                $this->dispatch('bet-saved', message: 'Account has been suspended', type: 'error');
+                return back();
+            }
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
                 $account = AccountManagement::where('user_id', auth()->id())->first();

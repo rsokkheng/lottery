@@ -33,6 +33,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::put('user/{user}/change-password', [UserController::class, 'updatePassword'])->name('user.update-password');
         Route::get('/users/under-manager/{manager_id}', [UserController::class, 'usersUnderManager'])->name('user.under-manager');
         Route::get('user/package/lotto/{user_id}', [UserController::class, 'viewPackageLotto'])->name('user.package-view-lotto'); 
+        Route::get('user/{user}/suspend', [UserController::class, 'suspendUser'])->name('user.suspend');
+        Route::post('user/{user}/suspend', [UserController::class, 'processSuspendUser'])->name('user.process-suspend');
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
         Route::resource('bet-lottery-package',BetLotteryPackageController::class);

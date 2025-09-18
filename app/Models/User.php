@@ -32,7 +32,11 @@ class User extends Authenticatable
         'password',
         'phonenumber',
         'provider_id',
-        'avatar'
+        'avatar',
+        'record_status_id',
+        'is_active',
+        'created_by',
+        'updated_by',
     ];
 
     /**
