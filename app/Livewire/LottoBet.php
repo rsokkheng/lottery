@@ -435,6 +435,7 @@ class LottoBet extends Component
                 $this->dispatch('bet-saved', message: 'Account has been suspended', type: 'error');
                 return back();
             }
+            
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
                 $account = AccountManagement::where('user_id', auth()->id())->first();
@@ -500,6 +501,14 @@ class LottoBet extends Component
                             $betLimit = $this->validationBetLimitAmount($number, $key, $this->digit[$key],$schedule->id);
                             if ($betLimit) {
                                 $this->dispatch('bet-saved', message: $betLimit, type: 'error');
+                                return back();
+                            }
+                           
+                            $checkTimeClose = BetLotterySchedule::where('id', $schedule->id)
+                                ->where('time_close', '>=', $this->currentTime)
+                                ->first();
+                            if (!$checkTimeClose) {
+                                $this->dispatch('bet-saved', message: 'Time Close', type: 'error');
                                 return back();
                             }
                           //insert bet

@@ -485,6 +485,13 @@ class LottoBetUSD extends Component
                                 $this->dispatch('bet-saved', message: $betLimit, type: 'error');
                                 return back();
                             }
+                             $checkTimeClose = BetLotterySchedule::where('id', $schedule->id)
+                                ->where('time_close', '>=', $this->currentTime)
+                                ->first();
+                            if (!$checkTimeClose) {
+                                $this->dispatch('bet-saved', message: 'Close Time', type: 'error');
+                                return back();
+                            }
                             //insert bet
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,

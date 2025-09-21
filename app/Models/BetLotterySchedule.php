@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class BetLotterySchedule extends Model
 {
     use HasFactory;
+    protected $table = 'bet_lottery_schedules';
 }
