@@ -520,6 +520,7 @@ class LottoBet extends Component
                                 ->where('user_id', $this->user->id)
                                 ->where('total_amount', $amountBet)
                                 ->where('bet_package_config_id', $betPackage->id ?? 0)
+                                ->where('bet_receipt_id', $betReceipt->id ?? null)
                                 ->whereDate('bet_date', $this->currentDate)
                                 ->first();
                            $lastAmount = $betAmountDupplicate ? $amountBet + 0.01 : $amountBet;
