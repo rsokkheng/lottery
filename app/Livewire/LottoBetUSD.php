@@ -493,6 +493,18 @@ class LottoBetUSD extends Component
                                 return back();
                             }
                             //insert bet
+                            $amountBet = $this->calculateAmountOutstanding($number, $key, $schedule['code'], 1);
+                            $betAmountDupplicate = BetUSD::where('user_id', $this->user->id)
+                                ->where('bet_schedule_id', $schedule->id)
+                                ->where('number_format', $number)
+                                ->where('digit_format', $this->digit[$key])
+                                ->where('company_id', $schedule->company_id)
+                                ->where('user_id', $this->user->id)
+                                ->where('total_amount', $amountBet)
+                                ->where('bet_package_config_id', $betPackage->id ?? 0)
+                                ->whereDate('bet_date', $this->currentDate)
+                                ->first();
+                           $lastAmount = $betAmountDupplicate ? $amountBet + 0.01 : $amountBet;
                             $betItem = [
                                 'bet_receipt_id' => $betReceipt->id,
                                 'company_id' => $schedule->company_id,
@@ -502,7 +514,7 @@ class LottoBetUSD extends Component
                                 'number_format' => $number,
                                 'digit_format' => $this->digit[$key],
                                 'bet_date' => $this->currentDate,
-                                'total_amount' => $this->calculateAmountOutstanding($number, $key, $schedule['code'], 1),
+                                'total_amount' => $lastAmount,
                             ];
                             $respone = BetUSD::create($betItem);
                             if ($respone) {
