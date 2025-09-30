@@ -588,6 +588,12 @@
                         <i class="fab fa-telegram-plane me-1"></i> Join us on Telegram
                     </a>
                 </p>
+                 <!-- Bank Logos -->
+                <div class="bank-logos mt-3">
+                    <img src="/images/wing.jpg" alt="Wing" style="height: 30px; margin: 0 1px;">
+                    <img src="/images/aba.jpg" alt="ABA" style="height: 30px; margin: 0 1px;">
+                    <img src="/images/acleda.jpg" alt="ACLEDA" style="height: 30px; margin: 0 1px;">
+                </div>
             </div>
         </div>
     </div>
