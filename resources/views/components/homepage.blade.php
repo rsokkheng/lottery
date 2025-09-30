@@ -568,14 +568,25 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center">
+                <!-- Copyright -->
                 <p style="color: var(--primary-gold); font-family: 'Orbitron', monospace; font-weight: 600; margin: 0;">
                     <i class="fas fa-crown me-2"></i>
                     © 2025 Lottery2888 - Your Premium Gaming Destination
                     <i class="fas fa-crown ms-2"></i>
                 </p>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 0.5rem;">
-                    <i class="fas fa-shield-alt me-1"></i>
-                    Secure • Licensed • Trusted
+
+                <!-- Contact -->
+                <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; margin-top: 1rem;">
+                    <i class="fas fa-phone-alt me-2" style="color: var(--primary-gold);"></i>
+                    <a href="tel:+85570956667" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 70 956 667</a> | 
+                    <a href="tel:+855977900022" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 97 790 0022</a>
+                </p>
+
+                <!-- Telegram -->
+                <p style="margin-top: 0.5rem;">
+                    <a href="https://t.me/lottery2888" target="_blank" style="color: var(--primary-gold); font-size: 1rem; text-decoration: none;">
+                        <i class="fab fa-telegram-plane me-1"></i> Join us on Telegram
+                    </a>
                 </p>
             </div>
         </div>
