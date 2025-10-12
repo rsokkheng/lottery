@@ -796,7 +796,7 @@ class LottoBet extends Component
                             ->first();
                         $amountLimit = Bet::join('bet_numbers', 'bets.id', '=', 'bet_numbers.bet_id')
                         // ->where('bets.user_id', $this->user->id)
-                        ->where('bet_numbers.original_number', $number)
+                        ->where('bet_numbers.generated_number', $number)
                         ->where('bet_numbers.digit_length', intval  ($digit))
                         ->where('bets.bet_schedule_id', $scheduleId)
                         ->whereDate('bets.bet_date', $this->currentDate)

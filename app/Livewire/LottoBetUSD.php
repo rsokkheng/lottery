@@ -774,7 +774,7 @@ class LottoBetUSD extends Component
                             ->first();
                         $amountLimit = BetUSD::join('bet_number_usd', 'bet_usd.id', '=', 'bet_number_usd.bet_id')
                         // ->where('bet_usd.user_id', $this->user->id)
-                        ->where('bet_number_usd.original_number', $number)
+                        ->where('bet_number_usd.generated_number', $number)
                         ->where('bet_number_usd.digit_length', intval  ($digit))
                         ->where('bet_usd.bet_schedule_id', $scheduleId)
                         ->whereDate('bet_usd.bet_date', $this->currentDate)
