@@ -90,6 +90,7 @@ class BetReportController extends Controller
             )
             ->orderByRaw('COUNT(DISTINCT bets.bet_receipt_id) DESC')
             ->get();
+         
             return view('reports.summary', compact('data', 'date','start_date','end_date'));
         } catch (\Exception $exception) {
             throwException($exception);
@@ -107,7 +108,7 @@ class BetReportController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -173,6 +174,7 @@ class BetReportController extends Controller
             return $exception->getMessage();
         }
     }
+    // for manager check report
     public function getDailyReportManager(Request $request){
         try {
             $company = [
@@ -183,8 +185,7 @@ class BetReportController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
-
+            $company_id = $request->get('com_id', null) ?? null;
             $user = Auth::user() ?? 0;
             if ($user) {
                 $user = User::find($user->id);
@@ -255,7 +256,7 @@ class BetReportController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -326,7 +327,7 @@ class BetReportController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -400,7 +401,7 @@ class BetReportController extends Controller
                 ["id" => 2, "label" => "5PM Company"],
                 ["id" => 3, "label" => "6PM Company"]
             ];
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
             $startDate = request()->get('startDate');
             $endDate = request()->get('endDate');
 
@@ -464,7 +465,7 @@ class BetReportController extends Controller
                 ["id" => 2, "label" => "5PM Company"],
                 ["id" => 3, "label" => "6PM Company"]
             ];
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
             if ($startDate && $endDate) {
                 $startDate = Carbon::parse($startDate)->format('Y-m-d');
                 $endDate = Carbon::parse($endDate)->format('Y-m-d');
@@ -529,6 +530,7 @@ class BetReportController extends Controller
             $date = $this->currentDate;
             $startDate = request()->get('startDate');
             $endDate = request()->get('endDate');
+            $company_id = $request->get('com_id', null) ?? null;
 
             if ($startDate && $endDate) {
                 $startDate = Carbon::parse($startDate)->format('Y-m-d');
@@ -544,7 +546,7 @@ class BetReportController extends Controller
                 ["label" => "5PM Company", "id" => 2],
                 ["label" => "6PM Company", "id" => 3],
             ];
-            $company_id = null;
+           
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             } 
@@ -595,7 +597,7 @@ class BetReportController extends Controller
             $date = $this->currentDate;
             $startDate = request()->get('startDate');
             $endDate = request()->get('endDate');
-
+            $company_id = $request->get('com_id', null) ?? null;
             if ($startDate && $endDate) {
                 $startDate = Carbon::parse($startDate)->format('Y-m-d');
                 $endDate = Carbon::parse($endDate)->format('Y-m-d');
@@ -610,10 +612,11 @@ class BetReportController extends Controller
                 ["label" => "5PM Company", "id" => 2],
                 ["label" => "6PM Company", "id" => 3],
             ];
-            $company_id = null;
+
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
+
             $data = [];
             $totalNetAmount = [
                 'turnover' => 0,

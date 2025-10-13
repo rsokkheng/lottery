@@ -99,7 +99,7 @@
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->draw_day }}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="{{ route('reports.daily-member-agent', ['id' => $row->manager_id]) }}"
+                                        <a href="{{ route('reports.daily-member-agent', ['id' => $row->manager_id, 'date' => $date, 'com_id' => $company_id]) }}"
                                             class="text-blue-600 hover:underline">
                                             {{ $row->account }}
                                         </a>

@@ -107,7 +107,7 @@ class BetReportUSDController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -183,7 +183,7 @@ class BetReportUSDController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -254,7 +254,7 @@ class BetReportUSDController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
 
             $user = Auth::user() ?? 0;
             if ($user) {
@@ -326,7 +326,7 @@ class BetReportUSDController extends Controller
             ];
 
             $date = $this->currentDate;
-            $company_id = null;
+           $company_id = $request->get('com_id', null) ?? null;
             $user = Auth::user() ?? 0;
             if ($user) {
                 $user = User::find($user->id);
@@ -399,7 +399,7 @@ class BetReportUSDController extends Controller
                 ["id" => 2, "label" => "5PM Company"],
                 ["id" => 3, "label" => "6PM Company"]
             ];
-            $company_id = null;
+            $company_id = $request->get('com_id', null) ?? null;
             $startDate = request()->get('startDate');
             $endDate = request()->get('endDate');
 
@@ -465,7 +465,7 @@ class BetReportUSDController extends Controller
                 ["id" => 2, "label" => "5PM Company"],
                 ["id" => 3, "label" => "6PM Company"]
             ];
-            $company_id = null;
+           $company_id = $request->get('com_id', null) ?? null;
             if ($startDate && $endDate) {
                 $startDate = Carbon::parse($startDate)->format('Y-m-d');
                 $endDate = Carbon::parse($endDate)->format('Y-m-d');
@@ -527,6 +527,7 @@ class BetReportUSDController extends Controller
         try {
             $startDate = request()->get('startDate');
             $endDate = request()->get('endDate');
+            $company_id = $request->get('com_id', null) ?? null;
 
             if ($startDate && $endDate) {
                 $startDate = Carbon::parse($startDate)->format('Y-m-d');
@@ -535,6 +536,16 @@ class BetReportUSDController extends Controller
                 $startDate = Carbon::parse($this->currentDate)->format('Y-m-d');
                 $endDate = Carbon::parse($this->currentDate)->format('Y-m-d');
             }
+             $company = [
+                ["label" => "All Company", "id" => null],
+                ["label" => "4PM Company", "id" => 1],
+                ["label" => "5PM Company", "id" => 2],
+                ["label" => "6PM Company", "id" => 3],
+            ];
+           
+            if ($request->has('com_id')) {
+                $company_id = $request->get('com_id');
+            } 
             $user = Auth::user() ?? 0;     
             $memberIds = User::where('manager_id', $user->id)->pluck('id')->toArray();
             $managerName = User::find($user->id );
@@ -562,13 +573,16 @@ class BetReportUSDController extends Controller
             ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('bet_usd.bet_date', [$startDate, $endDate]);
             })
+            ->when($company_id > 0, function ($q) use ($company_id) {
+                $q->where('bet_usd.company_id', $company_id);
+            })
             ->groupBy(
                 'bet_usd.user_id',
                 'users.username'
             )
             ->orderByDesc(DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id)'))
             ->get();
-            return view('report_usd.monthly-all-member', compact('data','managerName','startDate','endDate'));
+            return view('report_usd.monthly-all-member', compact('data','managerName','startDate','endDate','company', 'company_id'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
@@ -593,10 +607,12 @@ class BetReportUSDController extends Controller
             ["label" => "5PM Company", "id" => 2],
             ["label" => "6PM Company", "id" => 3],
         ];
-        $company_id = null;
+       $company_id = $request->get('com_id', null) ?? null;
         if ($request->has('com_id')) {
             $company_id = $request->get('com_id');
         }
+
+        $company_id = $company_id == 0 ? null : $company_id;
         $data = [];
         $totalNetAmount = [
             'turnover' => 0,
