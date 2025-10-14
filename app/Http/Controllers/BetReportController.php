@@ -636,7 +636,7 @@ class BetReportController extends Controller
                     'bet_numbers.roll_amount',
                     'bet_numbers.roll7_amount',
                     'bet_numbers.roll_parlay_amount',
-                    'bets.bet_date',
+                    'bet_numbers.created_at',
                     'bets.digit_format',
                     DB::raw("CASE 
                                 WHEN bet_numbers.a_amount > 0 THEN 'A'
@@ -686,7 +686,7 @@ class BetReportController extends Controller
                 ->groupBy('bet_numbers.roll_parlay_amount')
                 ->groupBy('bet_numbers.original_number')
                 ->groupBy('bet_numbers.generated_number')
-                ->groupBy('bets.bet_date')
+                ->groupBy('bet_numbers.created_at')
                 ->groupBy('bets.total_amount')
                 ->groupBy('bets.digit_format')
                 ->groupBy('bets.company_id')
@@ -696,7 +696,7 @@ class BetReportController extends Controller
                 ->groupBy('config.bet_type')
                 ->groupBy('schedules.province_en')
                 ->groupBy('bet_numbers.total_amount')
-                    ->orderBy('get_roll_amount','DESC')
+                    ->orderBy('bet_numbers.created_at','ASC')
                 ->lazy()
                 ->each(function ($betNumber) use (&$data, &$totalNetAmount){
                     $betNumber->win_lose = $betNumber->compensate - $betNumber->net_amount;

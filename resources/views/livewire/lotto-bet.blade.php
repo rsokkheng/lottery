@@ -5,7 +5,11 @@
         show = true;
         message = $event.detail.message;
         type = $event.detail.type || 'success';
-        setTimeout(() => show = false, 3000);"
+        setTimeout(() => show = false, 3000);
+        if (type === 'warning') {
+            setTimeout(() => window.location.reload(), 1000);
+        }
+        "
         class="fixed top-4 right-4 z-50">
         <div class="px-4 py-2 rounded shadow-lg flex items-center gap-2"
             :class="{

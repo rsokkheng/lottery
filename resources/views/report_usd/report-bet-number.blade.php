@@ -100,7 +100,7 @@
                         @foreach($data as $key=>$betNumber)
                         <tr class="border border-gray-300 hover:bg-gray-100 {{ $betNumber->compensate > 0 ? 'bg-red-100 hover:bg-red-200 text-black-500' : ''}} ">
                                     <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$key+1}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->bet_date??''}}</td>
+                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->created_at??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->generated_number??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->digit_format??''}}</td>
                                     <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->bet_game??''}}</td>

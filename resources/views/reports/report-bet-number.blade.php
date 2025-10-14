@@ -105,7 +105,7 @@
                                         {{ $key + 1 }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">
-                                        {{ $betNumber->bet_date ?? '' }}</td>
+                                        {{ $betNumber->created_at ?? '' }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">
                                         {{ $betNumber->generated_number ?? '' }}</td>

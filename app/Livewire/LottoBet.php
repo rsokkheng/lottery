@@ -504,11 +504,12 @@ class LottoBet extends Component
                                 return back();
                             }
                            
+                            $nowTime = Carbon::now();
                             $checkTimeClose = BetLotterySchedule::where('id', $schedule->id)
-                                ->where('time_close', '>=', $this->currentTime)
+                                ->where('time_close', '>=', $nowTime->format('H:i:s'))
                                 ->first();
-                            if (!$checkTimeClose) {
-                                $this->dispatch('bet-saved', message: 'Time Close', type: 'error');
+                             if (!$checkTimeClose) {
+                                $this->dispatch('bet-saved', message: 'Close Time', type: 'warning');
                                 return back();
                             }
                             $amountBet = $this->calculateAmountOutstanding($number, $key, $schedule['code'], 1);
