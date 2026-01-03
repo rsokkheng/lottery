@@ -763,7 +763,7 @@ class LottoBet extends Component
         if (strpos($number, '#') !== false) {
             if($this->roll_parlay_amount[$key] > 0) {
                 $digitKey = ($digit === 'RP3' && $this->roll_parlay_check[$key] != 1) ? 'RP3' : 'RP2';
-                $checkBetLimit = UserBetLimit::where('user_id', 6)
+                $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                         ->where('digit_key', $digitKey)
                         ->first();
 
@@ -792,7 +792,7 @@ class LottoBet extends Component
         }else{
             foreach ($betTypes as $info) {
                 if ($info['amount'] > 0) {
-                        $checkBetLimit = UserBetLimit::where('user_id', 6)
+                        $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                             ->where('digit_key', $digit)
                             ->first();
                         $amountLimit = Bet::join('bet_numbers', 'bets.id', '=', 'bet_numbers.bet_id')
