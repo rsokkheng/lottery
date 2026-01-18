@@ -429,7 +429,7 @@
                     <img src="{{ asset('uploads/banners/' .($menu->banner ?? 'uploads/default_banner.jpg')) }}" 
                          class="d-block w-100 img-fluid" 
                          alt="Slide {{ $index + 1 }}" 
-                         style="width: 100%; height: 400px; object-fit: cover;">
+                         style="width: 100%; object-fit: cover;">
                 </div>
             @endforeach
         </div>
