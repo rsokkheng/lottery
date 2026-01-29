@@ -58,6 +58,10 @@
             font-weight: bold;
         }
 
+        .footer1 {
+            font-size: 10px;
+            margin-top: 10px;
+        }
         .footer {
             font-size: 12px;
             margin-top: 10px;
@@ -116,6 +120,7 @@
 
     <p class="footer_bold">NOTE: VALIDITY FOR 3 DAYS</p>
     <p class="footer_bold">{{ $expire_date }}</p>
+    <p class="footer1">Quý khách vui lòng kiểm tra lại số ghi trên phiếu xin cảm ơn !</p>
     <p class="footer">Thank you for betting with us!</p>
 
 </body>
