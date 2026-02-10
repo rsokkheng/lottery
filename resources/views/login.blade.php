@@ -491,7 +491,7 @@
                 <!-- Contact -->
                 <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; margin-top: 1rem;">
                     <i class="fas fa-phone-alt me-2" style="color: var(--primary-gold);"></i>
-                    <a href="tel:+85570956667" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 70 956 667</a> | 
+                    <a href="tel:+85570956667" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 031 469 2888</a> | 
                     <a href="tel:+855977900022" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 97 790 0022</a>
                 </p>
 
