@@ -23,7 +23,7 @@ use App\Http\Controllers\LotteryResultUSDController;
 */
 Route::get('/', function () {
     return view('login');
-})->name('login');
+});
 Route::get('/lang/{locale}', function ($locale) {
     session(['locale' => $locale]);
     app()->setLocale($locale);
