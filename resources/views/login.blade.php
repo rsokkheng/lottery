@@ -330,65 +330,18 @@
             border-radius: 4px;
         }
 
-        /* ── Login grid (2-col: inputs | lang+submit) ── */
-        .login-grid {
-            display: flex;
-            gap: .75rem;
-            align-items: stretch;
-        }
-        .login-left {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: .5rem;
-        }
-        .login-right {
-            display: flex;
-            flex-direction: column;
-            gap: .5rem;
-            min-width: 130px;
-        }
-        .login-right .btn-gold { flex: 1; }
-
-        /* ── Tablet (768px – 991px) ── */
+        /* ── Tablet & below (< 992px) ── */
         @media (max-width: 991px) {
             .brand-logo { max-width: 155px; }
-            .login-card {
-                width: 100%;
-                float: none;
-                padding: 1.1rem 1.25rem;
-                border-radius: 16px;
-            }
+            .login-card { width: 100%; float: none; padding: 1.1rem 1.25rem; }
+            .auth-panel { width: 100%; }
         }
 
-        /* ── Phone (< 768px) ── */
-        @media (max-width: 767px) {
-            .login-card {
-                width: 100%;
-                float: none;
-                padding: 1rem;
-                border-radius: 14px;
-            }
-            .login-grid {
-                flex-direction: column;
-                gap: .5rem;
-            }
-            .login-right {
-                flex-direction: row;
-                min-width: unset;
-                align-items: stretch;
-            }
-            .login-right .lang-select { flex: 0 0 auto; }
-            .login-right .btn-gold { flex: 1; }
+        /* ── Phone (< 576px) ── */
+        @media (max-width: 575px) {
+            .login-card { padding: 1rem; border-radius: 14px; }
             .form-control { height: 50px; font-size: .9rem; }
-            .auth-panel { min-width: unset; width: 100%; }
-        }
-
-        /* ── Small phone (< 400px) ── */
-        @media (max-width: 399px) {
-            .login-card { padding: .85rem; }
-            .form-control { height: 46px; font-size: .85rem; }
-            .btn-gold { font-size: .75rem; }
+            .btn-gold { font-size: .85rem; padding-top: .65rem; padding-bottom: .65rem; }
         }
     </style>
 </head>
@@ -439,51 +392,47 @@
                             </div>
                         @endif
 
-                        {{-- 2-column grid: inputs left | lang+submit right --}}
-                        <div class="login-grid mb-2">
-
-                            {{-- Left: stacked inputs --}}
-                            <div class="login-left">
-                                <div class="input-icon">
-                                    <i class="fas fa-user"></i>
-                                    <input type="text" name="username"
-                                        class="form-control w-100 @error('username') is-invalid @enderror"
-                                        placeholder="{{ __('message.username') }}"
-                                        value="{{ old('username') }}"
-                                        required autofocus autocomplete="username">
-                                </div>
-                                <div class="input-icon">
-                                    <i class="fas fa-lock"></i>
-                                    <input type="password" name="password"
-                                        class="form-control w-100 @error('password') is-invalid @enderror"
-                                        placeholder="{{ __('message.password') }}"
-                                        required autocomplete="current-password">
-                                </div>
-                            </div>
-
-                            {{-- Right: lang select + submit --}}
-                            <div class="login-right">
-                                <select class="form-select form-select-sm lang-select" style="width:100%;"
-                                        onchange="location.href=this.value">
-                                    <option value="{{ route('lang.switch','en') }}" {{ app()->getLocale()==='en'?'selected':'' }}>🇺🇸 EN</option>
-                                    <option value="{{ route('lang.switch','vi') }}" {{ app()->getLocale()==='vi'?'selected':'' }}>🇻🇳 VI</option>
-                                </select>
-                                <button type="submit" class="btn btn-gold btn-submit w-100">
-                                    <i class="fas fa-sign-in-alt me-1"></i>{{ __('message.submit') }}
-                                </button>
-                            </div>
-
+                        {{-- Username --}}
+                        <div class="input-icon mb-2">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="username"
+                                class="form-control w-100 @error('username') is-invalid @enderror"
+                                placeholder="{{ __('message.username') }}"
+                                value="{{ old('username') }}"
+                                required autofocus autocomplete="username">
                         </div>
 
-                        {{-- Remember me --}}
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox"
-                                   id="remember" name="remember"
-                                   {{ old('remember') ? 'checked' : '' }}>
-                            <label class="form-check-label text-white" for="remember" style="font-size:.85rem;">
-                                {{ __('message.remember_me') }}
-                            </label>
+                        {{-- Password --}}
+                        <div class="input-icon mb-3">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password"
+                                class="form-control w-100 @error('password') is-invalid @enderror"
+                                placeholder="{{ __('message.password') }}"
+                                required autocomplete="current-password">
                         </div>
+
+                        {{-- Remember + Lang --}}
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox"
+                                       id="remember" name="remember"
+                                       {{ old('remember') ? 'checked' : '' }}>
+                                <label class="form-check-label text-white" for="remember" style="font-size:.85rem;">
+                                    {{ __('message.remember_me') }}
+                                </label>
+                            </div>
+                            <select class="form-select form-select-sm lang-select" style="width:auto;"
+                                    onchange="location.href=this.value">
+                                <option value="{{ route('lang.switch','en') }}" {{ app()->getLocale()==='en'?'selected':'' }}>🇺🇸 EN</option>
+                                <option value="{{ route('lang.switch','vi') }}" {{ app()->getLocale()==='vi'?'selected':'' }}>🇻🇳 VI</option>
+                            </select>
+                        </div>
+
+                        {{-- Submit --}}
+                        <button type="submit" class="btn btn-gold w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>{{ __('message.submit') }}
+                        </button>
+
                     </form>
                 </div>
                 @endauth
