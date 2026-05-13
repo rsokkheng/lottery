@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
 
         Session::put('currency',auth()->user()->currencies()?->first()?->currency);
 
-        return redirect()->intended(RouteServiceProvider::HOME)->with('success','Login successsfully.');
+        return redirect(RouteServiceProvider::HOME)->with('success', 'Login successfully.');
     }
 
     /**

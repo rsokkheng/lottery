@@ -22,6 +22,9 @@ use App\Http\Controllers\LotteryResultUSDController;
 |
 */
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect(\App\Providers\RouteServiceProvider::HOME);
+    }
     return view('login');
 });
 Route::get('/lang/{locale}', function ($locale) {

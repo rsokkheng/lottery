@@ -1,548 +1,582 @@
-@section('title')
-    {{ 'Log in' }}
-@endsection
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Lottery2888') }}</title>
     <link rel="icon" href="{{ asset('images/snooker.png') }}" type="image/png">
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <style>
         :root {
-            --primary-gold: #FFD700;
-            --accent-gold: #FFA500;
-            --dark-bg: #0a0a0a;
-            --card-bg: linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%);
-            --hover-glow: rgba(255, 215, 0, 0.3);
-            --text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            --gold:      #FFD700;
+            --gold-dark: #FFA500;
+            --bg:        #0a0a0a;
+            --card-bg:   linear-gradient(145deg, #1a1a1a, #2d2d2d);
+            --glow:      rgba(255,215,0,.3);
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            background: var(--dark-bg);
-            background-image: 
+            background: var(--bg);
+            background-image:
                 radial-gradient(circle at 25% 25%, #1a1a1a 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, #2d2d2d 0%, transparent 50%),
-                linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-            color: white;
+                radial-gradient(circle at 75% 75%, #2d2d2d 0%, transparent 50%);
+            color: #fff;
             font-family: 'Exo 2', sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* Animated background particles */
+        /* sparkle overlay */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, var(--primary-gold), transparent),
-                radial-gradient(2px 2px at 40px 70px, var(--accent-gold), transparent),
-                radial-gradient(1px 1px at 90px 40px, var(--primary-gold), transparent);
+            inset: 0;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, var(--gold), transparent),
+                radial-gradient(2px 2px at 40px 70px, var(--gold-dark), transparent),
+                radial-gradient(1px 1px at 90px 40px, var(--gold), transparent);
             background-repeat: repeat;
             background-size: 200px 200px;
             animation: sparkle 20s linear infinite;
-            opacity: 0.1;
+            opacity: .08;
             z-index: -1;
+            pointer-events: none;
         }
-
         @keyframes sparkle {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-200px); }
+            from { transform: translateY(0); }
+            to   { transform: translateY(-200px); }
         }
 
-        /* Navbar Styling */
-        .navbar {
-            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid var(--primary-gold);
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
-            padding: 1rem 0;
+        /* ── Navbar ── */
+        .site-nav {
+            background: linear-gradient(135deg, rgba(0,0,0,.97), rgba(26,26,26,.97));
+            border-bottom: 2px solid var(--gold);
+            box-shadow: 0 4px 20px rgba(255,215,0,.15);
+            padding: .9rem 0;
         }
 
-        .navbar-brand img {
-            filter: drop-shadow(0 0 10px var(--primary-gold));
-            transition: all 0.3s ease;
+        .brand-logo {
+            filter: drop-shadow(0 0 8px var(--gold));
+            transition: filter .3s, transform .3s;
+            max-width: 190px;
+        }
+        .brand-logo:hover {
+            filter: drop-shadow(0 0 18px var(--gold));
+            transform: scale(1.04);
         }
 
-        .navbar-brand img:hover {
-            filter: drop-shadow(0 0 20px var(--primary-gold));
-            transform: scale(1.05);
+        /* ── Auth panel (logged-in) ── */
+        .auth-panel {
+            background: linear-gradient(160deg, #1c1c1c, #111);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+            min-width: 240px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.6);
         }
-
-        /* Language Selector */
-        .form-select {
-            background: linear-gradient(145deg, #2d2d2d, #1a1a1a) !important;
-            border: 2px solid transparent;
-            color: var(--primary-gold) !important;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .welcome-title {
+            color: var(--gold);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-align: center;
+            letter-spacing: 1px;
         }
+        .welcome-title .fas { color: var(--gold-dark); }
 
-        .form-select:hover, .form-select:focus {
-            border-color: var(--primary-gold);
-            box-shadow: 0 0 15px var(--hover-glow);
-            background: linear-gradient(145deg, #3d3d3d, #2a2a2a) !important;
-        }
-
-        /* Login Form */
-        .login-form {
-            background: var(--card-bg);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 
-                0 8px 32px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-form::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary-gold), var(--accent-gold), var(--primary-gold));
-            border-radius: 15px;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .login-form:hover::before {
-            opacity: 1;
-        }
-
-        .form-control {
-            background: rgba(26, 26, 26, 0.8);
-            border: 2px solid #333;
-            color: white;
-            border-radius: 10px;
-            padding: 12px 16px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            background: rgba(26, 26, 26, 0.9);
-            border-color: var(--primary-gold);
-            box-shadow: 0 0 15px var(--hover-glow);
-            color: white;
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--accent-gold) 100%);
+        .btn-manager {
+            background: linear-gradient(135deg, #1b8a8f, #1da7ad);
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: .8rem;
+            letter-spacing: 1.5px;
             border: none;
             border-radius: 10px;
-            padding: 12px 24px;
-            font-weight: 700;
-            color: #000;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: .65rem;
+            transition: filter .2s, transform .2s;
+        }
+        .btn-manager:hover {
+            filter: brightness(1.15);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: #fff;
             font-family: 'Orbitron', monospace;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            font-weight: 700;
+            font-size: .8rem;
+            letter-spacing: 1.5px;
+            border: none;
+            border-radius: 10px;
+            padding: .65rem;
+            transition: filter .2s, transform .2s;
+        }
+        .btn-logout:hover {
+            filter: brightness(1.15);
+            color: #fff;
+            transform: translateY(-1px);
         }
 
-        .btn-warning:hover {
-            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--primary-gold) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
-            color: #000;
+        /* ── Login card ── */
+        .login-card {
+            background: linear-gradient(160deg, #1c1c1c, #111);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,.6);
+            width: 40%;
+            float: inline-end;
         }
 
-        .form-check-label {
-            font-weight: 500;
-            text-shadow: var(--text-shadow);
+        /* ── Inputs ── */
+        .form-control {
+            background: #e8eaf0;
+            border: none;
+            color: #222;
+            border-radius: 14px;
+            padding: .6rem 1rem .6rem 44px;
+            font-size: .95rem;
+            height: 52px;
+            transition: box-shadow .25s;
         }
-
-        /* Carousel */
-        .carousel {
-            margin: 2rem 0;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        .form-control:focus {
+            background: #f0f2f8;
+            border: none;
+            box-shadow: 0 0 0 3px var(--glow);
+            color: #222;
         }
+        .form-control::placeholder { color: #888; }
 
-        .carousel-item img {
-            filter: brightness(0.8) contrast(1.1);
-            transition: all 0.5s ease;
-        }
-
-        .carousel-item.active img {
-            filter: brightness(1) contrast(1.2);
-        }
-
-        /* Product Cards */
-        .product_list {
-            list-style: none;
-            overflow: hidden;
+        .input-icon {
             position: relative;
-            border-radius: 20px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
-
-        .product_list:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
-        }
-
-        .lotto-img {
-            border: 3px solid transparent;
-            transition: all 0.4s ease;
-            width: 100%;
-            height: auto;
-            border-radius: 20px;
-            filter: brightness(0.7) saturate(1.2);
-        }
-
-        .product_list:hover .lotto-img {
-            border-color: var(--primary-gold);
-            filter: brightness(1) saturate(1.4);
-            box-shadow: 
-                0 0 30px var(--hover-glow),
-                inset 0 0 20px rgba(255, 215, 0, 0.1);
-        }
-
-        .pro_text {
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gold-dark);
+            font-size: 1rem;
             pointer-events: none;
+        }
+
+        /* ── Language select ── */
+        .lang-select {
+            background: linear-gradient(145deg, #2d2d2d, #1a1a1a) !important;
+            border: 2px solid #444 !important;
+            color: var(--gold) !important;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color .25s;
+        }
+        .lang-select:focus {
+            border-color: var(--gold) !important;
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        /* ── Buttons ── */
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            color: #000;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+            font-size: .9rem;
+            border-radius: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 14px var(--glow);
+            transition: transform .2s, box-shadow .2s, background .2s;
+            white-space: nowrap;
+            height: 52px;
+        }
+        .btn-gold:hover {
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px var(--glow);
+        }
+        .btn-outline-gold {
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            background: transparent;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: .85rem;
+            white-space: nowrap;
+            transition: background .2s;
+        }
+        .btn-outline-gold:hover {
+            background: rgba(255,215,0,.12);
+            color: var(--gold);
+        }
+
+        /* ── Error alert ── */
+        .login-error {
+            background: rgba(220,53,69,.15);
+            border: 1px solid rgba(220,53,69,.5);
+            color: #f8a8ae;
+            border-radius: 8px;
+            padding: .55rem .9rem;
+            font-size: .83rem;
+        }
+
+        /* ── Carousel ── */
+        .carousel-wrap {
+            margin: 1.75rem 0 1rem;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,.55);
+        }
+        .carousel-wrap .carousel-item img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            filter: brightness(.85) contrast(1.1);
+        }
+        .carousel-wrap .carousel-item.active img {
+            filter: brightness(1) contrast(1.15);
+        }
+
+        /* ── Product cards ── */
+        .product-card {
+            list-style: none;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+            transition: transform .4s cubic-bezier(.175,.885,.32,1.275), box-shadow .4s;
+        }
+        .product-card:hover {
+            transform: translateY(-9px) scale(1.02);
+            box-shadow: 0 20px 40px var(--glow);
+        }
+        .product-card .card-img {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+            border-radius: 18px;
+            filter: brightness(.7) saturate(1.2);
+            border: 3px solid transparent;
+            transition: filter .4s, border-color .4s;
+        }
+        .product-card:hover .card-img {
+            filter: brightness(1) saturate(1.4);
+            border-color: var(--gold);
+        }
+        .card-label {
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
-            transition: all 0.4s ease;
+            background: linear-gradient(135deg, rgba(0,0,0,.65), rgba(0,0,0,.25));
+            border-radius: 18px;
+            pointer-events: none;
         }
-
-        .pro_text h3 {
-            color: var(--primary-gold) !important;
-            font-weight: 900 !important;
-            font-family: 'Orbitron', monospace !important;
-            text-shadow: 
-                2px 2px 4px rgba(0,0,0,0.8),
-                0 0 20px var(--primary-gold);
-            background: rgba(0,0,0,0.6) !important;
-            border: 2px solid var(--primary-gold);
-            border-radius: 15px !important;
-            padding: 1rem 2rem !important;
-            font-size: 1.5rem;
+        .card-label h3 {
+            color: var(--gold);
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            font-size: 1.35rem;
             letter-spacing: 2px;
             text-transform: uppercase;
-            animation: pulse 2s infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,.9), 0 0 20px var(--gold);
+            background: rgba(0,0,0,.55);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: .8rem 1.75rem;
+            margin: 0;
+            animation: pulse 2.5s ease-in-out infinite;
         }
-
         @keyframes pulse {
-            0% { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px var(--primary-gold); }
-            50% { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 30px var(--primary-gold), 0 0 40px var(--primary-gold); }
-            100% { text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px var(--primary-gold); }
+            0%,100% { text-shadow: 2px 2px 4px rgba(0,0,0,.9), 0 0 18px var(--gold); }
+            50%      { text-shadow: 2px 2px 4px rgba(0,0,0,.9), 0 0 32px var(--gold), 0 0 48px var(--gold); }
+        }
+        .product-card:hover .card-label h3 {
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,.9), 0 0 30px var(--gold), 0 0 50px var(--gold);
+            transform: scale(1.08);
         }
 
-        .product_list:hover .pro_text h3 {
-            transform: scale(1.1);
-            color: #fff !important;
-            text-shadow: 
-                2px 2px 4px rgba(0,0,0,0.8),
-                0 0 30px var(--primary-gold),
-                0 0 50px var(--primary-gold);
+        /* ── Footer ── */
+        .site-footer {
+            background: linear-gradient(135deg, rgba(0,0,0,.93), rgba(26,26,26,.93));
+            border-top: 3px solid var(--gold);
+            padding: 1.75rem 0;
+            margin-top: 3rem;
+            text-align: center;
         }
+        .site-footer a { color: rgba(255,255,255,.85); text-decoration: none; }
+        .site-footer a:hover { color: var(--gold); }
+        .bank-logo { height: 48px; margin: 0 3px; border-radius: 5px; object-fit: contain; }
 
-        /* Container max-width */
-        .container {
-            max-width: 1400px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .login-form {
-                padding: 1rem;
-                margin: 0 1rem;
-            }
-            
-            .pro_text h3 {
-                font-size: 1.2rem !important;
-                padding: 0.8rem 1.5rem !important;
-            }
-            
-            .navbar-brand img {
-                max-width: 150px !important;
-            }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 7px; }
+        ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
             border-radius: 4px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, var(--accent-gold), var(--primary-gold));
+        /* ── Login grid (2-col: inputs | lang+submit) ── */
+        .login-grid {
+            display: flex;
+            gap: .75rem;
+            align-items: stretch;
+        }
+        .login-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+        .login-right {
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            min-width: 130px;
+        }
+        .login-right .btn-gold { flex: 1; }
+
+        /* ── Tablet (768px – 991px) ── */
+        @media (max-width: 991px) {
+            .brand-logo { max-width: 155px; }
+            .login-card {
+                width: 100%;
+                float: none;
+                padding: 1.1rem 1.25rem;
+                border-radius: 16px;
+            }
+        }
+
+        /* ── Phone (< 768px) ── */
+        @media (max-width: 767px) {
+            .login-card {
+                width: 100%;
+                float: none;
+                padding: 1rem;
+                border-radius: 14px;
+            }
+            .login-grid {
+                flex-direction: column;
+                gap: .5rem;
+            }
+            .login-right {
+                flex-direction: row;
+                min-width: unset;
+                align-items: stretch;
+            }
+            .login-right .lang-select { flex: 0 0 auto; }
+            .login-right .btn-gold { flex: 1; }
+            .form-control { height: 50px; font-size: .9rem; }
+            .auth-panel { min-width: unset; width: 100%; }
+        }
+
+        /* ── Small phone (< 400px) ── */
+        @media (max-width: 399px) {
+            .login-card { padding: .85rem; }
+            .form-control { height: 46px; font-size: .85rem; }
+            .btn-gold { font-size: .75rem; }
         }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-        <!-- Mobile/Tablet Layout -->
-        <div class="d-lg-none w-100">
-            <!-- Logo centered on mobile/tablet -->
-            <div class="text-center mb-3">
-                <a class="navbar-brand text-warning" href="#">
-                    <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
-                </a>
-            </div>
-            
-            <!-- Login form on mobile/tablet -->
-            <div class="login-form">
-                <form action="{{ route('login') }}" method="POST" class="d-flex flex-column">
-                    @csrf
-                    <div class="mb-3">
-                        <div class="position-relative mb-2">
-                            <i class="fas fa-user position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
-                            <input id="username" class="form-control ps-5" type="username" placeholder="{{ __('message.username') }}" name="username" required>
-                        </div>
-                        <div class="position-relative mb-2">
-                            <i class="fas fa-lock position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
-                            <input id="password" class="form-control ps-5" type="password" name="password" required placeholder="{{ __('message.password') }}">
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                            <label class="form-check-label text-white" for="remember">
-                                <i class="fas fa-remember-me me-1"></i>{{ __('message.remember_me') }}
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                        <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET">
-                            <select onchange="location = this.value;" class="form-select form-select-sm" style="min-width: 140px;">
-                                <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
-                                    🇺🇸 English
-                                </option>
-                                <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
-                                    🇻🇳 Tiếng Việt
-                                </option>
-                            </select>
-                        </form>
-                        <button class="btn btn-warning">
-                            <i class="fas fa-sign-in-alt me-2"></i>{{ __('message.submit') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+{{-- ════════════════════════════ NAVBAR ════════════════════════════ --}}
+<nav class="site-nav">
+    <div class="container-xl">
+        <div class="row align-items-center g-3">
 
-        <!-- Desktop Layout -->
-        <div class="d-none d-lg-flex w-100 align-items-center">
-            <!-- Logo on desktop -->
-            <div class="logo me-auto">
-                <a class="navbar-brand text-warning" href="#">
-                    <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 200px; height: auto;">
+            {{-- Logo --}}
+            <div class="col-12 col-lg-auto text-center text-lg-start">
+                <a href="{{ url('/') }}">
+                    <img src="{{ asset('images/logo-2888.png') }}" class="brand-logo" alt="Lottery2888">
                 </a>
             </div>
-            
-            <!-- Login form on desktop -->
-            <div class="navbar-collapse justify-content-end" id="navbarNav">
-                <div class="login-form">
-                    <form action="{{ route('login') }}" method="POST" class="d-flex flex-row align-items-center">
+
+            {{-- Right panel --}}
+            <div class="col-12 col-lg d-flex justify-content-lg-end">
+
+                @auth
+                {{-- ── Logged-in state ── --}}
+                <div class="auth-panel">
+                    <div class="welcome-title">
+                        <i class="fas fa-crown"></i> Welcome, {{ auth()->user()->username }}!
+                    </div>
+                    <a href="{{ route('admin.homepage') }}" class="btn btn-manager w-100">
+                        <i class="fas fa-cog me-2"></i>MANAGER ACCOUNT
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
-                        <div class="d-flex flex-column me-3">
-                            <div class="position-relative mb-2">
-                                <i class="fas fa-user position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
-                                <input id="username" class="form-control ps-5" type="username" placeholder="{{ __('message.username') }}" name="username" required>
+                        <button type="submit" class="btn btn-logout w-100">
+                            LOGOUT
+                        </button>
+                    </form>
+                </div>
+
+                @else
+                {{-- ── Guest state: login form ── --}}
+                <div class="login-card">
+                    <form action="{{ route('login') }}" method="POST" novalidate>
+                        @csrf
+
+                        @if ($errors->any())
+                            <div class="login-error mb-3">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ $errors->first() }}
                             </div>
-                            <div class="position-relative mb-2">
-                                <i class="fas fa-lock position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--primary-gold);"></i>
-                                <input id="password" class="form-control ps-5" type="password" name="password" required placeholder="{{ __('message.password') }}">
+                        @endif
+
+                        {{-- 2-column grid: inputs left | lang+submit right --}}
+                        <div class="login-grid mb-2">
+
+                            {{-- Left: stacked inputs --}}
+                            <div class="login-left">
+                                <div class="input-icon">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" name="username"
+                                        class="form-control w-100 @error('username') is-invalid @enderror"
+                                        placeholder="{{ __('message.username') }}"
+                                        value="{{ old('username') }}"
+                                        required autofocus autocomplete="username">
+                                </div>
+                                <div class="input-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" name="password"
+                                        class="form-control w-100 @error('password') is-invalid @enderror"
+                                        placeholder="{{ __('message.password') }}"
+                                        required autocomplete="current-password">
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                                <label class="form-check-label text-white" for="remember">
-                                    <i class="fas fa-remember-me me-1"></i>{{ __('message.remember_me') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column align-items-center">
-                            <form action="{{ route('lang.switch', app()->getLocale()) }}" method="GET" class="mb-3">
-                                <select onchange="location = this.value;" class="form-select form-select-sm" style="min-width: 140px;">
-                                    <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>
-                                        🇺🇸 English
-                                    </option>
-                                    <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() == 'vi' ? 'selected' : '' }}>
-                                        🇻🇳 Tiếng Việt
-                                    </option>
+
+                            {{-- Right: lang select + submit --}}
+                            <div class="login-right">
+                                <select class="form-select form-select-sm lang-select" style="width:100%;"
+                                        onchange="location.href=this.value">
+                                    <option value="{{ route('lang.switch','en') }}" {{ app()->getLocale()==='en'?'selected':'' }}>🇺🇸 EN</option>
+                                    <option value="{{ route('lang.switch','vi') }}" {{ app()->getLocale()==='vi'?'selected':'' }}>🇻🇳 VI</option>
                                 </select>
-                            </form>
-                            <button class="btn btn-warning">
-                                <i class="fas fa-sign-in-alt me-2"></i>{{ __('message.submit') }}
-                            </button>
+                                <button type="submit" class="btn btn-gold btn-submit w-100">
+                                    <i class="fas fa-sign-in-alt me-1"></i>{{ __('message.submit') }}
+                                </button>
+                            </div>
+
+                        </div>
+
+                        {{-- Remember me --}}
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox"
+                                   id="remember" name="remember"
+                                   {{ old('remember') ? 'checked' : '' }}>
+                            <label class="form-check-label text-white" for="remember" style="font-size:.85rem;">
+                                {{ __('message.remember_me') }}
+                            </label>
                         </div>
                     </form>
                 </div>
+                @endauth
+
             </div>
         </div>
     </div>
 </nav>
 
+{{-- ════════════════════════════ CONTENT ════════════════════════════ --}}
 @php
     use App\Models\Menu;
     $betMenus = Menu::all();
 @endphp
 
-<!-- Carousel -->
-<div class="container">
-    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            @foreach ($betMenus as $index => $menu)
-                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}" data-bs-interval="4000">
-                    <img src="{{ asset('uploads/banners/' .($menu->banner ?? 'uploads/default_banner.jpg')) }}" 
-                         class="d-block w-100 img-fluid" 
-                         alt="Slide {{ $index + 1 }}" 
-                         style="width: 100%; object-fit: cover;">
-                </div>
-            @endforeach
-        </div>
-        
-        <!-- Carousel Controls -->
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-        
-        <!-- Carousel Indicators -->
-        <div class="carousel-indicators">
-            @foreach ($betMenus as $index => $menu)
-                <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="{{ $index }}" 
-                        class="{{ $index === 0 ? 'active' : '' }}" aria-current="true" aria-label="Slide {{ $index + 1 }}"></button>
-            @endforeach
+<div class="container-xl">
+
+    {{-- Carousel --}}
+    @if ($betMenus->isNotEmpty())
+    <div class="carousel-wrap">
+        <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @foreach ($betMenus as $i => $menu)
+                    <div class="carousel-item {{ $i === 0 ? 'active' : '' }}" data-bs-interval="4000">
+                        <img src="{{ asset('uploads/banners/' . ($menu->banner ?: 'default_banner.jpg')) }}"
+                             alt="{{ $menu->title }}" class="d-block w-100">
+                    </div>
+                @endforeach
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+
+            <div class="carousel-indicators">
+                @foreach ($betMenus as $i => $menu)
+                    <button type="button" data-bs-target="#mainCarousel"
+                            data-bs-slide-to="{{ $i }}"
+                            class="{{ $i === 0 ? 'active' : '' }}"
+                            aria-label="Slide {{ $i + 1 }}"></button>
+                @endforeach
+            </div>
         </div>
     </div>
-</div>
+    @endif
 
-<!-- Main Content -->
-<div class="container mt-5">
-    <div class="row g-4">
+    {{-- Product cards --}}
+    <div class="row g-4 mt-1 mb-4">
         @foreach ($betMenus as $menu)
-            <div class="col-12 col-md-6 col-lg-4">
-                <li class="product_list position-relative">
-                    <img src="{{ asset('uploads/images/' .($menu->image ?? 'uploads/default_banner.jpg')) }}" 
-                         class="img-fluid lotto-img" 
-                         alt="{{ $menu->title ?? 'Lotto Image' }}">
-                    
-                    <div class="pro_text position-absolute w-100 h-100 top-0 start-0 d-flex">
-                        <h3 class="text-center">
-                            <i class="fas fa-dice me-2"></i>
-                            {{ $menu->title ?? 'LOTTO' }}
-                        </h3>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <li class="product-card">
+                    <img src="{{ asset('uploads/images/' . ($menu->image ?: 'default_banner.jpg')) }}"
+                         class="card-img" alt="{{ $menu->title }}">
+                    <div class="card-label">
+                        <h3><i class="fas fa-dice me-2"></i>{{ $menu->title }}</h3>
                     </div>
                 </li>
             </div>
         @endforeach
     </div>
+
 </div>
 
-<!-- Footer -->
-<div class="footer mt-5 py-4" style="background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(26,26,26,0.9) 100%); border-top: 3px solid var(--primary-gold);">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <!-- Copyright -->
-                <p style="color: var(--primary-gold); font-family: 'Orbitron', monospace; font-weight: 600; margin: 0;">
-                    <i class="fas fa-crown me-2"></i>
-                    © 2025 Lottery2888 - Your Premium Gaming Destination
-                    <i class="fas fa-crown ms-2"></i>
-                </p>
-
-                <!-- Contact -->
-                <p style="color: rgba(255,255,255,0.9); font-size: 0.95rem; margin-top: 1rem;">
-                    <i class="fas fa-phone-alt me-2" style="color: var(--primary-gold);"></i>
-                    <a href="tel:+85570956667" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 031 469 2888</a> | 
-                    <a href="tel:+855977900022" style="color: rgba(255,255,255,0.9); text-decoration: none;">+855 97 790 0022</a>
-                </p>
-
-                <!-- Telegram -->
-                <p style="margin-top: 0.5rem;">
-                    <a href="https://t.me/lottery2888" target="_blank" style="color: var(--primary-gold); font-size: 1rem; text-decoration: none;">
-                        <i class="fab fa-telegram-plane me-1"></i> Join us on Telegram
-                    </a>
-                </p>
-
-                <div class="bank-logos mt-3">
-                    <img src="/images/wing.jpg" alt="Wing" style="height: 50px; margin: 0 1px;">
-                    <img src="/images/aba.jpg" alt="ABA" style="height: 50px; margin: 0 1px;">
-                    <img src="/images/acleda.jpg" alt="ACLEDA" style="height: 50px; margin: 0 1px;">
-                </div>
-            </div>
+{{-- ════════════════════════════ FOOTER ════════════════════════════ --}}
+<footer class="site-footer">
+    <div class="container-xl">
+        <p class="mb-2" style="color:var(--gold);font-family:'Orbitron',monospace;font-weight:700;">
+            <i class="fas fa-crown me-1"></i>
+            &copy; {{ date('Y') }} Lottery2888 — Your Premium Gaming Destination
+            <i class="fas fa-crown ms-1"></i>
+        </p>
+        <p class="mb-2 small">
+            <i class="fas fa-phone-alt me-1" style="color:var(--gold)"></i>
+            <a href="tel:+85531469288">+855 031 469 2888</a>
+            &nbsp;|&nbsp;
+            <a href="tel:+855977900022">+855 97 790 0022</a>
+        </p>
+        <p class="mb-3 small">
+            <a href="https://t.me/lottery2888" target="_blank" style="color:var(--gold)">
+                <i class="fab fa-telegram-plane me-1"></i>Join us on Telegram
+            </a>
+        </p>
+        <div>
+            <img src="{{ asset('images/wing.jpg') }}"   alt="Wing"   class="bank-logo">
+            <img src="{{ asset('images/aba.jpg') }}"    alt="ABA"    class="bank-logo">
+            <img src="{{ asset('images/acleda.jpg') }}" alt="ACLEDA" class="bank-logo">
         </div>
     </div>
-</div>
+</footer>
 
-
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    // Add smooth scrolling and enhanced interactions
-    document.addEventListener('DOMContentLoaded', function() {
-        // Smooth hover effects for product cards
-        const productCards = document.querySelectorAll('.product_list');
-        
-        productCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px) scale(1.02)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
-        });
-        
-        // Enhanced carousel auto-play
-        const carousel = document.querySelector('#carouselExample');
-        if (carousel) {
-            const carouselInstance = new bootstrap.Carousel(carousel, {
-                interval: 4000,
-                wrap: true,
-                keyboard: true
-            });
-        }
-    });
-</script>
-
 </body>
 </html>
