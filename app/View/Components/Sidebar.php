@@ -20,8 +20,17 @@ class Sidebar extends Component
      */
     public function __construct()
     {
-        $userCount = User::count();
-        view()->share('userCount',$userCount);
+        $authUser  = auth()->user();
+        $supervisorRoles = ['admin', 'master', 'senior', 'manager', 'share_master'];
+
+        $memberQuery = User::whereDoesntHave('roles', fn($q) => $q->whereIn('name', $supervisorRoles));
+        if ($authUser && !$authUser->hasRole('admin')) {
+            $memberQuery->where(function ($q) use ($authUser) {
+                $q->where('manager_id', $authUser->id)->orWhere('master_id', $authUser->id);
+            });
+        }
+        $userCount = $memberQuery->count();
+        view()->share('userCount', $userCount);
         
         $RoleCount = Role::count();
         view()->share('RoleCount',$RoleCount);

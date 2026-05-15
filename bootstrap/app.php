@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'check.usd' => \App\Http\Middleware\CheckUSDCurrency::class,
             'check.vnd' => \App\Http\Middleware\CheckVNDCurrency::class,
+            'check.kh'  => \App\Http\Middleware\CheckKHCurrency::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -26,55 +26,48 @@ class UserController extends Controller
     }
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        $currentCurrency = $user->currencies()->first();
-        if (!$currentCurrency) {
-            $data = collect();
+
+        $query = User::with('roles', 'manager', 'master', 'currencies')
+            ->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))
+            ->orderBy('users.id', 'ASC');
+
+        if ($user->hasRole('admin')) {
+            // Admin sees everyone except other admins
+        } elseif ($user->hasRole('master')) {
+            // Master sees seniors, share_masters, and members under them
+            $query->where(function ($q) use ($user) {
+                $q->where('users.master_id', $user->id)
+                  ->orWhere('users.manager_id', $user->id);
+            });
+        } elseif ($user->hasRole('senior') || $user->hasRole('manager')) {
+            // Senior/Manager sees only their direct members
+            $query->where('users.manager_id', $user->id);
         } else {
-            if ($user->hasRole('admin')) {
-                $data = User::with('package', 'roles', 'manager', 'accountManagement', 'currencies')
-                    ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                        $query->where('currency', $currentCurrency->currency);
-                    })
-                    ->whereDoesntHave('roles', function ($query) {
-                        $query->whereIn('name', ['member', 'admin']);
-                    })
-                    ->orderBy('id', 'ASC')
-                    ->get();
-            } elseif ($user->hasRole('manager')) {
-                $data = User::select(
-                        'users.*',
-                        DB::raw('COALESCE(SUM(account_management.bet_credit), 0) AS total_bet_credit'),
-                        DB::raw('COALESCE(SUM(account_management.available_credit), 0) AS total_available_credit')
-                    )
-                    ->leftJoin('account_management', 'account_management.user_id', '=', 'users.id')
-                    ->where('users.manager_id', $user->id)
-                    ->whereHas('currencies', function ($query) use ($currentCurrency) {
-                        $query->where('currency', $currentCurrency->currency);
-                    })
-                    ->whereDoesntHave('roles', function ($query) {
-                        $query->where('name', 'admin');
-                    })
-                    ->groupBy('users.id')
-                    ->orderBy('users.id', 'ASC')
-                    ->get();
-            }
-            
+            $query->whereRaw('1=0'); // no one else sees the list
         }
+
+        $data = $query->get();
 
         return view('admin.user.index', compact('data'));
     }
     public function create()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+
         if ($user->hasRole('admin')) {
-            $roles = Role::where('name', 'manager')->get();
-        } elseif ($user->hasRole('manager')) {
-            $roles = Role::where('name', 'member')->get();
+            $roles = Role::whereIn('name', ['master', 'share_master'])->get();
+        } elseif ($user->hasRole('master')) {
+            $roles = Role::whereIn('name', ['senior', 'manager', 'share_master'])->get();
+        } elseif ($user->hasRole('senior') || $user->hasRole('manager')) {
+            $roles = Role::whereIn('name', ['member'])->get();
         } else {
-            $roles = collect(); // or handle unauthorized
+            $roles = collect();
         }
-        return view('admin.user.create',compact('roles'));
+
+        return view('admin.user.create', compact('roles'));
     }
     public function store(Request $request)
     {
@@ -86,18 +79,40 @@ class UserController extends Controller
             'phonenumber' => 'required',
             'role' => 'required'
         ]);
+        /** @var \App\Models\User $creator */
+        $creator    = Auth::user();
+        $targetRole = $request->role;
+
+        // Determine manager_id and master_id based on who is creating and what role is being created
+        $managerId = $creator->id;
+        $masterId  = null;
+
+        if ($creator->hasRole('admin')) {
+            // Admin creates master/share_master: no manager_id hierarchy above them
+            $managerId = $creator->id;
+            $masterId  = null;
+        } elseif ($creator->hasRole('master')) {
+            // Master creates senior/manager/share_master
+            $managerId = $creator->id;
+            $masterId  = $creator->id;
+        } elseif ($creator->hasRole('senior') || $creator->hasRole('manager')) {
+            // Senior/Manager creates members
+            $managerId = $creator->id;
+            $masterId  = $creator->master_id ?? $creator->manager_id;
+        }
+
         $user = User::create([
-            'package_id' => $request->package_id,
-            'manager_id' => Auth::user()->id??0,
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->username.'@gmail.com',
-            'phonenumber' => $request->phonenumber,
-            'password' => bcrypt($request->password),
+            'package_id'       => $request->package_id,
+            'manager_id'       => $managerId,
+            'master_id'        => $masterId,
+            'name'             => $request->name,
+            'username'         => $request->username,
+            'email'            => $request->username . '@gmail.com',
+            'phonenumber'      => $request->phonenumber,
+            'password'         => bcrypt($request->password),
             'record_status_id' => 1,
-            'is_active' => 1,
-            'created_by' => Auth::user()->id??0,
-        
+            'is_active'        => 1,
+            'created_by'       => $creator->id,
         ]);
 
         UserCurrency::create([
@@ -151,15 +166,17 @@ class UserController extends Controller
     }
     public function edit($id)
         {
+            /** @var \App\Models\User $currentUser */
             $currentUser = auth()->user();
-            
-            // Filter roles based on current user's role
+
             if ($currentUser->hasRole('admin')) {
-                $roles = Role::whereIn('name', ['manager', 'member'])->get();
-            } elseif ($currentUser->hasRole('manager')) {
+                $roles = Role::whereIn('name', ['master', 'senior', 'manager', 'share_master', 'member'])->get();
+            } elseif ($currentUser->hasRole('master')) {
+                $roles = Role::whereIn('name', ['senior', 'manager', 'share_master', 'member'])->get();
+            } elseif ($currentUser->hasRole('senior') || $currentUser->hasRole('manager')) {
                 $roles = Role::where('name', 'member')->get();
             } else {
-                $roles = collect(); // Empty collection if no permissions
+                $roles = collect();
             }
             
             $user = User::with('roles')
@@ -214,6 +231,12 @@ class UserController extends Controller
                 'cash_balance' => 0,
                 'currency' => $request->currency ?? null,
             ]);
+        }
+        if ($request->currency) {
+            UserCurrency::updateOrCreate(
+                ['user_id' => $user->id],
+                ['currency' => $request->currency, 'record_status_id' => 1]
+            );
         }
         $user->assignRole($request->role);
         return redirect()->route('admin.user.index')->with('success','User updated successfully.');

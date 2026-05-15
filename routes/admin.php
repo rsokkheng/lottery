@@ -15,7 +15,9 @@ use App\Http\Controllers\BetReportUSDController;
 use App\Http\Controllers\BalanceReportController;
 use App\Http\Controllers\LotteryResultController;
 use App\Http\Controllers\LotteryResultUSDController;
+use App\Http\Controllers\LotteryResultKHController;
 use App\Http\Controllers\BetLotteryPackageController;
+use App\Http\Controllers\CreditKHController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard',[ProfileController::class,'dashboard'])->name('dashboard');
@@ -48,6 +50,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
         Route::post('result/store-winning-result-vnd',[LotteryResultController::class, 'storeWinningResult'])->name('result.store-winning-result');
         Route::post('result/store-winning-result-usd',[LotteryResultUSDController::class, 'storeWinningResult'])->name('result.store-winning-result-usd');
+        Route::post('result/store-winning-result-kh',[LotteryResultKHController::class, 'storeWinningResult'])->name('result.store-winning-result-kh');
+        Route::get('credit-kh', [CreditKHController::class, 'index'])->name('credit-kh.index');
+        Route::post('credit-kh/deposit', [CreditKHController::class, 'deposit'])->name('credit-kh.deposit');
+        Route::get('credit-kh/{userId}/history', [CreditKHController::class, 'history'])->name('credit-kh.history');
+        Route::get('result/index-kh-mien-nam',[LotteryResultKHController::class, 'indexMienNam'])->name('result-kh.index-mien-nam');
+        Route::get('result/create-kh-mien-nam',[LotteryResultKHController::class, 'createMienNam'])->name('result-kh.create-mien-nam');
+        Route::get('result/index-kh-mien-trung',[LotteryResultKHController::class, 'indexMienTrung'])->name('result-kh.index-mien-trung');
+        Route::get('result/create-kh-mien-trung',[LotteryResultKHController::class, 'createMienTrung'])->name('result-kh.create-mien-trung');
+        Route::get('result/index-kh-mien-bac',[LotteryResultKHController::class, 'indexMienBac'])->name('result-kh.index-mien-bac');
+        Route::get('result/create-kh-mien-bac',[LotteryResultKHController::class, 'createMienBac'])->name('result-kh.create-mien-bac');
         Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
         Route::get('generate-win-result',[LotteryResultController::class, 'callGenerateWinNumber']);
         Route::post('result/store-winning-record',[\App\Http\Controllers\WinningRecordController::class, 'storeWinningRecord'])->name('result.store-winning-record');

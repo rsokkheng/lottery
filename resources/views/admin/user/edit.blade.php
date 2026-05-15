@@ -90,6 +90,7 @@
                         $user = auth()->user();
                         $hasVND = $user->currencies()->where('currency', 'VND')->exists();
                         $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+                        $hasKHR = $user->currencies()->where('currency', 'KHR')->exists();
                     @endphp
 
                     {{-- Currency --}}
@@ -110,6 +111,14 @@
                                     <input class="form-check-input" type="radio" name="currency" id="currencyUSD" value="USD"
                                         {{ old('currency', !$hasVND && $hasUSD ? 'USD' : '') == 'USD' ? 'checked' : '' }} required>
                                     <label class="form-check-label" for="currencyUSD">USD</label>
+                                </div>
+                            @endif
+
+                            @if ($hasKHR)
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="currency" id="currencyKHR" value="KHR"
+                                        {{ old('currency', !$hasVND && !$hasUSD && $hasKHR ? 'KHR' : '') == 'KHR' ? 'checked' : '' }} required>
+                                    <label class="form-check-label" for="currencyKHR">VND</label>
                                 </div>
                             @endif
 

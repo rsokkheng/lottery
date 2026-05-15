@@ -19,15 +19,18 @@
             $user = auth()->user();
             $hasVND = $user->currencies()->where('currency', 'VND')->exists();
             $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+            $hasKHR = $user->currencies()->where('currency', 'KHR')->exists();
+            $currentCurrency = session('currency');
         @endphp
 
-        @if($hasVND && !$hasUSD)
-            @include('layouts.navigation') {{-- Only VND --}}
-        @elseif($hasUSD && !$hasVND)
-            @include('layouts.navigation_usd') {{-- Only USD --}}
-        @elseif($hasVND && $hasUSD)
-            {{-- Default to one, or let user choose via session --}}
-            @include('layouts.nonavigation') {{-- Default to VND --}}
+        @if($currentCurrency === 'KHR' || ($hasKHR && !$hasVND && !$hasUSD))
+            @include('layouts.navigation_kh')
+        @elseif($currentCurrency === 'USD' || ($hasUSD && !$hasVND && !$hasKHR))
+            @include('layouts.navigation_usd')
+        @elseif($currentCurrency === 'VND' || ($hasVND && !$hasUSD && !$hasKHR))
+            @include('layouts.navigation')
+        @else
+            @include('layouts.nonavigation')
         @endif
     @endauth
 

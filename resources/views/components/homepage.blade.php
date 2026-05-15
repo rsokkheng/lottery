@@ -515,6 +515,7 @@
                             $user = auth()->user();
                             $hasVND = $user->currencies()->where('currency', 'VND')->exists();
                             $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
+                            $hasKHR = $user->currencies()->where('currency', 'KHR')->exists();
                             $isAdminOrManager = $user->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty();
                         @endphp
 
@@ -523,17 +524,21 @@
 
                             if (!$isAdminOrManager) {
                                 // Normal user
-                                if ($hasVND && !$hasUSD) {
+                                if ($hasVND && !$hasUSD && !$hasKHR) {
                                     $link = url('lotto_vn/bet');
-                                } elseif ($hasUSD && !$hasVND) {
+                                } elseif ($hasUSD && !$hasVND && !$hasKHR) {
                                     $link = url('lotto_usd/bet');
+                                } elseif ($hasKHR && !$hasVND && !$hasUSD) {
+                                    $link = url('lotto_kh/bet');
                                 }
                             } else {
                                 // Admin or Manager
-                                if ($hasVND && !$hasUSD) {
+                                if ($hasVND && !$hasUSD && !$hasKHR) {
                                     $link = url('lotto_vn/receipt-list');
-                                } elseif ($hasUSD && !$hasVND) {
+                                } elseif ($hasUSD && !$hasVND && !$hasKHR) {
                                     $link = url('lotto_usd/receipt-list');
+                                } elseif ($hasKHR && !$hasVND && !$hasUSD) {
+                                    $link = url('lotto_kh/receipt-list');
                                 }
                             }
                         @endphp

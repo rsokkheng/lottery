@@ -27,6 +27,7 @@ class User extends Authenticatable
         'username',
         'package_id',
         'manager_id',
+        'master_id',
         'name',
         'email',
         'password',
@@ -70,16 +71,28 @@ class User extends Authenticatable
     {
         return $this->hasMany(BetUserWallet::class);
     }
-    // Each user belongs to a manager
+    // Immediate parent (manager or master who created this user)
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
     }
 
-    // Each manager has many users under them
+    // Direct children created by this user
     public function members()
     {
         return $this->hasMany(User::class, 'manager_id');
+    }
+
+    // Master Agent this user belongs to (for senior/member tracing back to master)
+    public function master()
+    {
+        return $this->belongsTo(User::class, 'master_id');
+    }
+
+    // All users directly under this master
+    public function masterChildren()
+    {
+        return $this->hasMany(User::class, 'master_id');
     }
     public function currencies()
     {
@@ -100,5 +113,13 @@ class User extends Authenticatable
         return $this->hasMany(BalanceReportOutstanding::class);
     }
 
-   
+    public function accountKH()
+    {
+        return $this->hasOne(AccountKH::class);
+    }
+
+    public function creditTransactionsKH()
+    {
+        return $this->hasMany(CreditTransactionKH::class);
+    }
 }
