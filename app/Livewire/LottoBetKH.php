@@ -14,9 +14,9 @@ use App\Models\AccountKH;
 use App\Models\CreditTransactionKH;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
-use App\Enums\MultiplierHashtagEnum;
+use App\Enums\MultiplierHashtagKHEnum;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\MultiplierHashtagHNEnum;
+use App\Enums\MultiplierHashtagHNKHEnum;
 use App\Models\BalanceReportOutstanding;
 use App\Models\BetLotteryPackageConfiguration;
 use Illuminate\Support\Facades\Log;
@@ -311,17 +311,9 @@ class LottoBetKH extends Component
                 $this->roll_parlay_check[$key] = false;
                 break;
             case 3:
-                // 3D: ABCD, Roll, Roll2 enabled
-                $this->setBetType($key, "3D", false, false, false, false, true, true, true, false);
-                $this->a_amount[$key] = null;
-                $this->b_amount[$key] = null;
-                $this->c_amount[$key] = null;
-                $this->d_amount[$key] = null;
+                // 3D: A, B, C, D, ABCD, Roll, Roll2 enabled; Roll Parlay disabled
+                $this->setBetType($key, "3D", true, true, true, true, true, true, true, false);
                 $this->roll_parlay_amount[$key] = null;
-                $this->a_check[$key] = false;
-                $this->b_check[$key] = false;
-                $this->c_check[$key] = false;
-                $this->d_check[$key] = false;
                 $this->roll_parlay_check[$key] = false;
                 break;
             case 4:
@@ -621,22 +613,22 @@ class LottoBetKH extends Component
                                 $countHashtag = substr_count($number, '#');
                                 if($schedule->code=="HN") {
                                     $multiplierHashtag = match ($countHashtag) {
-                                        1 => MultiplierHashtagHNEnum::one,
-                                        2 => MultiplierHashtagHNEnum::two,
-                                        3 => MultiplierHashtagHNEnum::three,
+                                        1 => MultiplierHashtagHNKHEnum::one,
+                                        2 => MultiplierHashtagHNKHEnum::two,
+                                        3 => MultiplierHashtagHNKHEnum::three,
                                         default => 1
                                     };
                                 }else
                                 {
                                     $multiplierHashtag = match ($countHashtag) {
-                                        1 => MultiplierHashtagEnum::one,
-                                        2 => MultiplierHashtagEnum::two,
-                                        3 => MultiplierHashtagEnum::three,
+                                        1 => MultiplierHashtagKHEnum::one,
+                                        2 => MultiplierHashtagKHEnum::two,
+                                        3 => MultiplierHashtagKHEnum::three,
                                         default => 1
                                     };
                                 }
                                 if ($this->roll_parlay_check[$key] == true) {
-                                    $multiplierOneHashtag = $schedule->code == "HN" ? MultiplierHashtagHNEnum::one : MultiplierHashtagEnum::one;
+                                    $multiplierOneHashtag = $schedule->code == "HN" ? MultiplierHashtagHNKHEnum::one : MultiplierHashtagKHEnum::one;
                                     $parts = $this->generateSharpNumber($number);
                                     foreach ($parts as $part) {
                                         $betNumber2 = [
@@ -814,16 +806,16 @@ class LottoBetKH extends Component
                 }
                 if ($code == "HN") {
                     $multiplier = match ($countHashtag) {
-                        1 => MultiplierHashtagHNEnum::one,
-                        2 => MultiplierHashtagHNEnum::two,
-                        3 => MultiplierHashtagHNEnum::three,
+                        1 => MultiplierHashtagHNKHEnum::one,
+                        2 => MultiplierHashtagHNKHEnum::two,
+                        3 => MultiplierHashtagHNKHEnum::three,
                         default => 1
                     };
                 } else {
                     $multiplier = match ($countHashtag) {
-                        1 => MultiplierHashtagEnum::one,
-                        2 => MultiplierHashtagEnum::two,
-                        3 => MultiplierHashtagEnum::three,
+                        1 => MultiplierHashtagKHEnum::one,
+                        2 => MultiplierHashtagKHEnum::two,
+                        3 => MultiplierHashtagKHEnum::three,
                         default => 1
                     };
                 }
@@ -838,22 +830,23 @@ class LottoBetKH extends Component
                 if ($info['amount'] > 0) {
                     if ($code == "HN") {
                         $multiplier = match ($type) {
-                            'a' => $length == 2 ? MultiplierHNKHEnum::A : 0,
-                            'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD :
-                                ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
-                            'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL :
-                                ($length == 3 ? MultiplierHNKHEnum::ROLL_3D :
-                                    ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
+                            'a'    => $length == 2 ? MultiplierHNKHEnum::A    : ($length == 3 ? MultiplierHNKHEnum::A_3D : 0),
+                            'b'    => $length == 2 ? MultiplierHNKHEnum::B    : ($length == 3 ? MultiplierHNKHEnum::B_3D : 0),
+                            'c'    => $length == 2 ? MultiplierHNKHEnum::C    : ($length == 3 ? MultiplierHNKHEnum::C_3D : 0),
+                            'd'    => $length == 2 ? MultiplierHNKHEnum::D    : ($length == 3 ? MultiplierHNKHEnum::D_3D : 0),
+                            'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD : ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
+                            'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL : ($length == 3 ? MultiplierHNKHEnum::ROLL_3D : ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
                             'roll2' => ($length == 2 || $length == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
                             default => 1,
                         };
                     } else {
                         $multiplier = match ($type) {
-                            'abcd' => $length == 2 ? MultiplierKHEnum::ABCD :
-                                ($length == 3 ? MultiplierKHEnum::ABCD : 0),
-                            'roll' => $length == 2 ? MultiplierKHEnum::ROLL :
-                                ($length == 3 ? MultiplierKHEnum::ROLL_3D :
-                                    ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
+                            'a'    => $length == 2 ? MultiplierKHEnum::A    : ($length == 3 ? MultiplierKHEnum::A_3D : 0),
+                            'b'    => $length == 2 ? MultiplierKHEnum::B    : ($length == 3 ? MultiplierKHEnum::B_3D : 0),
+                            'c'    => $length == 2 ? MultiplierKHEnum::C    : ($length == 3 ? MultiplierKHEnum::C_3D : 0),
+                            'd'    => $length == 2 ? MultiplierKHEnum::D    : ($length == 3 ? MultiplierKHEnum::D_3D : 0),
+                            'abcd' => $length == 2 ? MultiplierKHEnum::ABCD : ($length == 3 ? MultiplierKHEnum::ABCD_3D : 0),
+                            'roll' => $length == 2 ? MultiplierKHEnum::ROLL : ($length == 3 ? MultiplierKHEnum::ROLL_3D : ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
                             'roll2' => ($length == 2 || $length == 3) ? MultiplierKHEnum::ROLL2 : 0,
                             default => 1,
                         };
@@ -873,22 +866,23 @@ class LottoBetKH extends Component
                     }
                     if ($code == "HN") {
                         $multiplier = match ($type) {
-                            'a' => $length == 2 ? MultiplierHNKHEnum::A : 0,
-                            'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD :
-                                ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
-                            'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL :
-                                ($length == 3 ? MultiplierHNKHEnum::ROLL_3D :
-                                    ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
+                            'a'    => $length == 2 ? MultiplierHNKHEnum::A    : ($length == 3 ? MultiplierHNKHEnum::A_3D : 0),
+                            'b'    => $length == 2 ? MultiplierHNKHEnum::B    : ($length == 3 ? MultiplierHNKHEnum::B_3D : 0),
+                            'c'    => $length == 2 ? MultiplierHNKHEnum::C    : ($length == 3 ? MultiplierHNKHEnum::C_3D : 0),
+                            'd'    => $length == 2 ? MultiplierHNKHEnum::D    : ($length == 3 ? MultiplierHNKHEnum::D_3D : 0),
+                            'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD : ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
+                            'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL : ($length == 3 ? MultiplierHNKHEnum::ROLL_3D : ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
                             'roll2' => ($length == 2 || $length == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
                             default => 1,
                         };
                     } else {
                         $multiplier = match ($type) {
-                            'abcd' => $length == 2 ? MultiplierKHEnum::ABCD :
-                                ($length == 3 ? MultiplierKHEnum::ABCD : 0),
-                            'roll' => $length == 2 ? MultiplierKHEnum::ROLL :
-                                ($length == 3 ? MultiplierKHEnum::ROLL_3D :
-                                    ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
+                            'a'    => $length == 2 ? MultiplierKHEnum::A    : ($length == 3 ? MultiplierKHEnum::A_3D : 0),
+                            'b'    => $length == 2 ? MultiplierKHEnum::B    : ($length == 3 ? MultiplierKHEnum::B_3D : 0),
+                            'c'    => $length == 2 ? MultiplierKHEnum::C    : ($length == 3 ? MultiplierKHEnum::C_3D : 0),
+                            'd'    => $length == 2 ? MultiplierKHEnum::D    : ($length == 3 ? MultiplierKHEnum::D_3D : 0),
+                            'abcd' => $length == 2 ? MultiplierKHEnum::ABCD : ($length == 3 ? MultiplierKHEnum::ABCD_3D : 0),
+                            'roll' => $length == 2 ? MultiplierKHEnum::ROLL : ($length == 3 ? MultiplierKHEnum::ROLL_3D : ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
                             'roll2' => ($length == 2 || $length == 3) ? MultiplierKHEnum::ROLL2 : 0,
                             default => 1,
                         };
@@ -906,14 +900,22 @@ class LottoBetKH extends Component
         $multiplier = 0;
         if ($code == "HN") {
             $multiplier = match ($type) {
-                'a' => $numberLength == 2 ? MultiplierHNKHEnum::A : 0,
+                'a'    => $numberLength == 2 ? MultiplierHNKHEnum::A    : ($numberLength == 3 ? MultiplierHNKHEnum::A_3D : 0),
+                'b'    => $numberLength == 2 ? MultiplierHNKHEnum::B    : ($numberLength == 3 ? MultiplierHNKHEnum::B_3D : 0),
+                'c'    => $numberLength == 2 ? MultiplierHNKHEnum::C    : ($numberLength == 3 ? MultiplierHNKHEnum::C_3D : 0),
+                'd'    => $numberLength == 2 ? MultiplierHNKHEnum::D    : ($numberLength == 3 ? MultiplierHNKHEnum::D_3D : 0),
                 'abcd' => $numberLength == 2 ? MultiplierHNKHEnum::ABCD : ($numberLength == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
                 'roll' => $numberLength == 2 ? MultiplierHNKHEnum::ROLL : ($numberLength == 3 ? MultiplierHNKHEnum::ROLL_3D : ($numberLength == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
+                'roll2' => ($numberLength == 2 || $numberLength == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
                 default => 1,
             };
         } else {
             $multiplier = match ($type) {
-                'abcd' => $numberLength == 2 ? MultiplierKHEnum::ABCD : ($numberLength == 3 ? MultiplierKHEnum::ABCD : 0),
+                'a'    => $numberLength == 2 ? MultiplierKHEnum::A    : ($numberLength == 3 ? MultiplierKHEnum::A_3D : 0),
+                'b'    => $numberLength == 2 ? MultiplierKHEnum::B    : ($numberLength == 3 ? MultiplierKHEnum::B_3D : 0),
+                'c'    => $numberLength == 2 ? MultiplierKHEnum::C    : ($numberLength == 3 ? MultiplierKHEnum::C_3D : 0),
+                'd'    => $numberLength == 2 ? MultiplierKHEnum::D    : ($numberLength == 3 ? MultiplierKHEnum::D_3D : 0),
+                'abcd' => $numberLength == 2 ? MultiplierKHEnum::ABCD : ($numberLength == 3 ? MultiplierKHEnum::ABCD_3D : 0),
                 'roll' => $numberLength == 2 ? MultiplierKHEnum::ROLL : ($numberLength == 3 ? MultiplierKHEnum::ROLL_3D : ($numberLength == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
                 'roll2' => ($numberLength == 2 || $numberLength == 3) ? MultiplierKHEnum::ROLL2 : 0,
                 default => 1,
@@ -1087,38 +1089,40 @@ class LottoBetKH extends Component
             if ($this->province_body_check[$keys][$key]) {
                 if ($schedule->code == "HN") {
                     if ($this->a_amount[$key] > 0) {
+                        $aM = $lengthNumber == 2 ? MultiplierHNKHEnum::A : ($lengthNumber == 3 ? MultiplierHNKHEnum::A_3D : 0);
                         if ($this->a_check[$key]) {
-                            $this->totalProvisionalHN += $this->a_amount[$key] * MultiplierHNKHEnum::A * $this->permutationsLength[$key];
+                            $this->totalProvisionalHN += $this->a_amount[$key] * $aM * $this->permutationsLength[$key];
                         } else {
-                            if ($isAsterisk) {
-                                $this->totalProvisionalHN += $this->a_amount[$key] * MultiplierHNKHEnum::A * 10;
-                            } else {
-                                $this->totalProvisionalHN += $this->a_amount[$key] * MultiplierHNKHEnum::A;
-                            }
+                            $this->totalProvisionalHN += $isAsterisk
+                                ? $this->a_amount[$key] * $aM * 10
+                                : $this->a_amount[$key] * $aM;
                         }
                     }
 
                     if ($this->b_amount[$key] > 0) {
+                        $bM = $lengthNumber == 2 ? MultiplierHNKHEnum::B : ($lengthNumber == 3 ? MultiplierHNKHEnum::B_3D : 0);
                         if ($this->b_check[$key]) {
-                            $this->totalProvisionalHN += $this->b_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisionalHN += $this->b_amount[$key] * $bM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisionalHN += $isAsterisk ? $this->b_amount[$key] * 10 : $this->b_amount[$key];
+                            $this->totalProvisionalHN += $isAsterisk ? $this->b_amount[$key] * $bM * 10 : $this->b_amount[$key] * $bM;
                         }
                     }
 
                     if ($this->c_amount[$key] > 0) {
+                        $cM = $lengthNumber == 2 ? MultiplierHNKHEnum::C : ($lengthNumber == 3 ? MultiplierHNKHEnum::C_3D : 0);
                         if ($this->c_check[$key]) {
-                            $this->totalProvisionalHN += $this->c_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisionalHN += $this->c_amount[$key] * $cM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisionalHN += $isAsterisk ? $this->c_amount[$key] * 10 : $this->c_amount[$key];
+                            $this->totalProvisionalHN += $isAsterisk ? $this->c_amount[$key] * $cM * 10 : $this->c_amount[$key] * $cM;
                         }
                     }
 
                     if ($this->d_amount[$key] > 0) {
+                        $dM = $lengthNumber == 2 ? MultiplierHNKHEnum::D : ($lengthNumber == 3 ? MultiplierHNKHEnum::D_3D : 0);
                         if ($this->d_check[$key]) {
-                            $this->totalProvisionalHN += $this->d_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisionalHN += $this->d_amount[$key] * $dM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisionalHN += $isAsterisk ? $this->d_amount[$key] * 10 : $this->d_amount[$key];
+                            $this->totalProvisionalHN += $isAsterisk ? $this->d_amount[$key] * $dM * 10 : $this->d_amount[$key] * $dM;
                         }
                     }
 
@@ -1157,12 +1161,22 @@ class LottoBetKH extends Component
                         }
                     }
 
+                    if ($this->roll2_amount[$key] > 0) {
+                        $roll2Multiplier = ($lengthNumber == 2 || $lengthNumber == 3) ? MultiplierHNKHEnum::ROLL2 : 0;
+                        if ($this->roll2_check[$key]) {
+                            $this->totalProvisionalHN += $this->roll2_amount[$key] * $roll2Multiplier * $this->permutationsLength[$key];
+                        } else {
+                            $this->totalProvisionalHN += $isAsterisk
+                                ? $this->roll2_amount[$key] * $roll2Multiplier * 10
+                                : $this->roll2_amount[$key] * $roll2Multiplier;
+                        }
+                    }
 
                     if ($this->roll_parlay_amount[$key] > 0) {
                         $value = match ($countHashtag) {
-                            1 => MultiplierHashtagHNEnum::one,
-                            2 => MultiplierHashtagHNEnum::two,
-                            3 => MultiplierHashtagHNEnum::three,
+                            1 => MultiplierHashtagHNKHEnum::one,
+                            2 => MultiplierHashtagHNKHEnum::two,
+                            3 => MultiplierHashtagHNKHEnum::three,
                             default => 1
                         };
                         if ($this->roll_parlay_check[$key]) {
@@ -1177,38 +1191,40 @@ class LottoBetKH extends Component
                     }
                 } else {
                     if ($this->a_amount[$key] > 0) {
+                        $aM = $lengthNumber == 2 ? MultiplierKHEnum::A : ($lengthNumber == 3 ? MultiplierKHEnum::A_3D : 0);
                         if ($this->a_check[$key]) {
-                            $this->totalProvisional += $this->a_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisional += $this->a_amount[$key] * $aM * $this->permutationsLength[$key];
                         } else {
-                            if ($isAsterisk) {
-                                $this->totalProvisional += $this->a_amount[$key] * 10;
-                            } else {
-                                $this->totalProvisional += $this->a_amount[$key];
-                            }
+                            $this->totalProvisional += $isAsterisk
+                                ? $this->a_amount[$key] * $aM * 10
+                                : $this->a_amount[$key] * $aM;
                         }
                     }
 
                     if ($this->b_amount[$key] > 0) {
+                        $bM = $lengthNumber == 2 ? MultiplierKHEnum::B : ($lengthNumber == 3 ? MultiplierKHEnum::B_3D : 0);
                         if ($this->b_check[$key]) {
-                            $this->totalProvisional += $this->b_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisional += $this->b_amount[$key] * $bM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $isAsterisk ? $this->b_amount[$key] * 10 : $this->b_amount[$key];
+                            $this->totalProvisional += $isAsterisk ? $this->b_amount[$key] * $bM * 10 : $this->b_amount[$key] * $bM;
                         }
                     }
 
                     if ($this->c_amount[$key] > 0) {
+                        $cM = $lengthNumber == 2 ? MultiplierKHEnum::C : ($lengthNumber == 3 ? MultiplierKHEnum::C_3D : 0);
                         if ($this->c_check[$key]) {
-                            $this->totalProvisional += $this->c_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisional += $this->c_amount[$key] * $cM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $isAsterisk ? $this->c_amount[$key] * 10 : $this->c_amount[$key];
+                            $this->totalProvisional += $isAsterisk ? $this->c_amount[$key] * $cM * 10 : $this->c_amount[$key] * $cM;
                         }
                     }
 
                     if ($this->d_amount[$key] > 0) {
+                        $dM = $lengthNumber == 2 ? MultiplierKHEnum::D : ($lengthNumber == 3 ? MultiplierKHEnum::D_3D : 0);
                         if ($this->d_check[$key]) {
-                            $this->totalProvisional += $this->d_amount[$key] * $this->permutationsLength[$key];
+                            $this->totalProvisional += $this->d_amount[$key] * $dM * $this->permutationsLength[$key];
                         } else {
-                            $this->totalProvisional += $isAsterisk ? $this->d_amount[$key] * 10 : $this->d_amount[$key];
+                            $this->totalProvisional += $isAsterisk ? $this->d_amount[$key] * $dM * 10 : $this->d_amount[$key] * $dM;
                         }
                     }
 
@@ -1252,9 +1268,9 @@ class LottoBetKH extends Component
                     }
                     if ($this->roll_parlay_amount[$key] > 0) {
                         $value = match ($countHashtag) {
-                            1 => MultiplierHashtagEnum::one,
-                            2 => MultiplierHashtagEnum::two,
-                            3 => MultiplierHashtagEnum::three,
+                            1 => MultiplierHashtagKHEnum::one,
+                            2 => MultiplierHashtagKHEnum::two,
+                            3 => MultiplierHashtagKHEnum::three,
                             default => 1
                         };
 

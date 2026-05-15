@@ -64,34 +64,67 @@
 
         {{-- ── VND section ── --}}
         @if($hasVND)
-        @if($isSupervisor)
-        <li class="nav-item">
-            <a href="{{ route('admin.result.index-mien-nam') }}"
-               class="nav-link {{ Route::is('admin.result.index-mien-nam') || Route::is('admin.result.index-mien-trung') || Route::is('admin.result.index-mien-bac') ? 'active' : '' }}">
+        <li class="nav-item has-treeview
+            {{ request()->is('admin/result/index-mien*') || request()->is('admin/credit/VND*') || Route::is('admin.account-report.index') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link
+                {{ request()->is('admin/result/index-mien*') || request()->is('admin/credit/VND*') || Route::is('admin.account-report.index') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-money-bill-wave"></i>
-                <p>Lottery Result (VND)</p>
+                <p>VND <i class="fas fa-angle-left right"></i></p>
             </a>
+            <ul class="nav nav-treeview">
+                @if($isSupervisor)
+                <li class="nav-item">
+                    <a href="{{ route('admin.result.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Lottery Result</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
+                       class="nav-link {{ request()->is('admin/credit/VND') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
+                    </a>
+                </li>
+                @endif
+                @if($isAdmin || $isMaster)
+                <li class="nav-item">
+                    <a href="{{ route('admin.account-report.index') }}"
+                       class="nav-link {{ Route::is('admin.account-report.index') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Transaction Report</p>
+                    </a>
+                </li>
+                @endif
+            </ul>
         </li>
-        @endif
-        @if($isAdmin || $isMaster)
-        <li class="nav-item">
-            <a href="{{ route('admin.account-report.index') }}"
-               class="nav-link {{ Route::is('admin.account-report.index') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-file-invoice"></i>
-                <p>Transaction Report (VND)</p>
-            </a>
-        </li>
-        @endif
         @endif
 
         {{-- ── USD section ── --}}
-        @if($hasUSD && ($isAdmin || $isMaster))
-        <li class="nav-item">
-            <a href="{{ route('admin.account-report.transation-usd') }}"
-               class="nav-link {{ Route::is('admin.account-report.transation-usd') ? 'active' : '' }}">
+        @if($hasUSD)
+        <li class="nav-item has-treeview
+            {{ request()->is('admin/credit/USD*') || Route::is('admin.account-report.transation-usd') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link
+                {{ request()->is('admin/credit/USD*') || Route::is('admin.account-report.transation-usd') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-dollar-sign"></i>
-                <p>Transaction Report (USD)</p>
+                <p>USD <i class="fas fa-angle-left right"></i></p>
             </a>
+            <ul class="nav nav-treeview">
+                @if($isSupervisor)
+                <li class="nav-item">
+                    <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
+                       class="nav-link {{ request()->is('admin/credit/USD') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
+                    </a>
+                </li>
+                @endif
+                @if($isAdmin || $isMaster)
+                <li class="nav-item">
+                    <a href="{{ route('admin.account-report.transation-usd') }}"
+                       class="nav-link {{ Route::is('admin.account-report.transation-usd') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Transaction Report</p>
+                    </a>
+                </li>
+                @endif
+            </ul>
         </li>
         @endif
 

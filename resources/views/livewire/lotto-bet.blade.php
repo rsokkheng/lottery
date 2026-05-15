@@ -1,5 +1,5 @@
 <div>
-    {{-- notification save success   --}}
+    {{-- Notification --}}
     <div x-data="{ show: false, message: '', type: '' }" x-show="show" x-transition.opacity
         @bet-saved.window="
         show = true;
@@ -22,326 +22,305 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
             </template>
-
             <template x-if="type === 'error'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </template>
-
             <template x-if="type === 'warning'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01M12 17h.01M12 3a9 9 0 110 18 9 9 0 010-18z" />
                 </svg>
             </template>
-
             <span x-text="message"></span>
         </div>
     </div>
 
-
-    {{-- End notification --}}
-
-    <div class="grid grid-cols-1 xl:grid-cols-[30%_68%] gap-4 xl:mx-auto bg-white shadow-md py-4 rounded-lg space-x-2">
-        <div class="w-[90%] px-2 mb-6 mx-auto w-full max-w-md rounded-lg">
-            <div class="text-center font-bold py-2">
-                {{ now()->format('d M Y') }}
-            </div>
-            <table class="text-sm border-collapse">
-                <thead>
-                    <tr>
-                        <th class="w-[20%] border border-gray-500 px-4 py-2 text-left whitespace-nowrap">
-                            {{ __('lang.number') }}</th>
-                        <th class="w-[40%] border border-gray-500 px-4 py-2 text-left whitespace-nowrap">
-                            {{ __('lang.channel') }}</th>
-                        <th class="w-[40%] border border-gray-500 px-4 py-2 text-left whitespace-nowrap">
-                            {{ __('lang.amount') }}</th>
-                    </tr>
-                </thead>
+    <div class="bg-white shadow-md p-4 rounded-lg">
+        {{-- Top Info Section --}}
+        <div class="mb-4 text-sm">
+            <table class="border-separate" style="border-spacing: 0 3px;">
                 <tbody>
-                    @if (count($invoices) > 0)
-                        @foreach ($invoices as $invoice)
-                            <tr>
-                                <th class="w-[20%] border border-gray-500 px-4 py-2 text-left">
-                                    {{ $invoice['number'] }}
-                                </th>
-                                <th class="w-[40%] border border-gray-500 px-4 py-2 text-left">
-
-                                    {{ implode(', ', $invoice['chanel']) }}
-                                </th>
-                                <th class="w-[40%] border border-gray-500 px-4 py-2 text-left">
-                                    {{ implode(',', $invoice['amount']) }}
-                                </th>
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="3" class="border border-gray-500 px-4 py-2 text-center">
-                                {{ __('Không Có Số') }}
-                            </td>
-                        </tr>
+                    <tr>
+                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.bet-credit') }}:</td>
+                        <td class="pr-8 whitespace-nowrap">{{ $betAccount ?? 0 }} VND</td>
+                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.company') }} (GMT+7):</td>
+                        <td class="text-gray-700">
+                            @foreach ($timeClose as $time)
+                                {{ $time->code }} ({{ $time->time_close }})@if (!$loop->last), @endif
+                            @endforeach
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.outstanding') }}:</td>
+                        <td class="pr-8 whitespace-nowrap">{{ $totalOutstanding }} VND</td>
+                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.number-wildcard') }}:</td>
+                        <td>* = any of 0,1,2,...,9 &nbsp; 11-19(11,12,...,19) small(00-49) big(50-99)</td>
+                    </tr>
+                    <tr>
+                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.total-amount') }}:</td>
+                        <td class="pr-8 whitespace-nowrap">{{ $totalInvoice }} VND</td>
+                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.shortcut-word') }}:</td>
+                        <td>{{ __('lang.head-last-roll-roll7') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.total-due') }}:</td>
+                        <td class="pr-8 whitespace-nowrap font-bold {{ $totalDue > $betAccount ? 'text-red-600' : '' }}">
+                            {{ $totalDue }} VND
+                        </td>
+                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.time-left') }}:</td>
+                        <td>
+                            @foreach ($timeClose as $time)
+                                <span class="countdown-timer font-semibold"
+                                      data-close="{{ $time->time_close }}"
+                                      data-code="{{ $time->code }}">
+                                    {{ $time->code }}: {{ $time->time_close }}
+                                </span>@if (!$loop->last) &nbsp;|&nbsp; @endif
+                            @endforeach
+                        </td>
+                    </tr>
+                    @if ($totalDue > $betAccount)
+                    <tr>
+                        <td colspan="4" class="pb-1">
+                            <div class="flex items-center gap-2 bg-red-50 border border-red-300 text-red-700 rounded px-3 py-1.5 text-xs font-semibold">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                                </svg>
+                                Insufficient credit! Please add
+                                <span class="font-extrabold">
+                                    {{ number_format(round($totalDue - $betAccount, 2), 2) }} VND
+                                </span>
+                                more to your account.
+                            </div>
+                        </td>
+                    </tr>
                     @endif
-
                     <tr>
-                        <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-                            {{ __('lang.bet-credit') }}
+                        <td colspan="4" class="pt-1">
+                            <div class="flex gap-2">
+                                <button wire:click="handleSave"
+                                    @if($totalDue > $betAccount) disabled @endif
+                                    class="font-semibold px-8 py-1.5 rounded
+                                        {{ $totalDue > $betAccount
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-blue-600 hover:bg-blue-700 text-white' }}">
+                                    {{ __('lang.save') }}
+                                </button>
+                                <button wire:click="handleReset"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-8 py-1.5 rounded">
+                                    {{ __('lang.reset') }}
+                                </button>
+                            </div>
                         </td>
-                        <td class="border border-gray-500 px-4 py-2 text-right">
-
-                            {{ $betAccount ?? 0 }} (VND)
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-                            {{ __('lang.outstanding') }}
-                        </td>
-                        <td class="border border-gray-500 px-4 py-2 text-right">
-
-                            {{ $totalOutstanding }} (VND)
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-                            {{ __('lang.total-amount') }}
-                        </td>
-                        <td class="border border-gray-500 px-4 py-2 text-right">
-
-                            {{ $totalInvoice }} (VND)
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="border border-gray-500 px-4 py-2 font-bold">
-
-                            {{ __('lang.total-due') }}
-                        </td>
-                        <td class="border border-gray-500 px-4 py-2 text-right">{{ $totalDue }} (VND)</td>
                     </tr>
                 </tbody>
             </table>
-            <div class="flex p-2 items-center">
-                <div class="px-2 text-[12px]">Chi Chu:</div>
-                <div>
-                    @foreach ($packagePrice as $betType => $price)
-                        <span class="border border-gray-500 text-[12px] px-1 py-1">
-                            {{ __($betType . ' x ' . $price) }}
-                        </span>
-                    @endforeach
-                </div>
-            </div>
-            <p class="text-[12px] pb-2 text-center font-bold">{{ __('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY') }}
-            </p>
-            <!-- Print Button -->
-            <button wire:click="handleSave"
-                class="hidden w-full lg:flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
-                </svg>
-                {{ __('lang.save') }}
-            </button>
-
-            <button wire:click="handleSave"
-                class="lg:hidden w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9.75v6.75m0 0-3-3m3 3 3-3m-8.25 6a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                </svg>
-                {{ __('lang.save') }}
-            </button>
-
         </div>
 
+        {{-- Invoice List --}}
+        @if (count($invoices) > 0)
+        <div class="mb-3">
+            <table class="text-xs border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.number') }}</th>
+                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.channel') }}</th>
+                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.amount') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($invoices as $invoice)
+                        <tr>
+                            <td class="border border-gray-500 px-3 py-1">{{ $invoice['number'] }}</td>
+                            <td class="border border-gray-500 px-3 py-1">{{ implode(', ', $invoice['chanel']) }}</td>
+                            <td class="border border-gray-500 px-3 py-1">{{ implode(',', $invoice['amount']) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
 
-        <!-- Table header Section -->
-        <div x-data="popupHandler()" class="overflow-auto w-full mx-auto relative">
-            <div class="flex whitespace-nowrap mb-2">
-                <h6 style="font-size:14px">{{ __('lang.number-wildcard') }}: * = any of 0,1,2,3,...,9
-                    11-19(11,12,...,19) small(00-49)
-                    big(50-99) even(00,02,...,98) odd(01,03,...,99)</h6>
-            </div>
-            <div class="flex whitespace-nowrap mb-2">
-                <h6 style="font-size:14px">{{ __('lang.shortcut-word') }}: {{ __('lang.head-last-roll-roll7') }}</h6>
-            </div>
-            <div class="flex whitespace-nowrap mb-2">
-                <p class="text-md font-bold">{{ __('lang.time-left') }} </p>&nbsp;
-                @foreach ($timeClose as $time)
-                    <h6 style="font-size:14px" id="time-{{ $time->id }}">
-                        {{ $time->time_close }} ({{ $time->code }})
-                    </h6>&nbsp;
+        {{-- Package prices --}}
+        <div class="flex pb-2 items-center text-xs">
+            <div class="px-2">Chi Chu:</div>
+            <div>
+                @foreach ($packagePrice as $betType => $price)
+                    <span class="border border-gray-500 px-1 py-1">{{ __($betType . ' x ' . $price) }}</span>
                 @endforeach
             </div>
+        </div>
+        <p class="text-xs pb-2 text-center font-bold">{{ __('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY') }}</p>
+
+        {{-- Bet Table --}}
+        <div x-data="popupHandler()" class="overflow-auto">
             <table class="w-full text-sm border-collapse border border-gray-300">
                 <thead>
-                    <tr class="bg-blue-600 text-white" style="background-color:rgb(198 145 18)">
-                        <th class="border border-gray-300">{{ __('message.no') }}</th>
-                        <th class="border border-gray-300 p-2">{{ __('lang.number') }}</th>
-                        <th class="border border-gray-300">{{ __('lang.digit') }}</th>
-                        <th class="border border-gray-300">{{ __('A') }}</th>
-                        <th class="border border-gray-300">{{ __('B') }}</th>
-                        <th class="border border-gray-300">{{ __('A+B') }}</th>
-                        <th class="border border-gray-300">{{ __('lang.roll') }}</th>
-                        <th class="border border-gray-300">{{ __('lang.roll7') }}</th>
-                        <th class="border border-gray-300">{{ __('lang.roll-parlay') }}</th>
+                    <tr class="text-white text-left" style="background-color:#1d4ed8">
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('message.no') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.number') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.digit') }}</th>
+                        <th class="border border-blue-500 px-2 py-2">{{ __('A') }}</th>
+                        <th class="border border-blue-500 px-2 py-2">{{ __('B') }}</th>
+                        <th class="border border-blue-500 px-2 py-2">{{ __('A+B') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.roll') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.roll7') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.roll-parlay') }}</th>
                         @foreach ($schedules as $key => $item)
-                            <th class="border border-gray-300">
-                                <div class="flex-column">
+                            <th class="border border-blue-500 px-2 py-2 text-center">
+                                <div class="flex flex-col items-center gap-0.5">
                                     <input type="checkbox" wire:model="province_check.{{ $key }}"
                                         wire:click="handleProvinceCheck({{ $key }})"
                                         class="h-3 w-3 rounded-sm">
-                                    {{ $item['code'] }}
+                                    <span>{{ $item['code'] }}</span>
                                 </div>
                             </th>
                         @endforeach
-
-                        <th class="border border-gray-300">
-                            {{ __('lang.total-amount') }}
-                        </th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.total-amount') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for ($i = 0; $i < $totalRow; $i++)
-                        <tr class="text-center">
-                            <!--No-->
-                            <td class="border border-gray-300">
+                        <tr class="text-left hover:bg-gray-50">
+                            {{-- No --}}
+                            <td class="border border-gray-300 px-2 py-1 text-gray-600">
                                 {{ sprintf('%02d', $i + 1) }}
                             </td>
-                            <!--Number-->
-                            <td class="border border-gray-300 py-2">
+                            {{-- Number --}}
+                            <td class="border border-gray-300 py-1">
                                 <input type="text" autocomplete="off"
-                                    wire:model.defer="number.{{ $i }}" wire:input="handleInputNumber"
-                                    class="w-[124px] h-8 rounded text-center" oninput="formatNumberInput(this)">
+                                    wire:model.defer="number.{{ $i }}"
+                                    wire:input="handleInputNumber"
+                                    class="w-24 h-7 rounded text-left border border-gray-300 focus:outline-none focus:border-blue-400"
+                                    oninput="formatNumberInput(this)">
                             </td>
-                            <!--Digit-->
-                            <td class="border border-gray-300">
+                            {{-- Digit --}}
+                            <td class="border border-gray-300 px-1 text-gray-600">
                                 {{ $digit[$i] ?? '-' }}
                             </td>
-                            <!--A-->
-                            <td class="border border-gray-300">
-                                <div class="flex justify-center items-center">
+                            {{-- A --}}
+                            <td class="border border-gray-300 px-1">
+                                <div class="flex justify-start items-center">
                                     <input type="text" wire:model="a_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
                                         @click.stop="showPopup('a_amount',{{ $i }}, $event)"
                                         x-ref="a_amount{{ $i }}"
                                         {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] lg:w-full h-8 rounded focus:ring-0 translate-0 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
-                                    <input type="checkbox" id="a_check_{{ $i }}"
-                                        wire:model="a_check.{{ $i }}"
+                                    <input type="checkbox" wire:model="a_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'ACheck')"
                                         {{ isset($enableChanelA[$i]) && !$enableChanelA[$i] ? 'disabled' : '' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelA[$i]) && $enableChanelA[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-                            <!--B-->
-                            <td class="border border-gray-300">
-                                <div class="flex justify-center items-center">
+                            {{-- B --}}
+                            <td class="border border-gray-300 px-1">
+                                <div class="flex justify-start items-center">
                                     <input type="text" wire:model="b_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
-                                        wire:input="handleInputNumber"
                                         @click.stop="showPopup('b_amount',{{ $i }}, $event)"
                                         x-ref="b_amount{{ $i }}"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
-                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
-
                                     <input type="checkbox" wire:model="b_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'BCheck')"
                                         :disabled="{{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'false' : 'true' }}"
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelB[$i]) && $enableChanelB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-                            <!--A+B-->
-                            <td class="border border-gray-300">
-                                <div class="flex justify-center items-center">
+                            {{-- A+B --}}
+                            <td class="border border-gray-300 px-1">
+                                <div class="flex justify-start items-center">
                                     <input type="text" wire:model="ab_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
                                         @click.stop="showPopup('ab_amount',{{ $i }}, $event)"
                                         x-ref="ab_amount{{ $i }}"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                     <input type="checkbox" wire:model="ab_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'ABCheck')"
                                         {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? '' : 'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelAB[$i]) && $enableChanelAB[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-                            <!--Roll-->
-                            <td class="border border-gray-300">
-                                <div class="flex justify-center items-center">
+                            {{-- Roll --}}
+                            <td class="border border-gray-300 px-1">
+                                <div class="flex justify-start items-center">
                                     <input type="text" id="roll_amount_{{ $i }}"
                                         wire:model="roll_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
                                         @click.stop="showPopup('roll_amount',{{ $i }}, $event)"
                                         x-ref="roll_amount{{ $i }}"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                     <input type="checkbox" wire:model="roll_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'RCheck')"
                                         {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? '' : 'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll[$i]) && $enableChanelRoll[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-                            <!--Roll 7-->
-                            <td class="border border-gray-300 bg-yellow-200">
-                                <div class="flex justify-center items-center">
+                            {{-- Roll 7 --}}
+                            <td class="border border-gray-300 px-1 bg-yellow-100">
+                                <div class="flex justify-start items-center">
                                     <input type="text" wire:model="roll7_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
                                         @click.stop="showPopup('roll7_amount',{{ $i }}, $event)"
                                         x-ref="roll7_amount{{ $i }}"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                     <input type="checkbox" wire:model="roll7_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'R7Check')"
                                         {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? '' : 'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableChanelRoll7[$i]) && $enableChanelRoll7[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-                            <!--Roll Parlay-->
-                            <td class="border border-gray-300">
-                                <div class="flex justify-center items-center">
+                            {{-- Roll Parlay --}}
+                            <td class="border border-gray-300 px-1">
+                                <div class="flex justify-start items-center">
                                     <input type="text" wire:model="roll_parlay_amount.{{ $i }}"
                                         wire:input="handleInputAmount({{ $i }})"
                                         @click.stop="showPopup('roll_parlay_amount',{{ $i }}, $event)"
                                         x-ref="roll_parlay_amount{{ $i }}"
                                         {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? '' : 'disabled' }}
-                                        class="w-[100px] lg:w-full h-8 rounded {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}"
+                                        class="w-16 h-7 rounded text-left border {{ isset($enableChanelRollParlay[$i]) && $enableChanelRollParlay[$i] ? 'bg-white border-gray-300' : 'bg-gray-200 border-gray-200 cursor-no-drop' }}"
                                         oninput="formatNumberValue(this)">
                                     <input type="checkbox" wire:model="roll_parlay_check.{{ $i }}"
                                         wire:click="handleCheckChanel({{ $i }},'RPCheck')"
                                         :checked="{{ isset($roll_parlay_check[$i]) && $roll_parlay_check[$i] ? 'true' : 'false' }}"
                                         {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? '' : 'disabled' }}
-                                        class="rounded-sm h-3 w-3 {{ isset($enableCheckRollParlay[$i]) && $enableCheckRollParlay[$i] ? 'bg-white' : 'bg-gray-200 cursor-no-drop' }}">
-
+                                        class="h-3 w-3 ml-0.5">
                                 </div>
                             </td>
-
+                            {{-- Province Checkboxes --}}
                             @foreach ($schedules as $key => $item)
-                                <td class="border border-gray-300 py-2">
-                                    <div class="flex-column">
+                                <td class="border border-gray-300 py-1 text-center">
+                                    <div class="flex flex-col items-center">
                                         <input type="checkbox"
                                             wire:model.live="province_body_check.{{ $key }}.{{ $i }}"
                                             wire:change="handleProvinceBodyCheck({{ $key }},{{ $i }}, {{ $item }})"
                                             :checked="{{ isset($province_check[$key]) && $province_check[$key] ? 'true' : 'false' }}"
                                             class="h-3 w-3 rounded-sm">
-                                        {{ $item['code'] }}
+                                        <span class="text-xs">{{ $item['code'] }}</span>
                                     </div>
                                 </td>
                             @endforeach
-
-                            <!--Total Amount-->
-                            <td class="border border-gray-300 p-2">{{ $total_amount[$i] }}</td>
+                            {{-- Total --}}
+                            <td class="border border-gray-300 px-2 py-1 font-medium text-left">
+                                {{ $total_amount[$i] }}
+                            </td>
                         </tr>
                     @endfor
                 </tbody>
             </table>
 
-            <!-- Popup -->
+            {{-- Popup --}}
             <div x-show="show" x-transition @click.away="hidePopup()"
                 :style="'top:' + posY + 'px; left:' + posX + 'px'"
                 class="w-40 grid grid-cols-2 fixed bg-gray-200 border p-2 rounded shadow z-50 gap-2">
@@ -359,97 +338,110 @@
 </div>
 
 <script>
-    // Function to move focus to the next input on Enter key press
     const handleEnterKey = (event, inputs) => {
         const currentInput = event.target;
-        if (currentInput.disabled) {
-            return; // Do nothing if the current input is disabled
-        }
-
+        if (currentInput.disabled) return;
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent form submission if inside a form
-
+            event.preventDefault();
             let nextIndex = Array.from(inputs).indexOf(currentInput) + 1;
-
-            // Skip disabled inputs
             while (nextIndex < inputs.length && inputs[nextIndex].disabled) {
                 nextIndex++;
             }
-
-            // Move focus to the next enabled input, if exists
             if (nextIndex < inputs.length) {
                 inputs[nextIndex].focus();
             }
         }
     }
 
-    // Example: Attach the handleEnterKey to the input fields
-    const formatNumberValue = (input, nextInput) => {
-        let value = input.value.replace(/[^0-9.]/g, ''); // Allow only digits (0-9)
-        // Allow only one dot
+    const formatNumberValue = (input) => {
+        let value = input.value.replace(/[^0-9.]/g, '');
         const parts = value.split('.');
         if (parts.length > 2) {
             value = parts[0] + '.' + parts.slice(1).join('');
         }
-        // Limit to 5 characters
         if (value.length > 5) {
             value = value.slice(0, 5);
         }
-        input.value = value; // Update the input value with the formatted number
-
-        // Add event listener to handle the Enter key
-        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
+        input.value = value;
+        const inputs = document.querySelectorAll('input[type="text"]');
+        input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
     }
 
-    // Example: formatNumberInput with Enter key functionality
-    function formatNumberInput(input, nextInput) {
+    function formatNumberInput(input) {
         let value = input.value;
-
-        // Logic for handling specific number formats like '#', '*' and others
         if (value.includes("#")) {
-            value = value.replace(/[^0-9#]/g, ''); // Remove invalid characters
+            value = value.replace(/[^0-9#]/g, '');
             let validFormat =
                 /^(\d+|(\d{2}\#)|(\d{2}\#\d{1})|(\d{2}\#\d{2})|(\d{2}\#\d{2}\#)|(\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2})|(\d{2}\#\d{2}\#\d{2}\#)||(\d{2}\#\d{2}\#\d{2}\#\d{1})|(\d{2}\#\d{2}\#\d{2}\#\d{2}))$/;
             if (!validFormat.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
+                value = value.slice(0, -1);
             }
         } else if (value.startsWith("*")) {
-            value = value.replace(/[^0-9\*]/g, ''); // Remove invalid characters
+            value = value.replace(/[^0-9\*]/g, '');
             if (!/^\*([0-9]{1,3})?$/.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
+                value = value.slice(0, -1);
             }
-        } else if (value.startsWith("*") || value.endsWith("*")) {
+        } else if (value.endsWith("*")) {
             const validFormat = /^\*?\d{1,3}\*?$/;
             if (!validFormat.test(value)) {
-                value = value.slice(0, -1); // Remove the last character if invalid
+                value = value.slice(0, -1);
             }
         } else {
-            value = value.replace(/[^0-9]/g, ''); // Remove invalid characters
+            value = value.replace(/[^0-9]/g, '');
             if (value.length > 4) {
-                value = value.slice(0, 4); // Restrict to 4 digits
+                value = value.slice(0, 4);
             }
         }
-
-        input.value = value; // Update the input value
-
-        // Add event listener to handle the Enter key
-        input.addEventListener('keydown', (event) => handleEnterKey(event, nextInput));
+        input.value = value;
+        const inputs = document.querySelectorAll('input[type="text"]');
+        input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
     }
 
-    // Function to initialize all input fields with next field navigation
     const initializeInputs = () => {
-        const inputs = document.querySelectorAll('input[type="text"]'); // Select only input[type="text"]
-
+        const inputs = document.querySelectorAll('input[type="text"]');
         inputs.forEach((input) => {
-            // Add event listener to handle Enter key press for each input
             input.addEventListener('keydown', (event) => handleEnterKey(event, inputs));
         });
     };
 
-    // Initialize all input fields when the page loads
-    window.addEventListener('DOMContentLoaded', initializeInputs);
+    function startCountdowns() {
+        const spans = document.querySelectorAll('.countdown-timer');
 
-    popupHandler = function() {
+        function tick() {
+            const now = new Date();
+            spans.forEach(span => {
+                const code  = span.dataset.code;
+                const parts = span.dataset.close.split(':');
+                const close = new Date();
+                close.setHours(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2] || 0), 0);
+
+                const diff = close - now;
+                if (diff <= 0) {
+                    span.textContent = `${code}: Closed`;
+                    span.className = 'countdown-timer font-bold text-red-600';
+                } else {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    const hms = (h > 0 ? `${h}h ` : '') + `${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+                    span.textContent = `${code}: ${hms}`;
+                    span.className = diff < 300000
+                        ? 'countdown-timer font-bold text-red-500'
+                        : 'countdown-timer font-semibold text-blue-600';
+                }
+            });
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        initializeInputs();
+        startCountdowns();
+    });
+
+    popupHandler = function () {
         return {
             show: false,
             activeRow: null,
@@ -472,20 +464,12 @@
                 this.activeCol = null;
             },
 
-            shouldHighlight(row) {
-                if (!this.show) return false;
-                if (this.activeRow == 4) return row == 4;
-                return row >= this.activeRow;
-            },
-
             addValue(amount) {
                 const input = this.$refs[`${this.activeCol}${this.activeRow}`];
                 let current = parseFloat(input.value) || 0;
                 let result = current + amount;
                 input.value = result % 1 === 0 ? result.toString() : result.toFixed(1);
-                input.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
+                input.dispatchEvent(new Event('input', { bubbles: true }));
                 input.focus();
             },
 

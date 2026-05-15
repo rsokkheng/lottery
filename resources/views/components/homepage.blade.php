@@ -425,6 +425,43 @@
             flex-direction: column;
             gap: 0.5rem;
         }
+
+        .balance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+        }
+        .balance-table th {
+            color: rgba(255,215,0,0.7);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            padding: 4px 6px;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            text-align: left;
+        }
+        .balance-table td {
+            padding: 5px 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            vertical-align: middle;
+        }
+        .balance-table tr:last-child td { border-bottom: none; }
+        .currency-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.5px;
+        }
+        .badge-vnd { background: rgba(23,162,184,0.25); color: #17a2b8; border: 1px solid rgba(23,162,184,0.4); }
+        .badge-usd { background: rgba(40,167,69,0.25);  color: #28a745; border: 1px solid rgba(40,167,69,0.4); }
+        .badge-khr { background: rgba(255,193,7,0.2);   color: #ffc107; border: 1px solid rgba(255,193,7,0.4); }
+        .balance-amt  { color: #fff; font-weight: 600; text-align: right; }
+        .balance-zero { color: rgba(255,255,255,0.35); font-weight: 400; text-align: right; }
+        .outstanding-amt  { color: #ffc107; font-weight: 600; text-align: right; }
+        .outstanding-zero { color: rgba(255,255,255,0.25); text-align: right; }
     </style>
 </head>
 <body>
@@ -441,12 +478,96 @@
 
             <!-- Right: User Dashboard -->
             <div class="login-form">
+                @php
+                    use App\Models\AccountManagement;
+                    use App\Models\AccountKH;
+                    use Illuminate\Support\Facades\DB;
+                    use Carbon\Carbon;
+
+                    $authUser   = Auth::user();
+                    $authUserId = $authUser?->id;
+
+                    $hasVND = $authUser?->currencies()->where('currency', 'VND')->exists();
+                    $hasUSD = $authUser?->currencies()->where('currency', 'USD')->exists();
+                    $hasKHR = $authUser?->currencies()->where('currency', 'KHR')->exists();
+
+                    $vndBalance = $hasVND
+                        ? (float)(AccountManagement::where('user_id', $authUserId)->where('currency', 'VND')->value('bet_credit') ?? 0)
+                        : null;
+                    $usdBalance = $hasUSD
+                        ? (float)(AccountManagement::where('user_id', $authUserId)->where('currency', 'USD')->value('bet_credit') ?? 0)
+                        : null;
+                    $khrBalance = $hasKHR
+                        ? (float)(AccountKH::where('user_id', $authUserId)->value('credit_balance') ?? 0)
+                        : null;
+
+                    // Outstanding: today's unsettled bets per currency (exclude settled companies)
+                    $settledCompanyIds = DB::table('bet_lottery_results')
+                        ->join('bet_lottery_schedules', 'bet_lottery_schedules.id', '=', 'bet_lottery_results.lottery_schedule_id')
+                        ->whereDate('bet_lottery_results.draw_date', Carbon::today())
+                        ->pluck('bet_lottery_schedules.company_id')
+                        ->unique()->toArray();
+
+                    $outstandingAmt = $authUserId
+                        ? (float)(DB::table('balance_report_outstandings')
+                            ->where('user_id', $authUserId)
+                            ->whereDate('date', Carbon::today())
+                            ->when(!empty($settledCompanyIds), fn($q) => $q->whereNotIn('company_id', $settledCompanyIds))
+                            ->sum('amount'))
+                        : 0;
+                @endphp
+
                 <!-- Welcome Message -->
                 <div class="welcome-message">
-                    <i class="fas fa-crown"></i>{{ __('message.welcome') }}, {{ Auth::user()->name ?? 'Guest' }}!
+                    <i class="fas fa-crown"></i>{{ __('message.welcome') }}, {{ $authUser->name ?? 'Guest' }}!
                 </div>
 
-        
+                @if($hasVND || $hasUSD || $hasKHR)
+                <table class="balance-table">
+                    <thead>
+                        <tr>
+                            <th>Currency</th>
+                            <th class="text-end">Credit Balance</th>
+                            <th class="text-end">Outstanding</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($hasVND)
+                        <tr>
+                            <td><span class="currency-badge badge-vnd">VND</span></td>
+                            <td class="{{ $vndBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
+                                {{ $vndBalance > 0 ? number_format($vndBalance, 2) : '0.00' }}
+                            </td>
+                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
+                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if($hasUSD)
+                        <tr>
+                            <td><span class="currency-badge badge-usd">USD</span></td>
+                            <td class="{{ $usdBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
+                                {{ $usdBalance > 0 ? number_format($usdBalance, 2) : '0.00' }}
+                            </td>
+                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
+                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if($hasKHR)
+                        <tr>
+                            <td><span class="currency-badge badge-khr">VND</span></td>
+                            <td class="{{ $khrBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
+                                {{ $khrBalance > 0 ? number_format($khrBalance, 2) : '0.00' }}
+                            </td>
+                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
+                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
+                            </td>
+                        </tr>
+                        @endif
+                    </tbody>
+                </table>
+                @endif
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">

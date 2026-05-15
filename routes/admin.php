@@ -18,6 +18,7 @@ use App\Http\Controllers\LotteryResultUSDController;
 use App\Http\Controllers\LotteryResultKHController;
 use App\Http\Controllers\BetLotteryPackageController;
 use App\Http\Controllers\CreditKHController;
+use App\Http\Controllers\CreditFiatController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard',[ProfileController::class,'dashboard'])->name('dashboard');
@@ -54,6 +55,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('credit-kh', [CreditKHController::class, 'index'])->name('credit-kh.index');
         Route::post('credit-kh/deposit', [CreditKHController::class, 'deposit'])->name('credit-kh.deposit');
         Route::get('credit-kh/{userId}/history', [CreditKHController::class, 'history'])->name('credit-kh.history');
+
+        // VND / USD credit management (KHR-style UI, backward-compatible)
+        Route::get('credit/{currency}', [CreditFiatController::class, 'index'])->name('credit-fiat.index');
+        Route::post('credit/{currency}/deposit', [CreditFiatController::class, 'deposit'])->name('credit-fiat.deposit');
+        Route::get('credit/{currency}/{userId}/history', [CreditFiatController::class, 'history'])->name('credit-fiat.history');
         Route::get('result/index-kh-mien-nam',[LotteryResultKHController::class, 'indexMienNam'])->name('result-kh.index-mien-nam');
         Route::get('result/create-kh-mien-nam',[LotteryResultKHController::class, 'createMienNam'])->name('result-kh.create-mien-nam');
         Route::get('result/index-kh-mien-trung',[LotteryResultKHController::class, 'indexMienTrung'])->name('result-kh.index-mien-trung');

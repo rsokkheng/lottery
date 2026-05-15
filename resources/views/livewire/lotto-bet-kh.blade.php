@@ -70,9 +70,13 @@
                             {{ $totalDue }} VND
                         </td>
                         <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.time-left') }}:</td>
-                        <td class="text-blue-600">
+                        <td>
                             @foreach ($timeClose as $time)
-                                <span id="time-{{ $time->id }}">{{ $time->time_close }} ({{ $time->code }})</span>@if (!$loop->last) &nbsp; @endif
+                                <span class="countdown-timer font-semibold"
+                                      data-close="{{ $time->time_close }}"
+                                      data-code="{{ $time->code }}">
+                                    {{ $time->code }}: {{ $time->time_close }}
+                                </span>@if (!$loop->last) &nbsp;|&nbsp; @endif
                             @endforeach
                         </td>
                     </tr>
@@ -398,7 +402,42 @@
         });
     };
 
-    window.addEventListener('DOMContentLoaded', initializeInputs);
+    function startCountdowns() {
+        const spans = document.querySelectorAll('.countdown-timer');
+
+        function tick() {
+            const now = new Date();
+            spans.forEach(span => {
+                const code  = span.dataset.code;
+                const parts = span.dataset.close.split(':');
+                const close = new Date();
+                close.setHours(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2] || 0), 0);
+
+                const diff = close - now;
+                if (diff <= 0) {
+                    span.textContent = `${code}: Closed`;
+                    span.className = 'countdown-timer font-bold text-red-600';
+                } else {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    const hms = (h > 0 ? `${h}h ` : '') + `${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+                    span.textContent = `${code}: ${hms}`;
+                    span.className = diff < 300000
+                        ? 'countdown-timer font-bold text-red-500'
+                        : 'countdown-timer font-semibold text-blue-600';
+                }
+            });
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        initializeInputs();
+        startCountdowns();
+    });
 
     popupHandler = function () {
         return {
