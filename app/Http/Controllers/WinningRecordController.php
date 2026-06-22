@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\HelperEnum;
-use App\Models\AccountManagement;
-use App\Models\BalanceReportOutstanding;
+use App\Models\AccountUSD;
+use App\Models\AccountVND;
 use App\Models\BetLotterySchedule;
 use App\Models\BetReceipt;
 use App\Models\BetReceiptUSD;
@@ -127,11 +127,6 @@ class WinningRecordController extends Controller
                     }
                 }
 
-                BalanceReportOutstanding::where('date', Carbon::today()->format('Y-m-d'))
-                    ->where('company_id', $BetConfigCompany->company_id)
-                    ->update([
-                        'amount' => 0,
-                    ]);
 
             }
 
@@ -167,53 +162,19 @@ class WinningRecordController extends Controller
                 if ($winAmountMerged->isNotEmpty()) {
                     foreach ($winAmountMerged as $userWin) {
                         $User = User::find($userWin->user_id);
-                        $existingRecord = DB::table('account_management')
-                            ->where('user_id', $User->id)
-                            ->whereDate('created_at', $reportDate)
-                            ->first();
-                        
-                        if ($existingRecord) {
-                            // Update the existing record
-                            DB::table('account_management')
-                                ->where('user_id', $User->id)
-                                ->whereDate('created_at', $reportDate)
-                                ->update([
-                                    'name_user' => $User->name,
-                                    'available_credit' => 0,
-                                    'bet_credit' => $userWin->total_win_amount,
-                                    'cash_balance' => 0,
-                                    'currency' => $User->currencies()->first()->currency,
-                                    'updated_at' => now(),
-                                ]);
+                        if (!$User) continue;
+                        $currency     = strtoupper($User->currency ?? 'VND');
+                        $acctModel    = $currency === 'USD' ? AccountUSD::class : AccountVND::class;
+                        $acct         = $acctModel::where('user_id', $User->id)->first();
+                        if ($acct) {
+                            $acct->credit_balance += $userWin->total_win_amount;
+                            $acct->save();
                         } else {
-                            // Insert new record
-                            DB::table('account_management')->insert([
-                                'user_id' => $User->id,
-                                'name_user' => $User->name,
-                                'available_credit' => 0,
-                                'bet_credit' => $userWin->total_win_amount,
-                                'cash_balance' => 0,
-                                'currency' => $User->currencies()->first()->currency,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                            $acctModel::create([
+                                'user_id'          => $User->id,
+                                'credit_balance'   => $userWin->total_win_amount,
+                                'record_status_id' => 1,
                             ]);
-                        }                    
-                        if ($userWin->total_win_amount > 0) {
-                            DB::table('balance_reports')->updateOrInsert(
-                                [
-                                    'user_id' => $User->id,
-                                    'report_date' => $reportDate,
-                                ],
-                                [
-                                    'name_user' => $User->name,
-                                    'net_lose' => 0,
-                                    'net_win' => $userWin->total_win_amount,
-                                    'deposit' => 0,
-                                    'withdraw' => 0,
-                                    'adjustment' => 0,
-                                    'balance' => 0,
-                                ]
-                            );
                         }
                     }
                 }

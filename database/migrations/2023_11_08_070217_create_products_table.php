@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\SubCategory;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,15 +17,16 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->integer('collection_id');
-            $table->foreignIdFor(Category::class)->constrained()->onDelete('cascade');
-            $table->foreignIdFor(SubCategory::class)->nullable();
-            // $table->integer('sub_category_id')->nullable();
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
+            $table->unsignedBigInteger('sub_category_id')->nullable();
             $table->timestamps();
         });
 
         Schema::create('product_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Product::class)->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('product_id');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->string('image');
         });
     }

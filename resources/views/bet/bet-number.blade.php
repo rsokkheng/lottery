@@ -6,7 +6,7 @@
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
     <div class="flex-col bg-white rounded-lg px-4 py-4">
         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:flex bg-white rounded-lg">
-            @if (Auth::user()->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty())
+            @if (Auth::user()->roles->pluck('name')->intersect(['admin', 'master', 'agent'])->isNotEmpty())
                 <div class="w-full lg:w-48">
                     <select id="member" name="member_id" class="rounded w-full">
                         <option value="">All Members</option>

@@ -1,154 +1,192 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+    $authUser  = Auth::user();
+    $isAdmin   = $authUser->hasRole('admin');
+    $editedUser = $user; // keep original variable before any potential @auth overwrite
+@endphp
+
 <x-admin>
     @section('title', 'Edit User')
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Edit User</h3>
-            <div class="card-tools"><a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-dark">Back</a></div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Edit User</h3>
+            <a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-dark">Back</a>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.user.update',$user) }}" method="POST">
+            <form action="{{ route('admin.user.update', $editedUser) }}" method="POST">
                 @method('PUT')
                 @csrf
-                <input type="hidden" name="id" value="{{ $user->id }}">
-                <div class="row">
+                <input type="hidden" name="id" value="{{ $editedUser->id }}">
+                <div class="row g-3">
+
+                    {{-- Name --}}
                     <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="name" class="form-label">Name:*</label>
-                            <input type="text" class="form-control" name="name" required
-                                value="{{ $user->name }}">
-                                <x-error>name</x-error>
-                        </div>
+                        <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" required
+                            value="{{ old('name', $editedUser->name) }}">
+                        <x-error>name</x-error>
                     </div>
+
+                    {{-- Account ID --}}
                     <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="Username" class="form-label">Account ID:*</label>
-                            <input type="username" class="form-control" name="username" required
-                                value="{{ $user->username}}">
-                                <x-error>Account ID</x-error>
-                        </div>
+                        <label class="form-label fw-semibold">Account ID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="username" required
+                            value="{{ old('username', $editedUser->username) }}">
+                        <x-error>username</x-error>
                     </div>
+
+                    {{-- Phone --}}
                     <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="PhoneNumber" class="form-label">Phone Number:*</label>
-                            <input type="number" class="form-control" name="phonenumber" required
-                                value="{{ $user->phonenumber}}">
-                                <x-error>phonenumber</x-error>
-                        </div>
+                        <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="phonenumber" required
+                            value="{{ old('phonenumber', $editedUser->phonenumber) }}">
+                        <x-error>phonenumber</x-error>
                     </div>
+
+                    {{-- Role --}}
                     <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="role" class="form-label">Role:*</label>
-                            <select name="role" id="role" class="form-control" required>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->name }}" 
-                                        {{ old('role', $user->roles->first()->name ?? '') === $role->name ? 'selected' : '' }}>
-                                        {{ ucfirst($role->name) }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <label class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
+                        <select name="role" id="roleSelect" class="form-control" required>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->name }}"
+                                    {{ old('role', $editedUser->roles->first()->name ?? '') === $role->name ? 'selected' : '' }}>
+                                    {{ ucfirst(str_replace('_', ' ', $role->name)) }}
+                                </option>
+                            @endforeach
+                        </select>
                         <x-error>role</x-error>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="role" class="form-label">Package:*</label>
-                            <select name="package_id" id="package_id" class="form-control" required>
-                                <option value="" selected disabled>selecte the Package</option>
-                                @foreach ($packages as $package)
-                                    <option value="{{ $package->id }}"
-                                        {{ $user->package_id === $package->id ? 'selected' : '' }}>{{ $package->package_code }}</option>
-                                @endforeach
-                            </select>
-                            <x-error>package</x-error>
-                        </div>
                     </div>
 
-                     {{-- Credit --}}
+                    {{-- Package --}}
                     <div class="col-lg-6">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Give Credit:* {{ $user->total_bet_credit ?? 0 }}
-                            </label>
-                            <input readonly type="number"
-                                class="form-control"
-                                id="amount_bet_credit"
-                                name="available_credit"
-                                required
-                                autocomplete="off"
-                                value="{{ $user->total_available_credit ?? 0 }}"
-                                data-max="{{ $user->total_bet_credit ?? 0 }}">
-                            <small id="amount-error" class="text-danger d-none">
-                                The credit amount cannot exceed the allowed limit.
-                            </small>
-                            <x-error>given_credit</x-error>
-                        </div>
+                        <label class="form-label fw-semibold">Package <span class="text-danger">*</span></label>
+                        <select name="package_id" class="form-control" required>
+                            <option value="" disabled>— Select package —</option>
+                            @foreach ($packages as $package)
+                                <option value="{{ $package->id }}"
+                                    {{ $editedUser->package_id === $package->id ? 'selected' : '' }}>
+                                    {{ $package->package_code }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <x-error>package_id</x-error>
                     </div>
-               
-                    
-                    @auth
+
+                    {{-- Credit --}}
+                    <div class="col-lg-6">
+                        <label class="form-label fw-semibold">
+                            Give Credit
+                            <small class="text-muted">(current: {{ number_format($editedUser->total_bet_credit ?? 0, 2) }})</small>
+                        </label>
+                        <input type="number" class="form-control" id="amount_bet_credit"
+                            name="available_credit" required autocomplete="off"
+                            value="{{ old('available_credit', $editedUser->total_available_credit ?? 0) }}"
+                            data-max="{{ $editedUser->total_bet_credit ?? 0 }}">
+                        <small id="amount-error" class="text-danger d-none">
+                            Amount cannot exceed the allowed limit.
+                        </small>
+                    </div>
+
                     @php
-                        $user = auth()->user();
-                        $hasVND = $user->currencies()->where('currency', 'VND')->exists();
-                        $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
-                        $hasKHR = $user->currencies()->where('currency', 'KHR')->exists();
+                        $firstEditOpt  = $betTypeOptions[0] ?? null;
+                        $currentBtKey  = old('bet_types.0') ?? ($selectedBetTypes[0] ?? ($firstEditOpt ? $firstEditOpt['bet_system'].'_'.$firstEditOpt['currency'] : ''));
+                        $currentCur    = $currentBtKey ? strtoupper(substr($currentBtKey, strrpos($currentBtKey, '_') + 1)) : ($firstEditOpt ? $firstEditOpt['currency'] : 'VND');
+                        $currentCur    = old('currency', $currentCur);
                     @endphp
+                    <input type="hidden" name="currency" id="hidden-currency" value="{{ $currentCur }}">
 
-                    {{-- Currency --}}
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label class="form-label">Currency:*</label><br>
-
-                            @if ($hasVND)
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="currency" id="currencyVND" value="VND"
-                                        {{ old('currency', $hasVND ? 'VND' : '') == 'VND' ? 'checked' : '' }} required>
-                                    <label class="form-check-label" for="currencyVND">VND</label>
+                    {{-- Bet Type Assignment --}}
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-dice me-1 text-primary"></i>
+                            Bet Types
+                        </label>
+                        <div class="border rounded p-3 bg-light">
+                            @if($isAdmin)
+                                {{-- Admin: grouped by system (Bet Vietnam / Bet Khmer), radio, currency auto-follows --}}
+                                @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
+                                @foreach($btGroups as $system => $opts)
+                                <div class="{{ !$loop->last ? 'mb-3' : '' }}">
+                                    <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
+                                        Bet {{ ucfirst($system) }}
+                                    </div>
+                                    <div class="row g-2">
+                                        @foreach($opts as $opt)
+                                        @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                        <div class="col-6 col-md-3">
+                                            <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                                <input class="form-check-input" type="radio"
+                                                    name="bet_types[]" value="{{ $key }}"
+                                                    id="bt_edit_{{ $key }}"
+                                                    {{ $currentBtKey === $key ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-semibold" for="bt_edit_{{ $key }}">
+                                                    {{ $opt['label'] }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                            @else
+                                {{-- Non-admin: flat list, single selection --}}
+                                <div class="row g-2">
+                                    @foreach($betTypeOptions as $opt)
+                                    @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                    <div class="col-6 col-md-3">
+                                        <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                            <input class="form-check-input" type="radio"
+                                                name="bet_types[]" value="{{ $key }}"
+                                                id="bt_edit_{{ $key }}"
+                                                {{ $currentBtKey === $key ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-semibold" for="bt_edit_{{ $key }}">
+                                                {{ $opt['label'] }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @endforeach
                                 </div>
                             @endif
-
-                            @if ($hasUSD)
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="currency" id="currencyUSD" value="USD"
-                                        {{ old('currency', !$hasVND && $hasUSD ? 'USD' : '') == 'USD' ? 'checked' : '' }} required>
-                                    <label class="form-check-label" for="currencyUSD">USD</label>
-                                </div>
-                            @endif
-
-                            @if ($hasKHR)
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="currency" id="currencyKHR" value="KHR"
-                                        {{ old('currency', !$hasVND && !$hasUSD && $hasKHR ? 'KHR' : '') == 'KHR' ? 'checked' : '' }} required>
-                                    <label class="form-check-label" for="currencyKHR">VND</label>
-                                </div>
-                            @endif
-
-                            <x-error>currency</x-error>
                         </div>
                     </div>
-                @endauth
-                    <div class="col-lg-12">
-                        <div class="float-right">
-                            <button class="btn btn-primary" id="btn-save" type="submit">Save</button>
-                        </div>
+
+                    {{-- Submit --}}
+                    <div class="col-12 d-flex justify-content-end">
+                        <button class="btn btn-primary px-4" id="btn-save" type="submit">
+                            <i class="fas fa-save me-1"></i> Save
+                        </button>
                     </div>
+
                 </div>
             </form>
         </div>
     </div>
-</x-admin>
-<script>
-    $(document).ready(function () {
-        $('#amount_bet_credit').on('input', function () {
-            const enteredAmount = parseFloat($(this).val()) || 0;
-            const maxAmount = parseFloat($(this).data('max')) || 0;
 
-            if (enteredAmount > maxAmount) {
-                $('#amount-error').removeClass('d-none');
-                $('#btn-save').prop('disabled', true);
-            } else {
-                $('#amount-error').addClass('d-none');
-                $('#btn-save').prop('disabled', false);
-            }
+    @section('js')
+    <script>
+        $(document).ready(function () {
+            $('#amount_bet_credit').on('input', function () {
+                var entered = parseFloat($(this).val()) || 0;
+                var max     = parseFloat($(this).data('max')) || 0;
+                $('#amount-error').toggleClass('d-none', entered <= max);
+                $('#btn-save').prop('disabled', entered > max);
+            });
         });
-    });
-</script>
+    </script>
+
+    <script>
+    (function () {
+        function syncCurrencyFromBetType(val) {
+            var cur = val.split('_').pop();
+            var el = document.getElementById('hidden-currency');
+            if (el) el.value = cur;
+        }
+        document.querySelectorAll('input[name="bet_types[]"]').forEach(function (r) {
+            r.addEventListener('change', function () { syncCurrencyFromBetType(this.value); });
+        });
+        var initBt = document.querySelector('input[name="bet_types[]"]:checked');
+        if (initBt) syncCurrencyFromBetType(initBt.value);
+    })();
+    </script>
+    @endsection
+</x-admin>

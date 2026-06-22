@@ -330,11 +330,11 @@ class LotteryResultKHController extends Controller
                     });
 
                 // Capture users with existing wins before deletion (for credit reversal)
-                $existingWinnerIds = DB::table('bet_winning_kh')
-                    ->join('bet_kh', 'bet_kh.id', '=', 'bet_winning_kh.bet_id')
-                    ->whereDate('bet_winning_kh.created_at', $resultDate)
-                    ->whereIn('bet_kh.bet_schedule_id', $scheduleIdsByCurrentBet)
-                    ->pluck('bet_kh.user_id')
+                $existingWinnerIds = DB::table('bet_winning_kh_vnd')
+                    ->join('bet_kh_vnd', 'bet_kh_vnd.id', '=', 'bet_winning_kh_vnd.bet_id')
+                    ->whereDate('bet_winning_kh_vnd.created_at', $resultDate)
+                    ->whereIn('bet_kh_vnd.bet_schedule_id', $scheduleIdsByCurrentBet)
+                    ->pluck('bet_kh_vnd.user_id')
                     ->unique()->toArray();
 
                 $oldBetWinningRecords->each(function ($record){
@@ -382,11 +382,11 @@ class LotteryResultKHController extends Controller
                     $recordsCreated = $this->insertBetWinning($insertWinNumber, $resultDate);
                     if (count($recordsCreated)) {
                         // Update receipt compensate totals
-                        DB::table('bet_winning_kh as winning')
+                        DB::table('bet_winning_kh_vnd as winning')
                         ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
                         ->whereDate('winning.created_at', $resultDate)
                         ->whereIn('winning.bet_id', function ($sub) use ($scheduleIdsByCurrentBet) {
-                            $sub->select('id')->from('bet_kh')->whereIn('bet_schedule_id', $scheduleIdsByCurrentBet);
+                            $sub->select('id')->from('bet_kh_vnd')->whereIn('bet_schedule_id', $scheduleIdsByCurrentBet);
                         })
                         ->orderBy('winning.bet_receipt_id')
                         ->groupBy('winning.bet_receipt_id')
@@ -395,13 +395,13 @@ class LotteryResultKHController extends Controller
                         });
 
                         // Auto-credit winnings to each member's AccountKH
-                        DB::table('bet_winning_kh as winning')
-                        ->join('bet_kh', 'bet_kh.id', '=', 'winning.bet_id')
-                        ->select('bet_kh.user_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
+                        DB::table('bet_winning_kh_vnd as winning')
+                        ->join('bet_kh_vnd', 'bet_kh_vnd.id', '=', 'winning.bet_id')
+                        ->select('bet_kh_vnd.user_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
                         ->whereDate('winning.created_at', $resultDate)
-                        ->whereIn('bet_kh.bet_schedule_id', $scheduleIdsByCurrentBet)
-                        ->groupBy('bet_kh.user_id')
-                        ->orderBy('bet_kh.user_id')
+                        ->whereIn('bet_kh_vnd.bet_schedule_id', $scheduleIdsByCurrentBet)
+                        ->groupBy('bet_kh_vnd.user_id')
+                        ->orderBy('bet_kh_vnd.user_id')
                         ->each(function ($winning) use ($resultDate) {
                             $account = AccountKH::firstOrCreate(
                                 ['user_id' => $winning->user_id],
@@ -694,25 +694,25 @@ class LotteryResultKHController extends Controller
 //        $day = 'Sunday';
 //        $time = '16:30:00';
         $getBetWinningNumber = [];
-         DB::table('bet_kh')
+         DB::table('bet_kh_vnd')
             ->select(
-                'bet_number_kh.*',
+                'bet_number_kh_vnd.*',
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
-                'bet_kh.bet_schedule_id',
-                'bet_kh.number_format as original_number',
+                'bet_kh_vnd.bet_schedule_id',
+                'bet_kh_vnd.number_format as original_number',
                 'schedule.region_slug',
-                'bet_kh.bet_receipt_id'
+                'bet_kh_vnd.bet_receipt_id'
             )
-            ->join('bet_number_kh','bet_number_kh.bet_id','=', 'bet_kh.id')
-            ->join('bet_lottery_schedules as schedule','schedule.id','=','bet_kh.bet_schedule_id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh.bet_package_config_id')
-            ->whereIn('bet_kh.bet_schedule_id',$idSchedules)
+            ->join('bet_number_kh_vnd','bet_number_kh_vnd.bet_id','=', 'bet_kh_vnd.id')
+            ->join('bet_lottery_schedules as schedule','schedule.id','=','bet_kh_vnd.bet_schedule_id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh_vnd.bet_package_config_id')
+            ->whereIn('bet_kh_vnd.bet_schedule_id',$idSchedules)
             ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
-            ->whereDate('bet_kh.bet_date', '=',$date)
-//             ->where('bet_kh.id', 9)
-            ->orderBy('bet_kh.id')
-            ->orderBy('bet_number_kh.id')
+            ->whereDate('bet_kh_vnd.bet_date', '=',$date)
+//             ->where('bet_kh_vnd.id', 9)
+            ->orderBy('bet_kh_vnd.id')
+            ->orderBy('bet_number_kh_vnd.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->c_amount, $bet->d_amount, $bet->abcd_amount, $bet->roll2_amount, $bet->roll_amount, $bet->roll_parlay_amount, $bet->bet_type);
@@ -809,23 +809,23 @@ class LotteryResultKHController extends Controller
 //        $day = 'Sunday';
 //        $time = '16:30:00';
         $getBetWinningNumber = [];
-        DB::table('bet_kh')
+        DB::table('bet_kh_vnd')
             ->select(
-                'bet_number_kh.*',
+                'bet_number_kh_vnd.*',
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
                 'pkg_con.has_special as has_special',
-                'bet_kh.bet_schedule_id as bet_schedule_id',
-                'bet_kh.number_format as original_number',
-                'bet_kh.bet_receipt_id'
+                'bet_kh_vnd.bet_schedule_id as bet_schedule_id',
+                'bet_kh_vnd.number_format as original_number',
+                'bet_kh_vnd.bet_receipt_id'
             )
-            ->join('bet_number_kh','bet_number_kh.bet_id','=', 'bet_kh.id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh.bet_package_config_id')
-            ->whereIn('bet_kh.bet_schedule_id', $idSchedules)
+            ->join('bet_number_kh_vnd','bet_number_kh_vnd.bet_id','=', 'bet_kh_vnd.id')
+            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh_vnd.bet_package_config_id')
+            ->whereIn('bet_kh_vnd.bet_schedule_id', $idSchedules)
             ->whereIn('pkg_con.bet_type', ['RP2','RP3','RP4'])
-            ->whereDate('bet_kh.bet_date', '=',$date)
-            ->orderBy('bet_kh.id')
-            ->orderBy('bet_number_kh.id')
+            ->whereDate('bet_kh_vnd.bet_date', '=',$date)
+            ->orderBy('bet_kh_vnd.id')
+            ->orderBy('bet_number_kh_vnd.id')
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $numberArr = explode("#", $bet->generated_number);
@@ -988,11 +988,11 @@ class LotteryResultKHController extends Controller
             }
 
             $data = [];
-            DB::table('bet_winning_record_kh as record')
+            DB::table('bet_winning_record_kh_vnd as record')
                 ->select(
-                    'bet_winning_kh.bet_id',
+                    'bet_winning_kh_vnd.bet_id',
                     'record.bet_number_id',
-                    'bet_winning_kh.win_amount as compensate',
+                    'bet_winning_kh_vnd.win_amount as compensate',
                     'record.id as record_id',
                     'record.win_number',
                     DB::raw('(SELECT COUNT(*) FROM bet_winning_record_kh r2 WHERE r2.bet_winning_id = record.bet_winning_id) as total_wins_count'),
@@ -1000,32 +1000,32 @@ class LotteryResultKHController extends Controller
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
                     'pkg_con.price as odds',
-                    'bet_kh.bet_date',
-                    'bet_number_kh.generated_number as generated_number',
-                    'bet_number_kh.total_amount as turnover',
+                    'bet_kh_vnd.bet_date',
+                    'bet_number_kh_vnd.generated_number as generated_number',
+                    'bet_number_kh_vnd.total_amount as turnover',
                     'schedule.province_en',
                     'schedule.code',
-                    'bet_receipt_kh.receipt_no',
-                    'bet_receipt_kh.receipt_no',
-                    'bet_number_kh.a_amount',
-                    'bet_number_kh.b_amount',
-                    'bet_number_kh.c_amount',
-                    'bet_number_kh.d_amount',
-                    'bet_number_kh.abcd_amount',
-                    'bet_number_kh.roll_amount',
-                    'bet_number_kh.roll2_amount',
-                    'bet_number_kh.roll_parlay_amount',
-                    DB::raw('sum(bet_number_kh.a_check+bet_number_kh.b_check+bet_number_kh.c_check+bet_number_kh.d_check+bet_number_kh.abcd_check+bet_number_kh.roll_check+bet_number_kh.roll2_check+bet_number_kh.roll_parlay_check) as sum_check'),
+                    'bet_receipt_kh_vnd.receipt_no',
+                    'bet_receipt_kh_vnd.receipt_no',
+                    'bet_number_kh_vnd.a_amount',
+                    'bet_number_kh_vnd.b_amount',
+                    'bet_number_kh_vnd.c_amount',
+                    'bet_number_kh_vnd.d_amount',
+                    'bet_number_kh_vnd.abcd_amount',
+                    'bet_number_kh_vnd.roll_amount',
+                    'bet_number_kh_vnd.roll2_amount',
+                    'bet_number_kh_vnd.roll_parlay_amount',
+                    DB::raw('sum(bet_number_kh_vnd.a_check+bet_number_kh_vnd.b_check+bet_number_kh_vnd.c_check+bet_number_kh_vnd.d_check+bet_number_kh_vnd.abcd_check+bet_number_kh_vnd.roll_check+bet_number_kh_vnd.roll2_check+bet_number_kh_vnd.roll_parlay_check) as sum_check'),
                     'users.name as account'
                 )
-                ->join('bet_number_kh','bet_number_kh.id','=', 'record.bet_number_id')
-                ->join('bet_winning_kh','bet_winning_kh.bet_number_id','=', 'bet_number_kh.id')
-                ->join('bet_kh','bet_winning_kh.bet_id','=', 'bet_kh.id')
-                ->join('users','users.id','=', 'bet_kh.user_id')
-                ->join('bet_receipt_kh','bet_receipt_kh.id','=', 'bet_winning_kh.bet_receipt_id')
-                ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bet_kh.bet_schedule_id')
-                ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh.bet_package_config_id')
-                ->where('bet_kh.bet_date', $date)
+                ->join('bet_number_kh_vnd','bet_number_kh_vnd.id','=', 'record.bet_number_id')
+                ->join('bet_winning_kh_vnd','bet_winning_kh_vnd.bet_number_id','=', 'bet_number_kh_vnd.id')
+                ->join('bet_kh_vnd','bet_winning_kh_vnd.bet_id','=', 'bet_kh_vnd.id')
+                ->join('users','users.id','=', 'bet_kh_vnd.user_id')
+                ->join('bet_receipt_kh_vnd','bet_receipt_kh_vnd.id','=', 'bet_winning_kh_vnd.bet_receipt_id')
+                ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bet_kh_vnd.bet_schedule_id')
+                ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh_vnd.bet_package_config_id')
+                ->where('bet_kh_vnd.bet_date', $date)
                 ->when($company, function ($q) use ($company){
                     $q->when($company == 1, function ($q2){
                         $q2->where('schedule.draw_time', '16:30:00');
@@ -1036,23 +1036,23 @@ class LotteryResultKHController extends Controller
                     $q->when($company == 3, function ($q2){
                         $q2->where('schedule.draw_time', '18:30:00');
                     });
-                })->when(in_array('manager', $roles), function ($q) use ($user) {
+                })->when(in_array('agent', $roles), function ($q) use ($user) {
                     // Get all users under this manager
                     $memberIds = User::where('manager_id', $user->id)
                                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                     ->pluck('id')
                                     ->toArray();
-                    $q->whereIn('bet_kh.user_id', $memberIds);
-                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
-                    $q->where('bet_kh.user_id', $user->id);
+                    $q->whereIn('bet_kh_vnd.user_id', $memberIds);
+                })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
+                    $q->where('bet_kh_vnd.user_id', $user->id);
                 })
                 ->when($number, function ($q) use ($number){
-                    $q->where('bet_kh.number_format', 'like','%'.$number.'%');
+                    $q->where('bet_kh_vnd.number_format', 'like','%'.$number.'%');
                 })
-                ->orderBy('bet_winning_kh.bet_id')
+                ->orderBy('bet_winning_kh_vnd.bet_id')
                 ->orderBy('record.bet_winning_id')
                 ->orderBy('record.bet_number_id')
-                ->groupBy('bet_winning_kh.bet_id')
+                ->groupBy('bet_winning_kh_vnd.bet_id')
                 ->groupBy('record.id')
                 ->groupBy('record.win_number')
                 ->groupBy('record.bet_winning_id')
@@ -1060,22 +1060,22 @@ class LotteryResultKHController extends Controller
                 ->groupBy('bet_type')
                 ->groupBy('pkg_con.rate')
                 ->groupBy('pkg_con.price')
-                ->groupBy('bet_kh.bet_date')
-                ->groupBy('bet_kh.total_amount')
-                ->groupBy('bet_winning_kh.win_amount')
+                ->groupBy('bet_kh_vnd.bet_date')
+                ->groupBy('bet_kh_vnd.total_amount')
+                ->groupBy('bet_winning_kh_vnd.win_amount')
                 ->groupBy('schedule.province_en')
                 ->groupBy('schedule.code')
-                ->groupBy('bet_receipt_kh.receipt_no')
-                ->groupBy('bet_number_kh.generated_number')
-                ->groupBy('bet_number_kh.a_amount')
-                ->groupBy('bet_number_kh.total_amount')
-                ->groupBy('bet_number_kh.b_amount')
-                ->groupBy('bet_number_kh.c_amount')
-                ->groupBy('bet_number_kh.d_amount')
-                ->groupBy('bet_number_kh.abcd_amount')
-                ->groupBy('bet_number_kh.roll_amount')
-                ->groupBy('bet_number_kh.roll2_amount')
-                ->groupBy('bet_number_kh.roll_parlay_amount')
+                ->groupBy('bet_receipt_kh_vnd.receipt_no')
+                ->groupBy('bet_number_kh_vnd.generated_number')
+                ->groupBy('bet_number_kh_vnd.a_amount')
+                ->groupBy('bet_number_kh_vnd.total_amount')
+                ->groupBy('bet_number_kh_vnd.b_amount')
+                ->groupBy('bet_number_kh_vnd.c_amount')
+                ->groupBy('bet_number_kh_vnd.d_amount')
+                ->groupBy('bet_number_kh_vnd.abcd_amount')
+                ->groupBy('bet_number_kh_vnd.roll_amount')
+                ->groupBy('bet_number_kh_vnd.roll2_amount')
+                ->groupBy('bet_number_kh_vnd.roll_parlay_amount')
                 ->groupBy('users.name')
                 ->each(function ($record) use (&$data) {
                     $betType = $record->bet_type;

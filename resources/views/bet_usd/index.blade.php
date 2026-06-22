@@ -53,8 +53,9 @@
                         <span class="border border-gray-500 text-[12px]  px-1 py-1">3so x 650</span>
                         <span class="border border-gray-500 text-[12px]  px-1 py-1">4so x 6000</span>
                     </div>
+                      <p class="text-[12px] pb-2 text-center font-bold">LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY</p>
                 </div>
-                <p class="text-[12px] pb-2 text-center font-bold">LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY</p>
+              
                 <!-- Print Button -->
                 <button class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

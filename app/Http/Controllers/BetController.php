@@ -60,9 +60,9 @@ class BetController extends Controller
                 // Admin sees users who are not admin or manager
                 $members = User::with('manager') // Eager load manager relationship
                     ->whereDoesntHave('roles', function ($q) {
-                        $q->whereIn('name', ['admin', 'manager']);
+                        $q->whereIn('name', ['admin', 'master', 'agent']);
                     })->get();
-            } elseif (in_array('manager', $roles)) {
+            } elseif (in_array('agent', $roles)) {
                 // Manager sees their own members (exclude admins)
                 $members = User::with('manager')
                     ->where('manager_id', $user->id)
@@ -87,14 +87,14 @@ class BetController extends Controller
                 'betNumber.betNumberWin',
                 'bePackageConfig',
                 'betLotterySchedule'
-            ])->when(in_array('manager', $roles), function ($q) use ($user) {
+            ])->when(in_array('agent', $roles), function ($q) use ($user) {
                 // Get all users under this manager
                 $memberIds = User::where('manager_id', $user->id)
                                 ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                 ->pluck('id')
                                 ->toArray();
                 $q->whereIn('user_id', $memberIds);
-            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })->when(!is_null($member_id), function ($q) use ($member_id) {
                 $q->where('user_id', $member_id);
@@ -165,9 +165,9 @@ class BetController extends Controller
                 // Admin sees users who are not admin or manager
                 $members = User::with('manager') // Eager load manager relationship
                     ->whereDoesntHave('roles', function ($q) {
-                        $q->whereIn('name', ['admin', 'manager']);
+                        $q->whereIn('name', ['admin', 'master', 'agent']);
                     })->get();
-            } elseif (in_array('manager', $roles)) {
+            } elseif (in_array('agent', $roles)) {
                 // Manager sees their own members (exclude admins)
                 $members = User::with('manager')
                     ->where('manager_id', $user->id)
@@ -243,14 +243,14 @@ class BetController extends Controller
                 ->join('bet_package_configurations as config','config.id','=', 'bets.bet_package_config_id')
                 ->join('bet_lottery_schedules as schedules','schedules.id','=', 'bets.bet_schedule_id')
                 ->join('users','users.id','=', 'bets.user_id')
-                ->when(in_array('manager', $roles), function ($q) use ($user) {
+                ->when(in_array('agent', $roles), function ($q) use ($user) {
                     // Get all users under this manager
                     $memberIds = User::where('manager_id', $user->id)
                                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                     ->pluck('id')
                                     ->toArray();
                     $q->whereIn('user_id', $memberIds);
-                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })->when(!is_null($member_id), function ($q) use ($member_id) {
                     $q->where('user_id', $member_id);

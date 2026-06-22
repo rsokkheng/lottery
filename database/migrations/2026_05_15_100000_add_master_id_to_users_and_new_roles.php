@@ -10,7 +10,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('master_id')->nullable()->after('manager_id');
+            if (!Schema::hasColumn('users', 'master_id')) {
+                $table->unsignedBigInteger('master_id')->nullable();
+            }
         });
 
         $guard = config('auth.defaults.guard', 'web');

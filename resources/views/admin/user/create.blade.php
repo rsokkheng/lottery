@@ -1,17 +1,18 @@
 @php
     use Illuminate\Support\Facades\Auth;
     $creator = Auth::user();
-    $hasVND  = $creator->currencies()->where('currency', 'VND')->exists();
-    $hasUSD  = $creator->currencies()->where('currency', 'USD')->exists();
-    $hasKHR  = $creator->currencies()->where('currency', 'KHR')->exists();
+    $isAdmin = $creator->hasRole('admin');
 
     $roleLabels = [
-        'master'       => 'Master Agent',
-        'senior'       => 'Senior Agent',
-        'manager'      => 'Manager',
-        'share_master' => 'Share Master',
-        'member'       => 'Member / Staff',
+        'master' => 'Master',
+        'agent'  => 'Agent',
+        'member' => 'Member',
     ];
+
+    // Default selected bet type key and its derived currency
+    $firstOpt      = $betTypeOptions[0] ?? null;
+    $defaultBt     = old('bet_types.0') ?? ($firstOpt ? $firstOpt['bet_system'].'_'.$firstOpt['currency'] : '');
+    $defaultCur    = old('currency', $firstOpt ? $firstOpt['currency'] : '');
 @endphp
 
 <x-admin>
@@ -34,7 +35,7 @@
                         <x-error>name</x-error>
                     </div>
 
-                    {{-- Username --}}
+                    {{-- Account ID --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Account ID <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="username" required autocomplete="off"
@@ -49,7 +50,7 @@
                         <x-error>password</x-error>
                     </div>
 
-                    {{-- Phone Number --}}
+                    {{-- Phone --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="phonenumber" required autocomplete="off"
@@ -60,7 +61,7 @@
                     {{-- Role --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
-                        <select name="role" class="form-control" required>
+                        <select name="role" id="roleSelect" class="form-control" required>
                             <option value="" disabled selected>— Select role —</option>
                             @foreach ($roles as $role)
                                 <option value="{{ $role->name }}"
@@ -87,41 +88,69 @@
                         <x-error>package_id</x-error>
                     </div>
 
-                    {{-- Currency --}}
-                    <div class="col-lg-6">
-                        <label class="form-label fw-semibold">Currency <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-3 mt-1">
-                            @if($hasVND)
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="currency" id="currVND"
-                                    value="VND" {{ old('currency', 'VND') === 'VND' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="currVND">VND</label>
-                            </div>
-                            @endif
-                            @if($hasUSD)
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="currency" id="currUSD"
-                                    value="USD" {{ old('currency') === 'USD' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="currUSD">USD</label>
-                            </div>
-                            @endif
-                            @if($hasKHR)
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="currency" id="currKHR"
-                                    value="KHR" {{ old('currency') === 'KHR' ? 'checked' : '' }} required>
-                                <label class="form-check-label" for="currKHR">KHR</label>
-                            </div>
-                            @endif
-                        </div>
-                        <x-error>currency</x-error>
-                    </div>
+                    <input type="hidden" name="currency" id="hidden-currency" value="{{ $defaultCur }}">
 
-                    {{-- Give Credit (read-only for now) --}}
+                    {{-- Initial Credit --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Initial Credit</label>
                         <input type="number" class="form-control" name="available_credit"
                             value="{{ old('available_credit', 0) }}" min="0" step="0.01">
-                        <x-error>available_credit</x-error>
+                    </div>
+
+                    {{-- Bet Type Assignment --}}
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">
+                            <i class="fas fa-dice me-1 text-primary"></i>
+                            Bet Types
+                        </label>
+                        <div class="border rounded p-3 bg-light">
+                            @if($isAdmin)
+                                {{-- Admin: grouped by system (Bet Vietnam / Bet Khmer), radio, currency auto-follows --}}
+                                @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
+                                @foreach($btGroups as $system => $opts)
+                                <div class="{{ !$loop->last ? 'mb-3' : '' }}">
+                                    <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
+                                        Bet {{ ucfirst($system) }}
+                                    </div>
+                                    <div class="row g-2">
+                                        @foreach($opts as $opt)
+                                        @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                        <div class="col-6 col-md-3">
+                                            <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                                <input class="form-check-input" type="radio"
+                                                    name="bet_types[]" value="{{ $key }}"
+                                                    id="bt_create_{{ $key }}"
+                                                    {{ $defaultBt === $key ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
+                                                    {{ $opt['label'] }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                            @else
+                                {{-- Non-admin: flat list, single selection --}}
+                                <div class="row g-2">
+                                    @foreach($betTypeOptions as $opt)
+                                    @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                    <div class="col-6 col-md-3">
+                                        <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                            <input class="form-check-input" type="radio"
+                                                name="bet_types[]" value="{{ $key }}"
+                                                id="bt_create_{{ $key }}"
+                                                {{ $defaultBt === $key ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
+                                                {{ $opt['label'] }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                        <x-error>bet_types</x-error>
                     </div>
 
                     {{-- Submit --}}
@@ -135,4 +164,22 @@
             </form>
         </div>
     </div>
+
+    @section('js')
+    <script>
+    (function () {
+        function syncCurrencyFromBetType(val) {
+            var cur = val.split('_').pop();
+            var el = document.getElementById('hidden-currency');
+            if (el) el.value = cur;
+        }
+        document.querySelectorAll('input[name="bet_types[]"]').forEach(function (r) {
+            r.addEventListener('change', function () { syncCurrencyFromBetType(this.value); });
+        });
+        var initBt = document.querySelector('input[name="bet_types[]"]:checked');
+        if (initBt) syncCurrencyFromBetType(initBt.value);
+    })();
+    </script>
+    @endsection
+
 </x-admin>

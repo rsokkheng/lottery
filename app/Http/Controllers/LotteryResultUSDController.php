@@ -952,14 +952,14 @@ class LotteryResultUSDController extends Controller
                     $q->when($company == 3, function ($q2){
                         $q2->where('schedule.draw_time', '18:30:00');
                     });
-                })->when(in_array('manager', $roles), function ($q) use ($user) {
+                })->when(in_array('agent', $roles), function ($q) use ($user) {
                     // Get all users under this manager
                     $memberIds = User::where('manager_id', $user->id)
                                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                     ->pluck('id')
                                     ->toArray();
                     $q->whereIn('bet_usd.user_id', $memberIds);
-                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                     $q->where('bet_usd.user_id', $user->id);
                 })
                 ->when($number, function ($q) use ($number){

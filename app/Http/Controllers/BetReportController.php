@@ -65,7 +65,7 @@ class BetReportController extends Controller
             ->join('users', 'users.id', '=', 'bets.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 // Get all users under this manager
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
@@ -78,7 +78,7 @@ class BetReportController extends Controller
                     Carbon::parse($start_date)->startOfDay()->format('Y-m-d H:i:s'),
                     Carbon::parse($end_date)->endOfDay()->format('Y-m-d H:i:s')
                 ]);
-            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
             ->when($date && !$start_date && !$end_date, function ($q) use ($date) {
@@ -130,7 +130,7 @@ class BetReportController extends Controller
             $data = DB::table('bets')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bets.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -145,7 +145,7 @@ class BetReportController extends Controller
             ->join('users', 'users.id', '=', 'bets.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
                     ->pluck('id')
@@ -158,7 +158,7 @@ class BetReportController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bets.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bets.user_id', $user->id);
             })
             ->groupBy(
@@ -229,7 +229,7 @@ class BetReportController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bets.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bets.user_id', $user->id);
             })
             ->groupBy(
@@ -274,7 +274,7 @@ class BetReportController extends Controller
             $data = DB::table('bets')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bets.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -287,7 +287,7 @@ class BetReportController extends Controller
             ->join('users', 'users.id', '=', 'bets.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
                     ->pluck('id')
@@ -300,7 +300,7 @@ class BetReportController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bets.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bets.user_id', $user->id);
             })
             ->groupBy(
@@ -353,7 +353,7 @@ class BetReportController extends Controller
             $data = DB::table('bets')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bets.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -368,14 +368,14 @@ class BetReportController extends Controller
             ->join('users', 'users.id', '=', 'bets.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bets.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bets.bet_schedule_id')
-            ->whereIn('bets.user_id', $memberIds) 
+            ->whereIn('bets.user_id', $memberIds)
             ->when($date, function ($q) use ($date) {
                 $q->whereDate('bets.bet_date', '=', Carbon::parse($date)->format('Y-m-d'));
             })
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bets.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bets.user_id', $user->id);
             })
             ->groupBy(
@@ -491,7 +491,7 @@ class BetReportController extends Controller
             $data = DB::table('bets')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bets.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -559,7 +559,7 @@ class BetReportController extends Controller
             $data = DB::table('bets')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bets.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bets.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bets.total_amount) AS total_amount'),
                 DB::raw('SUM(bets.total_amount * bet_package_configurations.rate / 100) AS net_amount'),

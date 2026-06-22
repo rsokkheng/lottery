@@ -5,11 +5,10 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\HelperEnum;
-use App\Models\AccountManagement;
+use App\Models\AccountVND;
 use App\Models\BetReceipt;
 use App\Models\BetWinning;
 use Illuminate\Http\Request;
-use App\Models\BalanceReport;
 use App\Models\LotteryResult;
 use App\Models\LotterySchedule;
 use App\Models\BetWinningRecord;
@@ -17,7 +16,6 @@ use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Models\BalanceReportOutstanding;
 use Spatie\Permission\Models\Permission;
 use App\Models\BetLotteryPackageConfiguration;
 use function PHPUnit\Framework\throwException;
@@ -329,11 +327,6 @@ class LotteryResultController extends Controller
                     });
                     }
                 }
-                BalanceReportOutstanding::where('date', Carbon::today()->format('Y-m-d'))
-                ->where('company_id', $BetConfigCompany->company_id)
-                ->update([
-                    'amount' => 0,
-                ]);
             }
             DB::commit();
             $reportDate = Carbon::today()->format('Y-m-d');
@@ -342,28 +335,10 @@ class LotteryResultController extends Controller
             ->groupBy('user_id')
             ->get();
             foreach ($winAmountsByUser as $userWin) {
-                $user = AccountManagement::where('user_id', $userWin->user_id)->first();
-                if ($user) {
-                    $user->cash_balance = $userWin->total_win_amount;
-                    $user->save();
-                }
-                if ($userWin->total_win_amount > 0) {
-                    $User = User::find($userWin->user_id);
-                    DB::table('balance_reports')->updateOrInsert(
-                        [
-                            'user_id' => $User->id,
-                            'report_date' => $reportDate,
-                        ],
-                        [
-                            'name_user' => $User->name,
-                            'net_lose' => 0,
-                            'net_win' => $userWin->total_win_amount,
-                            'deposit' => 0,
-                            'withdraw' => 0,
-                            'adjustment' => 0,
-                            'balance' => 0,
-                        ]
-                    );
+                $acct = AccountVND::where('user_id', $userWin->user_id)->first();
+                if ($acct) {
+                    $acct->credit_balance += $userWin->total_win_amount;
+                    $acct->save();
                 }
             }
              
@@ -991,14 +966,14 @@ class LotteryResultController extends Controller
                     $q->when($company == 3, function ($q2){
                         $q2->where('schedule.draw_time', '18:30:00');
                     });
-                })->when(in_array('manager', $roles), function ($q) use ($user) {
+                })->when(in_array('agent', $roles), function ($q) use ($user) {
                     // Get all users under this manager
                     $memberIds = User::where('manager_id', $user->id)
                                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                                     ->pluck('id')
                                     ->toArray();
                     $q->whereIn('bets.user_id', $memberIds);
-                })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+                })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                     $q->where('bets.user_id', $user->id);
                 })
                 ->when($number, function ($q) use ($number){

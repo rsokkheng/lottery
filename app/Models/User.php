@@ -3,12 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\UserCurrency;
 use App\Models\BetUserWallet;
-use App\Models\AccountManagement;
+use App\Models\AccountUSD;
+use App\Models\AccountVND;
 use App\Models\BetLotteryPackage;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,6 +27,8 @@ class User extends Authenticatable
         'package_id',
         'manager_id',
         'master_id',
+        'bet_system',
+        'currency',
         'name',
         'email',
         'password',
@@ -94,26 +95,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(User::class, 'master_id');
     }
-    public function currencies()
+    public function accountVND()
     {
-        return $this->hasOne(UserCurrency::class);
-    }
-    // App\Models\User.php
-
-    public function accountManagement()
-    {
-        return $this->hasMany(AccountManagement::class, 'user_id');
-    }
-    public function balanceReports()
-    {
-        return $this->hasMany(BalanceReport::class);
-    }
-    public function balanceReportOutStandings()
-    {
-        return $this->hasMany(BalanceReportOutstanding::class);
+        return $this->hasOne(AccountVND::class, 'user_id');
     }
 
-    public function accountKH()
+    public function accountUSD()
+    {
+        return $this->hasOne(AccountUSD::class, 'user_id');
+    }
+public function accountKH()
     {
         return $this->hasOne(AccountKH::class);
     }
@@ -122,4 +113,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(CreditTransactionKH::class);
     }
+
 }

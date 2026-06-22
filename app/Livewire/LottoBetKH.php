@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagKHEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNKHEnum;
-use App\Models\BalanceReportOutstanding;
 use App\Models\BetLotteryPackageConfiguration;
 use Illuminate\Support\Facades\Log;
 
@@ -88,11 +87,10 @@ class LottoBetKH extends Component
 
     public $betAccount;
 
-    public $outstandingSummary;
-
-    public $totalOutstanding;
+    public $totalOutstanding = 0;
 
     public $packagePrice;
+    public string $currency = 'vnd';
 
 
     public function mount(
@@ -100,10 +98,8 @@ class LottoBetKH extends Component
         BetLotterySchedule             $betLotteryScheduleModel,
         BetLotteryPackageConfiguration $betPackageConfiguration,
         BetReceiptKH                  $betReceipt,
-
     )
     {
-        // Initialization logic if needed
         $this->betLotteryScheduleModel = $betLotteryScheduleModel;
         $this->betModel = $betModel;
         $this->betPackageConfiguration = $betPackageConfiguration;
@@ -127,7 +123,13 @@ class LottoBetKH extends Component
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
+
         $this->betAccount = AccountKH::where('user_id', $this->user->id)->value('credit_balance') ?? 0;
+
+        $this->totalOutstanding = DB::table('bet_kh_vnd')
+            ->where('user_id', $this->user->id)
+            ->whereDate('bet_date', $this->currentDate)
+            ->sum('total_amount');
 
         // Companies that already have results posted today — their bets are settled, not outstanding
         $settledCompanyIds = DB::table('bet_lottery_results')
@@ -137,19 +139,6 @@ class LottoBetKH extends Component
             ->unique()
             ->toArray();
 
-        $this->outstandingSummary = DB::table('balance_report_outstandings')
-            ->select(
-                'user_id',
-                DB::raw('DATE(date) as report_date'),
-                DB::raw('SUM(amount) as total_outstanding')
-            )
-            ->whereDate('date', Carbon::today())
-            ->where('user_id', $this->user->id)
-            ->when(!empty($settledCompanyIds), fn($q) => $q->whereNotIn('company_id', $settledCompanyIds))
-            ->groupBy('user_id', DB::raw('DATE(date)'))
-            ->orderByDesc('report_date')
-            ->get();
-        $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
         $this->packagePrice = $this->betPackageConfiguration
             ->where('package_id', $this->user->package_id)
             ->whereIn('bet_type', ['2D', '3D', '4D'])
@@ -434,6 +423,13 @@ class LottoBetKH extends Component
     public function handleSave()
     {
         $isCreateBetSuccess = false;
+        $AccountModel = AccountKH::class;
+        $TransactionModel = CreditTransactionKH::class;
+        $BetModel = BetKH::class;
+        $BetNumberModel = BetNumberKH::class;
+        $betTable = 'bet_kh_vnd';
+        $betNumberTable = 'bet_number_kh_vnd';
+
         DB::beginTransaction();
         try {
              $userSuspended = $this->user->is_active;
@@ -443,21 +439,23 @@ class LottoBetKH extends Component
             }
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
-                $account = AccountKH::where('user_id', auth()->id())->first();
+                $account = app($AccountModel)::where('user_id', auth()->id())->first();
                 if (!$account) {
-                    $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
+                    $currencyLabel = strtoupper($this->currency);
+                    $this->dispatch('bet-saved', message: "គណនីមិនមានទឹកលុយ ({$currencyLabel}) សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!", type: 'error');
                     return back();
                 }
                 $newBalance = round((float) $account->credit_balance - $this->totalDue, 2);
                 if ($newBalance < 0) {
                     $shortage = number_format(abs($newBalance), 2);
-                    $this->dispatch('bet-saved', message: "Insufficient credit! Please add {$shortage} VND more to your account.", type: 'error');
+                    $currencyLabel = strtoupper($this->currency);
+                    $this->dispatch('bet-saved', message: "Insufficient credit ({$currencyLabel})! Please add {$shortage} more to your account.", type: 'error');
                     return back();
                 } else {
                     $balanceBefore = (float) $account->credit_balance;
                     $account->credit_balance -= $this->totalDue;
                     $account->save();
-                    CreditTransactionKH::create([
+                    app($TransactionModel)::create([
                         'user_id'        => auth()->id(),
                         'type'           => 'bet_debit',
                         'amount'         => $this->totalDue,
@@ -484,7 +482,7 @@ class LottoBetKH extends Component
                     'receipt_no' => $invoiceNumber,
                     'user_id' => $this->user->id ?? 0,
                     'date' => now(),
-                    'currency' => 'VND',
+                    'currency' => strtoupper($this->currency),
                     'total_amount' => $this->totalInvoice,
                     'commission' => $this->totalInvoice - $this->totalDue,
                     'net_amount' => $this->totalDue,
@@ -515,12 +513,11 @@ class LottoBetKH extends Component
                             }
                             //insert bet
                             $amountBet = $this->calculateAmountOutstanding($number, $key, $schedule['code'], 1);
-                            $betAmountDupplicate = BetKH::where('user_id', $this->user->id)
+                            $betAmountDupplicate = $BetModel::where('user_id', $this->user->id)
                                 ->where('bet_schedule_id', $schedule->id)
                                 ->where('number_format', $number)
                                 ->where('digit_format', $this->digit[$key])
                                 ->where('company_id', $schedule->company_id)
-                                ->where('user_id', $this->user->id)
                                 ->where('total_amount', $amountBet)
                                 ->where('bet_package_config_id', $betPackage->id ?? 0)
                                 ->where('bet_receipt_id', $betReceipt->id ?? null)
@@ -538,17 +535,9 @@ class LottoBetKH extends Component
                                 'bet_date' => $this->currentDate,
                                 'total_amount' => $lastAmount,
                             ];
-                            $respone = BetKH::create($betItem);
+                            $respone = $BetModel::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
-                                $amountOutstanding = $this->calculateAmountOutstanding($number, $key, $schedule['code'], $rate);
-                                BalanceReportOutstanding::create([
-                                    'user_id' => $this->user->id ?? 0,
-                                    'company_id' => $schedule->company_id,
-                                    'amount' => $amountOutstanding,
-                                    'date' => $this->currentDate,
-
-                                ]);
                             }
                             //insert bet number
                             $betNumber1 = [
@@ -638,7 +627,7 @@ class LottoBetKH extends Component
                                         ];
 
                                         $data = array_merge($betNumber1, $betNumber2);
-                                        BetNumberKH::create($data);
+                                        $BetNumberModel::create($data);
                                     }
                                 } else {
                                     $betNumber2 = [
@@ -647,7 +636,7 @@ class LottoBetKH extends Component
                                         'total_amount' => $this->roll_parlay_amount[$key] * $multiplierHashtag,
                                     ];
                                     $data = array_merge($betNumber1, $betNumber2);
-                                    BetNumberKH::create($data);
+                                    $BetNumberModel::create($data);
                                 }
                             } else if (strpos($number, '*') !== false) {
                                 $num = trim($number, '*');
@@ -665,7 +654,7 @@ class LottoBetKH extends Component
                                         'digit_length' => \strlen($genNumber),
                                         'total_amount' => $total_amount,
                                     ];
-                                    BetNumberKH::create(array_merge($betNumber1, $betNumber2));
+                                    $BetNumberModel::create(array_merge($betNumber1, $betNumber2));
                                 }
                             } else {
                                 $numberLength = \strlen($number);
@@ -685,7 +674,7 @@ class LottoBetKH extends Component
                                         'digit_length' => \strlen($combo),
                                         'total_amount' => $total_amount,
                                     ];
-                                    BetNumberKH::create(array_merge($betNumber1, $betNumber2));
+                                    $BetNumberModel::create(array_merge($betNumber1, $betNumber2));
                                 }
                             }
                         }
@@ -694,9 +683,10 @@ class LottoBetKH extends Component
             }
             DB::commit();
             if ($isCreateBetSuccess) {
+                $this->totalOutstanding += $this->totalDue;
                 $this->handleReset();
                 $this->dispatch('bet-saved', message: 'Bet saved successfully!');
-                return redirect()->to('lotto_kh/bet_receipt/' . $betReceipt->receipt_no);
+                return redirect()->to('lotto_kh_vnd/bet_receipt/' . $betReceipt->receipt_no);
             }
         } catch (\Exception $e) {
             DB::rollBack();
@@ -706,6 +696,9 @@ class LottoBetKH extends Component
     }
     private function validationBetLimitAmount($number, $key, $digit, $scheduleId)
     {
+        $vBetTable = 'bet_kh_vnd';
+        $vBetNumberTable = 'bet_number_kh_vnd';
+
         $betTypes = [
             'a' => ['amount' => $this->a_amount[$key] ?? 0, 'check' => $this->a_check[$key]],
             'b' => ['amount' => $this->b_amount[$key] ?? 0, 'check' => $this->b_check[$key]],
@@ -722,60 +715,52 @@ class LottoBetKH extends Component
                 $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
                         ->where('digit_key', $digitKey)
                         ->first();
-                   $amountLimit = BetKH::join('bet_number_kh', 'bet_kh.id', '=', 'bet_number_kh.bet_id')
-                    // ->where('bet_kh.user_id', $this->user->id)
-                    ->where('bet_number_kh.generated_number', $number)
-                    ->where('bet_number_kh.digit_length', $digit)
-                    ->where('bet_kh.bet_schedule_id', $scheduleId)
-                    ->whereDate('bet_kh.bet_date', $this->currentDate)
-                    ->selectRaw(' COALESCE(SUM(bet_number_kh.roll_parlay_amount),0) as total')
+                $amountLimit = DB::table($vBetTable)
+                    ->join($vBetNumberTable, "$vBetTable.id", '=', "$vBetNumberTable.bet_id")
+                    ->where("$vBetNumberTable.generated_number", $number)
+                    ->where("$vBetNumberTable.digit_length", $digit)
+                    ->where("$vBetTable.bet_schedule_id", $scheduleId)
+                    ->whereDate("$vBetTable.bet_date", $this->currentDate)
+                    ->selectRaw("COALESCE(SUM($vBetNumberTable.roll_parlay_amount),0) as total")
                     ->value('total');
-                    if ($checkBetLimit) {
+                if ($checkBetLimit) {
                     if ($this->roll_parlay_amount[$key] < $checkBetLimit->min_bet) {
-                        $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
-                        // You can now use $message variable or return it
-                        return $message;
+                        return "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
                     }
                     if (($amountLimit + $this->roll_parlay_amount[$key]) > $checkBetLimit->max_bet) {
-                        $message = "Your bet amount exceeds the maximum limit";
-                        // You can now use $message variable or return it
-                        return $message;
+                        return "Your bet amount exceeds the maximum limit";
                     }
                 }
             }
-        }else{
+        } else {
             foreach ($betTypes as $info) {
                 if ($info['amount'] > 0) {
-                        $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
-                            ->where('digit_key', $digit)
-                            ->first();
-                        $amountLimit = BetKH::join('bet_number_kh', 'bet_kh.id', '=', 'bet_number_kh.bet_id')
-                        // ->where('bet_kh.user_id', $this->user->id)
-                        ->where('bet_number_kh.generated_number', $number)
-                        ->where('bet_number_kh.digit_length', intval  ($digit))
-                        ->where('bet_kh.bet_schedule_id', $scheduleId)
-                        ->whereDate('bet_kh.bet_date', $this->currentDate)
-                        ->selectRaw('
-                        COALESCE(SUM(bet_number_kh.a_amount),0)
-                        + COALESCE(SUM(bet_number_kh.b_amount),0)
-                        + COALESCE(SUM(bet_number_kh.c_amount),0)
-                        + COALESCE(SUM(bet_number_kh.d_amount),0)
-                        + COALESCE(SUM(bet_number_kh.abcd_amount),0)
-                        + COALESCE(SUM(bet_number_kh.roll_amount),0)
-                        + COALESCE(SUM(bet_number_kh.roll2_amount),0)
-                        + COALESCE(SUM(bet_number_kh.roll_parlay_amount),0) as total
-                        ')
+                    $checkBetLimit = UserBetLimit::where('user_id', $this->user->id)
+                        ->where('digit_key', $digit)
+                        ->first();
+                    $amountLimit = DB::table($vBetTable)
+                        ->join($vBetNumberTable, "$vBetTable.id", '=', "$vBetNumberTable.bet_id")
+                        ->where("$vBetNumberTable.generated_number", $number)
+                        ->where("$vBetNumberTable.digit_length", intval($digit))
+                        ->where("$vBetTable.bet_schedule_id", $scheduleId)
+                        ->whereDate("$vBetTable.bet_date", $this->currentDate)
+                        ->selectRaw("
+                            COALESCE(SUM($vBetNumberTable.a_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.b_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.c_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.d_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.abcd_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.roll_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.roll2_amount),0)
+                            + COALESCE(SUM($vBetNumberTable.roll_parlay_amount),0) as total
+                        ")
                         ->value('total');
-                        if ($checkBetLimit) {
+                    if ($checkBetLimit) {
                         if ($info['amount'] < $checkBetLimit->min_bet) {
-                            $message = "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
-                            // You can now use $message variable or return it
-                            return $message;
+                            return "Your bet amount is below the minimum limit ({$checkBetLimit->min_bet})";
                         }
                         if (($info['amount'] + $amountLimit) > $checkBetLimit->max_bet) {
-                            $message = "Your bet amount exceeds the maximum limit";
-                            // You can now use $message variable or return it
-                            return $message;
+                            return "Your bet amount exceeds the maximum limit";
                         }
                     }
                 }

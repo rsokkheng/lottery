@@ -479,26 +479,33 @@
             <!-- Right: User Dashboard -->
             <div class="login-form">
                 @php
-                    use App\Models\AccountManagement;
+                    use App\Models\AccountVND;
+                    use App\Models\AccountUSD;
                     use App\Models\AccountKH;
+                    use App\Models\AccountKHUSD;
                     use Illuminate\Support\Facades\DB;
                     use Carbon\Carbon;
 
                     $authUser   = Auth::user();
                     $authUserId = $authUser?->id;
 
-                    $hasVND = $authUser?->currencies()->where('currency', 'VND')->exists();
-                    $hasUSD = $authUser?->currencies()->where('currency', 'USD')->exists();
-                    $hasKHR = $authUser?->currencies()->where('currency', 'KHR')->exists();
+                    $authIsSupervisor = $authUser?->hasAnyRole(['admin', 'master', 'agent']);
+                    $hasVND   = $authIsSupervisor || ($authUser?->bet_system === 'vietnam' && $authUser?->currency === 'VND');
+                    $hasUSD   = $authIsSupervisor || ($authUser?->bet_system === 'vietnam' && $authUser?->currency === 'USD');
+                    $hasKhmer = $authIsSupervisor || $authUser?->bet_system === 'khmer';
+                    $hasKHR   = $hasKhmer;
 
                     $vndBalance = $hasVND
-                        ? (float)(AccountManagement::where('user_id', $authUserId)->where('currency', 'VND')->value('bet_credit') ?? 0)
+                        ? (float)(AccountVND::where('user_id', $authUserId)->value('credit_balance') ?? 0)
                         : null;
                     $usdBalance = $hasUSD
-                        ? (float)(AccountManagement::where('user_id', $authUserId)->where('currency', 'USD')->value('bet_credit') ?? 0)
+                        ? (float)(AccountUSD::where('user_id', $authUserId)->value('credit_balance') ?? 0)
                         : null;
                     $khrBalance = $hasKHR
-                        ? (float)(AccountKH::where('user_id', $authUserId)->value('credit_balance') ?? 0)
+                        ? (float)(
+                            (AccountKH::where('user_id', $authUserId)->value('credit_balance') ?? 0) +
+                            (AccountKHUSD::where('user_id', $authUserId)->value('credit_balance') ?? 0)
+                        )
                         : null;
 
                     // Outstanding: today's unsettled bets per currency (exclude settled companies)
@@ -508,13 +515,6 @@
                         ->pluck('bet_lottery_schedules.company_id')
                         ->unique()->toArray();
 
-                    $outstandingAmt = $authUserId
-                        ? (float)(DB::table('balance_report_outstandings')
-                            ->where('user_id', $authUserId)
-                            ->whereDate('date', Carbon::today())
-                            ->when(!empty($settledCompanyIds), fn($q) => $q->whereNotIn('company_id', $settledCompanyIds))
-                            ->sum('amount'))
-                        : 0;
                 @endphp
 
                 <!-- Welcome Message -->
@@ -528,7 +528,6 @@
                         <tr>
                             <th>Currency</th>
                             <th class="text-end">Credit Balance</th>
-                            <th class="text-end">Outstanding</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -538,9 +537,6 @@
                             <td class="{{ $vndBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $vndBalance > 0 ? number_format($vndBalance, 2) : '0.00' }}
                             </td>
-                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
-                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
-                            </td>
                         </tr>
                         @endif
                         @if($hasUSD)
@@ -549,9 +545,6 @@
                             <td class="{{ $usdBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $usdBalance > 0 ? number_format($usdBalance, 2) : '0.00' }}
                             </td>
-                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
-                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
-                            </td>
                         </tr>
                         @endif
                         @if($hasKHR)
@@ -559,9 +552,6 @@
                             <td><span class="currency-badge badge-khr">VND</span></td>
                             <td class="{{ $khrBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $khrBalance > 0 ? number_format($khrBalance, 2) : '0.00' }}
-                            </td>
-                            <td class="{{ $outstandingAmt > 0 ? 'outstanding-amt' : 'outstanding-zero' }}">
-                                {{ $outstandingAmt > 0 ? number_format($outstandingAmt, 2) : '-' }}
                             </td>
                         </tr>
                         @endif
@@ -634,33 +624,26 @@
                     @auth
                         @php
                             $user = auth()->user();
-                            $hasVND = $user->currencies()->where('currency', 'VND')->exists();
-                            $hasUSD = $user->currencies()->where('currency', 'USD')->exists();
-                            $hasKHR = $user->currencies()->where('currency', 'KHR')->exists();
-                            $isAdminOrManager = $user->roles->pluck('name')->intersect(['admin', 'manager'])->isNotEmpty();
-                        @endphp
+                            $isSupervisor = $user->hasAnyRole(['admin', 'master', 'agent']);
+                            $hasVietnamVND = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
+                            $hasVietnamUSD = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
+                            $hasKhmerVND   = $isSupervisor || ($user->bet_system === 'khmer'   && $user->currency === 'VND');
+                            $hasKhmerUSD   = $isSupervisor || ($user->bet_system === 'khmer'   && $user->currency === 'USD');
+                            $hasKhmer      = $hasKhmerVND || $hasKhmerUSD;
 
-                        @php
                             $link = null;
 
-                            if (!$isAdminOrManager) {
-                                // Normal user
-                                if ($hasVND && !$hasUSD && !$hasKHR) {
-                                    $link = url('lotto_vn/bet');
-                                } elseif ($hasUSD && !$hasVND && !$hasKHR) {
-                                    $link = url('lotto_usd/bet');
-                                } elseif ($hasKHR && !$hasVND && !$hasUSD) {
-                                    $link = url('lotto_kh/bet');
-                                }
+                            if ($isSupervisor) {
+                                if ($hasVietnamVND)    { $link = url('lotto_vn/receipt-list'); }
+                                elseif ($hasVietnamUSD){ $link = url('lotto_usd/receipt-list'); }
+                                elseif ($hasKhmerVND)  { $link = url('lotto_kh_vnd/receipt-list'); }
+                                elseif ($hasKhmerUSD)  { $link = url('lotto_kh_usd/receipt-list'); }
+                                else                   { $link = route('admin.homepage'); }
                             } else {
-                                // Admin or Manager
-                                if ($hasVND && !$hasUSD && !$hasKHR) {
-                                    $link = url('lotto_vn/receipt-list');
-                                } elseif ($hasUSD && !$hasVND && !$hasKHR) {
-                                    $link = url('lotto_usd/receipt-list');
-                                } elseif ($hasKHR && !$hasVND && !$hasUSD) {
-                                    $link = url('lotto_kh/receipt-list');
-                                }
+                                if ($hasVietnamVND)    { $link = url('lotto_vn/bet'); }
+                                elseif ($hasVietnamUSD){ $link = url('lotto_usd/bet'); }
+                                elseif ($hasKhmerVND)  { $link = url('lotto_kh_vnd/bet'); }
+                                elseif ($hasKhmerUSD)  { $link = url('lotto_kh_usd/bet'); }
                             }
                         @endphp
 

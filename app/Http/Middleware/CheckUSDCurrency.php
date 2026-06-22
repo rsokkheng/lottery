@@ -4,32 +4,29 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckUSDCurrency
 {
-    public function handle(Request $request, Closure $next, string $expectedCurrency): Response
+    public function handle(Request $request, Closure $next, string $currency): Response
     {
-        $user = auth()->user();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
         if ($user) {
-            $hasAccess = $user->currencies()
-                ->where('currency', strtoupper($expectedCurrency))
-                ->exists();
-
-            if (!$hasAccess) {
-                Log::warning('Currency access denied', [
-                    'user_id' => $user->id,
-                    'attempted_currency' => $expectedCurrency,
-                    'url' => $request->fullUrl(),
-                    'ip' => $request->ip(),
-                ]);
-
-                abort(403, "Access denied. Only {$expectedCurrency} currency users allowed.");
+            if ($user->hasAnyRole(['admin', 'master'])) {
+                return $next($request);
             }
 
-            // Optional: Set shared session for current currency
-            session(['currency' => strtoupper($expectedCurrency)]);
+            $hasAccess = $user->bet_system === 'vietnam'
+                      && $user->currency   === strtoupper($currency);
+
+            if (!$hasAccess) {
+                abort(403, 'Access denied. You do not have Bet Vietnam · ' . strtoupper($currency) . ' access.');
+            }
+
+            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
         }
 
         return $next($request);

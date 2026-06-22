@@ -15,63 +15,58 @@ class BetKHController extends Controller
 {
     public $betModel;
     public $currentDate;
+
     public function __construct(BetKH $betModel)
     {
-        $this->betModel = $betModel;
+        $this->betModel    = $betModel;
         $this->currentDate = Carbon::today()->format('Y-m-d');
     }
 
     public function getBetNumber(Request $request)
     {
         try {
+            $cur    = strtolower(session('currency', 'VND'));
+            $tBet   = "bet_kh_{$cur}";
+            $tNum   = "bet_number_kh_{$cur}";
+            $tWinRec = "bet_winning_record_kh_{$cur}";
+
             $date = $this->currentDate;
             if ($request->has('date')) {
                 $date = $request->get('date');
             }
-            $user = Auth::user()??0;
+            $user = Auth::user() ?? 0;
             $digits = BetLotteryPackageConfiguration::query()
                 ->where('package_id', $user->package_id)
-                ->orderBy('id')->get(['id', 'bet_type','has_special']);
-            $members = User::where('record_status_id', 1)
-                ->whereHas('roles', function ($query) {
-                    $query->where('name', 'staff');
-                })
-                ->get();
+                ->orderBy('id')->get(['id', 'bet_type', 'has_special']);
+
             $company_id = null;
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
-            $digit_type = "2D";
-            if ($request->has('digit_type')) {
-                $digit_type = $request->get('digit_type');
-            }
-            $member_id = $request->get('member_id');
-            $member_id = ($member_id === 'undefined' || empty($member_id)) ? null : $member_id;
+            $digit_type = $request->get('digit_type', '2D');
+            $member_id  = $request->get('member_id');
+            $member_id  = ($member_id === 'undefined' || empty($member_id)) ? null : $member_id;
+            $number     = $request->number ?? null;
+
             $roles = [];
             if ($user) {
-                $user = User::with('roles')->find($user->id); // reload with roles
+                $user  = User::with('roles')->find($user->id);
                 $roles = $user->roles->pluck('name')->toArray();
             }
 
-
-              // Get member list based on role
-            $members = collect(); // default empty collection
+            $members = collect();
             if (in_array('admin', $roles)) {
-                // Admin sees users who are not admin or manager
-                $members = User::with('manager') // Eager load manager relationship
+                $members = User::with('manager')
                     ->whereDoesntHave('roles', function ($q) {
-                        $q->whereIn('name', ['admin', 'manager']);
+                        $q->whereIn('name', ['admin', 'master', 'agent']);
                     })->get();
-            } elseif (in_array('manager', $roles)) {
-                // Manager sees their own members (exclude admins)
+            } elseif (in_array('agent', $roles)) {
                 $members = User::with('manager')
                     ->where('manager_id', $user->id)
                     ->whereDoesntHave('roles', function ($q) {
                         $q->where('name', 'admin');
                     })->get();
             }
-
-            $number = $request->number ?? null;
 
             $company = [
                 ["label" => "All Company", "id" => null],
@@ -80,109 +75,110 @@ class BetKHController extends Controller
                 ["label" => "6PM Company", "id" => 3],
             ];
 
-            $data = [];
+            $data         = [];
             $totalNetAmount = [
-                'turnover' => 0,
-                'commission'=>0,
-                'net_amount'=>0,
-                'win_lose' => 0
+                'turnover'   => 0,
+                'commission' => 0,
+                'net_amount' => 0,
+                'win_lose'   => 0,
             ];
-                DB::table('bet_number_kh')
+
+            DB::table($tNum)
                 ->select(
-                    'bet_number_kh.id as bet_number_id',
-                    'bet_number_kh.original_number',
-                    'bet_number_kh.generated_number',
-                    'bet_number_kh.total_amount as number_turnover',
-                    'bet_number_kh.a_amount',
-                    'bet_number_kh.b_amount',
-                    'bet_number_kh.c_amount',
-                    'bet_number_kh.d_amount',
-                    'bet_number_kh.abcd_amount',
-                    'bet_number_kh.roll_amount',
-                    'bet_number_kh.roll2_amount',
-                    'bet_number_kh.roll_parlay_amount',
-                    'bet_kh.bet_date',
-                    'bet_kh.digit_format',
+                    "{$tNum}.id as bet_number_id",
+                    "{$tNum}.original_number",
+                    "{$tNum}.generated_number",
+                    "{$tNum}.total_amount as number_turnover",
+                    "{$tNum}.a_amount",
+                    "{$tNum}.b_amount",
+                    "{$tNum}.c_amount",
+                    "{$tNum}.d_amount",
+                    "{$tNum}.abcd_amount",
+                    "{$tNum}.roll_amount",
+                    "{$tNum}.roll2_amount",
+                    "{$tNum}.roll_parlay_amount",
+                    "{$tBet}.bet_date",
+                    "{$tBet}.digit_format",
                     DB::raw("CASE
                                 WHEN config.bet_type LIKE 'RP%' THEN COUNT(winning_records.bet_number_id)*config.price/2
                                 ELSE COUNT(winning_records.bet_number_id)*config.price
                              END AS total_amount_number_win"),
                     DB::raw("TRIM(TRAILING ',' FROM CONCAT(
-                                IF(bet_number_kh.a_amount > 0, 'A,', ''),
-                                IF(bet_number_kh.b_amount > 0, 'B,', ''),
-                                IF(bet_number_kh.c_amount > 0, 'C,', ''),
-                                IF(bet_number_kh.d_amount > 0, 'D,', ''),
-                                IF(bet_number_kh.abcd_amount > 0, 'ABCD,', ''),
-                                IF(bet_number_kh.roll_amount > 0, 'Roll,', ''),
-                                IF(bet_number_kh.roll2_amount > 0, 'Roll2,', ''),
-                                IF(bet_number_kh.roll_parlay_amount > 0, 'RP,', '')
+                                IF({$tNum}.a_amount > 0, 'A,', ''),
+                                IF({$tNum}.b_amount > 0, 'B,', ''),
+                                IF({$tNum}.c_amount > 0, 'C,', ''),
+                                IF({$tNum}.d_amount > 0, 'D,', ''),
+                                IF({$tNum}.abcd_amount > 0, 'ABCD,', ''),
+                                IF({$tNum}.roll_amount > 0, 'Roll,', ''),
+                                IF({$tNum}.roll2_amount > 0, 'Roll2,', ''),
+                                IF({$tNum}.roll_parlay_amount > 0, 'RP,', '')
                              )) AS bet_game"),
-                    DB::raw("(COALESCE(bet_number_kh.a_amount,0)
-                             + COALESCE(bet_number_kh.b_amount,0)
-                             + COALESCE(bet_number_kh.c_amount,0)
-                             + COALESCE(bet_number_kh.d_amount,0)
-                             + COALESCE(bet_number_kh.abcd_amount,0)
-                             + COALESCE(bet_number_kh.roll_amount,0)
-                             + COALESCE(bet_number_kh.roll2_amount,0)
-                             + COALESCE(bet_number_kh.roll_parlay_amount,0)) AS get_roll_amount"),
-                    DB::raw("bet_number_kh.total_amount - (bet_number_kh.total_amount * config.rate / 100) as commission"),
-                    DB::raw("(bet_number_kh.total_amount * config.rate / 100) as net_amount"),
+                    DB::raw("(COALESCE({$tNum}.a_amount,0)
+                             + COALESCE({$tNum}.b_amount,0)
+                             + COALESCE({$tNum}.c_amount,0)
+                             + COALESCE({$tNum}.d_amount,0)
+                             + COALESCE({$tNum}.abcd_amount,0)
+                             + COALESCE({$tNum}.roll_amount,0)
+                             + COALESCE({$tNum}.roll2_amount,0)
+                             + COALESCE({$tNum}.roll_parlay_amount,0)) AS get_roll_amount"),
+                    DB::raw("{$tNum}.total_amount - ({$tNum}.total_amount * config.rate / 100) as commission"),
+                    DB::raw("({$tNum}.total_amount * config.rate / 100) as net_amount"),
                     'config.rate',
                     'config.price',
                     'config.bet_type',
                     'schedules.province_en',
                     'schedules.code',
-                    'bet_kh.company_id',
-                    'bet_kh.bet_schedule_id'
+                    "{$tBet}.company_id",
+                    "{$tBet}.bet_schedule_id"
                 )
-                ->join('bet_kh', 'bet_kh.id', '=', 'bet_number_kh.bet_id')
-                ->leftJoin('bet_winning_record_kh as winning_records', 'winning_records.bet_number_id', '=', 'bet_number_kh.id')
-                ->join('bet_package_configurations as config', 'config.id', '=', 'bet_kh.bet_package_config_id')
-                ->join('bet_lottery_schedules as schedules', 'schedules.id', '=', 'bet_kh.bet_schedule_id')
-                ->join('users', 'users.id', '=', 'bet_kh.user_id')
-                ->when(in_array('manager', $roles), function ($q) use ($user) {
+                ->join($tBet, "{$tBet}.id", '=', "{$tNum}.bet_id")
+                ->leftJoin("{$tWinRec} as winning_records", 'winning_records.bet_number_id', '=', "{$tNum}.id")
+                ->join('bet_package_configurations as config', 'config.id', '=', "{$tBet}.bet_package_config_id")
+                ->join('bet_lottery_schedules as schedules', 'schedules.id', '=', "{$tBet}.bet_schedule_id")
+                ->join('users', 'users.id', '=', "{$tBet}.user_id")
+                ->when(in_array('agent', $roles), function ($q) use ($user) {
                     $memberIds = User::where('manager_id', $user->id)
                         ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
                         ->pluck('id')->toArray();
                     $q->whereIn('user_id', $memberIds);
                 })
-                ->when(!in_array('admin', $roles) && !in_array('manager', $roles), fn($q) => $q->where('user_id', $user->id))
+                ->when(!in_array('admin', $roles) && !in_array('agent', $roles), fn($q) => $q->where('user_id', $user->id))
                 ->when(!is_null($member_id), fn($q) => $q->where('user_id', $member_id))
-                ->when($date, fn($q) => $q->whereDate('bet_date', $date))
-                ->when(!is_null($digit_type), fn($q) => $q->where('bet_kh.digit_format', $digit_type))
-                ->when(!is_null($company_id), fn($q) => $q->where('bet_kh.company_id', $company_id))
-                ->when(!is_null($number), fn($q) => $q->where('bet_number_kh.generated_number', $number))
+                ->when($date, fn($q) => $q->whereDate("{$tBet}.bet_date", $date))
+                ->when(!is_null($digit_type), fn($q) => $q->where("{$tBet}.digit_format", $digit_type))
+                ->when(!is_null($company_id), fn($q) => $q->where("{$tBet}.company_id", $company_id))
+                ->when(!is_null($number), fn($q) => $q->where("{$tNum}.generated_number", $number))
                 ->groupBy(
-                    'bet_number_kh.id',
-                    'bet_number_kh.original_number',
-                    'bet_number_kh.generated_number',
-                    'bet_number_kh.total_amount',
-                    'bet_number_kh.a_amount',
-                    'bet_number_kh.b_amount',
-                    'bet_number_kh.c_amount',
-                    'bet_number_kh.d_amount',
-                    'bet_number_kh.abcd_amount',
-                    'bet_number_kh.roll_amount',
-                    'bet_number_kh.roll2_amount',
-                    'bet_number_kh.roll_parlay_amount',
-                    'bet_kh.bet_date',
-                    'bet_kh.digit_format',
-                    'bet_kh.company_id',
-                    'bet_kh.bet_schedule_id',
+                    "{$tNum}.id",
+                    "{$tNum}.original_number",
+                    "{$tNum}.generated_number",
+                    "{$tNum}.total_amount",
+                    "{$tNum}.a_amount",
+                    "{$tNum}.b_amount",
+                    "{$tNum}.c_amount",
+                    "{$tNum}.d_amount",
+                    "{$tNum}.abcd_amount",
+                    "{$tNum}.roll_amount",
+                    "{$tNum}.roll2_amount",
+                    "{$tNum}.roll_parlay_amount",
+                    "{$tBet}.bet_date",
+                    "{$tBet}.digit_format",
+                    "{$tBet}.company_id",
+                    "{$tBet}.bet_schedule_id",
                     'config.rate',
                     'config.price',
                     'config.bet_type',
                     'schedules.province_en',
                     'schedules.code'
                 )
-                ->orderBy('bet_number_kh.id', 'DESC')
+                ->orderBy("{$tNum}.id", 'DESC')
                 ->lazy()
                 ->each(function ($betNumber) use (&$data, &$totalNetAmount) {
                     $betNumber->win_lose = $betNumber->total_amount_number_win - $betNumber->net_amount;
                     $totalNetAmount['commission'] += $betNumber->commission;
                     $totalNetAmount['net_amount'] += $betNumber->net_amount;
-                    $totalNetAmount['turnover'] += $betNumber->number_turnover;
-                    $totalNetAmount['win_lose'] += $betNumber->win_lose;
+                    $totalNetAmount['turnover']   += $betNumber->number_turnover;
+                    $totalNetAmount['win_lose']   += $betNumber->win_lose;
 
                     if (empty($data)) {
                         $data[] = $betNumber;
@@ -193,7 +189,7 @@ class BetKHController extends Controller
                                 && $item->generated_number === $betNumber->generated_number
                                 && (($item->code ?? '') === 'HN') === (($betNumber->code ?? '') === 'HN');
                             if ($sameSlot && !$betExist) {
-                                foreach (['a_amount','b_amount','c_amount','d_amount','abcd_amount','roll_amount','roll2_amount','roll_parlay_amount'] as $field) {
+                                foreach (['a_amount', 'b_amount', 'c_amount', 'd_amount', 'abcd_amount', 'roll_amount', 'roll2_amount', 'roll_parlay_amount'] as $field) {
                                     $item->$field = (float)$item->$field + (float)$betNumber->$field;
                                 }
                                 $this->sumExistingBet($item, $betNumber);
@@ -220,39 +216,25 @@ class BetKHController extends Controller
         }
     }
 
-    function sumExistingBet(&$item, &$betNumber){
-        $item->commission += $betNumber->commission;
+    function sumExistingBet(&$item, &$betNumber)
+    {
+        $item->commission              += $betNumber->commission;
         $item->total_amount_number_win += $betNumber->total_amount_number_win;
-        $item->net_amount += $betNumber->net_amount;
-        $item->win_lose += $betNumber->win_lose;
-        $item->number_turnover += $betNumber->number_turnover;
-        $item->get_roll_amount += $betNumber->get_roll_amount;
+        $item->net_amount              += $betNumber->net_amount;
+        $item->win_lose                += $betNumber->win_lose;
+        $item->number_turnover         += $betNumber->number_turnover;
+        $item->get_roll_amount         += $betNumber->get_roll_amount;
     }
-
 
     public function getBetAmount($a, $b, $ab, $roll7, $roll, $rollParlay)
     {
         $getAmount = 0;
-        if ((float)$a){
-            $getAmount = (float)$a;
-        }
-        if ((float)$b){
-            $getAmount = (float)$b;
-        }
-        if ((float)$ab){
-            $getAmount = (float)$ab;
-        }
-        if ((float)$roll7){
-            $getAmount = (float)$roll7;
-        }
-        if ((float)$roll){
-            $getAmount = (float)$roll;
-        }
-        if ((float)$rollParlay){
-            $getAmount = (float)$rollParlay;
-        }
+        if ((float)$a)         { $getAmount = (float)$a; }
+        if ((float)$b)         { $getAmount = (float)$b; }
+        if ((float)$ab)        { $getAmount = (float)$ab; }
+        if ((float)$roll7)     { $getAmount = (float)$roll7; }
+        if ((float)$roll)      { $getAmount = (float)$roll; }
+        if ((float)$rollParlay){ $getAmount = (float)$rollParlay; }
         return $getAmount;
     }
-
-
 }

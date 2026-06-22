@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -12,22 +11,21 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'testadmin@gmail.com',
-            'password' => bcrypt('p$ssw#rd'),
-        ])->assignRole('admin');
-        
-        // \App\Models\User::factory()->create([
-        //     'name' => 'User',
-        //     'email' => 'testuser@gmail.com',
-        //     'password' => bcrypt('p$ssw#rd'),
-        // ])->assignRole('user');
+        $admin = \App\Models\User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'name'             => 'Admin',
+                'email'            => 'admin@lottery.com',
+                'password'         => bcrypt('admin@123'),
+                'phonenumber'      => '012000000',
+                'record_status_id' => 1,
+                'is_active'        => 1,
+                'created_by'       => 1,
+            ]
+        );
 
-        \App\Models\User::factory()->create([
-            'name' => 'User',
-            'email' => 'testvendor@gmail.com',
-            'password' => bcrypt('p$ssw#rd'),
-        ])->assignRole('vendor');
+        if (!$admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
     }
 }

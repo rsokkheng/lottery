@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AccountManagement;
+use App\Models\AccountUSD;
+use App\Models\AccountVND;
 use App\Models\CreditTransactionUSD;
 use App\Models\CreditTransactionVND;
 use App\Models\User;
@@ -18,16 +19,18 @@ class CreditFiatController extends Controller
     {
         return match (strtoupper($currency)) {
             'VND' => [
-                'label'      => 'VND',
-                'model'      => CreditTransactionVND::class,
-                'bets_table' => 'bets',
-                'win_table'  => 'bet_winning',   // has bet_id + win_amount
+                'label'         => 'VND',
+                'model'         => CreditTransactionVND::class,
+                'account_model' => AccountVND::class,
+                'bets_table'    => 'bets',
+                'win_table'     => 'bet_winning',
             ],
             'USD' => [
-                'label'      => 'USD',
-                'model'      => CreditTransactionUSD::class,
-                'bets_table' => 'bet_usd',
-                'win_table'  => 'bet_winning_usd', // has bet_id + win_amount
+                'label'         => 'USD',
+                'model'         => CreditTransactionUSD::class,
+                'account_model' => AccountUSD::class,
+                'bets_table'    => 'bet_usd',
+                'win_table'     => 'bet_winning_usd',
             ],
             default => abort(404),
         };
@@ -41,21 +44,23 @@ class CreditFiatController extends Controller
         $roles = $auth->roles->pluck('name')->toArray();
         $date  = $request->input('date', Carbon::today()->format('Y-m-d'));
 
-        $supervisorRoles = ['master', 'senior', 'manager'];
+        $supervisorRoles = ['master', 'agent'];
         $isSupervisor    = !empty(array_intersect($supervisorRoles, $roles));
 
         // Members with the given currency
-        $memberQuery = User::with(['accountManagement', 'manager'])
+        $memberQuery = User::with(['manager'])
             ->whereHas('currencies', fn($q) => $q->where('currency', $currency))
             ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', array_merge(['admin'], $supervisorRoles)));
 
-        if ($isSupervisor && !in_array('admin', $roles)) {
-            $memberQuery->where(function ($q) use ($auth) {
-                $q->where('manager_id', $auth->id)->orWhere('master_id', $auth->id);
-            });
+        if (!in_array('admin', $roles)) {
+            if (in_array('master', $roles)) {
+                $memberQuery->where('master_id', $auth->id);
+            } elseif (in_array('agent', $roles)) {
+                $memberQuery->where('manager_id', $auth->id);
+            }
         }
 
-        $members = $memberQuery->orderBy('name')->get();
+        $members = $memberQuery->with('manager')->orderBy('name')->get();
         $memberIds = $members->pluck('id');
 
         // Turnover & net for selected date
@@ -91,17 +96,8 @@ class CreditFiatController extends Controller
             ->unique()
             ->toArray();
 
-        $outstanding = DB::table('balance_report_outstandings')
-            ->select('user_id', DB::raw('SUM(amount) as total_outstanding'))
-            ->whereDate('date', Carbon::today())
-            ->whereIn('user_id', $memberIds)
-            ->when(!empty($settledCompanyIds), fn($q) => $q->whereNotIn('company_id', $settledCompanyIds))
-            ->groupBy('user_id')
-            ->get()
-            ->keyBy('user_id');
-
         return view('admin.credit-fiat.index', compact(
-            'members', 'roles', 'date', 'stats', 'wins', 'outstanding', 'currency', 'cfg'
+            'members', 'roles', 'date', 'stats', 'wins', 'currency', 'cfg'
         ));
     }
 
@@ -127,30 +123,22 @@ class CreditFiatController extends Controller
 
         DB::beginTransaction();
         try {
-            $account = AccountManagement::firstOrCreate(
-                ['user_id' => $userId, 'currency' => $currency],
-                [
-                    'name_user'        => User::find($userId)?->name ?? '',
-                    'available_credit' => 0,
-                    'bet_credit'       => 0,
-                    'cash_balance'     => 0,
-                    'created_by'       => $auth->id,
-                ]
+            $acctModel = $cfg['account_model'];
+            $account   = $acctModel::firstOrCreate(
+                ['user_id' => $userId],
+                ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $auth->id]
             );
 
-            // Use bet_credit as the authoritative current balance (same field the bet system reads)
-            $before = (float) $account->bet_credit;
+            $before = (float) $account->credit_balance;
 
             if (in_array($request->type, ['withdraw', 'adjustment'])) {
                 if ($before < (float) $request->amount) {
                     DB::rollBack();
                     return back()->with('error', 'Insufficient credit balance for withdrawal.');
                 }
-                $account->bet_credit       -= $request->amount;
-                $account->available_credit -= $request->amount;
+                $account->credit_balance -= $request->amount;
             } else {
-                $account->bet_credit       += $request->amount;
-                $account->available_credit += $request->amount;
+                $account->credit_balance += $request->amount;
             }
 
             $account->updated_by = $auth->id;
@@ -162,7 +150,7 @@ class CreditFiatController extends Controller
                 'type'           => $request->type,
                 'amount'         => $request->amount,
                 'balance_before' => $before,
-                'balance_after'  => $account->bet_credit,
+                'balance_after'  => $account->credit_balance,
                 'note'           => $request->note,
                 'created_by'     => $auth->id,
             ]);
@@ -181,9 +169,7 @@ class CreditFiatController extends Controller
     {
         $cfg          = $this->config($currency);
         $member       = User::findOrFail($userId);
-        $account      = AccountManagement::where('user_id', $userId)
-                            ->where('currency', $currency)
-                            ->first();
+        $account      = $cfg['account_model']::where('user_id', $userId)->first();
         $txModel      = $cfg['model'];
         $transactions = $txModel::with('createdBy')
             ->where('user_id', $userId)

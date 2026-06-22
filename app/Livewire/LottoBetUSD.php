@@ -8,16 +8,14 @@ use Livewire\Component;
 use App\Models\BetNumberUSD;
 use App\Models\UserBetLimit;
 use App\Enums\MultiplierEnum;
-use App\Models\BalanceReport;
 use App\Models\BetReceiptUSD;
 use App\Enums\MultiplierHNEnum;
-use App\Models\AccountManagement;
+use App\Models\AccountUSD;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNEnum;
-use App\Models\BalanceReportOutstanding;
 use App\Models\BetLotteryPackageConfiguration;
 use Illuminate\Support\Facades\Log;
 
@@ -85,9 +83,7 @@ class LottoBetUSD extends Component
 
     public $betAccount;
 
-    public $outstandingSummary;
-
-    public $totalOutstanding;
+    public $totalOutstanding = 0;
 
     public $packagePrice;
 
@@ -124,19 +120,13 @@ class LottoBetUSD extends Component
             ->orderBy('company_id', 'asc')
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
-        $this->betAccount = AccountManagement::where('user_id', $this->user->id)->sum('bet_credit');
-        $this->outstandingSummary = DB::table('balance_report_outstandings')
-            ->select(
-                'user_id',
-                DB::raw('DATE(date) as report_date'),
-                DB::raw('SUM(amount) as total_outstanding')
-            )
-            ->whereDate('date', Carbon::today())
+        $this->betAccount = (float) (AccountUSD::where('user_id', $this->user->id)->value('credit_balance') ?? 0);
+
+        $this->totalOutstanding = DB::table('bet_usd')
             ->where('user_id', $this->user->id)
-            ->groupBy('user_id', DB::raw('DATE(date)'))
-            ->orderByDesc('report_date')
-            ->get();
-        $this->totalOutstanding = optional($this->outstandingSummary->first())->total_outstanding ?? 0;
+            ->whereDate('bet_date', $this->currentDate)
+            ->sum('total_amount');
+
         $this->packagePrice = $this->betPackageConfiguration
             ->where('package_id', $this->user->package_id)
             ->whereIn('bet_type', ['2D', '3D', '4D'])
@@ -422,7 +412,7 @@ class LottoBetUSD extends Component
             }
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
-                $account = AccountManagement::where('user_id', auth()->id())->first();
+                $account = AccountUSD::where('user_id', auth()->id())->first();
                 if (!$account) {
                     $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
@@ -432,21 +422,8 @@ class LottoBetUSD extends Component
                     $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
                     return back();
                 } else {
-                    // ✅ Update AccountManagement
-                    $account->bet_credit -= $this->totalDue;
+                    $account->credit_balance -= $this->totalDue;
                     $account->save();
-                    // create initial report if not exist
-                    BalanceReport::create([
-                        'user_id' => auth()->id(),
-                        'name_user' => auth()->user()->name,
-                        'net_lose' => $this->totalDue,
-                        'net_win' => 0,
-                        'deposit' => 0,
-                        'withdraw' => 0,
-                        'adjustment' => 0,
-                        'balance' => 0,
-                        'report_date' => $this->currentDate,
-                    ]);
                 }
                 // generate invoice number: check if exists, increment if exists, else use max(id)+1
                 $lastReceipt = $this->betReceipt->orderByDesc('id')->first();
@@ -521,14 +498,6 @@ class LottoBetUSD extends Component
                             $respone = BetUSD::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
-                                $amountOutstanding = $this->calculateAmountOutstanding($number, $key, $schedule['code'], $rate);
-                                BalanceReportOutstanding::create([
-                                    'user_id' => $this->user->id ?? 0,
-                                    'company_id' => $schedule->company_id,
-                                    'amount' => $amountOutstanding,
-                                    'date' => $this->currentDate,
-
-                                ]);
                             }
                             //insert bet number
                             $betNumber1 = [
@@ -707,6 +676,7 @@ class LottoBetUSD extends Component
             dump($e->getMessage());
         }
         if ($isCreateBetSuccess) {
+            $this->totalOutstanding += $this->totalDue;
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
             return redirect()->to('lotto_usd/bet_receipt/' . $betReceipt->receipt_no);

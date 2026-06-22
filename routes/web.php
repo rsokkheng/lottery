@@ -61,7 +61,7 @@ Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->gr
     Route::get('/report/monthly/tracking', [BetReportController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('reports.monthly-tracking');
     Route::get('/report/monthly/tracking/{id}', [BetReportController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('reports.monthly-tracking-member');
     Route::get('/report/monthly/tracking/{id}/member', [BetReportController::class, 'getMonthlyByAgentMember'])->name('reports.tracking-agent-member');
-    Route::get('/report/monthly/agent/member', [BetReportController::class, 'getMonthlyAllMember'])->middleware('role:manager')->name('reports.monthly-allmember');
+    Route::get('/report/monthly/agent/member', [BetReportController::class, 'getMonthlyAllMember'])->middleware('role:agent')->name('reports.monthly-allmember');
 });
 
 Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->group(function () {
@@ -81,27 +81,49 @@ Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->g
     Route::get('/report/monthly/tracking', [BetReportUSDController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('bet-usd.reports.monthly-tracking');
     Route::get('/report/monthly/tracking/{id}', [BetReportUSDController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('bet-usd.reports.monthly-tracking-member');
     Route::get('/report/monthly/tracking/{id}/member', [BetReportUSDController::class, 'getMonthlyByAgentMember'])->name('bet-usd.reports.tracking-agent-member');
-    Route::get('/report/monthly/member/all', [BetReportUSDController::class, 'getMonthlyAllMember'])->middleware('role:manager')->name('bet-usd.reports.monthly-allmember');
+    Route::get('/report/monthly/member/all', [BetReportUSDController::class, 'getMonthlyAllMember'])->middleware('role:agent')->name('bet-usd.reports.monthly-allmember');
 });
 
-Route::middleware(['auth', 'verified', 'check.kh:KHR'])->prefix('lotto_kh')->group(function () {
-    Route::get('/bet', \App\Livewire\LottoBetKH::class)->middleware('role:member')->name('bet-kh.input');
-    Route::get('/result', [LotteryResultKHController::class, 'getBetResultBy'])->name('bet-kh.result-show');
-    Route::get('/receipt-list', [BetReceiptKHController::class, 'index'])->name('bet-kh.receipt-list');
-    Route::get('/bet-list', [BetReceiptKHController::class, 'betList'])->name('bet-kh.bet-list');
-    Route::get('/bet-number', [BetKHController::class, 'getBetNumber'])->name('bet-kh.bet-number');
-    Route::get('/bet-winning', [LotteryResultKHController::class, 'getWinningReport'])->name('bet-kh.bet-winning');
-    Route::get('/report-summary', [BetReportKHController::class, 'getSummaryReport'])->name('bet-kh.reports.summary');
-    Route::get('/report-daily', [BetReportKHController::class, 'getDailyReport'])->name('bet-kh.reports.daily');
-    Route::get('/report-daily/sumary', [BetReportKHController::class, 'getDailyReportManager'])->name('bet-kh.reports.daily-manager');
-    Route::get('/report-daily/agenct/{id}', [BetReportKHController::class, 'getDailyReportMeberAgent'])->name('bet-kh.reports.daily-member-agent');
-    Route::get('/bet/{id}', [BetReceiptKHController::class, 'getBetByReceiptId'])->name('bet-kh.bet-by-id');
+// ── Bet Khmer · VND ──────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'check.kh:VND'])->prefix('lotto_kh_vnd')->group(function () {
+    Route::get('/bet', \App\Livewire\LottoBetKH::class)->middleware('role:member')->name('bet-kh-vnd.input');
+    Route::get('/result', [LotteryResultKHController::class, 'getBetResultBy'])->name('bet-kh-vnd.result-show');
+    Route::get('/receipt-list', [BetReceiptKHController::class, 'index'])->name('bet-kh-vnd.receipt-list');
+    Route::get('/bet-list', [BetReceiptKHController::class, 'betList'])->name('bet-kh-vnd.bet-list');
+    Route::get('/bet-number', [BetKHController::class, 'getBetNumber'])->name('bet-kh-vnd.bet-number');
+    Route::get('/bet-winning', [LotteryResultKHController::class, 'getWinningReport'])->name('bet-kh-vnd.bet-winning');
+    Route::get('/report-summary', [BetReportKHController::class, 'getSummaryReport'])->name('bet-kh-vnd.reports.summary');
+    Route::get('/report-daily', [BetReportKHController::class, 'getDailyReport'])->name('bet-kh-vnd.reports.daily');
+    Route::get('/report-daily/sumary', [BetReportKHController::class, 'getDailyReportManager'])->name('bet-kh-vnd.reports.daily-manager');
+    Route::get('/report-daily/agenct/{id}', [BetReportKHController::class, 'getDailyReportMeberAgent'])->name('bet-kh-vnd.reports.daily-member-agent');
+    Route::get('/bet/{id}', [BetReceiptKHController::class, 'getBetByReceiptId'])->name('bet-kh-vnd.bet-by-id');
     Route::get('/bet_receipt/{receipt_no}', [BetReceiptKHController::class, 'printReceiptNo']);
     Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptKHController::class, 'payReceipt']);
-    Route::get('/report/monthly/tracking', [BetReportKHController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('bet-kh.reports.monthly-tracking');
-    Route::get('/report/monthly/tracking/{id}', [BetReportKHController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('bet-kh.reports.monthly-tracking-member');
-    Route::get('/report/monthly/tracking/{id}/member', [BetReportKHController::class, 'getMonthlyByAgentMember'])->name('bet-kh.reports.tracking-agent-member');
-    Route::get('/report/monthly/member/all', [BetReportKHController::class, 'getMonthlyAllMember'])->middleware('role:manager')->name('bet-kh.reports.monthly-allmember');
+    Route::get('/report/monthly/tracking', [BetReportKHController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('bet-kh-vnd.reports.monthly-tracking');
+    Route::get('/report/monthly/tracking/{id}', [BetReportKHController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('bet-kh-vnd.reports.monthly-tracking-member');
+    Route::get('/report/monthly/tracking/{id}/member', [BetReportKHController::class, 'getMonthlyByAgentMember'])->name('bet-kh-vnd.reports.tracking-agent-member');
+    Route::get('/report/monthly/member/all', [BetReportKHController::class, 'getMonthlyAllMember'])->middleware('role:agent')->name('bet-kh-vnd.reports.monthly-allmember');
+});
+
+// ── Bet Khmer · USD ──────────────────────────────────────────────────────────
+Route::middleware(['auth', 'verified', 'check.kh:USD'])->prefix('lotto_kh_usd')->group(function () {
+    Route::get('/bet', \App\Livewire\LottoBetKHUSD::class)->middleware('role:member')->name('bet-kh-usd.input');
+    Route::get('/result', [LotteryResultKHController::class, 'getBetResultBy'])->name('bet-kh-usd.result-show');
+    Route::get('/receipt-list', [BetReceiptKHController::class, 'index'])->name('bet-kh-usd.receipt-list');
+    Route::get('/bet-list', [BetReceiptKHController::class, 'betList'])->name('bet-kh-usd.bet-list');
+    Route::get('/bet-number', [BetKHController::class, 'getBetNumber'])->name('bet-kh-usd.bet-number');
+    Route::get('/bet-winning', [LotteryResultKHController::class, 'getWinningReport'])->name('bet-kh-usd.bet-winning');
+    Route::get('/report-summary', [BetReportKHController::class, 'getSummaryReport'])->name('bet-kh-usd.reports.summary');
+    Route::get('/report-daily', [BetReportKHController::class, 'getDailyReport'])->name('bet-kh-usd.reports.daily');
+    Route::get('/report-daily/sumary', [BetReportKHController::class, 'getDailyReportManager'])->name('bet-kh-usd.reports.daily-manager');
+    Route::get('/report-daily/agenct/{id}', [BetReportKHController::class, 'getDailyReportMeberAgent'])->name('bet-kh-usd.reports.daily-member-agent');
+    Route::get('/bet/{id}', [BetReceiptKHController::class, 'getBetByReceiptId'])->name('bet-kh-usd.bet-by-id');
+    Route::get('/bet_receipt/{receipt_no}', [BetReceiptKHController::class, 'printReceiptNo']);
+    Route::get('/bet_receipt_pay/{receipt_no}', [BetReceiptKHController::class, 'payReceipt']);
+    Route::get('/report/monthly/tracking', [BetReportKHController::class, 'getMonthlyTracking'])->middleware('role:admin')->name('bet-kh-usd.reports.monthly-tracking');
+    Route::get('/report/monthly/tracking/{id}', [BetReportKHController::class, 'getMonthlyByAgent'])->middleware('role:admin')->name('bet-kh-usd.reports.monthly-tracking-member');
+    Route::get('/report/monthly/tracking/{id}/member', [BetReportKHController::class, 'getMonthlyByAgentMember'])->name('bet-kh-usd.reports.tracking-agent-member');
+    Route::get('/report/monthly/member/all', [BetReportKHController::class, 'getMonthlyAllMember'])->middleware('role:agent')->name('bet-kh-usd.reports.monthly-allmember');
 });
 
 

@@ -65,7 +65,7 @@ class BetReportUSDController extends Controller
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 // Get all users under this manager
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn($query) => $query->where('name', 'admin'))
@@ -78,7 +78,7 @@ class BetReportUSDController extends Controller
                     Carbon::parse($start_date)->startOfDay()->format('Y-m-d H:i:s'),
                     Carbon::parse($end_date)->endOfDay()->format('Y-m-d H:i:s')
                 ]);
-            })->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            })->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })
             ->when($date && !$start_date && !$end_date, function ($q) use ($date) {
@@ -144,7 +144,7 @@ class BetReportUSDController extends Controller
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
                     ->pluck('id')
@@ -157,7 +157,7 @@ class BetReportUSDController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bet_usd.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bet_usd.user_id', $user->id);
             })
             ->groupBy(
@@ -228,7 +228,7 @@ class BetReportUSDController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bet_usd.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bet_usd.user_id', $user->id);
             })
             ->groupBy(
@@ -285,7 +285,7 @@ class BetReportUSDController extends Controller
             ->join('users', 'users.id', '=', 'bet_usd.user_id')
             ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_usd.bet_package_config_id')
             ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_usd.bet_schedule_id')
-            ->when(in_array('manager', $roles), function ($q) use ($user) {
+            ->when(in_array('agent', $roles), function ($q) use ($user) {
                 $memberIds = User::where('manager_id', $user->id)
                     ->whereDoesntHave('roles', fn ($query) => $query->where('name', 'admin'))
                     ->pluck('id')
@@ -298,7 +298,7 @@ class BetReportUSDController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bet_usd.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bet_usd.user_id', $user->id);
             })
             ->groupBy(
@@ -373,7 +373,7 @@ class BetReportUSDController extends Controller
             ->when($company_id > 0, function ($q) use ($company_id) {
                 $q->where('bet_usd.company_id', $company_id);
             })
-            ->when(!in_array('admin', $roles) && !in_array('manager', $roles), function ($q) use ($user) {
+            ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user) {
                 $q->where('bet_usd.user_id', $user->id);
             })
             ->groupBy(

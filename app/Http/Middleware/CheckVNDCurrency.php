@@ -4,39 +4,32 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckVNDCurrency
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, string $currency): Response
     {
-        $user = auth()->user();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
         if ($user) {
-            $hasAccess = $user->currencies()->where('currency', strtoupper($currency))->exists();
-
-            if (!$hasAccess) {
-                Log::warning('Access denied: currency mismatch', [
-                    'user_id' => $user->id,
-                    'required_currency' => $currency,
-                    'user_currencies' => $user->currencies()->pluck('currency')->toArray(),
-                    'ip' => $request->ip(),
-                    'url' => $request->fullUrl(),
-                ]);
-
-                abort(403, "Access denied. Only {$currency} currency users allowed.");
+            // Supervisors (admin/master) bypass bet-type checks
+            if ($user->hasAnyRole(['admin', 'master'])) {
+                return $next($request);
             }
 
-            // Optional: store active currency in session
-            session(['currency' => strtoupper($currency)]);
+            $hasAccess = $user->bet_system === 'vietnam'
+                      && $user->currency   === strtoupper($currency);
+
+            if (!$hasAccess) {
+                abort(403, 'Access denied. You do not have Bet Vietnam · ' . strtoupper($currency) . ' access.');
+            }
+
+            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
         }
 
         return $next($request);
     }
-    
 }

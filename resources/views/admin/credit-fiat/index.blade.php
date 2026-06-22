@@ -57,7 +57,6 @@
                                 <th>Manager</th>
                             @endif
                             <th class="text-end">Credit Balance ({{ $currency }})</th>
-                            <th class="text-end">Outstanding</th>
                             <th class="text-end">Turnover</th>
                             <th class="text-end">Net Amount</th>
                             <th class="text-end">Win (Compensate)</th>
@@ -79,8 +78,6 @@
                                 $net        = $s ? (float)$s->net_amount : 0;
                                 $compensate = $w ? (float)$w->compensate : 0;
                                 $winLoss    = $compensate - $net;
-                                $outs        = $outstanding->get($member->id);
-                                $outstandAmt = $outs ? (float)$outs->total_outstanding : 0;
                             @endphp
                             <tr style="font-size:13px">
                                 <td>{{ $i + 1 }}</td>
@@ -91,9 +88,6 @@
                                 @endif
                                 <td class="text-end fw-bold {{ $balance <= 0 ? 'text-danger' : '' }}">
                                     {{ number_format($balance, 2) }}
-                                </td>
-                                <td class="text-end {{ $outstandAmt > 0 ? 'text-warning fw-bold' : 'text-muted' }}">
-                                    {{ $outstandAmt > 0 ? number_format($outstandAmt, 2) : '-' }}
                                 </td>
                                 <td class="text-end text-muted">{{ $turnover > 0 ? number_format($turnover, 2) : '-' }}</td>
                                 <td class="text-end text-muted">{{ $net > 0 ? number_format($net, 2) : '-' }}</td>

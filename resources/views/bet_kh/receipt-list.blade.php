@@ -1,4 +1,12 @@
 <x-app-layout>
+    @php
+        $khPrefix           = 'lotto_kh_' . strtolower(session('currency', 'VND'));
+        $urlReceiptList     = url($khPrefix . '/receipt-list');
+        $urlBetDetail       = url($khPrefix . '/bet');
+        $urlBetReceipt      = url($khPrefix . '/bet_receipt');
+        $urlBetReceiptPay   = url($khPrefix . '/bet_receipt_pay');
+        $currencyLabel      = strtoupper(session('currency', 'VND'));
+    @endphp
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.min.css') }}">
@@ -27,7 +35,7 @@
             <div class="w-full sm:w-16">
                 <button
                     class="flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2  rounded hover:bg-blue-600"
-                    onclick="searchReceipt('{{ route('bet-kh.receipt-list') }}')">
+                    onclick="searchReceipt('{{ $urlReceiptList }}')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -97,7 +105,7 @@
                                         {{ $row->bet_date ?? '' }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        VND</td>
+                                        {{ $currencyLabel }}</td>
                                     <td
                                         class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
                                         {{ number_format($row->total_amount, 3, '.', '') }}</td>
@@ -229,7 +237,7 @@
 
         function handleShowBet(id) {
 
-            fetch(`/lotto_kh/bet/${id}`)
+            fetch(`{{ $urlBetDetail }}/${id}`)
                 .then(response => response.json())
                 .then(data => {
                     let totalAmount = data?.totalAmount;
@@ -259,8 +267,8 @@
                     }
 
                     // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (VND)';
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (VND)';
+                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' ({{ $currencyLabel }})';
+                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' ({{ $currencyLabel }})';
                 })
                 .catch(error => console.error('Error:', error));
         }
@@ -271,7 +279,7 @@
                 alert("Receipt number not found!");
                 return;
             }
-            var printWindow = window.open('/lotto_kh/bet_receipt/' + receiptNo, '_blank');
+            var printWindow = window.open('{{ $urlBetReceipt }}/' + receiptNo, '_blank');
 
             if (!printWindow) {
                 alert('Popup blocked! Please allow popups for this site.');
@@ -290,7 +298,7 @@
 
         function payReceipt() {
             let receipt_no = $('#receipt_no').text();
-            fetch(`/lotto_kh/bet_receipt_pay/${receipt_no}`)
+            fetch(`{{ $urlBetReceiptPay }}/${receipt_no}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data?.success) {

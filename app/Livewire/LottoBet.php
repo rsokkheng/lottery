@@ -9,15 +9,13 @@ use Livewire\Component;
 use App\Models\BetNumber;
 use App\Models\BetReceipt;
 use App\Enums\MultiplierEnum;
-use App\Models\BalanceReport;
 use App\Enums\MultiplierHNEnum;
-use App\Models\AccountManagement;
+use App\Models\AccountVND;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNEnum;
-use App\Models\BalanceReportOutstanding;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\UserBetLimit;
 use Illuminate\Support\Facades\Log;
@@ -86,9 +84,7 @@ class LottoBet extends Component
 
     public $betAccount;
 
-    public $outstandingSummary;
-
-    public $totalOutstanding;
+    public $totalOutstanding = 0;
 
     public $packagePrice;
 
@@ -133,25 +129,13 @@ class LottoBet extends Component
             $this->schedules = $schedulesData;
             $this->timeClose = $schedulesData;
             // OPTIMIZATION 2: Use raw SQL with proper indexing for better performance
-            $this->betAccount = DB::table('account_management')
-                ->where('user_id', $userId)
-                ->sum('bet_credit');
-        
-        // OPTIMIZATION 3: Simplified outstanding query with better date handling
-        $this->outstandingSummary = DB::table('balance_report_outstandings')
-            ->select(
-                'user_id',
-                DB::raw('DATE(date) as report_date'),
-                DB::raw('SUM(amount) as total_outstanding')
-            )
+            $this->betAccount = (float) (AccountVND::where('user_id', $userId)->value('credit_balance') ?? 0);
+
+        $this->totalOutstanding = DB::table('bets')
             ->where('user_id', $userId)
-            ->whereDate('date', $now->toDateString()) // Use Carbon instance
-            ->groupBy('user_id', DB::raw('DATE(date)'))
-            ->orderByDesc('report_date')
-            ->first(); // Use first() since we only need one record
-    
-        $this->totalOutstanding = $this->outstandingSummary->total_outstanding ?? 0;
-    
+            ->whereDate('bet_date', $this->currentDate)
+            ->sum('total_amount');
+
         // OPTIMIZATION 4: More efficient package price query
         $this->packagePrice = $this->betPackageConfiguration
             ->where('package_id', $this->user->package_id)
@@ -438,7 +422,7 @@ class LottoBet extends Component
             
             $betReceipt = null;
             if ($this->totalInvoice > 0 && $this->totalDue > 0) {
-                $account = AccountManagement::where('user_id', auth()->id())->first();
+                $account = AccountVND::where('user_id', auth()->id())->first();
                 if (!$account) {
                     $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
@@ -448,21 +432,8 @@ class LottoBet extends Component
                     $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
                     return back();
                 }else{
-                    // ✅ Update AccountManagement
-                    $account->bet_credit -= $this->totalDue;
+                    $account->credit_balance -= $this->totalDue;
                     $account->save();
-                    // create initial report if not exist
-                    BalanceReport::create([
-                            'user_id' => auth()->id(),
-                            'name_user' => auth()->user()->name,
-                            'net_lose' => $this->totalDue,
-                            'net_win' => 0,
-                            'deposit' => 0,
-                            'withdraw' => 0,
-                            'adjustment' => 0,
-                            'balance' => 0,
-                            'report_date' => $this->currentDate,
-                        ]);
                 }            
                 // generate no invoice
                // generate invoice number: check if exists, increment if exists, else use max(id)+1
@@ -540,14 +511,6 @@ class LottoBet extends Component
                             $respone = Bet::create($betItem);
                             if ($respone) {
                                 $isCreateBetSuccess = true;
-                                $amountOutstanding = $this->calculateAmountOutstanding($number, $key, $schedule['code'], $rate);
-                                BalanceReportOutstanding::create([
-                                    'user_id' => $this->user->id ?? 0,
-                                    'company_id' => $schedule->company_id,
-                                    'amount' => $amountOutstanding,
-                                    'date' => $this->currentDate,
-
-                                ]);
                             }
                             //insert bet number
                             $betNumber1 = [
@@ -727,6 +690,7 @@ class LottoBet extends Component
             dump($e->getMessage());
         }
         if ($isCreateBetSuccess) {
+            $this->totalOutstanding += $this->totalDue;
             $this->handleReset();
             $this->dispatch('bet-saved', message: 'Bet saved successfully!');
             return redirect()->to('lotto_vn/bet_receipt/' . $betReceipt->receipt_no);

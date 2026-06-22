@@ -1,5 +1,5 @@
 <div>
-    {{-- Notification --}}
+    {{-- Notification toast --}}
     <div x-data="{ show: false, message: '', type: '' }" x-show="show" x-transition.opacity
         @bet-saved.window="
         show = true;
@@ -37,104 +37,121 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-md p-4 rounded-lg">
-        {{-- Top Info Section --}}
-        <div class="mb-4 text-sm">
-            <table class="border-separate" style="border-spacing: 0 3px;">
-                <tbody>
-                    <tr>
-                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.bet-credit') }}:</td>
-                        <td class="pr-8 whitespace-nowrap">{{ number_format($betAccount, 2) }} VND</td>
-                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.company') }} (GMT+7):</td>
-                        <td class="text-gray-700">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+
+        {{-- ── Info Panel ── --}}
+        <div class="p-3 border-b border-gray-100">
+
+            {{-- 2-col grid: financial | timing/help --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5 text-sm mb-2">
+
+                {{-- Left column: financials --}}
+                <div class="space-y-0.5">
+                    <div class="flex justify-between gap-2">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Bet Credit:</span>
+                        <span class="font-medium text-right">{{ number_format($betAccount, 2) }} {{ strtoupper($currency) }}</span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Total Amount:</span>
+                        <span class="font-medium text-right">{{ $totalInvoice }} {{ strtoupper($currency) }}</span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Total Due:</span>
+                        <span class="font-bold text-right {{ $totalDue > $betAccount ? 'text-red-600' : '' }}">{{ $totalDue }} {{ strtoupper($currency) }}</span>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Outstanding:</span>
+                        <span class="font-medium text-right text-orange-600">{{ number_format($totalOutstanding, 2) }} {{ strtoupper($currency) }}</span>
+                    </div>
+                </div>
+
+                {{-- Right column: company / help --}}
+                <div class="space-y-0.5 mt-1 sm:mt-0">
+                    <div class="flex gap-1 flex-wrap">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Company (GMT+7):</span>
+                        <span class="text-gray-700 text-xs">
                             @foreach ($timeClose as $time)
                                 {{ $time->code }} ({{ $time->time_close }})@if (!$loop->last), @endif
                             @endforeach
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.outstanding') }}:</td>
-                        <td class="pr-8 whitespace-nowrap">{{ number_format($totalOutstanding, 2) }} VND</td>
-                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.number-wildcard') }}:</td>
-                        <td>* = any of 0,1,2,...,9 &nbsp; 11-19(11,12,...,19)</td>
-                    </tr>
-                    <tr>
-                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.total-amount') }}:</td>
-                        <td class="pr-8 whitespace-nowrap">{{ $totalInvoice }} VND</td>
-                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.shortcut-word') }}:</td>
-                        <td>A(A) B(B) C(C) D(D) ABCD(ABCD) Roll(R) Roll 2(R2) Roll Parlay(PL) Cross(x)</td>
-                    </tr>
-                    <tr>
-                        <td class="pr-2 font-semibold whitespace-nowrap">{{ __('lang.total-due') }}:</td>
-                        <td class="pr-8 whitespace-nowrap font-bold {{ $totalDue > $betAccount ? 'text-red-600' : '' }}">
-                            {{ $totalDue }} VND
-                        </td>
-                        <td class="pr-2 font-bold whitespace-nowrap">{{ __('lang.time-left') }}:</td>
-                        <td>
-                            @foreach ($timeClose as $time)
-                                <span class="countdown-timer font-semibold"
-                                      data-close="{{ $time->time_close }}"
-                                      data-code="{{ $time->code }}">
-                                    {{ $time->code }}: {{ $time->time_close }}
-                                </span>@if (!$loop->last) &nbsp;|&nbsp; @endif
-                            @endforeach
-                        </td>
-                    </tr>
-                    @if ($totalDue > $betAccount)
-                    <tr>
-                        <td colspan="4" class="pb-1">
-                            <div class="flex items-center gap-2 bg-red-50 border border-red-300 text-red-700 rounded px-3 py-1.5 text-xs font-semibold">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                                </svg>
-                                Insufficient credit! Please add
-                                <span class="font-extrabold">
-                                    {{ number_format(round($totalDue - $betAccount, 2), 2) }} VND
-                                </span>
-                                more to your account.
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
-                    <tr>
-                        <td colspan="4" class="pt-1">
-                            <div class="flex gap-2">
-                                <button wire:click="handleSave"
-                                    @if($totalDue > $betAccount) disabled @endif
-                                    class="font-semibold px-8 py-1.5 rounded
-                                        {{ $totalDue > $betAccount
-                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-blue-600 hover:bg-blue-700 text-white' }}">
-                                    {{ __('lang.save') }}
-                                </button>
-                                <button wire:click="handleReset"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-8 py-1.5 rounded">
-                                    {{ __('lang.reset') }}
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </span>
+                    </div>
+                    <div class="flex gap-1 flex-wrap">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Number Wildcard:</span>
+                        <span class="text-gray-600 text-xs">* = any of 0,1,...,9 &nbsp; 11-19(11,12,...,19) small(00-49) big(50-99)</span>
+                    </div>
+                    <div class="flex gap-1 flex-wrap">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Shortcut Word:</span>
+                        <span class="text-gray-600 text-xs">A(A) B(B) C(C) D(D) ABCD(ABCD) Roll(R) Roll 2(R2) Roll Parlay(PL) Cross(x)</span>
+                    </div>
+                    <div class="flex gap-1 flex-wrap items-center">
+                        <span class="font-semibold text-gray-600 whitespace-nowrap">Time Left:</span>
+                        @foreach ($timeClose as $time)
+                            <span class="countdown-timer text-xs font-semibold"
+                                  data-close="{{ $time->time_close }}"
+                                  data-code="{{ $time->code }}">
+                                {{ $time->code }}: {{ $time->time_close }}
+                            </span>@if (!$loop->last) <span class="text-gray-400 text-xs">|</span> @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Chi Chu odds --}}
+            @if(count($packagePrice))
+            <div class="flex flex-wrap items-center gap-2 text-xs mb-2">
+                <span class="font-semibold text-gray-600">Chi Chu:</span>
+                @foreach($packagePrice as $type => $price)
+                    <span class="border border-gray-400 rounded px-2 py-0.5 bg-gray-50">{{ $type }} × {{ number_format($price, 2) }}</span>
+                @endforeach
+            </div>
+            @endif
+
+            {{-- Insufficient credit warning --}}
+            @if ($totalDue > $betAccount)
+            <div class="flex items-center gap-2 bg-red-50 border border-red-300 text-red-700 rounded px-3 py-1.5 text-xs font-semibold mb-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                Insufficient credit! Please add
+                <span class="font-extrabold">{{ number_format(round($totalDue - $betAccount, 2), 2) }} {{ strtoupper($currency) }}</span>
+                more to your account.
+            </div>
+            @endif
+
+            {{-- Save / Reset --}}
+            <div class="flex gap-2">
+                <button wire:click="handleSave"
+                    @if($totalDue > $betAccount) disabled @endif
+                    class="flex-1 sm:flex-none font-semibold px-8 py-1.5 rounded
+                        {{ $totalDue > $betAccount
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white' }}">
+                    Save
+                </button>
+                <button wire:click="handleReset"
+                    class="flex-1 sm:flex-none bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-8 py-1.5 rounded">
+                    Reset
+                </button>
+            </div>
         </div>
 
-        {{-- Table --}}
-        <div x-data="popupHandler()" class="overflow-auto">
-            <table class="w-full text-sm border-collapse border border-gray-300">
+        {{-- ── Betting Table ── --}}
+        <div x-data="popupHandler()" class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse border border-gray-300" style="min-width:700px">
                 <thead>
                     <tr class="text-white text-left" style="background-color:#1d4ed8">
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('message.no') }}</th>
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.number') }}</th>
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.digit') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">No</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Number</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Digit</th>
                         <th class="border border-blue-500 px-2 py-2">A</th>
                         <th class="border border-blue-500 px-2 py-2">B</th>
                         <th class="border border-blue-500 px-2 py-2">C</th>
                         <th class="border border-blue-500 px-2 py-2">D</th>
                         <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">ABCD</th>
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.roll') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Roll</th>
                         <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Roll 2</th>
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.roll-parlay') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Roll Parlay</th>
                         @foreach ($schedules as $key => $item)
                             <th class="border border-blue-500 px-2 py-2 text-center">
                                 <div class="flex flex-col items-center gap-0.5">
@@ -145,7 +162,7 @@
                                 </div>
                             </th>
                         @endforeach
-                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">{{ __('lang.total-amount') }}</th>
+                        <th class="border border-blue-500 px-2 py-2 whitespace-nowrap">Total Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -318,7 +335,7 @@
                 </tbody>
             </table>
 
-            {{-- Popup --}}
+            {{-- Amount popup --}}
             <div x-show="show" x-transition @click.away="hidePopup()"
                 :style="'top:' + posY + 'px; left:' + posX + 'px'"
                 class="w-40 grid grid-cols-2 fixed bg-gray-200 border p-2 rounded shadow z-50 gap-2">

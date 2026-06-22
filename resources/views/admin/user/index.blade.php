@@ -2,20 +2,23 @@
     use Illuminate\Support\Facades\Auth;
     $auth = Auth::user();
     $roleBadge = [
-        'admin'        => 'bg-dark',
-        'master'       => 'bg-purple',
-        'senior'       => 'bg-primary',
-        'manager'      => 'bg-info',
-        'share_master' => 'bg-warning text-dark',
-        'member'       => 'bg-secondary',
+        'admin'  => 'bg-dark',
+        'master' => 'bg-purple',
+        'agent'  => 'bg-info',
+        'member' => 'bg-secondary',
     ];
-    $supervisorRoles = ['admin', 'master', 'senior', 'manager'];
+    $betSystemColor = ['vietnam' => 'bg-success', 'khmer' => 'bg-danger'];
+    $supervisorRoles = ['admin', 'master', 'agent'];
     $canManage = $auth->hasAnyRole($supervisorRoles);
+    $isAdmin   = $auth->hasRole('admin');
+    $isMaster  = $auth->hasRole('master');
+    $showHierarchy = $isAdmin || $isMaster;
 @endphp
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
     .bg-purple { background-color: #6f42c1 !important; }
     .badge { font-size: 11px; }
+    .bet-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
 </style>
 <x-admin>
     @section('title', 'Account Management')
@@ -38,8 +41,9 @@
                         <th>Account ID</th>
                         <th>Name</th>
                         <th>Currency</th>
-                        @if($auth->hasRole('admin'))
-                        <th>Master / Manager</th>
+                        @if($showHierarchy)
+                        <th>{{ $isAdmin ? 'Master / Agent' : 'Agent' }}</th>
+                        <th>Bet Types</th>
                         @endif
                         <th>Register Date</th>
                         <th class="text-center">Status</th>
@@ -48,12 +52,13 @@
                 </thead>
                 <tbody>
                     @foreach ($data as $key => $user)
+                    @php $userRole = $user->roles->first()->name ?? null; @endphp
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>
                                 @foreach ($user->roles as $role)
                                     @php $cls = $roleBadge[$role->name] ?? 'bg-secondary'; @endphp
-                                    @if (in_array($role->name, ['master', 'senior', 'manager']))
+                                    @if (in_array($role->name, ['master', 'agent']))
                                         <a href="{{ route('admin.user.under-manager', ['manager_id' => $user->id]) }}"
                                            title="View members under this user">
                                             <span class="badge {{ $cls }}">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</span>
@@ -65,17 +70,45 @@
                             </td>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->name }}</td>
-                            <td>{{ $user->currencies->currency ?? '—' }}</td>
-                            @if($auth->hasRole('admin'))
+                            <td>
+                                @if($user->bet_system)
+                                    @php $curLabel = $user->currency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar'; @endphp
+                                    <span class="badge {{ $user->bet_system === 'khmer' ? 'bg-danger' : 'bg-success' }} me-1" style="font-size:10px">
+                                        Bet {{ ucfirst($user->bet_system) }}
+                                    </span>
+                                    <span class="badge bg-secondary" style="font-size:10px">{{ $curLabel }}</span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            @if($showHierarchy)
+                            {{-- Hierarchy: admin sees master + agent, master sees agent only --}}
                             <td class="text-muted" style="font-size:12px">
-                                @if($user->master)
+                                @if($isAdmin && $user->master)
                                     <span class="badge bg-purple me-1">{{ $user->master->name }}</span>
                                 @endif
-                                @if($user->manager && $user->manager->id !== $user->master?->id)
+                                @if($user->manager && ($isAdmin ? $user->manager->id !== $user->master?->id : true))
                                     <span class="badge bg-info">{{ $user->manager->name }}</span>
                                 @endif
                             </td>
+
+                            {{-- Bet Types (only meaningful for agents) --}}
+                            <td>
+                                @if($user->bet_system && $user->currency)
+                                    @php
+                                        $sysColor     = $betSystemColor[$user->bet_system] ?? 'bg-secondary';
+                                        $curLabel     = $user->currency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar';
+                                    @endphp
+                                    <span class="badge {{ $sysColor }} bet-badge">
+                                        Bet {{ ucfirst($user->bet_system) }} · {{ $curLabel }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                             @endif
+
                             <td>{{ $user->created_at ? $user->created_at->format('d M Y') : '—' }}</td>
                             <td class="text-center">
                                 @if($user->is_active)
@@ -140,16 +173,15 @@
     </div>
     @section('js')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            
-            $(function() {
-                $('#userTable').DataTable({
-                    "paging": true,
-                    "searching": true,
-                    "ordering": false,
-                    "responsive": true,
-                });
+    <script>
+        $(function() {
+            $('#userTable').DataTable({
+                "paging":    true,
+                "searching": true,
+                "ordering":  false,
+                "responsive": true,
             });
-        </script>
+        });
+    </script>
     @endsection
 </x-admin>

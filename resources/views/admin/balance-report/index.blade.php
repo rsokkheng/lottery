@@ -31,7 +31,6 @@
                         <th>Adjustment</th>
                         <th>Balance</th>
                         <th>Credit Balance</th>
-                        <th>Outstanding</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -70,7 +69,6 @@
                                  @endif
                                </td>
                                <td>{{ $user->bet_credit }}</td>
-                                <td style="color: blue;">{{ $user->outstanding }}</td>
                                 <td>
                                 @if ($user->record_status_id == 1)
                                     <h6 style="color: blue;">Active</h6>
