@@ -4,15 +4,21 @@
     $isAdmin = $creator->hasRole('admin');
 
     $roleLabels = [
-        'master' => 'Master',
-        'agent'  => 'Agent',
-        'member' => 'Member',
+        'master'   => 'Master',
+        'agent'    => 'Agent',
+        'member'   => 'Member',
+        'operator' => 'Operator',
+        'finance'  => 'Finance',
+        'support'  => 'Support',
+        'auditor'  => 'Auditor',
     ];
 
     // Default selected bet type key and its derived currency
     $firstOpt      = $betTypeOptions[0] ?? null;
     $defaultBt     = old('bet_types.0') ?? ($firstOpt ? $firstOpt['bet_system'].'_'.$firstOpt['currency'] : '');
     $defaultCur    = old('currency', $firstOpt ? $firstOpt['currency'] : '');
+    $backOfficeRoles = $backOfficeRoles ?? ['operator', 'finance', 'support', 'auditor'];
+    $backOfficeJson  = json_encode($backOfficeRoles);
 @endphp
 
 <x-admin>
@@ -63,94 +69,124 @@
                         <label class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
                         <select name="role" id="roleSelect" class="form-control" required>
                             <option value="" disabled selected>— Select role —</option>
-                            @foreach ($roles as $role)
-                                <option value="{{ $role->name }}"
-                                    {{ old('role') === $role->name ? 'selected' : '' }}>
-                                    {{ $roleLabels[$role->name] ?? ucfirst($role->name) }}
-                                </option>
-                            @endforeach
+                            @php
+                                $bettingNames     = ['master', 'agent', 'member'];
+                                $bettingRoles     = $roles->whereIn('name', $bettingNames);
+                                $backOfficeInForm = $roles->whereIn('name', $backOfficeRoles);
+                            @endphp
+                            @if($bettingRoles->isNotEmpty())
+                                <optgroup label="Betting Network">
+                                    @foreach($bettingRoles as $role)
+                                        <option value="{{ $role->name }}" {{ old('role') === $role->name ? 'selected' : '' }}>
+                                            {{ $roleLabels[$role->name] ?? ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if($backOfficeInForm->isNotEmpty())
+                                <optgroup label="Back Office">
+                                    @foreach($backOfficeInForm as $role)
+                                        <option value="{{ $role->name }}" {{ old('role') === $role->name ? 'selected' : '' }}>
+                                            {{ $roleLabels[$role->name] ?? ucfirst($role->name) }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                         <x-error>role</x-error>
                     </div>
 
-                    {{-- Package --}}
-                    <div class="col-lg-6">
-                        <label class="form-label fw-semibold">Package <span class="text-danger">*</span></label>
-                        <select name="package_id" class="form-control" required>
-                            <option value="" disabled selected>— Select package —</option>
-                            @foreach ($packages as $package)
-                                <option value="{{ $package->id }}"
-                                    {{ old('package_id') == $package->id ? 'selected' : '' }}>
-                                    {{ $package->package_code }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <x-error>package_id</x-error>
-                    </div>
+                    {{-- Betting-only fields (hidden for back-office roles) --}}
+                    <div id="bettingFields" class="col-12">
+                        <div class="row g-3">
 
-                    <input type="hidden" name="currency" id="hidden-currency" value="{{ $defaultCur }}">
+                            {{-- Package --}}
+                            <div class="col-lg-6">
+                                <label class="form-label fw-semibold">Package <span class="text-danger">*</span></label>
+                                <select name="package_id" id="packageSelect" class="form-control">
+                                    <option value="" disabled selected>— Select package —</option>
+                                    @foreach ($packages as $package)
+                                        <option value="{{ $package->id }}"
+                                            {{ old('package_id') == $package->id ? 'selected' : '' }}>
+                                            {{ $package->package_code }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-error>package_id</x-error>
+                            </div>
 
-                    {{-- Initial Credit --}}
-                    <div class="col-lg-6">
-                        <label class="form-label fw-semibold">Initial Credit</label>
-                        <input type="number" class="form-control" name="available_credit"
-                            value="{{ old('available_credit', 0) }}" min="0" step="0.01">
-                    </div>
+                            <input type="hidden" name="currency" id="hidden-currency" value="{{ $defaultCur }}">
 
-                    {{-- Bet Type Assignment --}}
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">
-                            <i class="fas fa-dice me-1 text-primary"></i>
-                            Bet Types
-                        </label>
-                        <div class="border rounded p-3 bg-light">
-                            @if($isAdmin)
-                                {{-- Admin: grouped by system (Bet Vietnam / Bet Khmer), radio, currency auto-follows --}}
-                                @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
-                                @foreach($btGroups as $system => $opts)
-                                <div class="{{ !$loop->last ? 'mb-3' : '' }}">
-                                    <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
-                                        Bet {{ ucfirst($system) }}
-                                    </div>
-                                    <div class="row g-2">
-                                        @foreach($opts as $opt)
-                                        @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                        <div class="col-6 col-md-3">
-                                            <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                                <input class="form-check-input" type="radio"
-                                                    name="bet_types[]" value="{{ $key }}"
-                                                    id="bt_create_{{ $key }}"
-                                                    {{ $defaultBt === $key ? 'checked' : '' }}>
-                                                <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
-                                                    {{ $opt['label'] }}
-                                                </label>
+                            {{-- Initial Credit --}}
+                            <div class="col-lg-6">
+                                <label class="form-label fw-semibold">Initial Credit</label>
+                                <input type="number" class="form-control" name="available_credit"
+                                    value="{{ old('available_credit', 0) }}" min="0" step="0.01">
+                            </div>
+
+                            {{-- Bet Type Assignment --}}
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-dice me-1 text-primary"></i>
+                                    Bet Types
+                                </label>
+                                <div class="border rounded p-3 bg-light">
+                                    @if($isAdmin)
+                                        @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
+                                        @foreach($btGroups as $system => $opts)
+                                        <div class="{{ !$loop->last ? 'mb-3' : '' }}">
+                                            <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
+                                                Bet {{ ucfirst($system) }}
+                                            </div>
+                                            <div class="row g-2">
+                                                @foreach($opts as $opt)
+                                                @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                                <div class="col-6 col-md-3">
+                                                    <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                                        <input class="form-check-input" type="radio"
+                                                            name="bet_types[]" value="{{ $key }}"
+                                                            id="bt_create_{{ $key }}"
+                                                            {{ $defaultBt === $key ? 'checked' : '' }}>
+                                                        <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
+                                                            {{ $opt['label'] }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                @endforeach
                                             </div>
                                         </div>
                                         @endforeach
-                                    </div>
-                                </div>
-                                @endforeach
-                            @else
-                                {{-- Non-admin: flat list, single selection --}}
-                                <div class="row g-2">
-                                    @foreach($betTypeOptions as $opt)
-                                    @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                    <div class="col-6 col-md-3">
-                                        <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                            <input class="form-check-input" type="radio"
-                                                name="bet_types[]" value="{{ $key }}"
-                                                id="bt_create_{{ $key }}"
-                                                {{ $defaultBt === $key ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
-                                                {{ $opt['label'] }}
-                                            </label>
+                                    @else
+                                        <div class="row g-2">
+                                            @foreach($betTypeOptions as $opt)
+                                            @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
+                                            <div class="col-6 col-md-3">
+                                                <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                                    <input class="form-check-input" type="radio"
+                                                        name="bet_types[]" value="{{ $key }}"
+                                                        id="bt_create_{{ $key }}"
+                                                        {{ $defaultBt === $key ? 'checked' : '' }}>
+                                                    <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
+                                                        {{ $opt['label'] }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            @endforeach
                                         </div>
-                                    </div>
-                                    @endforeach
+                                    @endif
                                 </div>
-                            @endif
+                                <x-error>bet_types</x-error>
+                            </div>
+
                         </div>
-                        <x-error>bet_types</x-error>
+                    </div>
+
+                    {{-- Back-office info notice (shown when back-office role selected) --}}
+                    <div id="backOfficeNotice" class="col-12" style="display:none;">
+                        <div class="alert alert-info mb-0" style="font-size:.875rem;">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Back-office users do not require a betting package or bet type. They access the system through the admin panel only.
+                        </div>
                     </div>
 
                     {{-- Submit --}}
@@ -168,6 +204,35 @@
     @section('js')
     <script>
     (function () {
+        var BACK_OFFICE = {!! $backOfficeJson !!};
+        var roleSelect       = document.getElementById('roleSelect');
+        var bettingFields    = document.getElementById('bettingFields');
+        var backOfficeNotice = document.getElementById('backOfficeNotice');
+        var packageSelect    = document.getElementById('packageSelect');
+
+        function toggleBettingFields(roleName) {
+            var isBO = BACK_OFFICE.indexOf(roleName) !== -1;
+            bettingFields.style.display    = isBO ? 'none' : '';
+            backOfficeNotice.style.display = isBO ? '' : 'none';
+            if (packageSelect) packageSelect.required = !isBO;
+            if (isBO) {
+                document.querySelectorAll('input[name="bet_types[]"]').forEach(function(r) { r.checked = false; });
+            } else {
+                var anyChecked = document.querySelector('input[name="bet_types[]"]:checked');
+                if (!anyChecked) {
+                    var first = document.querySelector('input[name="bet_types[]"]');
+                    if (first) { first.checked = true; syncCurrencyFromBetType(first.value); }
+                }
+            }
+        }
+
+        roleSelect.addEventListener('change', function () {
+            toggleBettingFields(this.value);
+        });
+
+        // Init on page load (handles old() repopulation)
+        if (roleSelect.value) toggleBettingFields(roleSelect.value);
+
         function syncCurrencyFromBetType(val) {
             var cur = val.split('_').pop();
             var el = document.getElementById('hidden-currency');

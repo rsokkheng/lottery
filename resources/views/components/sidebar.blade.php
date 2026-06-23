@@ -1,17 +1,26 @@
 @php
     $user          = auth()->user();
-    $isSupervisor  = $user->hasAnyRole(['admin', 'master', 'agent']);
-    $hasVND        = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-    $hasUSD        = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-    $hasKhmer      = $isSupervisor || $user->bet_system === 'khmer';
-    $hasKhmerVND   = $isSupervisor || ($user->bet_system === 'khmer' && $user->currency === 'VND');
-    $hasKhmerUSD   = $isSupervisor || ($user->bet_system === 'khmer' && $user->currency === 'USD');
-    // Legacy alias so existing sidebar blade references still work
-    $hasKHR        = $hasKhmer;
-    $isAdmin      = $user->hasRole('admin');
-    $isMaster     = $user->hasRole('master');
-    $isAgent      = $user->hasRole('agent');
-    $isSupervisor = $isAdmin || $isMaster || $isAgent;
+    $isAdmin       = $user->hasRole('admin');
+    $isMaster      = $user->hasRole('master');
+    $isAgent       = $user->hasRole('agent');
+    $isSupervisor  = $isAdmin || $isMaster || $isAgent;
+
+    // Back-office roles
+    $isOperator    = $user->hasRole('operator');
+    $isFinance     = $user->hasRole('finance');
+    $isSupport     = $user->hasRole('support');
+    $isAuditor     = $user->hasRole('auditor');
+    $isBackOffice  = $isOperator || $isFinance || $isSupport || $isAuditor;
+
+    $canEnterResult = $user->can('data entry bet result');
+
+    // Betting access flags — only admin sees all systems; master/agent see only their own
+    $hasVND      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
+    $hasUSD      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
+    $hasKhmerVND = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'VND');
+    $hasKhmerUSD = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'USD');
+    $hasKhmer    = $hasKhmerVND || $hasKhmerUSD;
+    $hasKHR      = $hasKhmer;
 
     $vndOpen = request()->is('admin/credit/VND*') || request()->is('lotto_vn/*');
     $usdOpen = request()->is('admin/credit/USD*') || request()->is('lotto_usd/*');
@@ -34,7 +43,7 @@
             </a>
         </li>
 
-        @if($isSupervisor)
+        @if($isSupervisor || $isSupport)
         <li class="nav-item">
             <a href="{{ route('admin.user.index') }}"
                class="nav-link {{ Route::is('admin.user.*') ? 'active' : '' }}">
@@ -66,6 +75,31 @@
         @endif
 
 
+        {{-- ── Bet Result (Vietnam + Khmer) ── --}}
+        @if($canEnterResult)
+        <span class="sidebar-section-label">Bet Result</span>
+        <li class="nav-item has-treeview {{ Route::is('admin.result.*') || Route::is('admin.result-kh.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ Route::is('admin.result.*') || Route::is('admin.result-kh.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-clipboard-list"></i>
+                <p>Bet Result <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('admin.result.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result.index-mien-*') || Route::is('admin.result.create-mien-*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.result-kh.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result</p>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endif
+
         {{-- ── Bet Vietnam ── --}}
         @if($hasVND || $hasUSD)
         <span class="sidebar-section-label">Bet Vietnam</span>
@@ -76,16 +110,6 @@
                 <p>Bet Vietnam <i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
-
-                {{-- Bet Vietnam Result (shared for VND & USD) --}}
-                @if($isSupervisor)
-                <li class="nav-item">
-                    <a href="{{ route('admin.result.index-mien-nam') }}"
-                       class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result</p>
-                    </a>
-                </li>
-                @endif
 
                 {{-- Vietnamese Dong sub-section --}}
                 @if($hasVND)
@@ -167,13 +191,6 @@
             <ul class="nav nav-treeview">
 
                 @if($isSupervisor)
-                {{-- Admin links shared across both KH currencies --}}
-                <li class="nav-item">
-                    <a href="{{ route('admin.result-kh.index-mien-nam') }}"
-                       class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result</p>
-                    </a>
-                </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.credit-kh.index') }}"
                        class="nav-link {{ Route::is('admin.credit-kh.*') ? 'active' : '' }}">
@@ -242,6 +259,115 @@
                 </li>
                 @endif
 
+            </ul>
+        </li>
+        @endif
+
+        {{-- ── Operator: Lottery Operations ── --}}
+        @if($isOperator)
+        <span class="sidebar-section-label">Lottery Operations</span>
+
+        <li class="nav-item has-treeview {{ Route::is('admin.result.*') || Route::is('admin.result-kh.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ Route::is('admin.result.*') || Route::is('admin.result-kh.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-trophy"></i>
+                <p>Lottery Results <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('admin.result.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.result-kh.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result</p>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endif
+
+        {{-- ── Finance: Credit & Transactions ── --}}
+        @if($isFinance)
+        <span class="sidebar-section-label">Finance</span>
+
+        <li class="nav-item has-treeview {{ Route::is('admin.credit-fiat.*') || Route::is('admin.credit-kh.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ Route::is('admin.credit-fiat.*') || Route::is('admin.credit-kh.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-wallet"></i>
+                <p>Credit Management <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
+                       class="nav-link {{ request()->is('admin/credit/VND*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Credit VND</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
+                       class="nav-link {{ request()->is('admin/credit/USD*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Credit USD</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.credit-kh.index') }}"
+                       class="nav-link {{ Route::is('admin.credit-kh.*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Credit Khmer</p>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endif
+
+        {{-- ── Support: Account & Bet Lookup ── --}}
+        @if($isSupport)
+        <span class="sidebar-section-label">Support Tools</span>
+
+        <li class="nav-item">
+            <a href="{{ route('admin.user.index') }}"
+               class="nav-link {{ Route::is('admin.user.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-search"></i>
+                <p>Account Lookup</p>
+            </a>
+        </li>
+        @endif
+
+        {{-- ── Auditor: Reports ── --}}
+        @if($isAuditor)
+        <span class="sidebar-section-label">Reports</span>
+
+        <li class="nav-item has-treeview {{ Route::is('admin.report.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ Route::is('admin.report.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-chart-bar"></i>
+                <p>Bet Reports <i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="{{ route('admin.report.index') }}"
+                       class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Report</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.report.daily-usd') }}"
+                       class="nav-link {{ Route::is('admin.report.daily-usd') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam USD Report</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.result.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result History</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.result-kh.index-mien-nam') }}"
+                       class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
+                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result History</p>
+                    </a>
+                </li>
             </ul>
         </li>
         @endif

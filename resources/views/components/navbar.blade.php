@@ -1,12 +1,11 @@
 @php
-    $navUser        = Auth::user();
-    $navRole        = $navUser->roles->first()?->name ?? 'user';
-    $navIsSupervisor = $navUser->hasAnyRole(['admin', 'master', 'agent']);
-    $navHasVND       = $navIsSupervisor || ($navUser->bet_system === 'vietnam' && $navUser->currency === 'VND');
-    $navHasUSD       = $navIsSupervisor || ($navUser->bet_system === 'vietnam' && $navUser->currency === 'USD');
-    $navHasKhmer     = $navIsSupervisor || $navUser->bet_system === 'khmer';
-    $navHasKHR       = $navHasKhmer; // alias for legacy references
-    $navInitials = strtoupper(substr($navUser->name, 0, 1));
+    $navUser         = Auth::user();
+    $navRole         = $navUser->roles->first()?->name ?? 'user';
+    $navIsAdmin    = $navUser->hasRole('admin');
+    $navHasVietnam = $navIsAdmin || $navUser->bet_system === 'vietnam';
+    $navHasKhmer   = $navIsAdmin || $navUser->bet_system === 'khmer';
+    $navHasKHR       = $navHasKhmer;
+    $navInitials     = strtoupper(substr($navUser->name, 0, 1));
 @endphp
 
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -30,13 +29,10 @@
 
         {{-- Currency badges --}}
         <li class="nav-item d-none d-md-flex align-items-center" style="gap:5px; margin-right:6px;">
-            @if($navHasVND)
-                <span class="badge" style="background:#17a2b8; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Vietnam · Vietnamese Dong</span>
+            @if($navHasVietnam)
+                <span class="badge" style="background:#17a2b8; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Vietnam</span>
             @endif
-            @if($navHasUSD)
-                <span class="badge" style="background:#28a745; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Vietnam · USD Dollar</span>
-            @endif
-            @if($navHasKHR)
+            @if($navHasKhmer)
                 <span class="badge" style="background:#d4a017; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Khmer</span>
             @endif
         </li>

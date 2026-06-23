@@ -23,7 +23,8 @@
                     data-type="deposit"
                     data-user-id="{{ encrypt($member->id) }}"
                     data-name="{{ $member->name }} ({{ $member->username }})"
-                    data-balance="{{ $account?->credit_balance ?? 0 }}">
+                    data-balance="{{ $account?->credit_balance ?? 0 }}"
+                    data-currency="{{ strtolower($member->currency) }}">
                     💰 Deposit
                 </button>
                 <button class="btn btn-sm btn-danger me-2 openCreditModal"
@@ -31,7 +32,8 @@
                     data-type="withdraw"
                     data-user-id="{{ encrypt($member->id) }}"
                     data-name="{{ $member->name }} ({{ $member->username }})"
-                    data-balance="{{ $account?->credit_balance ?? 0 }}">
+                    data-balance="{{ $account?->credit_balance ?? 0 }}"
+                    data-currency="{{ strtolower($member->currency) }}">
                     💸 Withdraw
                 </button>
                 <a href="{{ route('admin.credit-kh.index') }}" class="btn btn-sm btn-secondary">
@@ -48,7 +50,7 @@
                         <div class="info-box-content">
                             <span class="info-box-text">Current Balance</span>
                             <span class="info-box-number {{ ($account?->credit_balance ?? 0) > 0 ? 'text-success' : 'text-danger' }}">
-                                {{ number_format($account?->credit_balance ?? 0, 2) }} VND
+                                {{ number_format($account?->credit_balance ?? 0, 2) }} {{ strtoupper($member->currency) }}
                             </span>
                         </div>
                     </div>
@@ -77,7 +79,7 @@
                         <th style="width:3%">#</th>
                         <th>Date / Time</th>
                         <th>Type</th>
-                        <th class="text-end">Amount (VND)</th>
+                        <th class="text-end">Amount ({{ strtoupper($member->currency) }})</th>
                         <th class="text-end">Balance Before</th>
                         <th class="text-end">Balance After</th>
                         <th>Note</th>
@@ -124,6 +126,7 @@
                 @csrf
                 <input type="hidden" name="user_id" id="modal-user-id">
                 <input type="hidden" name="type" id="modal-type">
+                <input type="hidden" name="currency" id="modal-currency">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="creditModalLabel">Credit Transaction</h5>
@@ -139,11 +142,11 @@
                             <input type="text" class="form-control" id="modal-member-name" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Current Credit Balance (VND)</label>
+                            <label class="form-label" id="modal-balance-label">Current Credit Balance</label>
                             <input type="number" class="form-control" id="modal-balance" readonly>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Amount (VND)</label>
+                            <label class="form-label" id="modal-amount-label">Amount</label>
                             <input type="number" name="amount" class="form-control" step="0.01" min="0.01"
                                 required placeholder="Enter amount">
                         </div>
@@ -175,18 +178,22 @@
             });
 
             $(document).on('click', '.openCreditModal', function () {
-                const type    = $(this).data('type');
-                const name    = $(this).data('name');
-                const userId  = $(this).data('user-id');
-                const balance = $(this).data('balance');
+                const type     = $(this).data('type');
+                const name     = $(this).data('name');
+                const userId   = $(this).data('user-id');
+                const balance  = $(this).data('balance');
+                const currency = ($(this).data('currency') || 'vnd').toUpperCase();
 
                 $('#creditModalLabel').text(
                     type === 'deposit' ? 'Deposit — ' + name : 'Withdraw — ' + name
                 );
                 $('#modal-type').val(type);
                 $('#modal-user-id').val(userId);
+                $('#modal-currency').val(currency.toLowerCase());
                 $('#modal-member-name').val(name);
                 $('#modal-balance').val(parseFloat(balance).toFixed(2));
+                $('#modal-balance-label').text('Current Credit Balance (' + currency + ')');
+                $('#modal-amount-label').text('Amount (' + currency + ')');
                 $('#btn-submit')
                     .removeClass('btn-success btn-danger')
                     .addClass(type === 'deposit' ? 'btn-success' : 'btn-danger')

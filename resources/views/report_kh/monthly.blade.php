@@ -102,7 +102,7 @@
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
 
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="{{ route('bet-kh.reports.monthly-tracking-member', [
+                                        <a href="{{ route($khRoutePrefix . '.reports.monthly-tracking-member', [
                                         'id' => $row->manager_id,
                                         'startDate' => $startDate,
                                         'endDate' => $endDate,

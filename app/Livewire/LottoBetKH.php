@@ -821,7 +821,7 @@ class LottoBetKH extends Component
                             'd'    => $length == 2 ? MultiplierHNKHEnum::D    : ($length == 3 ? MultiplierHNKHEnum::D_3D : 0),
                             'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD : ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
                             'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL : ($length == 3 ? MultiplierHNKHEnum::ROLL_3D : ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
-                            'roll2' => ($length == 2 || $length == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
+                            'roll2' => match ($length) { 2 => MultiplierHNKHEnum::ROLL2, 3 => MultiplierHNKHEnum::ROLL2_3D, default => 0 },
                             default => 1,
                         };
                     } else {
@@ -832,7 +832,7 @@ class LottoBetKH extends Component
                             'd'    => $length == 2 ? MultiplierKHEnum::D    : ($length == 3 ? MultiplierKHEnum::D_3D : 0),
                             'abcd' => $length == 2 ? MultiplierKHEnum::ABCD : ($length == 3 ? MultiplierKHEnum::ABCD_3D : 0),
                             'roll' => $length == 2 ? MultiplierKHEnum::ROLL : ($length == 3 ? MultiplierKHEnum::ROLL_3D : ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
-                            'roll2' => ($length == 2 || $length == 3) ? MultiplierKHEnum::ROLL2 : 0,
+                            'roll2' => match ($length) { 2 => MultiplierKHEnum::ROLL2, 3 => MultiplierKHEnum::ROLL2_3D, default => 0 },
                             default => 1,
                         };
                     }
@@ -857,7 +857,7 @@ class LottoBetKH extends Component
                             'd'    => $length == 2 ? MultiplierHNKHEnum::D    : ($length == 3 ? MultiplierHNKHEnum::D_3D : 0),
                             'abcd' => $length == 2 ? MultiplierHNKHEnum::ABCD : ($length == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
                             'roll' => $length == 2 ? MultiplierHNKHEnum::ROLL : ($length == 3 ? MultiplierHNKHEnum::ROLL_3D : ($length == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
-                            'roll2' => ($length == 2 || $length == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
+                            'roll2' => match ($length) { 2 => MultiplierHNKHEnum::ROLL2, 3 => MultiplierHNKHEnum::ROLL2_3D, default => 0 },
                             default => 1,
                         };
                     } else {
@@ -868,7 +868,7 @@ class LottoBetKH extends Component
                             'd'    => $length == 2 ? MultiplierKHEnum::D    : ($length == 3 ? MultiplierKHEnum::D_3D : 0),
                             'abcd' => $length == 2 ? MultiplierKHEnum::ABCD : ($length == 3 ? MultiplierKHEnum::ABCD_3D : 0),
                             'roll' => $length == 2 ? MultiplierKHEnum::ROLL : ($length == 3 ? MultiplierKHEnum::ROLL_3D : ($length == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
-                            'roll2' => ($length == 2 || $length == 3) ? MultiplierKHEnum::ROLL2 : 0,
+                            'roll2' => match ($length) { 2 => MultiplierKHEnum::ROLL2, 3 => MultiplierKHEnum::ROLL2_3D, default => 0 },
                             default => 1,
                         };
                     }
@@ -891,7 +891,7 @@ class LottoBetKH extends Component
                 'd'    => $numberLength == 2 ? MultiplierHNKHEnum::D    : ($numberLength == 3 ? MultiplierHNKHEnum::D_3D : 0),
                 'abcd' => $numberLength == 2 ? MultiplierHNKHEnum::ABCD : ($numberLength == 3 ? MultiplierHNKHEnum::ABCD_3D : 0),
                 'roll' => $numberLength == 2 ? MultiplierHNKHEnum::ROLL : ($numberLength == 3 ? MultiplierHNKHEnum::ROLL_3D : ($numberLength == 4 ? MultiplierHNKHEnum::ROLL_4D : 0)),
-                'roll2' => ($numberLength == 2 || $numberLength == 3) ? MultiplierHNKHEnum::ROLL2 : 0,
+                'roll2' => match ($numberLength) { 2 => MultiplierHNKHEnum::ROLL2, 3 => MultiplierHNKHEnum::ROLL2_3D, default => 0 },
                 default => 1,
             };
         } else {
@@ -902,7 +902,7 @@ class LottoBetKH extends Component
                 'd'    => $numberLength == 2 ? MultiplierKHEnum::D    : ($numberLength == 3 ? MultiplierKHEnum::D_3D : 0),
                 'abcd' => $numberLength == 2 ? MultiplierKHEnum::ABCD : ($numberLength == 3 ? MultiplierKHEnum::ABCD_3D : 0),
                 'roll' => $numberLength == 2 ? MultiplierKHEnum::ROLL : ($numberLength == 3 ? MultiplierKHEnum::ROLL_3D : ($numberLength == 4 ? MultiplierKHEnum::ROLL_4D : 0)),
-                'roll2' => ($numberLength == 2 || $numberLength == 3) ? MultiplierKHEnum::ROLL2 : 0,
+                'roll2' => match ($numberLength) { 2 => MultiplierKHEnum::ROLL2, 3 => MultiplierKHEnum::ROLL2_3D, default => 0 },
                 default => 1,
             };
         }
@@ -987,6 +987,19 @@ class LottoBetKH extends Component
 
     public function handleCheckChanel($key, $name = "")
     {
+        $num = $this->number[$key] ?? '';
+        $lengthOfNum = strlen($num);
+        if ($lengthOfNum === 0) return;
+
+        $isAsterisk  = preg_match('/^\*\d+$|\d+\*$/', $num);
+        $countHashtag = substr_count($num, '#');
+        $countProvince = 0;
+        foreach ($this->schedules as $kp => $schedule) {
+            if ($this->province_body_check[$kp][$key] ?? false) $countProvince++;
+        }
+        if ($countProvince > 0) {
+            $this->totalAmountNormalNumber($key, $lengthOfNum, $isAsterisk, $countHashtag);
+        }
     }
 
     public function handleInputAmount($key)
@@ -1147,7 +1160,7 @@ class LottoBetKH extends Component
                     }
 
                     if ($this->roll2_amount[$key] > 0) {
-                        $roll2Multiplier = ($lengthNumber == 2 || $lengthNumber == 3) ? MultiplierHNKHEnum::ROLL2 : 0;
+                        $roll2Multiplier = match ($lengthNumber) { 2 => MultiplierHNKHEnum::ROLL2, 3 => MultiplierHNKHEnum::ROLL2_3D, default => 0 };
                         if ($this->roll2_check[$key]) {
                             $this->totalProvisionalHN += $this->roll2_amount[$key] * $roll2Multiplier * $this->permutationsLength[$key];
                         } else {
@@ -1242,7 +1255,7 @@ class LottoBetKH extends Component
                         }
                     }
                     if ($this->roll2_amount[$key] > 0) {
-                        $roll2Multiplier = ($lengthNumber == 2 || $lengthNumber == 3) ? MultiplierKHEnum::ROLL2 : 0;
+                        $roll2Multiplier = match ($lengthNumber) { 2 => MultiplierKHEnum::ROLL2, 3 => MultiplierKHEnum::ROLL2_3D, default => 0 };
                         if ($this->roll2_check[$key]) {
                             $this->totalProvisional += $this->roll2_amount[$key] * $roll2Multiplier * $this->permutationsLength[$key];
                         } else {

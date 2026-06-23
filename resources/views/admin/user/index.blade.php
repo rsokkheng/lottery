@@ -1,185 +1,292 @@
 @php
     use Illuminate\Support\Facades\Auth;
     $auth = Auth::user();
-    $roleBadge = [
-        'admin'  => 'bg-dark',
-        'master' => 'bg-purple',
-        'agent'  => 'bg-info',
-        'member' => 'bg-secondary',
-    ];
-    $betSystemColor = ['vietnam' => 'bg-success', 'khmer' => 'bg-danger'];
     $supervisorRoles = ['admin', 'master', 'agent'];
-    $canManage = $auth->hasAnyRole($supervisorRoles);
-    $isAdmin   = $auth->hasRole('admin');
-    $isMaster  = $auth->hasRole('master');
+    $canManage     = $auth->hasAnyRole($supervisorRoles);
+    $isAdmin       = $auth->hasRole('admin');
+    $isMaster      = $auth->hasRole('master');
     $showHierarchy = $isAdmin || $isMaster;
+
+    $roleMeta = [
+        'admin'    => ['color'=>'#1e293b', 'bg'=>'#e2e8f0', 'icon'=>'fa-shield-alt'],
+        'master'   => ['color'=>'#5b21b6', 'bg'=>'#ede9fe', 'icon'=>'fa-crown'],
+        'agent'    => ['color'=>'#0369a1', 'bg'=>'#e0f2fe', 'icon'=>'fa-user-tie'],
+        'member'   => ['color'=>'#374151', 'bg'=>'#f3f4f6', 'icon'=>'fa-user'],
+        'operator' => ['color'=>'#065f46', 'bg'=>'#d1fae5', 'icon'=>'fa-tools'],
+        'finance'  => ['color'=>'#92400e', 'bg'=>'#fef3c7', 'icon'=>'fa-calculator'],
+        'support'  => ['color'=>'#1d4ed8', 'bg'=>'#dbeafe', 'icon'=>'fa-headset'],
+        'auditor'  => ['color'=>'#7c3aed', 'bg'=>'#ede9fe', 'icon'=>'fa-search'],
+    ];
+
+    $totalUsers  = $data->count();
+    $activeUsers = $data->filter(fn($u) => $u->is_active)->count();
 @endphp
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-    .bg-purple { background-color: #6f42c1 !important; }
-    .badge { font-size: 11px; }
-    .bet-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    /* ── Stat cards ── */
+    .cr-stat { border-radius:14px; padding:16px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 2px 12px rgba(0,0,0,.07); }
+    .cr-stat-icon { width:46px; height:46px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0; }
+    .cr-stat-label { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:#6c757d; margin-bottom:2px; }
+    .cr-stat-value { font-size:1.4rem; font-weight:700; line-height:1.1; }
+
+    /* ── Table ── */
+    .cr-table-wrap { border-radius:12px; overflow:hidden; border:1px solid #e8ecf0; }
+    #userTable { margin-bottom:0 !important; font-size:.845rem; }
+    #userTable thead th {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563a8 100%);
+        color:#fff; font-weight:600; font-size:.75rem; text-transform:uppercase;
+        letter-spacing:.5px; border:none; padding:11px 12px; white-space:nowrap;
+    }
+    #userTable tbody td { padding:10px 12px; vertical-align:middle; border-color:#f0f2f5; }
+    #userTable tbody tr:hover { background:#f0f5ff; }
+
+    /* ── Role pill ── */
+    .role-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; text-decoration:none; transition:opacity .15s; }
+    .role-pill:hover { opacity:.8; }
+
+    /* ── System badges ── */
+    .sys-vn  { background:#dcfce7; color:#166534; }
+    .sys-kh  { background:#fee2e2; color:#991b1b; }
+    .cur-vnd { background:#e0f2fe; color:#0c4a6e; }
+    .cur-usd { background:#d1fae5; color:#064e3b; }
+
+    /* ── Action buttons ── */
+    .btn-act { font-size:.73rem; font-weight:600; padding:3px 9px; border-radius:7px; border:1px solid; transition:all .15s; white-space:nowrap; }
+    .btn-edit     { color:#1d4ed8; background:#dbeafe; border-color:#bfdbfe; }
+    .btn-edit:hover { background:#1d4ed8; color:#fff; }
+    .btn-pkg      { color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
+    .btn-pkg:hover  { background:#065f46; color:#fff; }
+    .btn-settings { color:#92400e; background:#fef3c7; border-color:#fde68a; }
+    .btn-settings:hover { background:#92400e; color:#fff; }
+    .btn-pwd      { color:#4b5563; background:#f3f4f6; border-color:#d1d5db; }
+    .btn-pwd:hover { background:#374151; color:#fff; }
+    .btn-suspend  { color:#b45309; background:#fffbeb; border-color:#fde68a; }
+    .btn-suspend:hover { background:#b45309; color:#fff; }
+    .btn-del      { color:#dc2626; background:#fef2f2; border-color:#fecaca; }
+    .btn-del:hover { background:#dc2626; color:#fff; }
+
+    /* ── DataTables ── */
+    .dataTables_wrapper .dataTables_filter input { border-radius:8px; border:1px solid #d1d8e0; padding:5px 10px; font-size:.82rem; }
+    .dataTables_wrapper .dataTables_length select { border-radius:8px; border:1px solid #d1d8e0; padding:4px 8px; font-size:.82rem; }
+
+    @media (max-width:768px) {
+        #userTable td, #userTable th { font-size:.73rem; white-space:nowrap; }
+    }
 </style>
+
 <x-admin>
     @section('title', 'Account Management')
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0"><i class="fas fa-users me-1"></i> Account Management</h3>
-            @if($canManage)
-            <a href="{{ route('admin.user.create') }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-plus me-1"></i> Add New
-            </a>
-            @endif
+
+    <div>
+        {{-- ── Summary Cards ── --}}
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="cr-stat bg-white">
+                    <div class="cr-stat-icon" style="background:#e8f0fe">
+                        <i class="fas fa-users" style="color:#1a73e8"></i>
+                    </div>
+                    <div>
+                        <div class="cr-stat-label">Total Accounts</div>
+                        <div class="cr-stat-value" style="color:#1a73e8">{{ $totalUsers }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="cr-stat bg-white">
+                    <div class="cr-stat-icon" style="background:#e8f5e9">
+                        <i class="fas fa-check-circle" style="color:#2e7d32"></i>
+                    </div>
+                    <div>
+                        <div class="cr-stat-label">Active</div>
+                        <div class="cr-stat-value" style="color:#2e7d32">{{ $activeUsers }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="cr-stat bg-white">
+                    <div class="cr-stat-icon" style="background:#fce4ec">
+                        <i class="fas fa-ban" style="color:#c62828"></i>
+                    </div>
+                    <div>
+                        <div class="cr-stat-label">Suspended</div>
+                        <div class="cr-stat-value" style="color:#c62828">{{ $totalUsers - $activeUsers }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="cr-stat bg-white">
+                    <div class="cr-stat-icon" style="background:#e3f2fd">
+                        <i class="fas fa-user" style="color:#1565c0"></i>
+                    </div>
+                    <div>
+                        <div class="cr-stat-label">Members</div>
+                        <div class="cr-stat-value" style="color:#1565c0">
+                            {{ $data->filter(fn($u) => $u->roles->first()?->name === 'member')->count() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body pb-2">
-            <div class="table-responsive">
-            <table class="table table-striped table-bordered" id="userTable" style="font-size:13px">
-                <thead>
-                    <tr style="font-size: 12px;">
-                        <th style="width:3%">#</th>
-                        <th>Role</th>
-                        <th>Account ID</th>
-                        <th>Name</th>
-                        <th>Currency</th>
-                        @if($showHierarchy)
-                        <th>{{ $isAdmin ? 'Master / Agent' : 'Agent' }}</th>
-                        <th>Bet Types</th>
-                        @endif
-                        <th>Register Date</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($data as $key => $user)
-                    @php $userRole = $user->roles->first()->name ?? null; @endphp
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>
-                                @foreach ($user->roles as $role)
-                                    @php $cls = $roleBadge[$role->name] ?? 'bg-secondary'; @endphp
-                                    @if (in_array($role->name, ['master', 'agent']))
-                                        <a href="{{ route('admin.user.under-manager', ['manager_id' => $user->id]) }}"
-                                           title="View members under this user">
-                                            <span class="badge {{ $cls }}">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</span>
-                                        </a>
-                                    @else
-                                        <span class="badge {{ $cls }}">{{ ucfirst(str_replace('_', ' ', $role->name)) }}</span>
-                                    @endif
-                                @endforeach
-                            </td>
-                            <td>{{ $user->username }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>
-                                @if($user->bet_system)
-                                    @php $curLabel = $user->currency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar'; @endphp
-                                    <span class="badge {{ $user->bet_system === 'khmer' ? 'bg-danger' : 'bg-success' }} me-1" style="font-size:10px">
-                                        Bet {{ ucfirst($user->bet_system) }}
-                                    </span>
-                                    <span class="badge bg-secondary" style="font-size:10px">{{ $curLabel }}</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
 
-                            @if($showHierarchy)
-                            {{-- Hierarchy: admin sees master + agent, master sees agent only --}}
-                            <td class="text-muted" style="font-size:12px">
-                                @if($isAdmin && $user->master)
-                                    <span class="badge bg-purple me-1">{{ $user->master->name }}</span>
-                                @endif
-                                @if($user->manager && ($isAdmin ? $user->manager->id !== $user->master?->id : true))
-                                    <span class="badge bg-info">{{ $user->manager->name }}</span>
-                                @endif
-                            </td>
+        {{-- ── Table Card ── --}}
+        <div class="bg-white rounded-3 shadow-sm" style="border:1px solid #e8ecf0; overflow:hidden;">
 
-                            {{-- Bet Types (only meaningful for agents) --}}
-                            <td>
-                                @if($user->bet_system && $user->currency)
-                                    @php
-                                        $sysColor     = $betSystemColor[$user->bet_system] ?? 'bg-secondary';
-                                        $curLabel     = $user->currency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar';
-                                    @endphp
-                                    <span class="badge {{ $sysColor }} bet-badge">
-                                        Bet {{ ucfirst($user->bet_system) }} · {{ $curLabel }}
-                                    </span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            @endif
+            <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid #e8ecf0;">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#1e3a5f,#2563a8);border-radius:9px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-users text-white" style="font-size:.9rem"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:.95rem;font-weight:700;color:#1e293b;">Account Management</div>
+                        <div style="font-size:.72rem;color:#6c757d;">All system accounts &amp; roles</div>
+                    </div>
+                </div>
+                @if($canManage)
+                <a href="{{ route('admin.user.create') }}" class="btn btn-primary btn-sm" style="border-radius:9px;font-weight:600;padding:6px 16px;">
+                    <i class="fas fa-plus me-1"></i>Add Account
+                </a>
+                @endif
+            </div>
 
-                            <td>{{ $user->created_at ? $user->created_at->format('d M Y') : '—' }}</td>
-                            <td class="text-center">
-                                @if($user->is_active)
-                                    <span class="badge bg-success">Active</span>
-                                @else
-                                    <span class="badge bg-danger">Suspended</span>
+            <div class="p-3">
+                <div class="cr-table-wrap">
+                    <table id="userTable" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width:3%">#</th>
+                                <th>Role</th>
+                                <th>Account ID</th>
+                                <th>Full Name</th>
+                                <th>System</th>
+                                @if($showHierarchy)
+                                    <th>{{ $isAdmin ? 'Master / Agent' : 'Agent' }}</th>
                                 @endif
-                            </td>
-                            <td class="text-center">
+                                <th>Registered</th>
+                                <th class="text-center">Status</th>
                                 @if($canManage)
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                            data-bs-toggle="dropdown">⚙️</button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.user.edit', encrypt($user->id)) }}">
-                                                <i class="fas fa-edit me-1 text-primary"></i> Edit
-                                            </a>
-                                        </li>
-                                        @if($auth->hasRole('admin') || $auth->hasRole('master'))
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}">
-                                                <i class="fas fa-box me-1 text-info"></i> Lotto Package
-                                            </a>
-                                        </li>
+                                    <th class="text-center" style="min-width:260px">Actions</th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($data as $key => $user)
+                                @php
+                                    $roleName = $user->roles->first()?->name ?? 'member';
+                                    $meta     = $roleMeta[$roleName] ?? $roleMeta['member'];
+                                @endphp
+                                <tr>
+                                    <td class="text-muted" style="font-size:.75rem;">{{ $key + 1 }}</td>
+                                    <td>
+                                        @foreach ($user->roles as $role)
+                                            @php $m = $roleMeta[$role->name] ?? $roleMeta['member']; @endphp
+                                            @if (in_array($role->name, ['master', 'agent']))
+                                                <a href="{{ route('admin.user.under-manager', ['manager_id' => $user->id]) }}"
+                                                   title="View members under {{ $user->name }}" class="role-pill text-decoration-none"
+                                                   style="color:{{ $m['color'] }};background:{{ $m['bg'] }};">
+                                                    <i class="fas {{ $m['icon'] }}" style="font-size:.65rem;"></i>
+                                                    {{ ucfirst($role->name) }}
+                                                </a>
+                                            @else
+                                                <span class="role-pill" style="color:{{ $m['color'] }};background:{{ $m['bg'] }};">
+                                                    <i class="fas {{ $m['icon'] }}" style="font-size:.65rem;"></i>
+                                                    {{ ucfirst($role->name) }}
+                                                </span>
+                                            @endif
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        <span style="font-family:monospace;font-weight:600;font-size:.85rem;color:#1e293b;">{{ $user->username }}</span>
+                                    </td>
+                                    <td style="font-weight:500;">{{ $user->name }}</td>
+                                    <td>
+                                        @if($user->bet_system)
+                                            <span class="role-pill {{ $user->bet_system === 'khmer' ? 'sys-kh' : 'sys-vn' }}" style="margin-bottom:2px;display:inline-flex;">
+                                                {{ ucfirst($user->bet_system) }}
+                                            </span>
+                                            <span class="role-pill {{ $user->currency === 'USD' ? 'cur-usd' : 'cur-vnd' }}" style="display:inline-flex;">
+                                                {{ $user->currency }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">—</span>
                                         @endif
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.user.show', $user->id) }}">
-                                                <i class="fas fa-sliders-h me-1 text-warning"></i> Bet Settings
+                                    </td>
+
+                                    @if($showHierarchy)
+                                        <td>
+                                            @if($isAdmin && $user->master)
+                                                <span class="role-pill" style="color:#5b21b6;background:#ede9fe;margin-bottom:2px;display:inline-flex;">
+                                                    <i class="fas fa-crown" style="font-size:.6rem;"></i>{{ $user->master->name }}
+                                                </span>
+                                            @endif
+                                            @if($user->manager && ($isAdmin ? $user->manager->id !== $user->master?->id : true))
+                                                <span class="role-pill" style="color:#0369a1;background:#e0f2fe;display:inline-flex;">
+                                                    <i class="fas fa-user-tie" style="font-size:.6rem;"></i>{{ $user->manager->name }}
+                                                </span>
+                                            @endif
+                                            @if(!$user->master && !$user->manager)
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                    @endif
+
+                                    <td class="text-muted" style="font-size:.8rem;">
+                                        {{ $user->created_at?->format('d M Y') ?? '—' }}
+                                    </td>
+                                    <td class="text-center">
+                                        @if($user->is_active)
+                                            <span class="badge rounded-pill bg-success" style="font-size:.7rem;">● Active</span>
+                                        @else
+                                            <span class="badge rounded-pill bg-danger" style="font-size:.7rem;">● Suspended</span>
+                                        @endif
+                                    </td>
+                                    @if($canManage)
+                                    <td>
+                                        <div class="d-flex flex-wrap justify-content-center gap-1">
+                                            <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-act btn-edit">
+                                                <i class="fas fa-edit me-1"></i>Edit
                                             </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.user.change-password', $user->id) }}">
-                                                <i class="fas fa-key me-1 text-secondary"></i> Change Password
+                                            @if($auth->hasRole('admin') || $auth->hasRole('master'))
+                                            <a href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}" class="btn btn-act btn-pkg">
+                                                <i class="fas fa-box me-1"></i>Package
                                             </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('admin.user.suspend', $user->id) }}">
-                                                <i class="fas fa-ban me-1 text-warning"></i> Suspend / Activate
+                                            @endif
+                                            <a href="{{ route('admin.user.show', $user->id) }}" class="btn btn-act btn-settings">
+                                                <i class="fas fa-sliders-h me-1"></i>Settings
                                             </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
+                                            <a href="{{ route('admin.user.change-password', $user->id) }}" class="btn btn-act btn-pwd">
+                                                <i class="fas fa-key me-1"></i>Password
+                                            </a>
+                                            <a href="{{ route('admin.user.suspend', $user->id) }}" class="btn btn-act btn-suspend">
+                                                <i class="fas fa-ban me-1"></i>{{ $user->is_active ? 'Suspend' : 'Activate' }}
+                                            </a>
                                             <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST"
-                                                onsubmit="return confirm('Delete this user?')">
+                                                  onsubmit="return confirm('Delete {{ addslashes($user->name) }}? This cannot be undone.')">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="dropdown-item text-danger">
-                                                    <i class="fas fa-trash me-1"></i> Delete
+                                                <button type="submit" class="btn btn-act btn-del">
+                                                    <i class="fas fa-trash me-1"></i>Delete
                                                 </button>
                                             </form>
-                                        </li>
-                                    </ul>
-                                </div>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                        </div>
+                                    </td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+
     @section('js')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(function() {
+        $(function () {
             $('#userTable').DataTable({
-                "paging":    true,
-                "searching": true,
-                "ordering":  false,
-                "responsive": true,
+                paging: true, searching: true, ordering: true,
+                responsive: true, autoWidth: false,
+                language: { search: '', searchPlaceholder: 'Search account…' },
+                columnDefs: [{ orderable: false, targets: -1 }]
             });
         });
     </script>

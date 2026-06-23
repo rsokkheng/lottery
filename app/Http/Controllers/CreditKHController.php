@@ -40,7 +40,7 @@ class CreditKHController extends Controller
         $supervisorRoles = ['master', 'agent'];
         $isSupervisor    = !empty(array_intersect($supervisorRoles, $roles));
 
-        $memberQuery = User::with(['accountKH', 'manager'])
+        $memberQuery = User::with(['accountKH', 'accountKHUSD', 'manager'])
             ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', array_merge(['admin'], $supervisorRoles)));
 
         if (!in_array('admin', $roles)) {

@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Models\BetUserWallet;
 use App\Models\AccountUSD;
 use App\Models\AccountVND;
+use App\Models\AccountKHUSD;
 use App\Models\BetLotteryPackage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -107,6 +108,11 @@ class User extends Authenticatable
 public function accountKH()
     {
         return $this->hasOne(AccountKH::class);
+    }
+
+    public function accountKHUSD()
+    {
+        return $this->hasOne(AccountKHUSD::class);
     }
 
     public function creditTransactionsKH()

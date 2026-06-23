@@ -36,7 +36,7 @@
             <div class="">
                 <button
                     class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    onclick="searchReceipt('{{ route('bet-kh.reports.daily-manager') }}')">
+                    onclick="searchReceipt('{{ route($khRoutePrefix . '.reports.daily-manager') }}')">
                     <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none"
                         xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -99,7 +99,7 @@
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->bet_date }}</td>
                                     <td class="py-2 px-1 border border-gray-300">{{ $row->draw_day }}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                        <a href="{{ route('bet-kh.reports.daily-member-agent', [
+                                        <a href="{{ route($khRoutePrefix . '.reports.daily-member-agent', [
                                         'id' => $row->manager_id,
                                         'date' => $date,
                                         'com_id' => $company_id

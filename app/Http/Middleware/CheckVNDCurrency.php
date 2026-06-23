@@ -15,7 +15,8 @@ class CheckVNDCurrency
         $user = Auth::user();
 
         if ($user) {
-            // Supervisors (admin/master) bypass bet-type checks
+            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
+
             if ($user->hasAnyRole(['admin', 'master'])) {
                 return $next($request);
             }
@@ -26,8 +27,6 @@ class CheckVNDCurrency
             if (!$hasAccess) {
                 abort(403, 'Access denied. You do not have Bet Vietnam · ' . strtoupper($currency) . ' access.');
             }
-
-            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
         }
 
         return $next($request);

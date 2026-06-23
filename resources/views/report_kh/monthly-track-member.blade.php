@@ -58,7 +58,7 @@
                 
                 <!-- Back Button with Manager Name -->
                 <div class="flex items-end">
-                    <a href="{{ route('bet-kh.reports.monthly-tracking') }}" 
+                    <a href="{{ route($khRoutePrefix . '.reports.monthly-tracking') }}" 
                         class="px-6 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 transition-colors w-full sm:w-auto inline-flex items-center justify-center space-x-1 text-decoration-none">
                         <span>{{ __('message.back') }}</span>
                         <span>{{ $managerName->username }}</span>
@@ -111,7 +111,7 @@
                                 <tr class="border border-gray-300 hover:bg-gray-100">
                                     <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
                                     <td class="py-2 px-1 border border-gray-300">
-                                    <a href="{{ route('bet-kh.reports.tracking-agent-member', [
+                                    <a href="{{ route($khRoutePrefix . '.reports.tracking-agent-member', [
                                     'id' => $row->user_id,
                                     'startDate' => $startDate,
                                     'endDate' => $endDate,

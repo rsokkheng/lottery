@@ -20,8 +20,8 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    // Roles that can access the admin panel
-    private const SUPERVISOR_ROLES = ['admin', 'master', 'agent'];
+    private const SUPERVISOR_ROLES  = ['admin', 'master', 'agent'];
+    private const BACK_OFFICE_ROLES = ['operator', 'finance', 'support', 'auditor'];
 
     public function __construct()
     {
@@ -41,13 +41,13 @@ class UserController extends Controller
             ->orderBy('id');
 
         if ($auth->hasRole('master')) {
-            // Master sees every user that belongs to their tree (master_id = master)
+            // Master sees only their own tree; back-office users have no master_id so they're excluded
             $query->where('master_id', $auth->id);
         } elseif ($auth->hasRole('agent')) {
             // Agent sees only their direct members
             $query->where('manager_id', $auth->id);
         }
-        // admin: no extra filter — sees everyone except other admins
+        // admin: no extra filter — sees everyone (betting users + back-office) except other admins
 
         $data = $query->get();
         return view('admin.user.index', compact('data'));
@@ -59,14 +59,20 @@ class UserController extends Controller
         $creator = Auth::user();
 
         if ($creator->hasRole('admin')) {
-            $roles          = Role::whereIn('name', ['master', 'agent'])->get();
+            $roles          = Role::whereIn('name', array_merge(
+                ['master', 'agent'],
+                self::BACK_OFFICE_ROLES
+            ))->get();
             $betTypeOptions = ManagerBetType::OPTIONS;
         } elseif ($creator->hasRole('master')) {
             $roles          = Role::whereIn('name', ['agent', 'member'])->get();
-            $betTypeOptions = ManagerBetType::OPTIONS;
+            $betTypeOptions = array_values(array_filter(
+                ManagerBetType::OPTIONS,
+                fn($opt) => $opt['bet_system'] === $creator->bet_system
+                         && $opt['currency']   === $creator->currency
+            )) ?: ManagerBetType::OPTIONS;
         } elseif ($creator->hasRole('agent')) {
             $roles          = Role::where('name', 'member')->get();
-            // Agent creating member: bet type is fixed (inherited from agent — shown read-only)
             $betTypeOptions = array_values(array_filter(
                 ManagerBetType::OPTIONS,
                 fn($opt) => $opt['bet_system'] === $creator->bet_system
@@ -76,28 +82,35 @@ class UserController extends Controller
             abort(403);
         }
 
-        return view('admin.user.create', compact('roles', 'betTypeOptions'));
+        $backOfficeRoles = self::BACK_OFFICE_ROLES;
+        return view('admin.user.create', compact('roles', 'betTypeOptions', 'backOfficeRoles'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        /** @var \App\Models\User $creator */
+        $creator      = Auth::user();
+        $targetRole   = $request->role;
+        $isBackOffice = in_array($targetRole, self::BACK_OFFICE_ROLES);
+
+        $rules = [
             'name'        => ['required', 'string', 'max:255'],
             'username'    => ['required', 'unique:users,username'],
             'password'    => ['required', 'min:6', 'max:255'],
-            'package_id'  => ['required'],
             'phonenumber' => ['required'],
             'role'        => ['required'],
-            'bet_types'   => ['required', 'array', 'min:1'],
-        ]);
+        ];
+        if (! $isBackOffice) {
+            $rules['package_id'] = ['required'];
+            $rules['bet_types']  = ['required', 'array', 'min:1'];
+        }
+        $request->validate($rules);
 
-        /** @var \App\Models\User $creator */
-        $creator    = Auth::user();
-        $targetRole = $request->role;
-
-        // Resolve bet_system + currency
-        if ($creator->hasRole('agent')) {
-            // Members always inherit the agent's bet type
+        // Resolve bet_system + currency (betting users only)
+        if ($isBackOffice) {
+            $betSystem = null;
+            $currency  = null;
+        } elseif ($creator->hasRole('agent')) {
             $betSystem = $creator->bet_system;
             $currency  = $creator->currency;
         } else {
@@ -107,10 +120,10 @@ class UserController extends Controller
             $currency  = $btParts[1] ?? 'VND';
         }
 
-        [$managerId, $masterId] = $this->resolveHierarchy($creator, $targetRole);
+        [$managerId, $masterId] = $isBackOffice ? [null, null] : $this->resolveHierarchy($creator, $targetRole);
 
         $user = User::create([
-            'package_id'       => $request->package_id,
+            'package_id'       => $isBackOffice ? null : $request->package_id,
             'manager_id'       => $managerId,
             'master_id'        => $masterId,
             'bet_system'       => $betSystem,
@@ -127,13 +140,14 @@ class UserController extends Controller
 
         $user->assignRole($targetRole);
 
-        $acctModel = $this->resolveAccountModel($betSystem, $currency);
-        $acctModel::firstOrCreate(
-            ['user_id' => $user->id],
-            ['credit_balance' => $request->available_credit ?? 0, 'record_status_id' => 1, 'created_by' => $creator->id]
-        );
-
-        $this->seedDefaultBetLimits($user->id);
+        if (! $isBackOffice) {
+            $acctModel = $this->resolveAccountModel($betSystem, $currency);
+            $acctModel::firstOrCreate(
+                ['user_id' => $user->id],
+                ['credit_balance' => $request->available_credit ?? 0, 'record_status_id' => 1, 'created_by' => $creator->id]
+            );
+            $this->seedDefaultBetLimits($user->id);
+        }
 
         return redirect()->route('admin.user.index')->with('success', 'User created successfully.');
     }
@@ -144,7 +158,10 @@ class UserController extends Controller
         $auth = Auth::user();
 
         if ($auth->hasRole('admin')) {
-            $roles = Role::whereIn('name', ['master', 'agent', 'member'])->get();
+            $roles = Role::whereIn('name', array_merge(
+                ['master', 'agent', 'member'],
+                self::BACK_OFFICE_ROLES
+            ))->get();
         } elseif ($auth->hasRole('master')) {
             $roles = Role::whereIn('name', ['agent', 'member'])->get();
         } elseif ($auth->hasRole('agent')) {
@@ -173,42 +190,52 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $targetRole   = $request->role;
+        $isBackOffice = in_array($targetRole, self::BACK_OFFICE_ROLES);
+
+        $rules = [
             'name'        => ['required', 'string', 'max:255'],
-            'package_id'  => ['required'],
             'phonenumber' => ['required'],
             'username'    => ['required', Rule::unique('users')->ignore($user->id)],
             'role'        => ['required', 'string'],
-        ]);
+        ];
+        if (! $isBackOffice) {
+            $rules['package_id'] = ['required'];
+        }
+        $request->validate($rules);
 
         $user->name        = $request->name;
-        $user->package_id  = $request->package_id;
         $user->username    = $request->username;
         $user->phonenumber = $request->phonenumber;
+        if (! $isBackOffice) {
+            $user->package_id = $request->package_id;
+        }
         $user->save();
 
-        $btRaw     = $request->input('bet_types', [])[0] ?? ($user->bet_system . '_' . $user->currency);
-        $btParts   = explode('_', $btRaw, 2);
-        $betSystem = $btParts[0] ?? $user->bet_system ?? 'vietnam';
-        $currency  = $btParts[1] ?? $user->currency  ?? 'VND';
+        if (! $isBackOffice) {
+            $btRaw     = $request->input('bet_types', [])[0] ?? ($user->bet_system . '_' . $user->currency);
+            $btParts   = explode('_', $btRaw, 2);
+            $betSystem = $btParts[0] ?? $user->bet_system ?? 'vietnam';
+            $currency  = $btParts[1] ?? $user->currency  ?? 'VND';
 
-        $acctModel = $this->resolveAccountModel($betSystem, $currency);
-        $account   = $acctModel::where('user_id', $user->id)->first();
-
-        if ($account) {
-            $account->credit_balance = $request->available_credit ?? $account->credit_balance;
-            $account->save();
-        } else {
-            $acctModel::create([
-                'user_id'          => $user->id,
-                'credit_balance'   => $request->available_credit ?? 0,
-                'record_status_id' => 1,
-            ]);
+            $acctModel = $this->resolveAccountModel($betSystem, $currency);
+            $account   = $acctModel::where('user_id', $user->id)->first();
+            if ($account) {
+                $account->credit_balance = $request->available_credit ?? $account->credit_balance;
+                $account->save();
+            } else {
+                $acctModel::create([
+                    'user_id'          => $user->id,
+                    'credit_balance'   => $request->available_credit ?? 0,
+                    'record_status_id' => 1,
+                ]);
+            }
+            $user->bet_system = $betSystem;
+            $user->currency   = $currency;
+            $user->save();
         }
 
-        $user->bet_system = $betSystem;
-        $user->currency   = $currency;
-        $user->syncRoles([$request->role]);
+        $user->syncRoles([$targetRole]);
 
         return redirect()->route('admin.user.index')->with('success', 'User updated successfully.');
     }
@@ -349,7 +376,7 @@ class UserController extends Controller
             ->leftJoinSub($accountSub, 'acc', 'users.id', '=', 'acc.user_id')
             ->where('users.manager_id', $manager_id)
             ->orderBy('users.id')
-            ->with(['package', 'roles', 'manager', 'currencies'])
+            ->with(['package', 'roles', 'manager'])
             ->get();
 
         return view('admin.user.under-manager', compact('data', 'managerName'));

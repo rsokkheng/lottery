@@ -27,7 +27,7 @@
     'navBg','navBgDarker','hoverBg','hoverText'
 ) + [
     'currencyLabel' => 'Bet Khmer · ' . ($khCurrency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar'),
-    'homeRoute'     => route($khPrefix . '.input'),
+    'homeRoute'     => $isMember ? route($khPrefix . '.input') : route($khPrefix . '.receipt-list'),
     'routes' => [
         'bet'         => $khPrefix . '.input',
         'receiptList' => $khPrefix . '.receipt-list',

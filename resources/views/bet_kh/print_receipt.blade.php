@@ -128,7 +128,7 @@
     function handlePrint() {
         window.print();
         window.onafterprint = function () {
-            window.location.href = '{{ route('bet-kh.input') }}';
+            window.location.href = '{{ route($khRoutePrefix . '.input') }}';
         };
     }
 </script>

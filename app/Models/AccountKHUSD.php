@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AccountKH extends Model
+class AccountKHUSD extends Model
 {
-    protected $table = 'account_kh_vnd';
+    protected $table = 'account_kh_usd';
 
     protected $fillable = [
         'user_id',
@@ -27,6 +27,6 @@ class AccountKH extends Model
 
     public function transactions()
     {
-        return $this->hasMany(CreditTransactionKH::class, 'user_id', 'user_id');
+        return $this->hasMany(CreditTransactionKHUSD::class, 'user_id', 'user_id');
     }
 }

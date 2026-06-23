@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CreditTransactionKH extends Model
+class CreditTransactionKHUSD extends Model
 {
-    protected $table = 'credit_transaction_kh_vnd';
+    protected $table = 'credit_transaction_kh_usd';
 
     protected $fillable = [
         'user_id',

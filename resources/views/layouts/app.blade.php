@@ -140,6 +140,74 @@
             .bn-filter-bar input,
             .bn-filter-bar select { font-size: .78rem; height: 32px; }
         }
+
+        /* ────────────────────────────────────────────────────
+           Shared bet-page styles  (receipt-list, bet-list,
+           bet-number, result, winning, reports)
+        ──────────────────────────────────────────────────── */
+        .bp-wrap { background:#fff; border-radius:14px; box-shadow:0 2px 14px rgba(0,0,0,.07); overflow:hidden; }
+
+        /* Filter bar */
+        .bp-filter { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center;
+                     padding:12px 16px; background:#f8f9fc; border-bottom:1px solid #e8ecf0; }
+        .bp-filter input, .bp-filter select {
+            border:1px solid #d1d8e0; border-radius:8px; padding:6px 10px 6px 32px;
+            font-size:.83rem; color:#374151; height:36px; outline:none;
+            background:#fff; transition:border-color .15s; }
+        .bp-filter input:focus, .bp-filter select:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.15); }
+        .bp-filter select { padding-left:10px; }
+        .bp-filter-icon { position:relative; display:flex; align-items:center; }
+        .bp-filter-icon svg { position:absolute; left:9px; width:15px; height:15px; color:#9ca3af; pointer-events:none; }
+        .bp-filter-icon input { padding-left:32px; }
+        .bp-search-btn { display:inline-flex; align-items:center; gap:5px; background:#2563eb; color:#fff;
+                         border:none; border-radius:8px; padding:0 16px; height:36px; font-size:.83rem;
+                         font-weight:600; cursor:pointer; white-space:nowrap; transition:background .15s; }
+        .bp-search-btn:hover { background:#1d4ed8; }
+
+        /* Table */
+        .bp-table-wrap { overflow-x:auto; }
+        .bp-table { width:100%; border-collapse:separate; border-spacing:0; font-size:.82rem; }
+        .bp-table thead th {
+            background:#4b5563;
+            color:#f9fafb; font-size:.72rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:.5px; padding:10px 10px; white-space:nowrap;
+            border-right:1px solid rgba(255,255,255,.12); border-bottom:none; }
+        .bp-table thead th:first-child { border-radius:0; }
+        .bp-table tbody td { padding:8px 10px; border-bottom:1px solid #f0f2f5;
+                              border-right:1px solid #f0f2f5; vertical-align:middle; white-space:nowrap; }
+        .bp-table tbody tr:last-child td { border-bottom:none; }
+        .bp-table tbody tr:hover td { background:#f0f5ff; }
+        .bp-table tbody tr.bp-win td { background:#fff0f0; color:#dc2626; }
+        .bp-table tbody tr.bp-win:hover td { background:#ffe5e5; }
+        .bp-table tfoot td, .bp-table tfoot th {
+            background:#f8f9fc; font-weight:700; padding:9px 10px;
+            border-top:2px solid #e2e8f0; font-size:.82rem; }
+        .bp-table .bp-num { text-align:right; }
+        .bp-table .bp-center { text-align:center; }
+
+        /* System badge */
+        .bp-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px;
+                    border-radius:20px; font-size:.75rem; font-weight:700; margin-bottom:10px; }
+        .bp-badge-vn  { background:linear-gradient(135deg,#1e3a8a,#2563eb); color:#fff; }
+        .bp-badge-usd { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; }
+        .bp-badge-kh  { background:linear-gradient(135deg,#7d5a00,#a17100); color:#fff; }
+
+        /* Empty state */
+        .bp-empty { text-align:center; padding:40px; color:#9ca3af; }
+        .bp-empty svg { width:44px; height:44px; margin:0 auto 10px; opacity:.4; }
+        .bp-empty p { font-size:.88rem; }
+
+        /* Page header row */
+        .bp-page-header { display:flex; align-items:center; justify-content:space-between;
+                          padding:14px 16px; border-bottom:1px solid #e8ecf0; flex-wrap:wrap; gap:8px; }
+        .bp-page-title { font-size:.95rem; font-weight:700; color:#1e293b; }
+        .bp-page-sub { font-size:.72rem; color:#6c757d; }
+
+        @media (max-width:640px) {
+            .bp-filter { gap:.35rem; }
+            .bp-filter input, .bp-filter select { font-size:.78rem; height:32px; }
+            .bp-table thead th, .bp-table tbody td { font-size:.72rem; padding:6px 7px; }
+        }
     </style>
 
     @livewireStyles
@@ -150,21 +218,21 @@
 <body>
     @auth
         @php
-            $user = auth()->user();
-            $isSupervisor  = $user->hasAnyRole(['admin', 'master', 'agent']);
-            $hasVietnamVND = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-            $hasVietnamUSD = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-            $hasKhmer      = $isSupervisor || $user->bet_system === 'khmer';
-            // For admin/master: rely on session to pick the active navigation
-            $sessionBetSystem = session('bet_system');
-            $sessionCurrency  = session('currency');
+            $user             = auth()->user();
+            $isAdmin          = $user->hasRole('admin');
+            $sessionBetSystem = session('bet_system', $user->bet_system);
+            $sessionCurrency  = session('currency',   $user->currency);
+            // Only admin sees all systems; master/agent/member use their own bet_system
+            $hasVietnamVND = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
+            $hasVietnamUSD = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
+            $hasKhmer      = $isAdmin || $user->bet_system === 'khmer';
         @endphp
 
         @if($sessionBetSystem === 'khmer' || ($hasKhmer && !$hasVietnamVND && !$hasVietnamUSD))
             @include('layouts.navigation_kh')
-        @elseif($sessionCurrency === 'USD' || ($hasVietnamUSD && !$hasVietnamVND && !$hasKhmer))
+        @elseif($sessionBetSystem !== 'khmer' && ($sessionCurrency === 'USD' || ($hasVietnamUSD && !$hasVietnamVND && !$hasKhmer)))
             @include('layouts.navigation_usd')
-        @elseif($sessionCurrency === 'VND' || ($hasVietnamVND && !$hasVietnamUSD && !$hasKhmer))
+        @elseif($sessionBetSystem !== 'khmer' && ($sessionCurrency === 'VND' || ($hasVietnamVND && !$hasVietnamUSD && !$hasKhmer)))
             @include('layouts.navigation')
         @else
             @include('layouts.nonavigation')

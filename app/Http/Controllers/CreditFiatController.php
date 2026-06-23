@@ -45,11 +45,11 @@ class CreditFiatController extends Controller
         $date  = $request->input('date', Carbon::today()->format('Y-m-d'));
 
         $supervisorRoles = ['master', 'agent'];
-        $isSupervisor    = !empty(array_intersect($supervisorRoles, $roles));
 
-        // Members with the given currency
+        // Members with the given currency (bet_system=vietnam, currency matches)
         $memberQuery = User::with(['manager'])
-            ->whereHas('currencies', fn($q) => $q->where('currency', $currency))
+            ->where('bet_system', 'vietnam')
+            ->where('currency', strtoupper($currency))
             ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', array_merge(['admin'], $supervisorRoles)));
 
         if (!in_array('admin', $roles)) {
@@ -60,8 +60,13 @@ class CreditFiatController extends Controller
             }
         }
 
-        $members = $memberQuery->with('manager')->orderBy('name')->get();
+        $members   = $memberQuery->with('manager')->orderBy('name')->get();
         $memberIds = $members->pluck('id');
+
+        // Preload credit balances for all members
+        $balances = $cfg['account_model']::whereIn('user_id', $memberIds)
+            ->get()
+            ->keyBy('user_id');
 
         // Turnover & net for selected date
         $statsQuery = DB::table($cfg['bets_table'] . ' as b')
@@ -88,16 +93,8 @@ class CreditFiatController extends Controller
 
         $wins = $winQuery->get()->keyBy('user_id');
 
-        // Outstanding: today's unsettled bets (exclude companies that already have results)
-        $settledCompanyIds = DB::table('bet_lottery_results')
-            ->join('bet_lottery_schedules', 'bet_lottery_schedules.id', '=', 'bet_lottery_results.lottery_schedule_id')
-            ->whereDate('bet_lottery_results.draw_date', Carbon::today())
-            ->pluck('bet_lottery_schedules.company_id')
-            ->unique()
-            ->toArray();
-
         return view('admin.credit-fiat.index', compact(
-            'members', 'roles', 'date', 'stats', 'wins', 'currency', 'cfg'
+            'members', 'roles', 'date', 'stats', 'wins', 'balances', 'currency', 'cfg'
         ));
     }
 

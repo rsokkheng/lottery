@@ -15,6 +15,8 @@ class CheckUSDCurrency
         $user = Auth::user();
 
         if ($user) {
+            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
+
             if ($user->hasAnyRole(['admin', 'master'])) {
                 return $next($request);
             }
@@ -25,8 +27,6 @@ class CheckUSDCurrency
             if (!$hasAccess) {
                 abort(403, 'Access denied. You do not have Bet Vietnam · ' . strtoupper($currency) . ' access.');
             }
-
-            session(['currency' => strtoupper($currency), 'bet_system' => 'vietnam']);
         }
 
         return $next($request);

@@ -129,7 +129,7 @@ class BetReportUSDController extends Controller
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bet_usd.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -272,7 +272,7 @@ class BetReportUSDController extends Controller
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bet_usd.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -351,7 +351,7 @@ class BetReportUSDController extends Controller
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bet_usd.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -491,7 +491,7 @@ class BetReportUSDController extends Controller
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bet_usd.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
@@ -556,7 +556,7 @@ class BetReportUSDController extends Controller
             $data = DB::table('bet_usd')
             ->select(
                 'users.username AS account',
-                'users.id AS user_id',
+                DB::raw('bet_usd.user_id AS user_id'),
                 DB::raw('COUNT(DISTINCT bet_usd.bet_receipt_id) AS total_receipts'),
                 DB::raw('SUM(bet_usd.total_amount) AS total_amount'),
                 DB::raw('SUM(bet_usd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),

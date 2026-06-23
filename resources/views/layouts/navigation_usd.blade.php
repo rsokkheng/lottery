@@ -21,7 +21,7 @@
     'navBg','navBgDarker','hoverBg','hoverText'
 ) + [
     'currencyLabel' => 'Bet Vietnam · USD Dollar',
-    'homeRoute'     => route('bet-usd.input'),
+    'homeRoute'     => $isMember ? route('bet-usd.input') : route('bet-usd.receipt-list'),
     'routes' => [
         'bet'         => 'bet-usd.input',
         'receiptList' => 'bet-usd.receipt-list',

@@ -25,4 +25,6 @@ enum MultiplierHNKHEnum
     public const ROLL_3D = 25;  // 3D roll
     public const ROLL_4D = 22;  // 4D roll
     public const ROLL2   = 28;  // Roll 2 (2D)
+    public const ROLL2_3D  = 23;  // Roll 2 (3D)
+
 }

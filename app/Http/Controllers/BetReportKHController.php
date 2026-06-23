@@ -166,7 +166,7 @@ class BetReportKHController extends Controller
                 ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user, $tBet) {
                     $q->where("{$tBet}.user_id", $user->id);
                 })
-                ->groupBy("{$tBet}.user_id", 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
+                ->groupBy("{$tBet}.user_id", 'users.id', 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
                 ->orderByRaw("COUNT(DISTINCT {$tBet}.bet_receipt_id) DESC")
                 ->get();
 
@@ -299,7 +299,7 @@ class BetReportKHController extends Controller
                 ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user, $tBet) {
                     $q->where("{$tBet}.user_id", $user->id);
                 })
-                ->groupBy("{$tBet}.user_id", 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
+                ->groupBy("{$tBet}.user_id", 'users.id', 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
                 ->orderByRaw("COUNT(DISTINCT {$tBet}.bet_receipt_id) DESC")
                 ->get();
 
@@ -370,7 +370,7 @@ class BetReportKHController extends Controller
                 ->when(!in_array('admin', $roles) && !in_array('agent', $roles), function ($q) use ($user, $tBet) {
                     $q->where("{$tBet}.user_id", $user->id);
                 })
-                ->groupBy("{$tBet}.user_id", 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
+                ->groupBy("{$tBet}.user_id", 'users.id', 'users.username', DB::raw("DATE({$tBet}.bet_date)"))
                 ->orderByRaw("COUNT(DISTINCT {$tBet}.bet_receipt_id) DESC")
                 ->get();
 
@@ -508,7 +508,7 @@ class BetReportKHController extends Controller
                 ->when($company_id > 0, function ($q) use ($company_id, $tBet) {
                     $q->where("{$tBet}.company_id", $company_id);
                 })
-                ->groupBy("{$tBet}.user_id", 'users.username')
+                ->groupBy("{$tBet}.user_id", 'users.id', 'users.username')
                 ->orderByDesc(DB::raw("COUNT(DISTINCT {$tBet}.bet_receipt_id)"))
                 ->get();
 
@@ -577,7 +577,7 @@ class BetReportKHController extends Controller
                 ->when($company_id > 0, function ($q) use ($company_id, $tBet) {
                     $q->where("{$tBet}.company_id", $company_id);
                 })
-                ->groupBy("{$tBet}.user_id", 'users.username')
+                ->groupBy("{$tBet}.user_id", 'users.id', 'users.username')
                 ->orderByDesc(DB::raw("COUNT(DISTINCT {$tBet}.bet_receipt_id)"))
                 ->get();
 

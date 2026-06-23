@@ -6,19 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BetWinningRecordKH extends Model
+class BetWinningRecordKHUSD extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $table = 'bet_winning_record_kh_vnd';
+    protected $table = 'bet_winning_record_kh_usd';
 
     public function betLotteryResult(): BelongsTo
     {
         return $this->belongsTo(LotteryResult::class, 'result_id', 'result_id');
     }
 
-    public function betWinningKH(): BelongsTo
+    public function betWinningKHUSD(): BelongsTo
     {
-        return $this->belongsTo(BetWinningKH::class, 'bet_winning_id', 'id');
+        return $this->belongsTo(BetWinningKHUSD::class, 'bet_winning_id', 'id');
     }
+
+    public function betWinningKH(): BelongsTo { return $this->betWinningKHUSD(); }
 }

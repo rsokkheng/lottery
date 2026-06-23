@@ -24,7 +24,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::middleware(['role:admin|master|agent'])->group(function(){
+    Route::middleware(['role:admin|master|agent|operator|finance|support|auditor'])->group(function(){
         Route::resource('menu',MenuController::class);
         Route::post('admin/user/setting', [UserController::class, 'saveSetting'])->name('user.setting');
         Route::resource('user',UserController::class);
@@ -37,16 +37,29 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::resource('role',RoleController::class);
         Route::resource('permission',PermissionController::class);
         Route::resource('bet-lottery-package',BetLotteryPackageController::class);
-        Route::resource('lottery-result',LotteryResultController::class);
-        Route::get('result/index-mien-nam',[LotteryResultController::class, 'indexMienNam'])->name('result.index-mien-nam');
-        Route::get('result/create-mien-nam',[LotteryResultController::class, 'createMienNam'])->name('result.create-mien-nam');
-        Route::get('result/index-mien-trung',[LotteryResultController::class, 'indexMienTrung'])->name('result.index-mien-trung');
-        Route::get('result/create-mien-trung',[LotteryResultController::class, 'createMienTrung'])->name('result.create-mien-trung');
-        Route::get('result/index-mien-bac',[LotteryResultController::class, 'indexMienBac'])->name('result.index-mien-bac');
-        Route::get('result/create-mien-bac',[LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
-        Route::post('result/store-winning-result-vnd',[LotteryResultController::class, 'storeWinningResult'])->name('result.store-winning-result');
-        Route::post('result/store-winning-result-usd',[LotteryResultUSDController::class, 'storeWinningResult'])->name('result.store-winning-result-usd');
-        Route::post('result/store-winning-result-kh',[LotteryResultKHController::class, 'storeWinningResult'])->name('result.store-winning-result-kh');
+        // Result data entry — requires 'data entry bet result' permission
+        // Admin grants this via the permission management UI
+        Route::middleware(['permission:data entry bet result'])->group(function () {
+            Route::resource('lottery-result', LotteryResultController::class);
+            Route::get('result/index-mien-nam',    [LotteryResultController::class, 'indexMienNam'])->name('result.index-mien-nam');
+            Route::get('result/create-mien-nam',   [LotteryResultController::class, 'createMienNam'])->name('result.create-mien-nam');
+            Route::get('result/index-mien-trung',  [LotteryResultController::class, 'indexMienTrung'])->name('result.index-mien-trung');
+            Route::get('result/create-mien-trung', [LotteryResultController::class, 'createMienTrung'])->name('result.create-mien-trung');
+            Route::get('result/index-mien-bac',    [LotteryResultController::class, 'indexMienBac'])->name('result.index-mien-bac');
+            Route::get('result/create-mien-bac',   [LotteryResultController::class, 'createMienBac'])->name('result.create-mien-bac');
+            Route::post('result/store-winning-result-vnd', [LotteryResultController::class,    'storeWinningResult'])->name('result.store-winning-result');
+            Route::post('result/store-winning-result-usd', [LotteryResultUSDController::class, 'storeWinningResult'])->name('result.store-winning-result-usd');
+            Route::post('result/store-winning-result-kh',  [LotteryResultKHController::class,  'storeWinningResult'])->name('result.store-winning-result-kh');
+            Route::get('result/index-kh-mien-nam',    [LotteryResultKHController::class, 'indexMienNam'])->name('result-kh.index-mien-nam');
+            Route::get('result/create-kh-mien-nam',   [LotteryResultKHController::class, 'createMienNam'])->name('result-kh.create-mien-nam');
+            Route::get('result/index-kh-mien-trung',  [LotteryResultKHController::class, 'indexMienTrung'])->name('result-kh.index-mien-trung');
+            Route::get('result/create-kh-mien-trung', [LotteryResultKHController::class, 'createMienTrung'])->name('result-kh.create-mien-trung');
+            Route::get('result/index-kh-mien-bac',    [LotteryResultKHController::class, 'indexMienBac'])->name('result-kh.index-mien-bac');
+            Route::get('result/create-kh-mien-bac',   [LotteryResultKHController::class, 'createMienBac'])->name('result-kh.create-mien-bac');
+            Route::get('result/get-bet-result/{date}/{region}', [LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
+            Route::get('generate-win-result', [LotteryResultController::class, 'callGenerateWinNumber']);
+            Route::post('result/store-winning-record', [\App\Http\Controllers\WinningRecordController::class, 'storeWinningRecord'])->name('result.store-winning-record');
+        });
         Route::get('credit-kh', [CreditKHController::class, 'index'])->name('credit-kh.index');
         Route::post('credit-kh/deposit', [CreditKHController::class, 'deposit'])->name('credit-kh.deposit');
         Route::get('credit-kh/{userId}/history', [CreditKHController::class, 'history'])->name('credit-kh.history');
@@ -55,16 +68,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         Route::get('credit/{currency}', [CreditFiatController::class, 'index'])->name('credit-fiat.index');
         Route::post('credit/{currency}/deposit', [CreditFiatController::class, 'deposit'])->name('credit-fiat.deposit');
         Route::get('credit/{currency}/{userId}/history', [CreditFiatController::class, 'history'])->name('credit-fiat.history');
-        Route::get('result/index-kh-mien-nam',[LotteryResultKHController::class, 'indexMienNam'])->name('result-kh.index-mien-nam');
-        Route::get('result/create-kh-mien-nam',[LotteryResultKHController::class, 'createMienNam'])->name('result-kh.create-mien-nam');
-        Route::get('result/index-kh-mien-trung',[LotteryResultKHController::class, 'indexMienTrung'])->name('result-kh.index-mien-trung');
-        Route::get('result/create-kh-mien-trung',[LotteryResultKHController::class, 'createMienTrung'])->name('result-kh.create-mien-trung');
-        Route::get('result/index-kh-mien-bac',[LotteryResultKHController::class, 'indexMienBac'])->name('result-kh.index-mien-bac');
-        Route::get('result/create-kh-mien-bac',[LotteryResultKHController::class, 'createMienBac'])->name('result-kh.create-mien-bac');
-        Route::get('result/get-bet-result/{date}/{region}',[LotteryResultController::class, 'getBetResultBy'])->name('result.index-get-bet-result');
-        Route::get('generate-win-result',[LotteryResultController::class, 'callGenerateWinNumber']);
-        Route::post('result/store-winning-record',[\App\Http\Controllers\WinningRecordController::class, 'storeWinningRecord'])->name('result.store-winning-record');
-
         Route::get('/set-lang/{locale}', function (string $locale) {
             try {
                 if (! in_array($locale, ['en', 'vi'])) {
@@ -83,7 +86,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         });
 
     });
-    Route::middleware(['role:admin'])->group(function(){
+    Route::middleware(['role:admin|auditor'])->group(function(){
         Route::get('/report-daily/report-vnd', [BetReportController::class, 'getDailyReportVND'])->name('report.index');
         Route::get('/report-daily/report-usd', [BetReportUSDController::class, 'getDailyReportUSD'])->name('report.daily-usd');
     });

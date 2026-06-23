@@ -6,12 +6,12 @@
     $isSupervisor = $isAdmin || $isMaster || $isAgent;
     $today         = \Carbon\Carbon::today()->format('Y-m-d');
 
-    $hasVND      = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-    $hasUSD      = $isSupervisor || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-    $hasKhmer    = $isSupervisor || $user->bet_system === 'khmer';
-    $hasKhmerVND = $isSupervisor || ($user->bet_system === 'khmer' && $user->currency === 'VND');
-    $hasKhmerUSD = $isSupervisor || ($user->bet_system === 'khmer' && $user->currency === 'USD');
-    $hasKHR      = $hasKhmer; // alias for legacy references
+    $hasVND      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
+    $hasUSD      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
+    $hasKhmerVND = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'VND');
+    $hasKhmerUSD = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'USD');
+    $hasKhmer    = $hasKhmerVND || $hasKhmerUSD;
+    $hasKHR      = $hasKhmer;
 
     if ($isSupervisor) {
         $supervisorRoleNames = ['admin', 'master', 'agent'];

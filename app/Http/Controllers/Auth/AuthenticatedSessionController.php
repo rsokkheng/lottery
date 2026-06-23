@@ -32,8 +32,8 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Supervisors (admin/master) and agents always go to admin panel
-        if ($user->hasAnyRole(['admin', 'master', 'agent'])) {
+        // Supervisors and back-office roles go directly to admin panel
+        if ($user->hasAnyRole(['admin', 'master', 'agent', 'operator', 'finance', 'support', 'auditor'])) {
             return redirect(RouteServiceProvider::HOME)->with('success', 'Login successfully.');
         }
 

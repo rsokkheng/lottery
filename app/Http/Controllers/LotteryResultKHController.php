@@ -995,7 +995,7 @@ class LotteryResultKHController extends Controller
                     'bet_winning_kh_vnd.win_amount as compensate',
                     'record.id as record_id',
                     'record.win_number',
-                    DB::raw('(SELECT COUNT(*) FROM bet_winning_record_kh r2 WHERE r2.bet_winning_id = record.bet_winning_id) as total_wins_count'),
+                    DB::raw('(SELECT COUNT(*) FROM bet_winning_record_kh_vnd r2 WHERE r2.bet_winning_id = record.bet_winning_id) as total_wins_count'),
                     'record.bet_number_id',
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',

@@ -1,305 +1,206 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/toastr/css/toastr.min.css') }}">
 
-    <div class="flex-col bg-white rounded-lg px-4 py-4">
-        <div class="grid grid-cols-2 gap-2 sm:gap-0 sm:flex sm:justify-start sm:items-center sm:space-x-2">
-            <div class="w-full sm:w-40">
-                <div class="relative">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                        </svg>
-                    </div>
-                    <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
-                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
-                        class="border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
-                        placeholder="Select date">
-                </div>
+    <div class="bp-wrap">
+        <div class="bp-page-header">
+            <div>
+                <span class="bp-badge bp-badge-usd">BET VIETNAM &middot; USD</span>
+                <div class="bp-page-title">{{ __('message.receipt_no') }} List</div>
             </div>
-            <div class="w-full sm:w-40">
-                <input type="text" id="receipt-no" value="{{ $no }}" class="rounded w-full"
-                    placeholder="{{ __('message.receipt_no') }}">
-            </div>
-            <div class="w-full sm:w-16">
-                <button
-                    class="flex justify-center items-center bg-blue-500 text-white px-2 py-1 sm:py-2  rounded hover:bg-blue-600"
-                    onclick="searchReceipt('{{ route('bet-usd.receipt-list') }}')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                    <p class="whitespace-nowrap"> {{ __('message.search') }} </p>
-                </button>
-            </div>
-
         </div>
-        <div class="flex w-full">
-            <div class="w-full overflow-auto py-4">
-                <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
-                    <thead>
-                        <tr class="bg-blue-500 border text-white font-bold text-nowrap ">
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.no') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.receipt_no') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.account') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.date') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.currency') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.total_amount') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.commission') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.net_amount') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">
-                                {{ __('message.compensate') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (isset($data) && count($data))
-                            @php
-                                $totalAmount = 0;
-                                $totalCommission = 0;
-                                $totalNetAmount = 0;
-                                $totalCompensate = 0;
-                            @endphp
-                            @foreach ($data as $key => $row)
-                                @php
-                                    $totalAmount += $row->total_amount ?? 0;
-                                    $totalCommission += $row->commission ?? 0;
-                                    $totalNetAmount += $row->net_amount ?? 0;
-                                    $totalCompensate += $row->compensate ?? 0;
-                                @endphp
-                                <tr
-                                    class="border border-gray-300 hover:bg-gray-100 {{ $row->compensate > 0 ? 'bg-red-100 hover:bg-red-200 text-red-500' : '' }} ">
-                                    <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
-                                    <td onclick="handleShowBet('{{ $row->receipt_id }}')"
-                                        class="py-2 px-1 border border-gray-300">
-                                        <a href="#" data-modal-target="static-modal"
-                                            data-modal-toggle="static-modal"
-                                            class="active text-blue-800 hover:underline whitespace-nowrap text-[12px] sm:text-base"
-                                            data-toggle="modal"
-                                            data-target="#detailModal">{{ $row->receipt_no ?? '' }}</a>
-                                    </td>
-                                    <td
-                                        class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $row->account ?? '' }}</td>
-                                    <td
-                                        class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $row->bet_date ?? '' }}</td>
-                                    <td
-                                        class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        USD</td>
-                                    <td
-                                        class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row->total_amount, 3, '.', '') }}</td>
-                                    <td
-                                        class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row->commission, 3, '.', '') }}</td>
-                                    <td
-                                        class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row->net_amount, 3, '.', '') }}</td>
-                                    <td
-                                        class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ number_format($row->compensate, 3, '.', '') }}</td>
-                                </tr>
-                            @endforeach
-                            <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td colspan="5"></td>
-                                <td
-                                    class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                    {{ number_format($totalAmount, 3, '.', '') }} </td>
-                                <td
-                                    class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                    {{ number_format($totalCommission, 3, '.', '') }}</td>
-                                <td
-                                    class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                    {{ number_format($totalNetAmount, 3, '.', '') }}</td>
-                                <td
-                                    class="text-right py-2 px-1 border font-bold border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                    {{ number_format($totalCompensate, 3, '.', '') }}</td>
 
-                            </tr>
-                        @else
-                            <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300" colspan="9">No data</td>
-                            </tr>
-                        @endif
-
-                    </tbody>
-                </table>
+        <div class="bp-filter">
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
+                    datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
+                    style="width:160px;" placeholder="{{ __('message.date') }}">
             </div>
+            <input type="text" id="receipt-no" value="{{ $no }}" style="width:160px;"
+                placeholder="{{ __('message.receipt_no') }}">
+            <button class="bp-search-btn" onclick="searchReceipt('{{ route('bet-usd.receipt-list') }}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
+                {{ __('message.search') }}
+            </button>
+        </div>
+
+        <div class="bp-table-wrap" style="padding:0 0 8px;">
+            <table class="bp-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('message.no') }}</th>
+                        <th>{{ __('message.receipt_no') }}</th>
+                        <th>{{ __('message.account') }}</th>
+                        <th>{{ __('message.date') }}</th>
+                        <th>{{ __('message.currency') }}</th>
+                        <th class="bp-num">{{ __('message.total_amount') }}</th>
+                        <th class="bp-num">{{ __('message.commission') }}</th>
+                        <th class="bp-num">{{ __('message.net_amount') }}</th>
+                        <th class="bp-num">{{ __('message.compensate') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isset($data) && count($data))
+                        @php
+                            $totalAmount     = 0;
+                            $totalCommission = 0;
+                            $totalNetAmount  = 0;
+                            $totalCompensate = 0;
+                        @endphp
+                        @foreach ($data as $key => $row)
+                            @php
+                                $totalAmount     += $row->total_amount ?? 0;
+                                $totalCommission += $row->commission ?? 0;
+                                $totalNetAmount  += $row->net_amount ?? 0;
+                                $totalCompensate += $row->compensate ?? 0;
+                            @endphp
+                            <tr class="{{ $row->compensate > 0 ? 'bp-win' : '' }}">
+                                <td class="bp-center">{{ $key + 1 }}</td>
+                                <td onclick="handleShowBet('{{ $row->receipt_id }}')" class="bp-center">
+                                    <a href="#" onclick="return false;" style="color:#059669;font-weight:600;">
+                                        {{ $row->receipt_no ?? '' }}
+                                    </a>
+                                </td>
+                                <td>{{ $row->account ?? '' }}</td>
+                                <td>{{ $row->bet_date ?? '' }}</td>
+                                <td class="bp-center">USD</td>
+                                <td class="bp-num">{{ number_format($row->total_amount, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row->commission, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row->net_amount, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row->compensate, 3, '.', '') }}</td>
+                            </tr>
+                        @endforeach
+                        <tr>
+                            <td colspan="5" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;text-align:center;">Total</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalAmount, 3, '.', '') }}</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCommission, 3, '.', '') }}</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount, 3, '.', '') }}</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCompensate, 3, '.', '') }}</td>
+                        </tr>
+                    @else
+                        <tr><td colspan="9" class="bp-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                            <p>No data found</p>
+                        </td></tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
-    <!-- Main modal -->
-    <div id="static-modal" data-modal-placement="top-left" data-modal-backdrop="static" tabindex="-1"
-        aria-hidden="true"
-        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+
+    {{-- Receipt detail modal --}}
+    <div id="static-modal" tabindex="-1" aria-hidden="true"
+        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+        style="background:rgba(0,0,0,.45);">
         <div class="relative p-3 w-full max-w-2xl max-h-full">
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg shadow-sm">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t  border-gray-200">
-                    <h6 class="text-xl font-semibold text-gray-900 ">
-                        <div class="flex">
-                            <p>{{ __('message.receipt_no') }}:</p>
-                            <p id="receipt_no"></p>
-                        </div>
+            <div class="relative bg-white rounded-lg shadow-sm" style="border:1px solid #e2e8f0;">
+                <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                    <h6 style="font-size:.95rem;font-weight:700;color:#1e293b;margin:0;">
+                        {{ __('message.receipt_no') }}: <span id="receipt_no" style="color:#059669;"></span>
                     </h6>
-                    <button type="button"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center "
-                        data-modal-hide="static-modal">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    <button type="button" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:4px;" onclick="closeReceiptModal()">
+                        <svg style="width:18px;height:18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                         </svg>
-                        <span class="sr-only">Close modal</span>
                     </button>
                 </div>
-                <!-- Modal body -->
-                <div class="p-4 md:p-5 space-y-4 w-full">
-                    <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
+                <div class="p-4 w-full">
+                    <table class="bp-table">
                         <thead>
-                            <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                                <th class="py-2 border border-white">{{ __('message.number') }}</th>
-                                <th class="py-2 border border-white">{{ __('message.company') }}</th>
-                                <th class="py-2 border border-white">{{ __('message.amount') }}</th>
+                            <tr>
+                                <th>{{ __('message.number') }}</th>
+                                <th>{{ __('message.company') }}</th>
+                                <th class="bp-num">{{ __('message.amount') }}</th>
                             </tr>
                         </thead>
-                        <tbody id="getBetByReceipt">
-                        </tbody>
-                        <tr class="border border-gray-300 hover:bg-gray-100">
-                            <th colspan="2" class="py-2 px-1 border border-gray-300">
-                                {{ __('message.total_amount') }}</th>
-                            <th class="py-2 px-1 border border-gray-300" id="totalAmount">0.00</th>
-                        </tr>
-                        <tr class="border border-gray-300 hover:bg-gray-100">
-                            <th colspan="2" class="py-2 px-1 border border-gray-300">
-                                {{ __('message.due_amount') }}</th>
-                            <th class="py-2 px-1 border border-gray-300" id="dueAmount">0.00</th>
-                        </tr>
-
+                        <tbody id="getBetByReceipt"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" style="font-weight:700;">{{ __('message.total_amount') }}</td>
+                                <td class="bp-num" id="totalAmount">0.00</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="font-weight:700;">{{ __('message.due_amount') }}</td>
+                                <td class="bp-num" id="dueAmount">0.00</td>
+                            </tr>
+                        </tfoot>
                     </table>
-
                 </div>
-                <!-- Modal footer -->
-                <div
-                    class="flex justify-content-end justify-items-end justify-end items-end p-4 space-x-2 md:p-5 border-t border-gray-200 rounded-b font-semibold">
-                    <button id="btn_pay" style="display: none" data-modal-hide="static-modal" type="button"
-                        class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 text-center "
-                        onclick="payReceipt()">{{ __('Pay') }}</button>
-                    <button data-modal-hide="static-modal" type="button"
-                        class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center "
-                        onclick="printReceipt()">{{ __('Print') }}</button>
-                    <button data-modal-hide="static-modal" type="button"
-                        class="text-white bg-sky-400 py-2.5 px-5 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{ __('Close') }}</button>
+                <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
+                    <button id="btn_pay" style="display:none;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;"
+                        type="button" onclick="payReceipt()">{{ __('Pay') }}</button>
+                    <button type="button" onclick="printReceipt()"
+                        style="background:#064e3b;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">{{ __('Print') }}</button>
+                    <button type="button" onclick="closeReceiptModal()"
+                        style="background:#e2e8f0;color:#374151;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">{{ __('Close') }}</button>
                 </div>
             </div>
         </div>
     </div>
 
-
     <script src="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.js') }}"></script>
-    <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('admin/plugins/toastr/js/toastr.min.js') }}"></script>
     <script>
-        // Toastr alerts
-        toastr.options = {
-            "progressBar": true,
-            "closeButton": true,
-        }
+        toastr.options = { "progressBar": true, "closeButton": true };
 
         function searchReceipt(url) {
             const date = $('#datepicker-receipt').val();
-            const no = $('#receipt-no').val()
+            const no   = $('#receipt-no').val();
             if (date.length || no.length) {
                 window.location = url + '?date=' + date + '&no=' + no;
             }
         }
 
+        function showReceiptModal() {
+            const m = document.getElementById('static-modal');
+            m.classList.remove('hidden'); m.classList.add('flex');
+        }
+        function closeReceiptModal() {
+            const m = document.getElementById('static-modal');
+            m.classList.add('hidden'); m.classList.remove('flex');
+        }
+
         function handleShowBet(id) {
-
+            document.getElementById('getBetByReceipt').innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px;">Loading...</td></tr>';
+            showReceiptModal();
             fetch(`/lotto_usd/bet/${id}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    let totalAmount = data?.totalAmount;
-                    let dueAmount = data?.dueAmount;
-
                     document.getElementById('receipt_no').innerText = data?.no_receipt;
-                    const getBetByReceipt = document.getElementById('getBetByReceipt');
-                    getBetByReceipt.innerHTML = '';
+                    const tbody = document.getElementById('getBetByReceipt');
+                    tbody.innerHTML = '';
                     let existWin = false;
                     data?.items?.forEach(item => {
-                        let winColor = ''
-                        if (Boolean(item?.is_win)) {
-                            existWin = true
-                            winColor = 'bg-red-100 hover:bg-red-200 text-red-500'
-                        }
-                        getBetByReceipt.innerHTML += `
-                            <tr class="border border-gray-300 hover:bg-gray-100 ${winColor}">
-                                <td class="py-2 px-1 border border-gray-300">${item?.number??""}</td>
-                                <td class="py-2 px-1 border border-gray-300">${item?.company??""}</td>
-                                <td class="py-2 px-1 border border-gray-300">${item?.amount??""}</td>
-                            </tr>`;
+                        const winClass = Boolean(item?.is_win) ? (existWin = true, 'bp-win') : '';
+                        tbody.innerHTML += `<tr class="${winClass}">
+                            <td>${item?.number ?? ''}</td>
+                            <td>${item?.company ?? ''}</td>
+                            <td class="bp-num">${item?.amount ?? ''}</td>
+                        </tr>`;
                     });
-                    if (!(data?.is_paid) && existWin) {
-                        $("#btn_pay").show()
-                    } else {
-                        $("#btn_pay").hide()
-                    }
-
-                    // Update Total Amount and Due Amount
-                    document.getElementById('totalAmount').innerText = Number(totalAmount).toFixed(2) + ' (USD)';
-                    document.getElementById('dueAmount').innerText = Number(dueAmount).toFixed(2) + ' (USD)';
+                    document.getElementById('btn_pay').style.display = (!(data?.is_paid) && existWin) ? '' : 'none';
+                    document.getElementById('totalAmount').innerText = Number(data?.totalAmount).toFixed(2) + ' (USD)';
+                    document.getElementById('dueAmount').innerText = Number(data?.dueAmount).toFixed(2) + ' (USD)';
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(e => { console.error(e); closeReceiptModal(); });
         }
 
         function printReceipt() {
-            var receiptNo = document.getElementById('receipt_no')?.innerText;
-            if (!receiptNo) {
-                alert("Receipt number not found!");
-                return;
-            }
-            var printWindow = window.open('/lotto_usd/bet_receipt/' + receiptNo, '_blank');
-
-            if (!printWindow) {
-                alert('Popup blocked! Please allow popups for this site.');
-                return;
-            }
-
-            printWindow.onload = function() {
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.onafterprint = function() {
-                        printWindow.close();
-                    };
-                }, 500);
-            };
+            const receiptNo = document.getElementById('receipt_no')?.innerText;
+            if (!receiptNo) { alert("Receipt number not found!"); return; }
+            const w = window.open('/lotto_usd/bet_receipt/' + receiptNo, '_blank');
+            if (!w) { alert('Popup blocked! Please allow popups for this site.'); return; }
+            w.onload = () => setTimeout(() => { w.print(); w.onafterprint = () => w.close(); }, 500);
         }
 
         function payReceipt() {
-            let receipt_no = $('#receipt_no').text();
-            fetch(`/lotto_usd/bet_receipt_pay/${receipt_no}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data?.success) {
-                        toastr.success('Receipt was paid!');
-                    } else {
-                        toastr.error('Internal error!');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            const receipt_no = $('#receipt_no').text();
+            fetch(`/bet_receipt_pay_usd/${receipt_no}`)
+                .then(r => r.json())
+                .then(data => data?.success ? toastr.success('Receipt was paid!') : toastr.error('Internal error!'))
+                .catch(e => console.error(e));
         }
     </script>
 </x-app-layout>

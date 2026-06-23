@@ -1,157 +1,111 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
-    <style>
 
-    </style>
+    @php $currencyLabel = strtoupper(session('currency', 'VND')); @endphp
 
-    {{--    </x-slot> --}}
-    <div class="flex-col bg-white rounded-lg px-4 py-4">
-        <div class="flex lg:w-2/4 md:w-2/3 max-sm:w-full max-sm:flex-col gap-4">
-            <div class="flex w-full">
-                <div class="relative w-full">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                        </svg>
-                    </div>
-                    <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
-                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
-                        class="border border-gray-600 text-gray-900 rounded focus:ring-blue-500 focus:border-blue-500 block w-full ps-10"
-                        placeholder="Select date">
-                </div>
+    <div class="bp-wrap">
+        <div class="bp-page-header">
+            <div>
+                <span class="bp-badge bp-badge-kh">BET KHMER &middot; {{ $currencyLabel }}</span>
+                <div class="bp-page-title">{{ __('message.win_lose') }} Report</div>
             </div>
-            <div class="flex w-full">
-                <select id="company" class=" w-full rounded">
-                    @foreach ($companies as $val)
-                        @if ($company == $val['id'])
-                            <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                        @else
-                            <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                        @endif
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex w-full">
-                <input type="text" id="bet-number" value="{{ $number }}" class="w-full rounded"
-                    placeholder="Bet number">
-            </div>
-            <div class="flex w-full">
-                <button
-                    class="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    onclick="searchWinning('{{ route('bet-kh.bet-winning') }}')">
-                    <svg class="size-6" viewBox="-2.64 -2.64 29.28 29.28" fill="none"
-                        xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z"
-                                fill="#ffffff"></path>
-                        </g>
-                    </svg>
-                    <p class="whitespace-nowrap">{{ __('message.search') }}</p>
-                </button>
-            </div>
-
         </div>
-        <div class="flex w-full">
-            <div class="w-full overflow-auto overflow-x-auto py-4">
-                <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
-                    <thead>
-                        <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                            <th class="py-2 px-2 border border-white">{{ __('message.no') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.receipt_no') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.account') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.date_time') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.bet_no') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.number') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.digit') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.game') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.company') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.amount') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.odds') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.net') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.turnover') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.commission') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.net_amount') }}</th>
-                            <th class="py-2 px-2 border border-white">{{ __('message.compensate') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (isset($data) && count($data))
-                            @php
-                                $totalCompensate = 0;
-                                $totalCommission = 0;
-                                $totalNetAmount = 0;
-                            @endphp
-                            @foreach ($data as $key => $row)
-                                <tr class="border border-gray-300 hover:bg-gray-100 text-center">
-                                    <td class="py-2 px-2 border border-gray-300">{{ $key + 1 }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['receipt_no'] ?? '' }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['account'] ?? '' }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['bet_date'] ?? '' }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['bet_id'] ?? '' }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['win_number'] ?? '' }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">
-                                        {{ $row['bet_type'] == 'RP4(x)' ? 'PL2' : $row['bet_type'] }}</td>
-                                    <td class="py-2 px-2 border border-gray-300">{{ $row['game'] ?? '' }} </td>
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row['company'] ?? '' }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['amount'], 2, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['odds'], 2, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['net'], 2, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['turnover'], 2, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['commission'], 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['net_amount'], 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-2 border border-gray-300">
-                                        {{ number_format($row['compensate'], 3, '.', '') }}</td>
-                                </tr>
-                                @php
-                                    $totalCommission += (float) $row['commission'] ?? 0;
-                                    $totalNetAmount += (float) $row['net_amount'] ?? 0;
-                                    $totalCompensate += (float) $row['compensate'] ?? 0;
-                                @endphp
-                            @endforeach
-                            <tr class="border border-gray-300  hover:bg-gray-100">
-                                <td colspan="13"></td>
-                                <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">
-                                    {{ number_format($totalCommission, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">
-                                    {{ number_format($totalNetAmount, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border bg-gray-200 font-bold border-gray-300">
-                                    {{ number_format($totalCompensate, 3, '.', '') }}</td>
-                            </tr>
-                        @else
-                            <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-2 border border-gray-300" colspan="16">No data</td>
-                            </tr>
-                        @endif
 
-                    </tbody>
-                </table>
+        <div class="bp-filter">
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="datepicker-receipt" value="{{ $date }}" datepicker datepicker-buttons
+                    datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
+                    style="width:160px;" placeholder="{{ __('message.date') }}">
             </div>
+            <select id="company" style="width:160px;">
+                @foreach ($companies as $val)
+                    <option value="{{ $val['id'] }}" @selected($company == $val['id'])>{{ $val['label'] }}</option>
+                @endforeach
+            </select>
+            <input type="text" id="bet-number" value="{{ $number }}" style="width:140px;" placeholder="{{ __('message.number') }}">
+            <button class="bp-search-btn" onclick="searchWinning('{{ route($khRoutePrefix . '.bet-winning') }}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
+                {{ __('message.search') }}
+            </button>
+        </div>
+
+        <div class="bp-table-wrap" style="padding:0 0 8px;">
+            <table class="bp-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('message.no') }}</th>
+                        <th>{{ __('message.receipt_no') }}</th>
+                        <th>{{ __('message.account') }}</th>
+                        <th>{{ __('message.date_time') }}</th>
+                        <th>{{ __('message.bet_no') }}</th>
+                        <th>{{ __('message.number') }}</th>
+                        <th>{{ __('message.digit') }}</th>
+                        <th>{{ __('message.game') }}</th>
+                        <th>{{ __('message.company') }}</th>
+                        <th class="bp-num">{{ __('message.amount') }}</th>
+                        <th class="bp-num">{{ __('message.odds') }}</th>
+                        <th class="bp-num">{{ __('message.net') }}</th>
+                        <th class="bp-num">{{ __('message.turnover') }}</th>
+                        <th class="bp-num">{{ __('message.commission') }}</th>
+                        <th class="bp-num">{{ __('message.net_amount') }}</th>
+                        <th class="bp-num">{{ __('message.compensate') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isset($data) && count($data))
+                        @php $totalCompensate = 0; $totalCommission = 0; $totalNetAmount = 0; @endphp
+                        @foreach ($data as $key => $row)
+                            <tr>
+                                <td class="bp-center">{{ $key + 1 }}</td>
+                                <td class="bp-center">{{ $row['receipt_no'] ?? '' }}</td>
+                                <td>{{ $row['account'] ?? '' }}</td>
+                                <td>{{ $row['bet_date'] ?? '' }}</td>
+                                <td class="bp-center">{{ $row['bet_id'] ?? '' }}</td>
+                                <td class="bp-center">{{ $row['win_number'] ?? '' }}</td>
+                                <td class="bp-center">{{ $row['bet_type'] == 'RP4(x)' ? 'PL2' : $row['bet_type'] }}</td>
+                                <td class="bp-center">{{ $row['game'] ?? '' }}</td>
+                                <td class="bp-center">{{ $row['company'] ?? '' }}</td>
+                                <td class="bp-num">{{ number_format($row['amount'], 2, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['odds'], 2, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['net'], 2, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['turnover'], 2, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['commission'], 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['net_amount'], 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row['compensate'], 3, '.', '') }}</td>
+                            </tr>
+                            @php
+                                $totalCommission += (float) ($row['commission'] ?? 0);
+                                $totalNetAmount  += (float) ($row['net_amount'] ?? 0);
+                                $totalCompensate += (float) ($row['compensate'] ?? 0);
+                            @endphp
+                        @endforeach
+                        <tr>
+                            <td colspan="13" style="background:#f8f9fc;border-top:2px solid #e2e8f0;"></td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCommission, 3, '.', '') }}</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount, 3, '.', '') }}</td>
+                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCompensate, 3, '.', '') }}</td>
+                        </tr>
+                    @else
+                        <tr><td colspan="16" class="bp-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                            <p>No data found</p>
+                        </td></tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script src="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.js') }}"></script>
-    <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
-
     <script>
         function searchWinning(url) {
-            const date = $('#datepicker-receipt').val();
-            const number = $('#bet-number').val()
-            const numberEncoded = encodeURIComponent(number); // "12%2324%2334"
-            const company = $('#company').val()
-            if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&number=' + numberEncoded + '&company=' + company;
+            const date    = $('#datepicker-receipt').val();
+            const number  = encodeURIComponent($('#bet-number').val());
+            const company = $('#company').val();
+            if (date.length) {
+                window.location = url + '?date=' + date + '&number=' + number + '&company=' + company;
             }
         }
     </script>
