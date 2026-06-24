@@ -190,25 +190,25 @@ class LotteryResultUSDController extends Controller
                 $result[$key]['provinces'][$item['code']]['province_code'] = $item['code'];
                 $result[$key]['provinces'][$item['code']]['province_name'] = $item['province'];
                 $result[$key]['provinces'][$item['code']]['schedule_id'] = $item['id'];
+                $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
+                $resultByOrder = [];
+                foreach ($getResult as $val) {
+                    $resultByOrder[(int)$val['result_order']] = $val;
+                }
                 for($i=0; $i<$prize['order_count']; $i++){
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['prize_level'] = $key;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_order'] = $i+1;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['input_length'] = $prize['input_length'];
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['tailwind_class'] = $prize['tailwind_class'];
-                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     if($region === HelperEnum::MienBacDienToanSlug->value){
                         $result[$key]['provinces'][$item['code']]['row_result'][$i]['col_count'] = $prize['col_count'];
                         $result[$key]['provinces'][$item['code']]['row_result'][$i]['row_count'] = $prize['row_count'];
                     }
-                    $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
-                    if(count($getResult)>0){
-                        foreach ($getResult as $val){
-                            if($val['result_order'] === $i+1){
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id']??0;
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number']??0;
-                            }
-                        }
+                    if(isset($resultByOrder[$i+1])){
+                        $val = $resultByOrder[$i+1];
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id'] ?? 0;
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number'] ?? '';
                     }
                 }
             }

@@ -2,24 +2,51 @@
     @php $currencyLabel = strtoupper(session('currency', 'VND')); @endphp
 
     <style>
-        .rs-tab { display:inline-block; cursor:pointer; padding:8px 16px; font-weight:700; font-size:.88rem;
+        /* ── Tabs ── */
+        .rs-tab { display:inline-block; cursor:pointer; padding:9px 18px; font-weight:700; font-size:.88rem;
                   color:#92400e; white-space:nowrap; border-radius:8px 8px 0 0; transition:all .15s; }
         .rs-tab.active { background:#78350f; color:#fff; }
         .rs-tab:not(.active):hover { background:#fef3c7; }
-        .responsive-table { width:100%; border-collapse:collapse; text-align:center; }
-        .responsive-table td { border:1px solid #e5e7eb; padding:6px 4px; vertical-align:top; }
-        .prize-column   { width:15%; font-size:1.1rem; font-weight:700; }
-        .province-column { width:20%; }
-        .province-name  { font-size:1.4rem; font-weight:700; }
-        .province-code  { font-size:.95rem; }
-        .winning-number { line-height:1.5; margin:2px 0; }
-        .prize-label-mobile { font-size:1.1rem; font-weight:700; }
-        @media (max-width:768px) {
-            .responsive-table { font-size:.72rem; }
-            .province-name  { font-size:1rem !important; }
-            .province-code  { font-size:.75rem !important; }
-            .winning-number { font-size:.72rem !important; }
-            .prize-label-mobile { font-size:.85rem !important; }
+
+        /* ── Result table ── */
+        .rs-wrap { max-width:860px; margin:20px auto; border-radius:12px; overflow:hidden;
+                   box-shadow:0 4px 20px rgba(0,0,0,.12); border:1px solid #e2e8f0; }
+        .rs-table { width:100%; border-collapse:collapse; text-align:center; }
+        .rs-table td { border:1px solid #e5e7eb; vertical-align:middle; padding:0; }
+
+        /* Header */
+        .rs-head { background:linear-gradient(135deg,#b45309 0%,#92400e 100%); }
+        .rs-head td { border-color:#c0714a; color:#fff; padding:16px 14px; }
+        .rs-date { font-size:1rem; font-weight:700; letter-spacing:.03em; }
+        .rs-prov-name { font-size:1.4rem; font-weight:800; letter-spacing:.01em; }
+        .rs-prov-code { font-size:.82rem; opacity:.85; margin-top:2px; }
+
+        /* Prize label column */
+        .rs-label { width:100px; min-width:100px; background:#fffbf0;
+                    border-right:3px solid #e5e7eb; font-size:1rem; font-weight:800;
+                    color:#374151; padding:16px 10px; letter-spacing:.02em; }
+
+        /* Data cells */
+        .rs-cell { padding:14px 16px; }
+        .rs-row-even { background:#fff; }
+        .rs-row-odd  { background:#f9fafb; }
+        .rs-row-even:hover, .rs-row-odd:hover { background:#fef9ec; }
+
+        /* Winning numbers */
+        .wn       { display:block; line-height:2; text-align:center; }
+        .wn-red   { color:#dc2626; font-weight:800; font-size:22px; }
+        .wn-blue  { color:#1d4ed8; font-weight:800; font-size:20px; }
+        .wn-num   { color:#1e293b; font-weight:700; font-size:18px; }
+        .wn-sep   { color:#9ca3af; font-size:14px; margin:0 2px; }
+
+        @media (max-width:640px) {
+            .rs-wrap         { margin:10px 8px; border-radius:8px; }
+            .rs-prov-name    { font-size:1rem; }
+            .rs-label        { width:66px; min-width:66px; font-size:.8rem; padding:12px 6px; }
+            .rs-cell         { padding:10px 6px; }
+            .wn-red          { font-size:16px; }
+            .wn-blue         { font-size:15px; }
+            .wn-num          { font-size:14px; }
         }
     </style>
 
@@ -62,7 +89,7 @@
             </ul>
         </div>
 
-        <div style="overflow-x:auto;padding:16px;">
+        <div style="padding:8px 16px 24px;">
             @php
                 $isMienBac = $data['type'] === \App\Enums\HelperEnum::MienBacDienToanSlug->value;
                 $result    = $data['form_result']['result'];
@@ -70,25 +97,25 @@
 
                 if ($isMienBac) {
                     $displayRows = [
-                        ['label'=>'1/A', 'type'=>'pair',   'p1'=>'GiaiBay', 'p2'=>'GiaiSau',  'color'=>'red'],
-                        ['label'=>'2',   'type'=>'single', 'prize'=>'GiaiNam'],
-                        ['label'=>'3',   'type'=>'single', 'prize'=>'GiaiTu'],
-                        ['label'=>'4',   'type'=>'single', 'prize'=>'GiaiBa'],
-                        ['label'=>'5',   'type'=>'single', 'prize'=>'GiaiNhi'],
-                        ['label'=>'6',   'type'=>'single', 'prize'=>'GiaiNhat'],
+                        ['label'=>'1/A', 'type'=>'pair',   'p1'=>'KH_GiaiBay', 'p2'=>'KH_GiaiSau',  'color'=>'red'],
+                        ['label'=>'2',   'type'=>'single', 'prize'=>'KH_GiaiNam'],
+                        ['label'=>'3',   'type'=>'single', 'prize'=>'KH_GiaiTu'],
+                        ['label'=>'4',   'type'=>'single', 'prize'=>'KH_GiaiBa'],
+                        ['label'=>'5',   'type'=>'single', 'prize'=>'KH_GiaiNhi'],
+                        ['label'=>'6',   'type'=>'single', 'prize'=>'KH_GiaiNhat'],
                         ['label'=>'7/B', 'type'=>'pair',   'p1'=>'KH_B_2D', 'p2'=>'KH_B_3D', 'color'=>'blue'],
                         ['label'=>'8/C', 'type'=>'pair',   'p1'=>'KH_C_2D', 'p2'=>'KH_C_3D', 'color'=>'blue'],
                         ['label'=>'9/D', 'type'=>'pair',   'p1'=>'KH_D_2D', 'p2'=>'KH_D_3D', 'color'=>'blue'],
                     ];
                 } else {
                     $displayRows = [
-                        ['label'=>'1/A',  'type'=>'pair',   'p1'=>'1/A',     'p2'=>'GiaiBay',  'color'=>'red'],
-                        ['label'=>'2',    'type'=>'single', 'prize'=>'GiaiSau'],
-                        ['label'=>'3',    'type'=>'single', 'prize'=>'GiaiNam'],
-                        ['label'=>'4',    'type'=>'single', 'prize'=>'GiaiTu'],
-                        ['label'=>'5',    'type'=>'single', 'prize'=>'GiaiBa'],
-                        ['label'=>'6',    'type'=>'single', 'prize'=>'GiaiNhi'],
-                        ['label'=>'7',    'type'=>'single', 'prize'=>'GiaiNhat'],
+                        ['label'=>'1/A',  'type'=>'pair',   'p1'=>'1/A',         'p2'=>'KH_GiaiBay',  'color'=>'red'],
+                        ['label'=>'2',    'type'=>'single', 'prize'=>'KH_GiaiSau'],
+                        ['label'=>'3',    'type'=>'single', 'prize'=>'KH_GiaiNam'],
+                        ['label'=>'4',    'type'=>'single', 'prize'=>'KH_GiaiTu'],
+                        ['label'=>'5',    'type'=>'single', 'prize'=>'KH_GiaiBa'],
+                        ['label'=>'6',    'type'=>'single', 'prize'=>'KH_GiaiNhi'],
+                        ['label'=>'7',    'type'=>'single', 'prize'=>'KH_GiaiNhat'],
                         ['label'=>'8/B',  'type'=>'pair',   'p1'=>'KH_B_2D', 'p2'=>'KH_B_3D', 'color'=>'blue'],
                         ['label'=>'9/C',  'type'=>'pair',   'p1'=>'KH_C_2D', 'p2'=>'KH_C_3D', 'color'=>'blue'],
                         ['label'=>'10/D', 'type'=>'pair',   'p1'=>'KH_D_2D', 'p2'=>'KH_D_3D', 'color'=>'blue'],
@@ -96,90 +123,82 @@
                 }
             @endphp
 
-            <table class="responsive-table">
-                <thead>
-                    <tr style="background:#b45309;">
-                        <td style="border:2px solid #fff;color:#fff;font-weight:700;padding:10px 6px;min-width:80px;">
-                            {{ $data['date_show'] }}
-                            <input type="hidden" value="{{ $data['date_show'] }}" id="date_result">
-                        </td>
-                        @foreach($schedule as $sch)
-                            <td style="border:2px solid #fff;color:#fff;font-weight:700;padding:10px 6px;min-width:100px;">
-                                <div class="province-name">{{ $sch['province'] }}</div>
-                                <div class="province-code">({{ $sch['code'] }})</div>
+            <div class="rs-wrap">
+                <table class="rs-table">
+                    <thead class="rs-head">
+                        <tr>
+                            <td class="rs-label" style="background:#7c2d12;border-color:#7c2d12;">
+                                <span class="rs-date">{{ $data['date_show'] }}</span>
+                                <input type="hidden" value="{{ $data['date_show'] }}" id="date_result">
                             </td>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($displayRows as $rowIdx => $row)
-                        <tr style="{{ $rowIdx % 2 === 0 ? 'background:#fff;' : 'background:#f9fafb;' }}">
-                            <td class="prize-label-mobile" style="font-weight:700;">{{ $row['label'] }}</td>
-
                             @foreach($schedule as $sch)
-                                <td class="province-column">
-                                    @if($row['type'] === 'pair')
-                                        @php
-                                            $prov1    = $result[$row['p1']]['provinces'][$sch['code']] ?? null;
-                                            $prov2    = $result[$row['p2']]['provinces'][$sch['code']] ?? null;
-                                            $colorCls = $row['color'] === 'red' ? 'text-red-600 font-bold' : 'text-blue-700 font-bold';
-                                        @endphp
-                                        @if($isMienBac && $row['color'] === 'red')
-                                            @php
-                                                $line1 = collect($prov1['row_result'] ?? [])->pluck('winning_number')->map(fn($v) => $v ?? '**')->join(' - ');
-                                                $line2 = collect($prov2['row_result'] ?? [])->pluck('winning_number')->map(fn($v) => $v ?? '***')->join(' - ');
-                                            @endphp
-                                            <div style="display:flex;justify-content:center;padding:2px 0;">
-                                                <span class="winning-number" style="color:#dc2626;font-weight:700;">{{ $line1 }}</span>
-                                            </div>
-                                            <div style="display:flex;justify-content:center;padding:2px 0;">
-                                                <span class="winning-number" style="color:#dc2626;font-weight:700;">{{ $line2 }}</span>
-                                            </div>
-                                        @else
-                                            @php
-                                                $val1 = $prov1['row_result'][0]['winning_number'] ?? '--';
-                                                $val2 = $prov2['row_result'][0]['winning_number'] ?? '---';
-                                            @endphp
-                                            <div style="display:flex;justify-content:center;padding:2px 0;">
-                                                <span class="winning-number {{ $colorCls }}">{{ $val1 }} - {{ $val2 }}</span>
-                                            </div>
-                                        @endif
-                                    @else
-                                        @php $prov = $result[$row['prize']]['provinces'][$sch['code']] ?? null; @endphp
-                                        @if($prov)
-                                            @if($isMienBac)
-                                                @php
-                                                    $rrList   = $prov['row_result'];
-                                                    $colCount = $rrList[0]['col_count'] ?? 1;
-                                                    $chunks   = array_chunk($rrList, $colCount);
-                                                @endphp
-                                                @foreach($chunks as $chunk)
-                                                    @php
-                                                        $len  = $chunk[0]['input_length'] ?? 4;
-                                                        $nums = collect($chunk)->pluck('winning_number')->map(fn($v) => $v ?? str_repeat('*', $len))->join(' - ');
-                                                        $cls  = $chunk[0]['tailwind_class'] ?? 'text-gray-800 font-semibold';
-                                                    @endphp
-                                                    <div style="display:flex;justify-content:center;padding:2px 0;">
-                                                        <span class="winning-number {{ $cls }}">{{ $nums }}</span>
-                                                    </div>
-                                                @endforeach
-                                            @else
-                                                @foreach($prov['row_result'] as $rr)
-                                                    <div style="display:flex;justify-content:center;padding:2px 0;">
-                                                        <span class="winning-number {{ $rr['tailwind_class'] ?? 'text-gray-800 font-semibold' }}">
-                                                            {{ $rr['winning_number'] ?? str_repeat('*', $rr['input_length'] ?? 4) }}
-                                                        </span>
-                                                    </div>
-                                                @endforeach
-                                            @endif
-                                        @endif
-                                    @endif
+                                <td style="padding:12px 10px;">
+                                    <div class="rs-prov-name">{{ $sch['province'] }}</div>
+                                    <div class="rs-prov-code">({{ $sch['code'] }})</div>
                                 </td>
                             @endforeach
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach($displayRows as $rowIdx => $row)
+                            @php $rowBg = $rowIdx % 2 === 0 ? 'rs-row-even' : 'rs-row-odd'; @endphp
+                            <tr class="{{ $rowBg }}">
+                                <td class="rs-label">{{ $row['label'] }}</td>
+
+                                @foreach($schedule as $sch)
+                                    <td class="rs-cell">
+                                        @if($row['type'] === 'pair')
+                                            @php
+                                                $prov1 = $result[$row['p1']]['provinces'][$sch['code']] ?? null;
+                                                $prov2 = $result[$row['p2']]['provinces'][$sch['code']] ?? null;
+                                            @endphp
+                                            @if($isMienBac && $row['color'] === 'red')
+                                                @php
+                                                    $line1 = collect($prov1['row_result'] ?? [])->pluck('winning_number')->map(fn($v) => $v ?? '**')->join(' - ');
+                                                    $line2 = collect($prov2['row_result'] ?? [])->pluck('winning_number')->map(fn($v) => $v ?? '***')->join(' - ');
+                                                @endphp
+                                                <span class="wn wn-red">{{ $line1 }}</span>
+                                                <span class="wn wn-red" style="font-size:19px;margin-top:4px;">{{ $line2 }}</span>
+                                            @else
+                                                @php
+                                                    $val1 = $prov1['row_result'][0]['winning_number'] ?? '--';
+                                                    $val2 = $prov2['row_result'][0]['winning_number'] ?? '---';
+                                                    $cls  = $row['color'] === 'red' ? 'wn-red' : 'wn-blue';
+                                                @endphp
+                                                <span class="wn {{ $cls }}">{{ $val1 }} - {{ $val2 }}</span>
+                                            @endif
+                                        @else
+                                            @php $prov = $result[$row['prize']]['provinces'][$sch['code']] ?? null; @endphp
+                                            @if($prov)
+                                                @if($isMienBac)
+                                                    @php
+                                                        $rrList   = $prov['row_result'];
+                                                        $colCount = $rrList[0]['col_count'] ?? 1;
+                                                        $chunks   = array_chunk($rrList, $colCount);
+                                                    @endphp
+                                                    @foreach($chunks as $chunk)
+                                                        @php
+                                                            $len  = $chunk[0]['input_length'] ?? 4;
+                                                            $nums = collect($chunk)->pluck('winning_number')->map(fn($v) => $v ?? str_repeat('*', $len))->join(' - ');
+                                                        @endphp
+                                                        <span class="wn wn-num">{{ $nums }}</span>
+                                                    @endforeach
+                                                @else
+                                                    @foreach($prov['row_result'] as $rr)
+                                                        <span class="wn wn-num">
+                                                            {{ $rr['winning_number'] ?? str_repeat('*', $rr['input_length'] ?? 4) }}
+                                                        </span>
+                                                    @endforeach
+                                                @endif
+                                            @endif
+                                        @endif
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

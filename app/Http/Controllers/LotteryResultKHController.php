@@ -27,8 +27,8 @@ class LotteryResultKHController extends Controller
     public string $currentDayName;
 
     // MienNam / MienTrung — A channel (row 1/A)
-    public array $rollA    = ['1/A'];       // 2D head
-    public array $rollA3D  = ['GiaiBay'];   // 3D head
+    public array $rollA    = ['1/A'];           // 2D head
+    public array $rollA3D  = ['KH_GiaiBay'];    // 3D head
 
     // MienNam / MienTrung — individual B/C/D channels
     public array $rollB    = ['KH_B_2D'];
@@ -39,8 +39,8 @@ class LotteryResultKHController extends Controller
     public array $rollD3D  = ['KH_D_3D'];
 
     // MienBac (Hanoi) — A channel (row 1/A)
-    public array $HanoiRollA   = ['GiaiBay'];   // 4 × 2D
-    public array $HanoiRollA3D = ['GiaiSau'];   // 3 × 3D
+    public array $HanoiRollA   = ['KH_GiaiBay'];    // 4 × 2D
+    public array $HanoiRollA3D = ['KH_GiaiSau'];    // 3 × 3D
 
     // MienBac (Hanoi) — individual B/C/D channels
     public array $HanoiRollB   = ['KH_B_2D'];
@@ -52,18 +52,18 @@ class LotteryResultKHController extends Controller
 
     // All KHR prize levels (used by Roll and Roll Parlay)
     public array $rolls = [
-        '1/A', 'GiaiBay',
-        'GiaiSau', 'GiaiNam', 'GiaiTu', 'GiaiBa', 'GiaiNhi', 'GiaiNhat',
+        '1/A', 'KH_GiaiBay',
+        'KH_GiaiSau', 'KH_GiaiNam', 'KH_GiaiTu', 'KH_GiaiBa', 'KH_GiaiNhi', 'KH_GiaiNhat',
         'KH_B_2D', 'KH_B_3D', 'KH_C_2D', 'KH_C_3D', 'KH_D_2D', 'KH_D_3D',
     ];
 
     // Roll2: row 1/A (2D+3D) + rows 2-3 + row 4 first-result-only (handled separately)
-    public array $roll7 = ['1/A', 'GiaiBay', 'GiaiSau', 'GiaiNam'];
+    public array $roll7 = ['1/A', 'KH_GiaiBay', 'KH_GiaiSau', 'KH_GiaiNam'];
 
     // Roll Parlay checks all prize levels
     public array $rollParlay = [
-        '1/A', 'GiaiBay',
-        'GiaiSau', 'GiaiNam', 'GiaiTu', 'GiaiBa', 'GiaiNhi', 'GiaiNhat',
+        '1/A', 'KH_GiaiBay',
+        'KH_GiaiSau', 'KH_GiaiNam', 'KH_GiaiTu', 'KH_GiaiBa', 'KH_GiaiNhi', 'KH_GiaiNhat',
         'KH_B_2D', 'KH_B_3D', 'KH_C_2D', 'KH_C_3D', 'KH_D_2D', 'KH_D_3D',
     ];
     public array $companies = [
@@ -151,36 +151,36 @@ class LotteryResultKHController extends Controller
     {
         if($region === HelperEnum::MienBacDienToanSlug->value){
             return [
-                "GiaiBay"  => ["name"=>"1/A 2D", "order_count"=>4, "input_length"=>2, "col_count"=>4, "row_count"=>1, "tailwind_class"=>'text-red-600 font-bold text-2xl'],
-                "GiaiSau"  => ["name"=>"1/A 3D", "order_count"=>3, "input_length"=>3, "col_count"=>3, "row_count"=>1, "tailwind_class"=>'text-red-600 font-bold text-2xl'],
-                "GiaiNam"  => ["name"=>"2",       "order_count"=>6, "input_length"=>4, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
-                "GiaiTu"   => ["name"=>"3",       "order_count"=>4, "input_length"=>4, "col_count"=>2, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
-                "GiaiBa"   => ["name"=>"4",       "order_count"=>6, "input_length"=>5, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
-                "GiaiNhi"  => ["name"=>"5",       "order_count"=>2, "input_length"=>5, "col_count"=>2, "row_count"=>1, "tailwind_class"=>'text-gray-800 font-semibold'],
-                "GiaiNhat" => ["name"=>"6",       "order_count"=>1, "input_length"=>5, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-gray-800 font-semibold'],
-                "KH_B_2D"  => ["name"=>"7/B 2D", "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
-                "KH_B_3D"  => ["name"=>"7/B 3D", "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
-                "KH_C_2D"  => ["name"=>"8/C 2D", "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
-                "KH_C_3D"  => ["name"=>"8/C 3D", "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
-                "KH_D_2D"  => ["name"=>"9/D 2D", "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
-                "KH_D_3D"  => ["name"=>"9/D 3D", "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_GiaiBay"  => ["name"=>"1/A 2D", "order_count"=>4, "input_length"=>2, "col_count"=>4, "row_count"=>1, "tailwind_class"=>'text-red-600 font-bold text-2xl'],
+                "KH_GiaiSau"  => ["name"=>"1/A 3D", "order_count"=>3, "input_length"=>3, "col_count"=>3, "row_count"=>1, "tailwind_class"=>'text-red-600 font-bold text-2xl'],
+                "KH_GiaiNam"  => ["name"=>"2",       "order_count"=>6, "input_length"=>4, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
+                "KH_GiaiTu"   => ["name"=>"3",       "order_count"=>4, "input_length"=>4, "col_count"=>2, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
+                "KH_GiaiBa"   => ["name"=>"4",       "order_count"=>6, "input_length"=>5, "col_count"=>3, "row_count"=>2, "tailwind_class"=>'text-gray-800 font-semibold'],
+                "KH_GiaiNhi"  => ["name"=>"5",       "order_count"=>2, "input_length"=>5, "col_count"=>2, "row_count"=>1, "tailwind_class"=>'text-gray-800 font-semibold'],
+                "KH_GiaiNhat" => ["name"=>"6",       "order_count"=>1, "input_length"=>5, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-gray-800 font-semibold'],
+                "KH_B_2D"     => ["name"=>"7/B 2D",  "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_B_3D"     => ["name"=>"7/B 3D",  "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_C_2D"     => ["name"=>"8/C 2D",  "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_C_3D"     => ["name"=>"8/C 3D",  "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_D_2D"     => ["name"=>"9/D 2D",  "order_count"=>1, "input_length"=>2, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
+                "KH_D_3D"     => ["name"=>"9/D 3D",  "order_count"=>1, "input_length"=>3, "col_count"=>1, "row_count"=>1, "tailwind_class"=>'text-blue-700 font-bold'],
             ];
         }else{
             return [
-                "1/A"     => ["name"=>"1/A",      "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-red-600 font-bold"],
-                "GiaiBay" => ["name"=>"1/A 3D",   "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-red-600 font-bold"],
-                "GiaiSau" => ["name"=>"2",         "order_count"=>3, "input_length"=>4, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "GiaiNam" => ["name"=>"3",         "order_count"=>1, "input_length"=>4, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "GiaiTu"  => ["name"=>"4",         "order_count"=>7, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "GiaiBa"  => ["name"=>"5",         "order_count"=>2, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "GiaiNhi" => ["name"=>"6",         "order_count"=>1, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "GiaiNhat"=> ["name"=>"7",         "order_count"=>1, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
-                "KH_B_2D" => ["name"=>"8/B 2D",   "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
-                "KH_B_3D" => ["name"=>"8/B 3D",   "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
-                "KH_C_2D" => ["name"=>"9/C 2D",   "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
-                "KH_C_3D" => ["name"=>"9/C 3D",   "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
-                "KH_D_2D" => ["name"=>"10/D 2D",  "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
-                "KH_D_3D" => ["name"=>"10/D 3D",  "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
+                "1/A"         => ["name"=>"1/A",      "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-red-600 font-bold"],
+                "KH_GiaiBay"  => ["name"=>"1/A 3D",   "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-red-600 font-bold"],
+                "KH_GiaiSau"  => ["name"=>"2",         "order_count"=>3, "input_length"=>4, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_GiaiNam"  => ["name"=>"3",         "order_count"=>1, "input_length"=>4, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_GiaiTu"   => ["name"=>"4",         "order_count"=>7, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_GiaiBa"   => ["name"=>"5",         "order_count"=>2, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_GiaiNhi"  => ["name"=>"6",         "order_count"=>1, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_GiaiNhat" => ["name"=>"7",         "order_count"=>1, "input_length"=>5, "tailwind_class"=>"text-gray-800 font-semibold"],
+                "KH_B_2D"     => ["name"=>"8/B 2D",    "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
+                "KH_B_3D"     => ["name"=>"8/B 3D",    "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
+                "KH_C_2D"     => ["name"=>"9/C 2D",    "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
+                "KH_C_3D"     => ["name"=>"9/C 3D",    "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
+                "KH_D_2D"     => ["name"=>"10/D 2D",   "order_count"=>1, "input_length"=>2, "tailwind_class"=>"text-blue-700 font-bold"],
+                "KH_D_3D"     => ["name"=>"10/D 3D",   "order_count"=>1, "input_length"=>3, "tailwind_class"=>"text-blue-700 font-bold"],
             ];
         }
     }
@@ -232,25 +232,25 @@ class LotteryResultKHController extends Controller
                 $result[$key]['provinces'][$item['code']]['province_code'] = $item['code'];
                 $result[$key]['provinces'][$item['code']]['province_name'] = $item['province'];
                 $result[$key]['provinces'][$item['code']]['schedule_id'] = $item['id'];
+                $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
+                $resultByOrder = [];
+                foreach ($getResult as $val) {
+                    $resultByOrder[(int)$val['result_order']] = $val;
+                }
                 for($i=0; $i<$prize['order_count']; $i++){
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['prize_level'] = $key;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_order'] = $i+1;
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['input_length'] = $prize['input_length'];
                     $result[$key]['provinces'][$item['code']]['row_result'][$i]['tailwind_class'] = $prize['tailwind_class'];
-                    $result[$key]['provinces'][$item['code']]['row_result'][$i]['draw_date'] = $dateFormatted;
                     if($region === HelperEnum::MienBacDienToanSlug->value){
                         $result[$key]['provinces'][$item['code']]['row_result'][$i]['col_count'] = $prize['col_count'];
                         $result[$key]['provinces'][$item['code']]['row_result'][$i]['row_count'] = $prize['row_count'];
                     }
-                    $getResult = $this->getLotteryResultFilter($dateFormatted, $key, null, $item['id']);
-                    if(count($getResult)>0){
-                        foreach ($getResult as $val){
-                            if($val['result_order'] === $i+1){
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id']??0;
-                                $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number']??0;
-                            }
-                        }
+                    if(isset($resultByOrder[$i+1])){
+                        $val = $resultByOrder[$i+1];
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['result_id'] = $val['result_id'] ?? 0;
+                        $result[$key]['provinces'][$item['code']]['row_result'][$i]['winning_number'] = $val['winning_number'] ?? '';
                     }
                 }
             }
@@ -507,6 +507,85 @@ class LotteryResultKHController extends Controller
             ];
             return view('admin.lottery-kh-result.create', compact('data'));
         }catch (\Exception $exception){
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+
+    public function checkResult(Request $request)
+    {
+        try {
+            $filterDate = $request->get('date', $this->currentDate);
+            $region     = $request->get('region', HelperEnum::MienNamSlug->value);
+
+            if (!$this->isValidDateRequest($filterDate)) {
+                $filterDate = $this->currentDate;
+            }
+            if (!$this->validateRegion($region)) {
+                $region = HelperEnum::MienNamSlug->value;
+            }
+
+            $dateFormatted = Carbon::createFromFormat('d/m/Y', $filterDate)->format('Y-m-d');
+            $dayName       = Carbon::parse($dateFormatted)->dayName;
+
+            // Get schedules for this region/day
+            $schedules = $this->getCurrentScheduleResultFilter($dayName, $region);
+            $scheduleIds = array_column($schedules, 'id');
+
+            // Bet + win summary per province (schedule)
+            $betData = [];
+            if (count($scheduleIds)) {
+                $betData = DB::table('bet_kh_vnd')
+                    ->select(
+                        'schedule.id as schedule_id',
+                        'schedule.province',
+                        'schedule.code',
+                        DB::raw('COUNT(DISTINCT bet_kh_vnd.bet_receipt_id) AS total_receipts'),
+                        DB::raw('SUM(bet_kh_vnd.total_amount) AS total_amount'),
+                        DB::raw('SUM(bet_kh_vnd.total_amount * bet_package_configurations.rate / 100) AS net_amount'),
+                        DB::raw('SUM(bet_kh_vnd.total_amount - (bet_kh_vnd.total_amount * bet_package_configurations.rate / 100)) AS commission'),
+                        DB::raw('COALESCE(SUM(bet_winning_kh_vnd.win_amount), 0) AS compensate')
+                    )
+                    ->leftJoin('bet_winning_kh_vnd', 'bet_winning_kh_vnd.bet_id', '=', 'bet_kh_vnd.id')
+                    ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', 'bet_kh_vnd.bet_schedule_id')
+                    ->join('bet_package_configurations', 'bet_package_configurations.id', '=', 'bet_kh_vnd.bet_package_config_id')
+                    ->whereIn('bet_kh_vnd.bet_schedule_id', $scheduleIds)
+                    ->whereDate('bet_kh_vnd.bet_date', $dateFormatted)
+                    ->groupBy('schedule.id', 'schedule.province', 'schedule.code')
+                    ->orderBy('schedule.province')
+                    ->get()->keyBy('schedule_id');
+            }
+
+            // Build province rows (all scheduled provinces, even with zero bets)
+            $rows = [];
+            foreach ($schedules as $sch) {
+                $bet = $betData[$sch['id']] ?? null;
+                $totalAmount = (float)($bet->total_amount ?? 0);
+                $netAmount   = (float)($bet->net_amount   ?? 0);
+                $commission  = (float)($bet->commission   ?? 0);
+                $compensate  = (float)($bet->compensate   ?? 0);
+                $rows[] = [
+                    'province'        => $sch['province'],
+                    'code'            => $sch['code'],
+                    'schedule_id'     => $sch['id'],
+                    'total_receipts'  => (int)($bet->total_receipts ?? 0),
+                    'total_amount'    => $totalAmount,
+                    'net_amount'      => $netAmount,
+                    'commission'      => $commission,
+                    'compensate'      => $compensate,
+                    'win_lose'        => $netAmount - $compensate,
+                ];
+            }
+
+            $data = [
+                'type'         => $region,
+                'current_date' => $filterDate,
+                'rows'         => $rows,
+                'url'          => ['check' => 'admin.result-kh.check-result'],
+            ];
+
+            return view('admin.lottery-kh-result.check-result', compact('data'));
+        } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();
         }
@@ -935,13 +1014,13 @@ class LotteryResultKHController extends Controller
         return DB::table('bet_lottery_results')
             ->select('result_id', DB::raw("'$number' as bet_number"))
             ->where(function ($q) use ($number, $date, $scheduleId) {
-                $q->whereIn('prize_level', ['1/A', 'GiaiBay', 'GiaiSau', 'GiaiNam'])
+                $q->whereIn('prize_level', ['1/A', 'KH_GiaiBay', 'KH_GiaiSau', 'KH_GiaiNam'])
                     ->where('lottery_schedule_id', $scheduleId)
                     ->where('draw_date', $date)
                     ->where('winning_number', 'like', '%'.$number);
             })
             ->orWhere(function ($q) use ($number, $date, $scheduleId) {
-                $q->where('prize_level', 'GiaiTu')
+                $q->where('prize_level', 'KH_GiaiTu')
                     ->where('result_order', 1)
                     ->where('lottery_schedule_id', $scheduleId)
                     ->where('draw_date', $date)

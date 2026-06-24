@@ -14,9 +14,9 @@
         <div class="container tab-pane active"><br>
             <div class="card">
                 <div class="card-header">
-                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-nam')}} (VND)</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-trung')}} (VND)</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-bac')}} (VND)</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-nam')}} (Cambodia)</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-trung')}} (Cambodia)</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-bac')}} (Cambodia)</h3>@endif
 
                     <input type="hidden" id="region_value" value="{{$data['type']??''}}"/>
                     <div class="card-tools">

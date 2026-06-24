@@ -28,22 +28,27 @@
 
 <style>
 /* ── Bet-type card grid ── */
-.bet-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
+.bet-type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; }
 
-/* card accent strip on the left */
 .bt-card { border-radius: .5rem; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.12); display: flex; flex-direction: column; }
 .bt-card .bt-header { padding: .9rem 1.1rem .75rem; display: flex; align-items: center; gap: .75rem; }
 .bt-card .bt-icon  { width: 2.6rem; height: 2.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
 .bt-card .bt-title { font-weight: 700; font-size: 1rem; line-height: 1.2; margin: 0; }
 .bt-card .bt-sub   { font-size: .72rem; opacity: .75; margin: 0; }
-.bt-card .bt-body  { padding: .5rem .75rem .85rem; flex: 1; }
+.bt-card .bt-body  { padding: .6rem .85rem .9rem; flex: 1; }
 
-/* action buttons inside card */
-.bt-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
-.bt-actions .btn { font-size: .75rem; padding: .3rem .65rem; border-radius: .35rem; font-weight: 600; white-space: nowrap; }
+/* action select dropdown */
+.bt-select-wrap { margin-top: .5rem; display: flex; gap: .4rem; align-items: center; }
+.bt-select { flex: 1; font-size: .8rem; font-weight: 600; padding: .35rem .5rem; border-radius: .35rem; border: 1.5px solid #dee2e6; background: #fff; cursor: pointer; height: 34px; }
+.bt-select:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,123,255,.2); border-color: #80bdff; }
+.bt-go-btn { height: 34px; padding: 0 .75rem; border-radius: .35rem; border: none; font-size: .78rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
 
-/* divider label inside card body */
-.bt-section-label { font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; margin: .55rem 0 .3rem; }
+/* divider label */
+.bt-section-label { font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .55; margin: .6rem 0 .2rem; }
+
+/* balance row */
+.balance-row { display: flex; align-items: center; justify-content: space-between; padding: .45rem .6rem; border-radius: .35rem; margin-bottom: .3rem; }
+.balance-row:last-child { margin-bottom: 0; }
 
 /* colour themes */
 .bt-vnd  { border-top: 4px solid #17a2b8; }
@@ -59,15 +64,11 @@
 .bt-khusd .bt-header { background: rgba(253,126,20,.08); }
 .bt-khusd .bt-icon  { background: rgba(253,126,20,.15); color: #fd7e14; }
 
-/* member stat mini-boxes */
+/* stat mini-boxes */
 .stat-mini { border-radius: .5rem; padding: .85rem 1rem; display: flex; align-items: center; gap: .85rem; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
 .stat-mini .stat-val { font-size: 1.7rem; font-weight: 800; line-height: 1; }
 .stat-mini .stat-lbl { font-size: .76rem; opacity: .8; margin-top: 3px; }
 .stat-mini .stat-ico { font-size: 2rem; opacity: .25; margin-left: auto; }
-
-/* member balance rows */
-.balance-row { display: flex; align-items: center; justify-content: space-between; padding: .45rem .6rem; border-radius: .35rem; margin-bottom: .3rem; }
-.balance-row:last-child { margin-bottom: 0; }
 
 /* ── Schedule + Reference panel ── */
 .sched-row { display: flex; align-items: center; gap: .6rem; padding: .55rem .75rem; border-bottom: 1px solid rgba(0,0,0,.06); }
@@ -87,6 +88,13 @@
 .ref-table td:first-child { white-space: nowrap; font-weight: 700; color: #495057; width: 9rem; }
 .ref-chip { display: inline-block; padding: .1rem .45rem; border-radius: .25rem; font-size: .7rem; font-weight: 700; margin: .1rem .15rem .1rem 0; }
 </style>
+
+<script>
+function btGo(sel) {
+    var url = sel.value;
+    if (url) { window.location.href = url; sel.value = ''; }
+}
+</script>
 
 {{-- ══════════════════════════════════════════════════
      TOP STATS ROW  (supervisor only)
@@ -149,43 +157,27 @@
         </div>
         <div class="bt-body">
             @if($isSupervisor)
-                <div class="bt-section-label">Management</div>
-                <div class="bt-actions">
-                    <a href="{{ url('lotto_vn/receipt-list') }}" class="btn btn-outline-info">
-                        <i class="fas fa-receipt me-1"></i>Receipt List
-                    </a>
-                    <a href="{{ url('lotto_vn/bet-list') }}" class="btn btn-outline-info">
-                        <i class="fas fa-list me-1"></i>Bet List
-                    </a>
-                    <a href="{{ url('lotto_vn/bet-number') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-hashtag me-1"></i>Bet Number
-                    </a>
+                <div class="bt-select-wrap">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <optgroup label="Management">
+                            <option value="{{ url('lotto_vn/receipt-list') }}">Receipt List</option>
+                            <option value="{{ url('lotto_vn/bet-list') }}">Bet List</option>
+                            <option value="{{ url('lotto_vn/bet-number') }}">Bet Number</option>
+                        </optgroup>
+                        <optgroup label="Reports">
+                            <option value="{{ route('reports.summary') }}">Summary</option>
+                            <option value="{{ route('reports.daily') }}">Daily</option>
+                            @if($isAdmin)
+                            <option value="{{ route('reports.monthly-tracking') }}">Monthly</option>
+                            @endif
+                        </optgroup>
+                        <optgroup label="Admin">
+                            <option value="{{ route('admin.result.index-mien-nam') }}">Lottery Result</option>
+                            <option value="{{ route('admin.credit-fiat.index', 'VND') }}">Credit</option>
+                        </optgroup>
+                    </select>
                 </div>
-                <div class="bt-section-label">Reports</div>
-                <div class="bt-actions">
-                    <a href="{{ route('reports.summary') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-pie me-1"></i>Summary
-                    </a>
-                    <a href="{{ route('reports.daily') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-bar me-1"></i>Daily
-                    </a>
-                    @if($isAdmin)
-                    <a href="{{ route('reports.monthly-tracking') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-calendar-alt me-1"></i>Monthly
-                    </a>
-                    @endif
-                </div>
-                @if($isSupervisor)
-                <div class="bt-section-label">Admin</div>
-                <div class="bt-actions">
-                    <a href="{{ route('admin.result.index-mien-nam') }}" class="btn btn-info text-white">
-                        <i class="fas fa-trophy me-1"></i>Lottery Result
-                    </a>
-                    <a href="{{ route('admin.credit-fiat.index', 'VND') }}" class="btn btn-info text-white">
-                        <i class="fas fa-wallet me-1"></i>Credit
-                    </a>
-                </div>
-                @endif
             @else
                 <div class="bt-section-label">My Account</div>
                 @php
@@ -195,13 +187,12 @@
                     <span class="fw-bold text-muted" style="font-size:.8rem"><i class="fas fa-wallet me-1"></i>Credit Balance</span>
                     <span class="fw-bold {{ $vndCredit > 0 ? 'text-info' : 'text-muted' }}">{{ number_format($vndCredit, 2) }}</span>
                 </div>
-                <div class="bt-actions mt-2">
-                    <a href="{{ url('lotto_vn/bet') }}" class="btn btn-info text-white">
-                        <i class="fas fa-dice me-1"></i>Place Bet
-                    </a>
-                    <a href="{{ url('lotto_vn/receipt-list') }}" class="btn btn-outline-info">
-                        <i class="fas fa-receipt me-1"></i>My Receipts
-                    </a>
+                <div class="bt-select-wrap mt-2">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <option value="{{ url('lotto_vn/bet') }}">Place Bet</option>
+                        <option value="{{ url('lotto_vn/receipt-list') }}">My Receipts</option>
+                    </select>
                 </div>
             @endif
         </div>
@@ -220,43 +211,27 @@
         </div>
         <div class="bt-body">
             @if($isSupervisor)
-                <div class="bt-section-label">Management</div>
-                <div class="bt-actions">
-                    <a href="{{ url('lotto_usd/receipt-list') }}" class="btn btn-outline-success">
-                        <i class="fas fa-receipt me-1"></i>Receipt List
-                    </a>
-                    <a href="{{ url('lotto_usd/bet-list') }}" class="btn btn-outline-success">
-                        <i class="fas fa-list me-1"></i>Bet List
-                    </a>
-                    <a href="{{ url('lotto_usd/bet-number') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-hashtag me-1"></i>Bet Number
-                    </a>
+                <div class="bt-select-wrap">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <optgroup label="Management">
+                            <option value="{{ url('lotto_usd/receipt-list') }}">Receipt List</option>
+                            <option value="{{ url('lotto_usd/bet-list') }}">Bet List</option>
+                            <option value="{{ url('lotto_usd/bet-number') }}">Bet Number</option>
+                        </optgroup>
+                        <optgroup label="Reports">
+                            <option value="{{ route('bet-usd.reports.summary') }}">Summary</option>
+                            <option value="{{ route('bet-usd.reports.daily') }}">Daily</option>
+                            @if($isAdmin)
+                            <option value="{{ route('bet-usd.reports.monthly-tracking') }}">Monthly</option>
+                            @endif
+                        </optgroup>
+                        <optgroup label="Admin">
+                            <option value="{{ route('admin.result.index-mien-nam') }}">Lottery Result</option>
+                            <option value="{{ route('admin.credit-fiat.index', 'USD') }}">Credit</option>
+                        </optgroup>
+                    </select>
                 </div>
-                <div class="bt-section-label">Reports</div>
-                <div class="bt-actions">
-                    <a href="{{ route('bet-usd.reports.summary') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-pie me-1"></i>Summary
-                    </a>
-                    <a href="{{ route('bet-usd.reports.daily') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-bar me-1"></i>Daily
-                    </a>
-                    @if($isAdmin)
-                    <a href="{{ route('bet-usd.reports.monthly-tracking') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-calendar-alt me-1"></i>Monthly
-                    </a>
-                    @endif
-                </div>
-                @if($isSupervisor)
-                <div class="bt-section-label">Admin</div>
-                <div class="bt-actions">
-                    <a href="{{ route('admin.result.index-mien-nam') }}" class="btn btn-success text-white">
-                        <i class="fas fa-trophy me-1"></i>Lottery Result
-                    </a>
-                    <a href="{{ route('admin.credit-fiat.index', 'USD') }}" class="btn btn-success text-white">
-                        <i class="fas fa-wallet me-1"></i>Credit
-                    </a>
-                </div>
-                @endif
             @else
                 <div class="bt-section-label">My Account</div>
                 @php
@@ -266,13 +241,12 @@
                     <span class="fw-bold text-muted" style="font-size:.8rem"><i class="fas fa-wallet me-1"></i>Credit Balance</span>
                     <span class="fw-bold {{ $usdCredit > 0 ? 'text-success' : 'text-muted' }}">{{ number_format($usdCredit, 2) }}</span>
                 </div>
-                <div class="bt-actions mt-2">
-                    <a href="{{ url('lotto_usd/bet') }}" class="btn btn-success text-white">
-                        <i class="fas fa-dice me-1"></i>Place Bet
-                    </a>
-                    <a href="{{ url('lotto_usd/receipt-list') }}" class="btn btn-outline-success">
-                        <i class="fas fa-receipt me-1"></i>My Receipts
-                    </a>
+                <div class="bt-select-wrap mt-2">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <option value="{{ url('lotto_usd/bet') }}">Place Bet</option>
+                        <option value="{{ url('lotto_usd/receipt-list') }}">My Receipts</option>
+                    </select>
                 </div>
             @endif
         </div>
@@ -291,43 +265,27 @@
         </div>
         <div class="bt-body">
             @if($isSupervisor)
-                <div class="bt-section-label">Management</div>
-                <div class="bt-actions">
-                    <a href="{{ route('bet-kh-vnd.receipt-list') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-receipt me-1"></i>Receipt List
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.bet-list') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-list me-1"></i>Bet List
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.bet-number') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-hashtag me-1"></i>Bet Number
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.bet-winning') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-trophy me-1"></i>Win Report
-                    </a>
-                </div>
-                <div class="bt-section-label">Reports</div>
-                <div class="bt-actions">
-                    <a href="{{ route('bet-kh-vnd.reports.summary') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-pie me-1"></i>Summary
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.reports.daily') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-bar me-1"></i>Daily
-                    </a>
-                    @if($isAdmin)
-                    <a href="{{ route('bet-kh-vnd.reports.monthly-tracking') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-calendar-alt me-1"></i>Monthly
-                    </a>
-                    @endif
-                </div>
-                <div class="bt-section-label">Admin</div>
-                <div class="bt-actions">
-                    <a href="{{ route('admin.result-kh.index-mien-nam') }}" class="btn btn-warning text-white">
-                        <i class="fas fa-trophy me-1"></i>KH Result
-                    </a>
-                    <a href="{{ route('admin.credit-kh.index') }}" class="btn btn-warning text-white">
-                        <i class="fas fa-wallet me-1"></i>Credit
-                    </a>
+                <div class="bt-select-wrap">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <optgroup label="Management">
+                            <option value="{{ route('bet-kh-vnd.receipt-list') }}">Receipt List</option>
+                            <option value="{{ route('bet-kh-vnd.bet-list') }}">Bet List</option>
+                            <option value="{{ route('bet-kh-vnd.bet-number') }}">Bet Number</option>
+                            <option value="{{ route('bet-kh-vnd.bet-winning') }}">Win Report</option>
+                        </optgroup>
+                        <optgroup label="Reports">
+                            <option value="{{ route('bet-kh-vnd.reports.summary') }}">Summary</option>
+                            <option value="{{ route('bet-kh-vnd.reports.daily') }}">Daily</option>
+                            @if($isAdmin)
+                            <option value="{{ route('bet-kh-vnd.reports.monthly-tracking') }}">Monthly</option>
+                            @endif
+                        </optgroup>
+                        <optgroup label="Admin">
+                            <option value="{{ route('admin.result-kh.index-mien-nam') }}">KH Result</option>
+                            <option value="{{ route('admin.credit-kh.index') }}">Credit</option>
+                        </optgroup>
+                    </select>
                 </div>
             @else
                 <div class="bt-section-label">My Account</div>
@@ -338,16 +296,13 @@
                     <span class="fw-bold text-muted" style="font-size:.8rem"><i class="fas fa-wallet me-1"></i>Credit Balance</span>
                     <span class="fw-bold {{ $khVndCredit > 0 ? 'text-warning' : 'text-muted' }}">{{ number_format($khVndCredit, 2) }}</span>
                 </div>
-                <div class="bt-actions mt-2">
-                    <a href="{{ url('lotto_kh_vnd/bet') }}" class="btn btn-warning text-white">
-                        <i class="fas fa-dice me-1"></i>Place Bet
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.receipt-list') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-receipt me-1"></i>My Receipts
-                    </a>
-                    <a href="{{ route('bet-kh-vnd.bet-winning') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-trophy me-1"></i>Win Report
-                    </a>
+                <div class="bt-select-wrap mt-2">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <option value="{{ url('lotto_kh_vnd/bet') }}">Place Bet</option>
+                        <option value="{{ route('bet-kh-vnd.receipt-list') }}">My Receipts</option>
+                        <option value="{{ route('bet-kh-vnd.bet-winning') }}">Win Report</option>
+                    </select>
                 </div>
             @endif
         </div>
@@ -366,43 +321,27 @@
         </div>
         <div class="bt-body">
             @if($isSupervisor)
-                <div class="bt-section-label">Management</div>
-                <div class="bt-actions">
-                    <a href="{{ route('bet-kh-usd.receipt-list') }}" class="btn btn-outline-warning" style="border-color:#fd7e14;color:#fd7e14">
-                        <i class="fas fa-receipt me-1"></i>Receipt List
-                    </a>
-                    <a href="{{ route('bet-kh-usd.bet-list') }}" class="btn btn-outline-warning" style="border-color:#fd7e14;color:#fd7e14">
-                        <i class="fas fa-list me-1"></i>Bet List
-                    </a>
-                    <a href="{{ route('bet-kh-usd.bet-number') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-hashtag me-1"></i>Bet Number
-                    </a>
-                    <a href="{{ route('bet-kh-usd.bet-winning') }}" class="btn btn-outline-warning" style="border-color:#fd7e14;color:#fd7e14">
-                        <i class="fas fa-trophy me-1"></i>Win Report
-                    </a>
-                </div>
-                <div class="bt-section-label">Reports</div>
-                <div class="bt-actions">
-                    <a href="{{ route('bet-kh-usd.reports.summary') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-pie me-1"></i>Summary
-                    </a>
-                    <a href="{{ route('bet-kh-usd.reports.daily') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-chart-bar me-1"></i>Daily
-                    </a>
-                    @if($isAdmin)
-                    <a href="{{ route('bet-kh-usd.reports.monthly-tracking') }}" class="btn btn-outline-dark">
-                        <i class="fas fa-calendar-alt me-1"></i>Monthly
-                    </a>
-                    @endif
-                </div>
-                <div class="bt-section-label">Admin</div>
-                <div class="bt-actions">
-                    <a href="{{ route('admin.result-kh.index-mien-nam') }}" class="btn text-white" style="background:#fd7e14;border-color:#fd7e14">
-                        <i class="fas fa-trophy me-1"></i>KH Result
-                    </a>
-                    <a href="{{ route('admin.credit-kh.index') }}" class="btn text-white" style="background:#fd7e14;border-color:#fd7e14">
-                        <i class="fas fa-wallet me-1"></i>Credit
-                    </a>
+                <div class="bt-select-wrap">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <optgroup label="Management">
+                            <option value="{{ route('bet-kh-usd.receipt-list') }}">Receipt List</option>
+                            <option value="{{ route('bet-kh-usd.bet-list') }}">Bet List</option>
+                            <option value="{{ route('bet-kh-usd.bet-number') }}">Bet Number</option>
+                            <option value="{{ route('bet-kh-usd.bet-winning') }}">Win Report</option>
+                        </optgroup>
+                        <optgroup label="Reports">
+                            <option value="{{ route('bet-kh-usd.reports.summary') }}">Summary</option>
+                            <option value="{{ route('bet-kh-usd.reports.daily') }}">Daily</option>
+                            @if($isAdmin)
+                            <option value="{{ route('bet-kh-usd.reports.monthly-tracking') }}">Monthly</option>
+                            @endif
+                        </optgroup>
+                        <optgroup label="Admin">
+                            <option value="{{ route('admin.result-kh.index-mien-nam') }}">KH Result</option>
+                            <option value="{{ route('admin.credit-kh.index') }}">Credit</option>
+                        </optgroup>
+                    </select>
                 </div>
             @else
                 <div class="bt-section-label">My Account</div>
@@ -415,16 +354,13 @@
                     <span class="fw-bold text-muted" style="font-size:.8rem"><i class="fas fa-wallet me-1"></i>Credit Balance</span>
                     <span class="fw-bold {{ $khUsdCredit > 0 ? '' : 'text-muted' }}" style="{{ $khUsdCredit > 0 ? 'color:#fd7e14' : 'color:inherit' }}">{{ number_format($khUsdCredit, 2) }}</span>
                 </div>
-                <div class="bt-actions mt-2">
-                    <a href="{{ url('lotto_kh_usd/bet') }}" class="btn text-white" style="background:#fd7e14;border-color:#fd7e14">
-                        <i class="fas fa-dice me-1"></i>Place Bet
-                    </a>
-                    <a href="{{ route('bet-kh-usd.receipt-list') }}" class="btn btn-outline-warning" style="border-color:#fd7e14;color:#fd7e14">
-                        <i class="fas fa-receipt me-1"></i>My Receipts
-                    </a>
-                    <a href="{{ route('bet-kh-usd.bet-winning') }}" class="btn btn-outline-warning" style="border-color:#fd7e14;color:#fd7e14">
-                        <i class="fas fa-trophy me-1"></i>Win Report
-                    </a>
+                <div class="bt-select-wrap mt-2">
+                    <select class="bt-select" onchange="btGo(this)">
+                        <option value="">— Select Action —</option>
+                        <option value="{{ url('lotto_kh_usd/bet') }}">Place Bet</option>
+                        <option value="{{ route('bet-kh-usd.receipt-list') }}">My Receipts</option>
+                        <option value="{{ route('bet-kh-usd.bet-winning') }}">Win Report</option>
+                    </select>
                 </div>
             @endif
         </div>
@@ -612,26 +548,27 @@
     <div class="card-header">
         <h3 class="card-title"><i class="fas fa-cogs me-1"></i> Admin Quick Actions</h3>
     </div>
-    <div class="card-body d-flex flex-wrap gap-2">
-        <a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-users me-1"></i>User Management
-        </a>
-        <a href="{{ route('admin.bet-lottery-package.index') }}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-box-open me-1"></i>Lottery Packages
-        </a>
-        <a href="{{ route('admin.menu.index') }}" class="btn btn-sm btn-secondary">
-            <i class="fas fa-bars me-1"></i>Menus
-        </a>
-        @if($hasVND)
-        <a href="{{ route('admin.report.index') }}" class="btn btn-sm btn-outline-info">
-            <i class="fas fa-file-alt me-1"></i>VND Daily Report
-        </a>
-        @endif
-        @if($hasUSD)
-        <a href="{{ route('admin.report.daily-usd') }}" class="btn btn-sm btn-outline-success">
-            <i class="fas fa-file-alt me-1"></i>USD Daily Report
-        </a>
-        @endif
+    <div class="card-body">
+        <div class="bt-select-wrap">
+            <select class="bt-select" onchange="btGo(this)">
+                <option value="">— Select Action —</option>
+                <optgroup label="Administration">
+                    <option value="{{ route('admin.user.index') }}">User Management</option>
+                    <option value="{{ route('admin.bet-lottery-package.index') }}">Lottery Packages</option>
+                    <option value="{{ route('admin.menu.index') }}">Menus</option>
+                </optgroup>
+                @if($hasVND || $hasUSD)
+                <optgroup label="Daily Reports">
+                    @if($hasVND)
+                    <option value="{{ route('admin.report.index') }}">VND Daily Report</option>
+                    @endif
+                    @if($hasUSD)
+                    <option value="{{ route('admin.report.daily-usd') }}">USD Daily Report</option>
+                    @endif
+                </optgroup>
+                @endif
+            </select>
+        </div>
     </div>
 </div>
 @endif
