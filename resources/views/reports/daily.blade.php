@@ -2,12 +2,6 @@
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
 
     <div class="bp-wrap">
-        <div class="bp-page-header">
-            <div>
-                <span class="bp-badge bp-badge-vn">Lotto Vietnam · VND</span>
-                <div class="bp-page-title">Daily Report</div>
-            </div>
-        </div>
 
         <div class="bp-filter">
             <div class="bp-filter-icon">
@@ -24,6 +18,9 @@
             <button class="bp-search-btn" onclick="searchReceipt('{{ route('reports.daily') }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
+            </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route('reports.daily') }}')">
+                {{ __('message.clear') }}
             </button>
         </div>
 
@@ -110,5 +107,6 @@
                 window.location = url + '?date=' + date + '&com_id=' + com_id;
             }
         }
+        function clearSearch(url) { window.location = url; }
     </script>
 </x-app-layout>

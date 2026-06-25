@@ -192,6 +192,11 @@
         .bp-badge-usd { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; }
         .bp-badge-kh  { background:linear-gradient(135deg,#7d5a00,#a17100); color:#fff; }
 
+        /* Win/lose colour helpers */
+        .bp-neg     { color:#dc2626; font-weight:700; }
+        .bp-neg-t   { color:#dc2626; }
+        .bp-row-win { background:#fef2f2; }
+
         /* Empty state */
         .bp-empty { text-align:center; padding:40px; color:#9ca3af; }
         .bp-empty svg { width:44px; height:44px; margin:0 auto 10px; opacity:.4; }

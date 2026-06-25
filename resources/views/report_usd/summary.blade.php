@@ -2,12 +2,6 @@
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
 
     <div class="bp-wrap">
-        <div class="bp-page-header">
-            <div>
-                <span class="bp-badge bp-badge-usd">Lotto Vietnam · USD</span>
-                <div class="bp-page-title">Summary Report</div>
-            </div>
-        </div>
 
         <div class="bp-filter">
             <div class="bp-filter-icon">

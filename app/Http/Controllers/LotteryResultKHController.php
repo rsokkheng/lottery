@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\BetReceiptKH;
+use App\Models\BetReceiptKHUSD;
 use App\Models\BetWinningRecordKH;
+use App\Models\BetWinningRecordKHUSD;
 use App\Models\BetWinningKH;
+use App\Models\BetWinningKHUSD;
 use App\Models\AccountKH;
+use App\Models\AccountVND;
+use App\Models\AccountUSD;
 use App\Models\CreditTransactionKH;
+use App\Models\CreditTransactionVND;
+use App\Models\CreditTransactionUSD;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\HelperEnum;
@@ -309,134 +316,138 @@ class LotteryResultKHController extends Controller
             $form = $request->all();
             $betResult = new LotteryResult();
             if (isset($form['data']) && count($form['data'])) {
-                $resultRegion = $form['result_region']??'';
-                $resultDate = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
-                $dayName = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->dayName;
-                if(strtotime(Carbon::today()->format('Y-m-d')) < strtotime($resultDate)){
+                $resultRegion = $form['result_region'] ?? '';
+                $resultDate   = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->format('Y-m-d');
+                $dayName      = Carbon::createFromFormat('d/m/Y', $form['data'][0]['result_date'])->dayName;
+                if (strtotime(Carbon::today()->format('Y-m-d')) < strtotime($resultDate)) {
                     DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Invalid result date!',
-                    ], 500);
+                    return response()->json(['success' => false, 'message' => 'Invalid result date!'], 500);
                 }
-//                $date = '2025-02-23';
-//                $dayName = 'Sunday';
-//                $time = '16:30:00';
-                $resultTime = $this->getBetTime($resultRegion);
+
+                $resultTime              = $this->getBetTime($resultRegion);
                 $scheduleIdsByCurrentBet = $this->getPluckIdSchedule($dayName, $resultTime);
-                $oldBetWinningRecords = BetWinningRecordKH::query()->whereHas('betLotteryResult', function ($query) use ($resultDate, $scheduleIdsByCurrentBet){
-                        $query->where('draw_date', $resultDate)
-                            ->whereIn('lottery_schedule_id', $scheduleIdsByCurrentBet);
-                    });
 
-                // Capture users with existing wins before deletion (for credit reversal)
-                $existingWinnerIds = DB::table('bet_winning_kh_vnd')
-                    ->join('bet_kh_vnd', 'bet_kh_vnd.id', '=', 'bet_winning_kh_vnd.bet_id')
-                    ->whereDate('bet_winning_kh_vnd.created_at', $resultDate)
-                    ->whereIn('bet_kh_vnd.bet_schedule_id', $scheduleIdsByCurrentBet)
-                    ->pluck('bet_kh_vnd.user_id')
-                    ->unique()->toArray();
-
-                $oldBetWinningRecords->each(function ($record){
-                    $record->betWinningKH()->forceDelete();
-                });
-                $oldBetWinningRecords->forceDelete();
-
-                // Reverse existing win credits for those users on this date
-                if (!empty($existingWinnerIds)) {
-                    CreditTransactionKH::where('type', 'win_credit')
-                        ->where('bet_date', $resultDate)
-                        ->whereIn('user_id', $existingWinnerIds)
-                        ->get()
-                        ->each(function ($tx) {
-                            $account = AccountKH::where('user_id', $tx->user_id)->first();
-                            if ($account) {
-                                $account->credit_balance = max(0, (float) $account->credit_balance - (float) $tx->amount);
-                                $account->save();
-                            }
-                        });
-                    CreditTransactionKH::where('type', 'win_credit')
-                        ->where('bet_date', $resultDate)
-                        ->whereIn('user_id', $existingWinnerIds)
-                        ->delete();
-                }
+                // Save lottery result numbers
                 foreach ($form['data'] as $item) {
-                    $betResult->newQuery()->upsert([
-                            [
-                                'draw_date' => $resultDate,
-                                'province_code' => $item['province_code'],
-                                'prize_level' => $item['prize_level'],
-                                'winning_number' => $item['winning_number'],
-                                'result_order' => $item['result_order'],
-                                'lottery_schedule_id' => $item['schedule_id']
-                            ]
-                        ],
+                    $betResult->newQuery()->upsert([[
+                        'draw_date'           => $resultDate,
+                        'province_code'       => $item['province_code'],
+                        'prize_level'         => $item['prize_level'],
+                        'winning_number'      => $item['winning_number'],
+                        'result_order'        => $item['result_order'],
+                        'lottery_schedule_id' => $item['schedule_id'],
+                    ]],
                         uniqueBy: ['draw_date', 'province_code', 'prize_level', 'result_order', 'lottery_schedule_id'],
-                        update: ['winning_number']
+                        update:   ['winning_number']
                     );
                 }
-                $getNormalWinNumber = $this->generateNormalWinBet($resultDate, $scheduleIdsByCurrentBet);
-                $getHashWinNumber = $this->generateHashWinBet($resultDate, $scheduleIdsByCurrentBet);
-                $insertWinNumber = [...$getNormalWinNumber,...$getHashWinNumber];
-                if(count($insertWinNumber)) {
-                    $recordsCreated = $this->insertBetWinning($insertWinNumber, $resultDate);
-                    if (count($recordsCreated)) {
-                        // Update receipt compensate totals
-                        DB::table('bet_winning_kh_vnd as winning')
-                        ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
-                        ->whereDate('winning.created_at', $resultDate)
-                        ->whereIn('winning.bet_id', function ($sub) use ($scheduleIdsByCurrentBet) {
-                            $sub->select('id')->from('bet_kh_vnd')->whereIn('bet_schedule_id', $scheduleIdsByCurrentBet);
-                        })
-                        ->orderBy('winning.bet_receipt_id')
-                        ->groupBy('winning.bet_receipt_id')
-                        ->each(function ($winning) {
-                            BetReceiptKH::query()->find($winning->bet_receipt_id)->update(['compensate' => $winning->sum_amount]);
-                        });
 
-                        // Auto-credit winnings to each member's AccountKH
-                        DB::table('bet_winning_kh_vnd as winning')
-                        ->join('bet_kh_vnd', 'bet_kh_vnd.id', '=', 'winning.bet_id')
-                        ->select('bet_kh_vnd.user_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
-                        ->whereDate('winning.created_at', $resultDate)
-                        ->whereIn('bet_kh_vnd.bet_schedule_id', $scheduleIdsByCurrentBet)
-                        ->groupBy('bet_kh_vnd.user_id')
-                        ->orderBy('bet_kh_vnd.user_id')
-                        ->each(function ($winning) use ($resultDate) {
-                            $account = AccountKH::firstOrCreate(
-                                ['user_id' => $winning->user_id],
-                                ['credit_balance' => 0, 'created_by' => Auth::id()]
-                            );
-                            $before = (float) $account->credit_balance;
-                            $account->credit_balance += $winning->sum_amount;
-                            $account->save();
-                            CreditTransactionKH::create([
-                                'user_id'        => $winning->user_id,
-                                'type'           => 'win_credit',
-                                'amount'         => $winning->sum_amount,
-                                'balance_before' => $before,
-                                'balance_after'  => $account->credit_balance,
-                                'note'           => 'Win credit ' . $resultDate,
-                                'bet_date'       => $resultDate,
-                                'created_by'     => Auth::id(),
-                            ]);
-                        });
-                    }
+                // Process wins for both VND and USD Cambodia bets
+                foreach (['vnd', 'usd'] as $currency) {
+                    $this->processKHWinningForCurrency($resultDate, $scheduleIdsByCurrentBet, $currency);
                 }
             }
 
             DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'save success'
-            ]);
-        }catch (\Exception $e){
+            return response()->json(['success' => true, 'message' => 'save success']);
+        } catch (\Exception $e) {
             DB::rollBack();
             throwException($e);
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function processKHWinningForCurrency(string $resultDate, array $scheduleIds, string $currency): void
+    {
+        $tBet = "bet_kh_{$currency}";
+        $tWin = "bet_winning_kh_{$currency}";
+
+        $winningModel = $currency === 'usd' ? BetWinningKHUSD::class  : BetWinningKH::class;
+        $recordModel  = $currency === 'usd' ? BetWinningRecordKHUSD::class : BetWinningRecordKH::class;
+        $receiptModel = $currency === 'usd' ? BetReceiptKHUSD::class  : BetReceiptKH::class;
+        $accountModel = $currency === 'usd' ? AccountUSD::class        : AccountVND::class;
+        $txModel      = $currency === 'usd' ? CreditTransactionUSD::class : CreditTransactionVND::class;
+
+        // Capture existing winners for credit reversal before deleting old records
+        $existingWinnerIds = DB::table($tWin)
+            ->join($tBet, "{$tBet}.id", '=', "{$tWin}.bet_id")
+            ->whereDate("{$tWin}.created_at", $resultDate)
+            ->whereIn("{$tBet}.bet_schedule_id", $scheduleIds)
+            ->pluck("{$tBet}.user_id")
+            ->unique()->toArray();
+
+        // Delete old winning records for this date/schedule
+        $oldRecords = $recordModel::query()->whereHas('betLotteryResult', function ($q) use ($resultDate, $scheduleIds) {
+            $q->where('draw_date', $resultDate)->whereIn('lottery_schedule_id', $scheduleIds);
+        });
+        $oldRecords->each(fn($rec) => $rec->betWinningKH()->forceDelete());
+        $oldRecords->forceDelete();
+
+        // Reverse existing win credits
+        if (!empty($existingWinnerIds)) {
+            $txModel::where('type', 'win_credit')
+                ->where('bet_date', $resultDate)
+                ->whereIn('user_id', $existingWinnerIds)
+                ->get()
+                ->each(function ($tx) use ($accountModel) {
+                    $account = $accountModel::where('user_id', $tx->user_id)->first();
+                    if ($account) {
+                        $account->credit_balance = max(0, (float) $account->credit_balance - (float) $tx->amount);
+                        $account->save();
+                    }
+                });
+            $txModel::where('type', 'win_credit')
+                ->where('bet_date', $resultDate)
+                ->whereIn('user_id', $existingWinnerIds)
+                ->delete();
+        }
+
+        // Generate new winning records
+        $insertWinNumber = [
+            ...$this->generateNormalWinBet($resultDate, $scheduleIds, $currency),
+            ...$this->generateHashWinBet($resultDate, $scheduleIds, $currency),
+        ];
+
+        if (count($insertWinNumber)) {
+            $recordsCreated = $this->insertBetWinning($insertWinNumber, $resultDate, $currency);
+            if (count($recordsCreated)) {
+                // Update receipt compensate totals
+                DB::table("{$tWin} as winning")
+                    ->select('winning.bet_receipt_id', DB::raw('SUM(winning.win_amount) as sum_amount'))
+                    ->whereDate('winning.created_at', $resultDate)
+                    ->whereIn('winning.bet_id', fn($sub) => $sub->select('id')->from($tBet)->whereIn('bet_schedule_id', $scheduleIds))
+                    ->orderBy('winning.bet_receipt_id')
+                    ->groupBy('winning.bet_receipt_id')
+                    ->each(fn($w) => $receiptModel::query()->find($w->bet_receipt_id)?->update(['compensate' => $w->sum_amount]));
+
+                // Auto-credit winnings to each member's account
+                DB::table("{$tWin} as winning")
+                    ->join($tBet, "{$tBet}.id", '=', 'winning.bet_id')
+                    ->select("{$tBet}.user_id", DB::raw('SUM(winning.win_amount) as sum_amount'))
+                    ->whereDate('winning.created_at', $resultDate)
+                    ->whereIn("{$tBet}.bet_schedule_id", $scheduleIds)
+                    ->groupBy("{$tBet}.user_id")
+                    ->orderBy("{$tBet}.user_id")
+                    ->each(function ($winning) use ($resultDate, $accountModel, $txModel) {
+                        $account = $accountModel::firstOrCreate(
+                            ['user_id' => $winning->user_id],
+                            ['credit_balance' => 0, 'created_by' => Auth::id()]
+                        );
+                        $before = (float) $account->credit_balance;
+                        $account->credit_balance += $winning->sum_amount;
+                        $account->save();
+                        $txModel::create([
+                            'user_id'        => $winning->user_id,
+                            'type'           => 'win_credit',
+                            'amount'         => $winning->sum_amount,
+                            'balance_before' => $before,
+                            'balance_after'  => $account->credit_balance,
+                            'note'           => 'Win credit ' . $resultDate,
+                            'bet_date'       => $resultDate,
+                            'created_by'     => Auth::id(),
+                        ]);
+                    });
+            }
         }
     }
 
@@ -631,48 +642,56 @@ class LotteryResultKHController extends Controller
     }
 
 
-    public function insertBetWinning($data,$date){
+    public function insertBetWinning($data, $date, string $currency = 'vnd'): array
+    {
+        $winningModel = $currency === 'usd' ? BetWinningKHUSD::class : BetWinningKH::class;
+        $recordModel  = $currency === 'usd' ? BetWinningRecordKHUSD::class : BetWinningRecordKH::class;
+
         $betAmount = [];
         $sumAmount = 0;
         $save = [];
-        if(count($data)){
-            foreach ($data as $k=>$item){
-                if(empty($betAmount)){
+        if (count($data)) {
+            foreach ($data as $item) {
+                if (empty($betAmount)) {
                     $betAmount = $item;
                     $sumAmount = $item['prize_amount'];
-                }else{
-                    if($betAmount['bet_id'] !== $item['bet_id']){
+                } else {
+                    if ($betAmount['bet_id'] !== $item['bet_id']) {
                         $sumAmount = $item['prize_amount'];
                         $betAmount = $item;
-                    }else{
-                        if(in_array($item['bet_type'],['RP2','RP3','RP4'])) {
+                    } else {
+                        if (in_array($item['bet_type'], ['RP2', 'RP3', 'RP4'])) {
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
                                 $sumAmount = $item['prize_amount'];
                                 $betAmount = $item;
                             }
-                        }else{
+                        } else {
                             if ($betAmount['bet_number_id'] !== $item['bet_number_id']) {
                                 $sumAmount = $item['prize_amount'];
                                 $betAmount = $item;
-                            }else{
+                            } else {
                                 $sumAmount += $item['prize_amount'];
-                                $betAmount = $item;
+                                $betAmount  = $item;
                             }
                         }
                     }
                 }
 
-                $matchThese = ['bet_id'=>$item['bet_id']??0,'bet_number_id' => $item['bet_number_id'],'bet_receipt_id'=>$item['receipt_id']];
-                $betWin = BetWinningKH::query()->updateOrCreate($matchThese,[
-                    'win_amount'=>$sumAmount,
+                $matchThese = [
+                    'bet_id'         => $item['bet_id'] ?? 0,
+                    'bet_number_id'  => $item['bet_number_id'],
+                    'bet_receipt_id' => $item['receipt_id'],
+                ];
+                $betWin = $winningModel::query()->updateOrCreate($matchThese, [
+                    'win_amount'    => $sumAmount,
                     'bet_number_id' => $item['bet_number_id'],
-                    'created_at' => $date,
+                    'created_at'    => $date,
                 ]);
-                $save[] = BetWinningRecordKH::query()->insert([
-                    'bet_winning_id'=> $betWin->id,
-                    'bet_number_id' => $item['bet_number_id'],
-                    'result_id' => $item['result_id'],
-                    'win_number' => $item['win_number']
+                $save[] = $recordModel::query()->insert([
+                    'bet_winning_id' => $betWin->id,
+                    'bet_number_id'  => $item['bet_number_id'],
+                    'result_id'      => $item['result_id'],
+                    'win_number'     => $item['win_number'],
                 ]);
             }
         }
@@ -767,31 +786,30 @@ class LotteryResultKHController extends Controller
         return $getAmount;
     }
 
-    public function generateNormalWinBet($date, $idSchedules): array
+    public function generateNormalWinBet($date, $idSchedules, string $currency = 'vnd'): array
     {
-//        $date = '2025-02-23';
-//        $day = 'Sunday';
-//        $time = '16:30:00';
+        $tBet = "bet_kh_{$currency}";
+        $tNum = "bet_number_kh_{$currency}";
+
         $getBetWinningNumber = [];
-         DB::table('bet_kh_vnd')
+        DB::table($tBet)
             ->select(
-                'bet_number_kh_vnd.*',
+                "{$tNum}.*",
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
-                'bet_kh_vnd.bet_schedule_id',
-                'bet_kh_vnd.number_format as original_number',
+                "{$tBet}.bet_schedule_id",
+                "{$tBet}.number_format as original_number",
                 'schedule.region_slug',
-                'bet_kh_vnd.bet_receipt_id'
+                "{$tBet}.bet_receipt_id"
             )
-            ->join('bet_number_kh_vnd','bet_number_kh_vnd.bet_id','=', 'bet_kh_vnd.id')
-            ->join('bet_lottery_schedules as schedule','schedule.id','=','bet_kh_vnd.bet_schedule_id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh_vnd.bet_package_config_id')
-            ->whereIn('bet_kh_vnd.bet_schedule_id',$idSchedules)
-            ->whereIn('pkg_con.bet_type', ['2D','3D','4D'])
-            ->whereDate('bet_kh_vnd.bet_date', '=',$date)
-//             ->where('bet_kh_vnd.id', 9)
-            ->orderBy('bet_kh_vnd.id')
-            ->orderBy('bet_number_kh_vnd.id')
+            ->join($tNum, "{$tNum}.bet_id", '=', "{$tBet}.id")
+            ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', "{$tBet}.bet_schedule_id")
+            ->join('bet_package_configurations as pkg_con', 'pkg_con.id', '=', "{$tBet}.bet_package_config_id")
+            ->whereIn("{$tBet}.bet_schedule_id", $idSchedules)
+            ->whereIn('pkg_con.bet_type', ['2D', '3D', '4D'])
+            ->whereDate("{$tBet}.bet_date", '=', $date)
+            ->orderBy("{$tBet}.id")
+            ->orderBy("{$tNum}.id")
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->c_amount, $bet->d_amount, $bet->abcd_amount, $bet->roll2_amount, $bet->roll_amount, $bet->roll_parlay_amount, $bet->bet_type);
@@ -882,29 +900,29 @@ class LotteryResultKHController extends Controller
         $array[$j] = $temp;
     }
 
-    public function generateHashWinBet($date, $idSchedules): array
+    public function generateHashWinBet($date, $idSchedules, string $currency = 'vnd'): array
     {
-//        $date = '2025-02-23';
-//        $day = 'Sunday';
-//        $time = '16:30:00';
+        $tBet = "bet_kh_{$currency}";
+        $tNum = "bet_number_kh_{$currency}";
+
         $getBetWinningNumber = [];
-        DB::table('bet_kh_vnd')
+        DB::table($tBet)
             ->select(
-                'bet_number_kh_vnd.*',
+                "{$tNum}.*",
                 'pkg_con.price as pkg_price',
                 'pkg_con.bet_type as bet_type',
                 'pkg_con.has_special as has_special',
-                'bet_kh_vnd.bet_schedule_id as bet_schedule_id',
-                'bet_kh_vnd.number_format as original_number',
-                'bet_kh_vnd.bet_receipt_id'
+                "{$tBet}.bet_schedule_id as bet_schedule_id",
+                "{$tBet}.number_format as original_number",
+                "{$tBet}.bet_receipt_id"
             )
-            ->join('bet_number_kh_vnd','bet_number_kh_vnd.bet_id','=', 'bet_kh_vnd.id')
-            ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_kh_vnd.bet_package_config_id')
-            ->whereIn('bet_kh_vnd.bet_schedule_id', $idSchedules)
-            ->whereIn('pkg_con.bet_type', ['RP2','RP3','RP4'])
-            ->whereDate('bet_kh_vnd.bet_date', '=',$date)
-            ->orderBy('bet_kh_vnd.id')
-            ->orderBy('bet_number_kh_vnd.id')
+            ->join($tNum, "{$tNum}.bet_id", '=', "{$tBet}.id")
+            ->join('bet_package_configurations as pkg_con', 'pkg_con.id', '=', "{$tBet}.bet_package_config_id")
+            ->whereIn("{$tBet}.bet_schedule_id", $idSchedules)
+            ->whereIn('pkg_con.bet_type', ['RP2', 'RP3', 'RP4'])
+            ->whereDate("{$tBet}.bet_date", '=', $date)
+            ->orderBy("{$tBet}.id")
+            ->orderBy("{$tNum}.id")
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
                 $numberArr = explode("#", $bet->generated_number);

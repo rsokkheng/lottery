@@ -29,9 +29,11 @@ class BetUSDController extends Controller
                 $date = $request->get('date');
             }
             $user = Auth::user()??0;
-            $digits = BetLotteryPackageConfiguration::query()
-                ->where('package_id', $user->package_id)
-                ->orderBy('id')->get(['id', 'bet_type','has_special']);
+            $digitsQuery = BetLotteryPackageConfiguration::query()->orderBy('bet_type');
+            if ($user->package_id) {
+                $digitsQuery->where('package_id', $user->package_id);
+            }
+            $digits = $digitsQuery->select(['bet_type', 'has_special'])->distinct()->get();
             $members = User::where('record_status_id', 1)
                 ->whereHas('roles', function ($query) {
                     $query->where('name', 'staff');
@@ -41,8 +43,8 @@ class BetUSDController extends Controller
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
-            $digit_type = "2D";
-            if ($request->has('digit_type')) {
+            $digit_type = null;
+            if ($request->has('digit_type') && $request->get('digit_type') !== '') {
                 $digit_type = $request->get('digit_type');
             }
             $member_id = $request->get('member_id');

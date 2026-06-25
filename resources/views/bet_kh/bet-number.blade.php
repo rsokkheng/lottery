@@ -1,19 +1,13 @@
-@php
-    $isAdmin = in_array('admin', $roles ?? []);
-@endphp
+<?php
+    $isAdmin      = in_array('admin', $roles ?? []);
+    $betNumberUrl = route($khRoutePrefix . '.bet-number');
+    $currencyLabel = strtoupper(session('currency', 'VND'));
+?>
 
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
 
-    @php $currencyLabel = strtoupper(session('currency', 'VND')); @endphp
-
     <div class="bp-wrap">
-        <div class="bp-page-header">
-            <div>
-                <span class="bp-badge bp-badge-kh">Lotto Cambodia · {{ $currencyLabel }}</span>
-                <div class="bp-page-title">{{ __('message.number') }} Detail</div>
-            </div>
-        </div>
 
         <div class="bp-filter">
             @if (Auth::user()->roles->pluck('name')->intersect(['admin', 'master', 'agent'])->isNotEmpty())
@@ -39,6 +33,7 @@
                 @endforeach
             </select>
             <select id="digit_type" style="width:100px;">
+                <option value="" {{ empty($digit_type) ? 'selected' : '' }}>All Digits</option>
                 @foreach ($digits as $val)
                     @php
                         $isSpecial   = $val['has_special'] == 1 && $val['bet_type'] == 'RP3';
@@ -48,9 +43,12 @@
                 @endforeach
             </select>
             <input type="text" id="number" value="{{ $number }}" style="width:120px;" placeholder="{{ __('message.number') }}">
-            <button class="bp-search-btn" onclick="searchReceipt('{{ route($khRoutePrefix . '.bet-number') }}')">
+            <button class="bp-search-btn" onclick="searchReceipt('{{ $betNumberUrl }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
+            </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ $betNumberUrl }}')">
+                {{ __('message.clear') }}
             </button>
         </div>
 
@@ -75,31 +73,40 @@
                 </thead>
                 <tbody>
                     @if (isset($data) && count($data) > 0)
-                        @foreach ($data as $key => $betNumber)
-                            @php $wlStyle = ($betNumber->win_lose ?? 0) < 0 ? 'color:#dc2626;' : ''; @endphp
-                            <tr>
-                                <td class="bp-center">{{ $key + 1 }}</td>
-                                <td>{{ $betNumber->bet_date ?? '' }}</td>
-                                <td class="bp-center">{{ $betNumber->generated_number ?? '' }}</td>
-                                <td class="bp-center">{{ $betNumber->digit_format ?? '' }}</td>
-                                <td class="bp-center">{{ $betNumber->bet_game ?? '' }}</td>
-                                <td class="bp-center">{{ $betNumber->province_en ?? '' }}</td>
-                                <td class="bp-num">{{ number_format($betNumber->get_roll_amount ?? 0, 2) }}</td>
-                                <td class="bp-num">{{ $betNumber->price ?? 0 }}</td>
-                                <td class="bp-num">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
-                                <td class="bp-num">{{ $betNumber->number_turnover ?? 0 }}</td>
-                                <td class="bp-num">{{ number_format($betNumber->commission ?? 0, 2) }}</td>
-                                <td class="bp-num">{{ number_format($betNumber->net_amount ?? 0, 2) }}</td>
-                                <td class="bp-num" style="{{ $wlStyle }}">{{ number_format($betNumber->win_lose ?? 0, 2) }}</td>
-                            </tr>
+                        <?php
+                            $grouped = [];
+                            foreach ($data as $row) {
+                                $grouped[$row->digit_format ?? 'Unknown'][] = $row;
+                            }
+                            $rowNum = 1;
+                        ?>
+                        @foreach ($grouped as $digitKey => $rows)
+                            @foreach ($rows as $betNumber)
+                                <?php $wlNc = ($betNumber->win_lose ?? 0) < 0 ? 'bp-neg' : ''; ?>
+                                <tr>
+                                    <td class="bp-center">{{ number_format($rowNum++, 0, '.', '') }}</td>
+                                    <td>{{ $betNumber->bet_date ?? '' }}</td>
+                                    <td class="bp-center">{{ $betNumber->generated_number ?? '' }}</td>
+                                    <td class="bp-center">{{ $betNumber->digit_format ?? '' }}</td>
+                                    <td class="bp-center">{{ $betNumber->bet_game ?? '' }}</td>
+                                    <td class="bp-center">{{ $betNumber->province_en ?? '' }}</td>
+                                    <td class="bp-num">{{ number_format($betNumber->get_roll_amount ?? 0, 2) }}</td>
+                                    <td class="bp-num">{{ $betNumber->price ?? 0 }}</td>
+                                    <td class="bp-num">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
+                                    <td class="bp-num">{{ $betNumber->number_turnover ?? 0 }}</td>
+                                    <td class="bp-num">{{ number_format($betNumber->commission ?? 0, 2) }}</td>
+                                    <td class="bp-num">{{ number_format($betNumber->net_amount ?? 0, 2) }}</td>
+                                    <td class="bp-num {{ $wlNc }}">{{ number_format($betNumber->win_lose ?? 0, 2) }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
-                        @php $twlStyle = $totalNetAmount['win_lose'] < 0 ? 'color:#dc2626;' : ''; @endphp
+                        <?php $twlNc = $totalNetAmount['win_lose'] < 0 ? 'bp-neg-t' : ''; ?>
                         <tr>
                             <td colspan="9" style="background:#f8f9fc;border-top:2px solid #e2e8f0;"></td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['turnover'], 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['commission'], 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['net_amount'], 3, '.', '') }}</td>
-                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;{{ $twlStyle }}">{{ number_format($totalNetAmount['win_lose'], 3, '.', '') }}</td>
+                            <td class="bp-num {{ $twlNc }}" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['win_lose'], 3, '.', '') }}</td>
                         </tr>
                     @else
                         <tr><td colspan="13" class="bp-empty">
@@ -117,15 +124,15 @@
     <script>
         function searchReceipt(url) {
             const date       = $('#datepicker-receipt').val();
-            const no         = $('#receipt-no').val();
             const number     = $('#number').val();
             const member_id  = $('#member').val();
             const digit_type = $('#digit_type').val();
             const com_id     = $('#company').find(":selected").val();
-            if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&no=' + no + '&number=' + number +
+            if (date.length) {
+                window.location = url + '?date=' + date + '&number=' + number +
                     '&com_id=' + com_id + '&member_id=' + member_id + '&digit_type=' + digit_type;
             }
         }
+        function clearSearch(url) { window.location = url; }
     </script>
 </x-app-layout>

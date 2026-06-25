@@ -4,15 +4,6 @@
 
     <div class="bp-wrap">
         {{-- Page header --}}
-        <div class="bp-page-header">
-            <div>
-                <span class="bp-badge bp-badge-vn">
-                    <svg style="width:12px;height:12px;" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Lotto Vietnam · VND
-                </span>
-                <div class="bp-page-title">{{ __('message.receipt_no') }} List</div>
-            </div>
-        </div>
 
         {{-- Filter bar --}}
         <div class="bp-filter">
@@ -27,6 +18,9 @@
             <button class="bp-search-btn" onclick="searchReceipt('{{ route('bet.receipt-list') }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
+            </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route('bet.receipt-list') }}')">
+                {{ __('message.clear') }}
             </button>
         </div>
 
@@ -160,6 +154,7 @@
                 window.location = url + '?date=' + date + '&no=' + no;
             }
         }
+        function clearSearch(url) { window.location = url; }
 
         function showReceiptModal() {
             const m = document.getElementById('static-modal');

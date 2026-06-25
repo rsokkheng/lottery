@@ -50,6 +50,11 @@
                     <p class="whitespace-nowrap">{{ __('message.search') }}</p>
                 </button>
             </div>
+            <div class="">
+                <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route($khRoutePrefix . '.reports.daily-manager') }}')">
+                    {{ __('message.clear') }}
+                </button>
+            </div>
 
         </div>
         <div class="flex w-full">
@@ -168,5 +173,6 @@
                 window.location = url + '?date=' + date + '&com_id=' + com_id;
             }
         }
+        function clearSearch(url) { window.location = url; }
     </script>
 </x-app-layout>

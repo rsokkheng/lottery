@@ -4,12 +4,6 @@
     @php $currencyLabel = strtoupper(session('currency', 'VND')); @endphp
 
     <div class="bp-wrap">
-        <div class="bp-page-header">
-            <div>
-                <span class="bp-badge bp-badge-kh">Lotto Cambodia · {{ $currencyLabel }}</span>
-                <div class="bp-page-title">Daily Report</div>
-            </div>
-        </div>
 
         <div class="bp-filter">
             <div class="bp-filter-icon">

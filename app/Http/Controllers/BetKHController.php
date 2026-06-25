@@ -35,15 +35,17 @@ class BetKHController extends Controller
                 $date = $request->get('date');
             }
             $user = Auth::user() ?? 0;
-            $digits = BetLotteryPackageConfiguration::query()
-                ->where('package_id', $user->package_id)
-                ->orderBy('id')->get(['id', 'bet_type', 'has_special']);
+            $digitsQuery = BetLotteryPackageConfiguration::query()->orderBy('bet_type');
+            if ($user->package_id) {
+                $digitsQuery->where('package_id', $user->package_id);
+            }
+            $digits = $digitsQuery->select(['bet_type', 'has_special'])->distinct()->get();
 
             $company_id = null;
             if ($request->has('com_id')) {
                 $company_id = $request->get('com_id');
             }
-            $digit_type = $request->get('digit_type', '2D');
+            $digit_type = ($request->get('digit_type', '') !== '') ? $request->get('digit_type') : null;
             $member_id  = $request->get('member_id');
             $member_id  = ($member_id === 'undefined' || empty($member_id)) ? null : $member_id;
             $number     = $request->number ?? null;
