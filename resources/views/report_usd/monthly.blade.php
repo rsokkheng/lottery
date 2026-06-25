@@ -55,6 +55,7 @@
                         {{ __('message.clear') }}
                     </button>
                 </div>
+                
             </div>
         </div>
     </div>

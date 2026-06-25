@@ -56,6 +56,7 @@
                     </button>
                 </div>
                 
+                
                 <!-- Back Button with Manager Name -->
                 <div class="flex items-end">
                     <a href="{{ route($khRoutePrefix . '.reports.monthly-tracking') }}" 

@@ -47,9 +47,11 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
+            @if (count(request()->query()) > 0)
             <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ $betNumberUrl }}')">
                 {{ __('message.clear') }}
             </button>
+            @endif
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">

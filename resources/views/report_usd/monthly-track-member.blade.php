@@ -50,11 +50,12 @@
                 
                 <!-- Clear Button -->
                 <div class="flex items-end">
-                    <button onclick="clearDateFilter()" 
+                    <button onclick="clearDateFilter()"
                         class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow hover:bg-gray-400 transition-colors w-full sm:w-auto">
                         {{ __('message.clear') }}
                     </button>
                 </div>
+                
                 
                 <!-- Back Button with Manager Name -->
                 <div class="flex items-end">

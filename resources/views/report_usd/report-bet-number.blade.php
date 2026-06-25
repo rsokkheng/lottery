@@ -1,170 +1,126 @@
-@php
-  $isAdmin = in_array('admin', $roles ?? []);
-@endphp
+@php $isAdmin = in_array('admin', $roles ?? []); @endphp
 
 <x-app-layout>
-    <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet"/>
-    <div class="bg-white rounded-lg px-4 py-4">
-    <div class="">
-        @php
-            $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
-        @endphp
+    <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
 
-        <div class="flex flex-wrap gap-4">
-            <!-- Start Date -->
-            <div class="flex-1 min-w-[150px] max-w-[200px]">
-                <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
-                <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons 
+    <div class="bp-wrap">
+        <div class="bp-filter">
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
                     datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                    class="w-full px-4 py-2 border rounded bg-white text-gray-700 shadow">
+                    style="width:150px;" placeholder="{{ __('message.start_date') }}">
             </div>
-            
-            <!-- End Date -->
-            <div class="flex-1 min-w-[150px] max-w-[200px]">
-                <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
-                <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons 
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
                     datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                    class="w-full px-4 py-2 border rounded bg-white text-gray-700 shadow">
+                    style="width:150px;" placeholder="{{ __('message.end_date') }}">
             </div>
-            
-            <!-- Company -->
-            <div class="flex-1 min-w-[150px] max-w-[200px]">
-                <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
-                <div class="w-full lg:w-48">
-                    <select id="company" class="w-full rounded border px-4 py-2">
-                        @foreach($company as $val)
-                            @if($company_id == $val['id'])
-                                <option selected value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                            @else
-                                <option value="{{ $val['id'] }}">{{ $val['label'] }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            
-            <!-- Search Button -->
-            <div class="flex items-end">
-                <button onclick="applyDateFilter()" 
-                    class="px-6 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition-colors w-full sm:w-auto">
-                    {{ __('message.search') }}
-                </button>
-            </div>
-            
-            <!-- Clear Button -->
-            <div class="flex items-end">
-                <button onclick="clearDateFilter()" 
-                    class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow hover:bg-gray-400 transition-colors w-full sm:w-auto">
-                    {{ __('message.clear') }}
-                </button>
-            </div>
-            
-            <!-- Back Button -->
-            <div class="flex items-end">
-                <a href="javascript:history.back()" 
-                    class="px-6 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700 transition-colors w-full sm:w-auto inline-flex items-center justify-center text-decoration-none">
-                    {{ __('message.back') }}
-                </a>
-            </div>
+            <select id="company" style="width:160px;">
+                @foreach ($company as $val)
+                    <option value="{{ $val['id'] }}" {{ $company_id == $val['id'] ? 'selected' : '' }}>{{ $val['label'] }}</option>
+                @endforeach
+            </select>
+            <button class="bp-search-btn" onclick="applyDateFilter()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
+                {{ __('message.search') }}
+            </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearDateFilter()">
+                {{ __('message.clear') }}
+            </button>
+            <a href="javascript:history.back()"
+                style="display:inline-flex;align-items:center;gap:6px;background:#dc2626;color:#fff;padding:5px 14px;border-radius:7px;font-size:.82rem;font-weight:700;text-decoration:none;">
+                ← {{ __('message.back') }}
+            </a>
         </div>
-    </div>
-</div>
-        <div class="flex w-full">
-            <div class="w-full overflow-auto py-4">
-                <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
+
+        <div class="bp-table-wrap" style="padding:0 0 8px;">
+            <table class="bp-table">
                 <thead>
-                        <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.no') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.date') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.number') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.digit') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.game') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.company') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.amount') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.odds') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.net') }}</th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.turnover') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.commission') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.net_amount') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.compensate') }}
-                            </th>
-                            <th class="py-2 border border-white px-2 text-[12px] sm:text-base">{{ __('message.win_lose') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @if(isset($data) && count($data)>0)
-                        @foreach($data as $key=>$betNumber)
-                        <tr class="border border-gray-300 hover:bg-gray-100 {{ $betNumber->compensate > 0 ? 'bg-red-100 hover:bg-red-200 text-black-500' : ''}} ">
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$key+1}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->created_at??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->generated_number??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->digit_format??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->bet_game??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->province_en??''}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{ number_format($betNumber->get_roll_amount?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->price??0}}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
-                                    <td class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{$betNumber->number_turnover?? 0}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{number_format($betNumber->commission?? 0, 2)}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{number_format($betNumber->net_amount?? 0, 2)}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas">{{number_format($betNumber->compensate?? 0, 2)}}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300 whitespace-nowrap text-[16px] sm:text-bas {{number_format($betNumber->win_lose?? 0, 2) < 0 ? 'text-red-500' : ''}}">{{number_format($betNumber->win_lose?? 0, 2)}}</td>
-                                </tr>
+                    <tr>
+                        <th>{{ __('message.no') }}</th>
+                        <th>{{ __('message.date') }}</th>
+                        <th>{{ __('message.number') }}</th>
+                        <th>{{ __('message.digit') }}</th>
+                        <th>{{ __('message.game') }}</th>
+                        <th>{{ __('message.company') }}</th>
+                        <th class="bp-num">{{ __('message.amount') }}</th>
+                        <th class="bp-num">{{ __('message.odds') }}</th>
+                        <th class="bp-num">{{ __('message.net') }}</th>
+                        <th class="bp-num">{{ __('message.turnover') }}</th>
+                        <th class="bp-num">{{ __('message.commission') }}</th>
+                        <th class="bp-num">{{ __('message.net_amount') }}</th>
+                        <th class="bp-num">{{ __('message.compensate') }}</th>
+                        <th class="bp-num">{{ __('message.win_lose') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isset($data) && count($data) > 0)
+                        @foreach ($data as $key => $betNumber)
+                            <?php $wlNc = ($betNumber->win_lose ?? 0) < 0 ? 'bp-neg' : ''; ?>
+                            <tr style="{{ ($betNumber->compensate ?? 0) > 0 ? 'background:#fef2f2;' : '' }}">
+                                <td class="bp-center">{{ $key + 1 }}</td>
+                                <td class="bp-center" style="white-space:nowrap;">{{ $betNumber->created_at ?? '' }}</td>
+                                <td class="bp-center" style="font-weight:700;">{{ $betNumber->generated_number ?? '' }}</td>
+                                <td class="bp-center">{{ $betNumber->digit_format ?? '' }}</td>
+                                <td class="bp-center">{{ $betNumber->bet_game ?? '' }}</td>
+                                <td class="bp-center">{{ $betNumber->province_en ?? '' }}</td>
+                                <td class="bp-num">{{ number_format($betNumber->get_roll_amount ?? 0, 2) }}</td>
+                                <td class="bp-num">{{ $betNumber->price ?? 0 }}</td>
+                                <td class="bp-num">{{ number_format($betNumber->rate ?? 0, 2) }}</td>
+                                <td class="bp-num">{{ $betNumber->number_turnover ?? 0 }}</td>
+                                <td class="bp-num">{{ number_format($betNumber->commission ?? 0, 2) }}</td>
+                                <td class="bp-num">{{ number_format($betNumber->net_amount ?? 0, 2) }}</td>
+                                <td class="bp-num">{{ number_format($betNumber->compensate ?? 0, 2) }}</td>
+                                <td class="bp-num {{ $wlNc }}">{{ number_format($betNumber->win_lose ?? 0, 2) }}</td>
+                            </tr>
                         @endforeach
-                        <tr class="border border-gray-300 hover:bg-gray-100">
+                        <?php $twlNc = $totalNetAmount['win_lose'] < 0 ? 'bp-neg-t' : ''; ?>
+                        <tr style="background:#f8f9fc;font-weight:700;border-top:2px solid #e2e8f0;">
                             <td colspan="9"></td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['turnover'], 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{  number_format( $totalNetAmount['commission'], 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['net_amount'], 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300">{{ number_format( $totalNetAmount['compensate'], 3, '.', '')}}</td>
-                            <td class="text-right py-2 px-1 border font-bold border-gray-300 {{ $totalNetAmount['win_lose'] < 0 ? 'text-red-500' : ''}}">{{number_format( $totalNetAmount['win_lose'], 3, '.', '')}}</td>
+                            <td class="bp-num">{{ number_format($totalNetAmount['turnover'], 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalNetAmount['commission'], 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalNetAmount['net_amount'], 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalNetAmount['compensate'], 3, '.', '') }}</td>
+                            <td class="bp-num {{ $twlNc }}">{{ number_format($totalNetAmount['win_lose'], 3, '.', '') }}</td>
                         </tr>
                     @else
-                        <tr class="border border-gray-300 hover:bg-gray-100">
-                            <td class="py-2 px-1 border border-gray-300" colspan="15">No data</td>
-                        </tr>
+                        <tr><td colspan="14" class="bp-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                            <p>No data found</p>
+                        </td></tr>
                     @endif
-
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 
-
     <script src="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.js') }}"></script>
-    <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
-
-<script>
-   function applyDateFilter() {
-        const start = document.getElementById('startDate').value;
-        const end = document.getElementById('endDate').value;
-        const com_id = $('#company').find(":selected").val();
-
-        if (start && end) {
+    <script>
+        function applyDateFilter() {
+            const start  = document.getElementById('startDate').value;
+            const end    = document.getElementById('endDate').value;
+            const com_id = $('#company').find(':selected').val();
+            if (start && end) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('startDate', start);
+                url.searchParams.set('endDate', end);
+                url.searchParams.set('com_id', com_id);
+                url.searchParams.delete('date');
+                window.location.href = url.toString();
+            } else {
+                alert('Please select both start and end dates.');
+            }
+        }
+        function clearDateFilter() {
             const url = new URL(window.location.href);
-            url.searchParams.set('startDate', start);
-            url.searchParams.set('endDate', end);
-            url.searchParams.set('com_id', com_id);
-            // Optional: remove old 'date' param if it existed
+            url.searchParams.delete('startDate');
+            url.searchParams.delete('endDate');
+            url.searchParams.delete('com_id');
             url.searchParams.delete('date');
             window.location.href = url.toString();
-        } else {
-            alert('Please select both start and end dates.');
         }
-    }
-    function clearDateFilter() {
-        const url = new URL(window.location.href);
-        url.searchParams.delete('startDate');
-        url.searchParams.delete('endDate');
-        url.searchParams.delete('com_id');
-        url.searchParams.delete('date');
-        window.location.href = url.toString();
-    }
-</script>
+    </script>
 </x-app-layout>
