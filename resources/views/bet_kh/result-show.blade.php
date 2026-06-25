@@ -3,57 +3,57 @@
 
     <style>
         /* ── Tabs ── */
-        .rs-tab { display:inline-block; cursor:pointer; padding:9px 18px; font-weight:700; font-size:.88rem;
+        .rs-tab { display:inline-block; cursor:pointer; padding:12px 24px; font-weight:700; font-size:.88rem;
                   color:#92400e; white-space:nowrap; border-radius:8px 8px 0 0; transition:all .15s; }
         .rs-tab.active { background:#78350f; color:#fff; }
         .rs-tab:not(.active):hover { background:#fef3c7; }
 
         /* ── Result table ── */
-        .rs-wrap { max-width:860px; margin:20px auto; border-radius:12px; overflow:hidden;
-                   box-shadow:0 4px 20px rgba(0,0,0,.12); border:1px solid #e2e8f0; }
+        .rs-wrap { max-width:960px; margin:28px auto; border-radius:14px; overflow:hidden;
+                   box-shadow:0 4px 24px rgba(0,0,0,.13); border:1px solid #e2e8f0; }
         .rs-table { width:100%; border-collapse:collapse; text-align:center; }
         .rs-table td { border:1px solid #e5e7eb; vertical-align:middle; padding:0; }
 
         /* Header */
         .rs-head { background:linear-gradient(135deg,#b45309 0%,#92400e 100%); }
-        .rs-head td { border-color:#c0714a; color:#fff; padding:16px 14px; }
+        .rs-head td { border-color:#c0714a; color:#fff; padding:22px 18px; }
         .rs-date { font-size:1rem; font-weight:700; letter-spacing:.03em; }
-        .rs-prov-name { font-size:1.4rem; font-weight:800; letter-spacing:.01em; }
-        .rs-prov-code { font-size:.82rem; opacity:.85; margin-top:2px; }
+        .rs-prov-name { font-size:1.5rem; font-weight:800; letter-spacing:.01em; }
+        .rs-prov-code { font-size:.84rem; opacity:.85; margin-top:4px; }
 
         /* Prize label column */
-        .rs-label { width:100px; min-width:100px; background:#fffbf0;
+        .rs-label { width:110px; min-width:110px; background:#fffbf0;
                     border-right:3px solid #e5e7eb; font-size:1rem; font-weight:800;
-                    color:#374151; padding:16px 10px; letter-spacing:.02em; }
+                    color:#374151; padding:22px 14px; letter-spacing:.02em; }
 
         /* Data cells */
-        .rs-cell { padding:14px 16px; }
+        .rs-cell { padding:20px 20px; }
         .rs-row-even { background:#fff; }
         .rs-row-odd  { background:#f9fafb; }
         .rs-row-even:hover, .rs-row-odd:hover { background:#fef9ec; }
 
         /* Winning numbers */
-        .wn       { display:block; line-height:2; text-align:center; }
-        .wn-red   { color:#dc2626; font-weight:800; font-size:22px; }
-        .wn-blue  { color:#1d4ed8; font-weight:800; font-size:20px; }
-        .wn-num   { color:#1e293b; font-weight:700; font-size:18px; }
+        .wn       { display:block; line-height:2.4; text-align:center; }
+        .wn-red   { color:#dc2626; font-weight:800; font-size:24px; }
+        .wn-blue  { color:#1d4ed8; font-weight:800; font-size:22px; }
+        .wn-num   { color:#1e293b; font-weight:700; font-size:20px; }
         .wn-sep   { color:#9ca3af; font-size:14px; margin:0 2px; }
 
         @media (max-width:640px) {
-            .rs-wrap         { margin:10px 8px; border-radius:8px; }
+            .rs-wrap         { margin:12px 8px; border-radius:8px; }
             .rs-prov-name    { font-size:1rem; }
-            .rs-label        { width:66px; min-width:66px; font-size:.8rem; padding:12px 6px; }
-            .rs-cell         { padding:10px 6px; }
-            .wn-red          { font-size:16px; }
-            .wn-blue         { font-size:15px; }
-            .wn-num          { font-size:14px; }
+            .rs-label        { width:70px; min-width:70px; font-size:.8rem; padding:14px 8px; }
+            .rs-cell         { padding:12px 8px; }
+            .wn-red          { font-size:17px; }
+            .wn-blue         { font-size:16px; }
+            .wn-num          { font-size:15px; }
         }
     </style>
 
     <div class="bp-wrap">
         <div class="bp-page-header">
             <div>
-                <span class="bp-badge bp-badge-kh">BET KHMER &middot; {{ $currencyLabel }}</span>
+                <span class="bp-badge bp-badge-kh">Lotto Cambodia · {{ $currencyLabel }}</span>
                 <div class="bp-page-title">Lottery Results</div>
             </div>
             <div>

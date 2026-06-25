@@ -221,14 +221,16 @@
             <a href="{{ route($r['summary']) }}" class="bn-link {{ Route::is($r['summary']) ? 'bn-active' : '' }}">Summary Report</a>
         </div>
 
-        {{-- Right: badge + lang + admin + user --}}
+        {{-- Right: badge + switcher + lang + admin + user --}}
         <div class="bn-right">
             <span class="bn-badge">{{ $currencyLabel }}</span>
+
 
             {{-- Language selector --}}
             <select class="bn-lang" onchange="location = this.value;">
                 <option value="{{ route('lang.switch', 'en') }}" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>🇺🇸 EN</option>
                 <option value="{{ route('lang.switch', 'vi') }}" {{ app()->getLocale() === 'vi' ? 'selected' : '' }}>🇻🇳 VI</option>
+                <option value="{{ route('lang.switch', 'km') }}" {{ app()->getLocale() === 'km' ? 'selected' : '' }}>🇰🇭 KM</option>
             </select>
 
             @if($isSupervisor)

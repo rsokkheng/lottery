@@ -10,10 +10,8 @@ class ManagerBetType extends Model
     protected $fillable = ['user_id', 'bet_system', 'currency'];
 
     const OPTIONS = [
-        ['bet_system' => 'vietnam', 'currency' => 'VND', 'label' => 'Bet Vietnam · Vietnamese Dong'],
-        ['bet_system' => 'vietnam', 'currency' => 'USD', 'label' => 'Bet Vietnam · USD Dollar'],
-        ['bet_system' => 'khmer',   'currency' => 'VND', 'label' => 'Bet Khmer · Vietnamese Dong'],
-        ['bet_system' => 'khmer',   'currency' => 'USD', 'label' => 'Bet Khmer · USD Dollar'],
+        ['currency' => 'VND', 'label' => 'VND — Bet Vietnam & Khmer'],
+        ['currency' => 'USD', 'label' => 'USD — Bet Vietnam & Khmer'],
     ];
 
     const CURRENCY_LABEL = [

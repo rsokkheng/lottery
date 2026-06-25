@@ -33,13 +33,16 @@
     .badge-usd  { background:#198754; color:#fff; }
     .badge-role { font-size:.7rem; padding:3px 8px; border-radius:6px; font-weight:600; }
 
-    /* ── Inline action buttons ── */
-    .btn-deposit  { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; font-size:.75rem; font-weight:600; border-radius:7px; padding:3px 10px; }
-    .btn-deposit:hover  { background:#2e7d32; color:#fff; }
-    .btn-withdraw { background:#fce4ec; color:#c62828; border:1px solid #f8bbd0; font-size:.75rem; font-weight:600; border-radius:7px; padding:3px 10px; }
-    .btn-withdraw:hover { background:#c62828; color:#fff; }
-    .btn-history  { background:#e3f2fd; color:#1565c0; border:1px solid #bbdefb; font-size:.75rem; font-weight:600; border-radius:7px; padding:3px 10px; }
-    .btn-history:hover  { background:#1565c0; color:#fff; }
+    /* ── Actions dropdown ── */
+    .act-toggle { font-size:.78rem; font-weight:700; padding:4px 12px; border-radius:8px;
+                  background:#f1f5f9; color:#374151; border:1px solid #cbd5e1; transition:all .15s; }
+    .act-toggle:hover, .act-toggle:focus { background:#334155; color:#fff; border-color:#334155; }
+    .act-toggle::after { margin-left:4px; }
+    .act-menu { border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.13); border:1px solid #e2e8f0;
+                padding:4px 0; min-width:150px; }
+    .act-menu .dropdown-item { font-size:.82rem; font-weight:600; padding:7px 14px; display:flex; align-items:center; gap:8px; cursor:pointer; }
+    .act-menu .dropdown-item:hover { background:#f1f5f9; }
+    .act-menu button.dropdown-item { background:none; border:none; width:100%; text-align:left; }
 
     /* ── Balance cell ── */
     .bal-ok   { color:#1a7a3c; font-weight:700; }
@@ -69,7 +72,7 @@
     @media (max-width:768px) {
         #creditTable td, #creditTable th { font-size:.75rem; white-space:nowrap; }
         .cr-stat-value { font-size:1rem; }
-        .btn-deposit, .btn-withdraw, .btn-history { padding:2px 7px; }
+        .act-toggle { padding:3px 9px; font-size:.74rem; }
     }
 </style>
 
@@ -77,10 +80,13 @@
     @section('title', 'Credit Management · Khmer')
 
     @php
+        $isUSDPage    = strtolower($currency ?? 'vnd') === 'usd';
         $totalMembers = $members->count();
-        $totalVND = $members->sum(fn($m) => strtolower($m->currency) !== 'usd' ? ($m->accountKH?->credit_balance ?? 0) : 0);
-        $totalUSD = $members->sum(fn($m) => strtolower($m->currency) === 'usd' ? ($m->accountKHUSD?->credit_balance ?? 0) : 0);
-        $activeCount = $members->filter(fn($m) => strtolower($m->currency) === 'usd'
+        $totalCredit  = $members->sum(fn($m) => $isUSDPage
+            ? ($m->accountKHUSD?->credit_balance ?? 0)
+            : ($m->accountKH?->credit_balance ?? 0)
+        );
+        $activeCount  = $members->filter(fn($m) => $isUSDPage
             ? ($m->accountKHUSD?->credit_balance ?? 0) > 0
             : ($m->accountKH?->credit_balance ?? 0) > 0
         )->count();
@@ -114,23 +120,23 @@
             </div>
             <div class="col-6 col-md-3">
                 <div class="cr-stat bg-white">
-                    <div class="cr-stat-icon" style="background:#e3f2fd">
-                        <i class="fas fa-coins" style="color:#0d6efd"></i>
+                    <div class="cr-stat-icon" style="background:{{ $isUSDPage ? '#e8f5e9' : '#e3f2fd' }}">
+                        <i class="fas {{ $isUSDPage ? 'fa-dollar-sign' : 'fa-coins' }}" style="color:{{ $isUSDPage ? '#198754' : '#0d6efd' }}"></i>
                     </div>
                     <div>
-                        <div class="cr-stat-label">Total VND Credit</div>
-                        <div class="cr-stat-value" style="color:#0d6efd;font-size:1rem">{{ number_format($totalVND, 2) }}</div>
+                        <div class="cr-stat-label">Total {{ $isUSDPage ? 'USD' : 'VND' }} Credit</div>
+                        <div class="cr-stat-value" style="color:{{ $isUSDPage ? '#198754' : '#0d6efd' }};font-size:1rem">{{ number_format($totalCredit, 2) }}</div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="cr-stat bg-white">
-                    <div class="cr-stat-icon" style="background:#e8f5e9">
-                        <i class="fas fa-dollar-sign" style="color:#198754"></i>
+                    <div class="cr-stat-icon" style="background:#fce4ec">
+                        <i class="fas fa-flag" style="color:#c62828"></i>
                     </div>
                     <div>
-                        <div class="cr-stat-label">Total USD Credit</div>
-                        <div class="cr-stat-value" style="color:#198754;font-size:1rem">{{ number_format($totalUSD, 2) }}</div>
+                        <div class="cr-stat-label">Currency</div>
+                        <div class="cr-stat-value" style="color:#c62828;font-size:1rem">KH · {{ $isUSDPage ? 'USD' : 'VND' }}</div>
                     </div>
                 </div>
             </div>
@@ -168,6 +174,7 @@
                 </div>
                 {{-- Date filter --}}
                 <form method="GET" action="{{ route('admin.credit-kh.index') }}" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="currency" value="{{ $currency }}">
                     <label class="mb-0 fw-semibold text-nowrap" style="font-size:.8rem;color:#495057;">Win/Loss Date:</label>
                     <input type="date" name="date" value="{{ $date }}"
                            class="form-control form-control-sm" style="border-radius:8px;font-size:.82rem;max-width:150px;">
@@ -201,17 +208,16 @@
                         <tbody>
                             @foreach ($members as $i => $member)
                                 @php
-                                    $isUSD    = strtolower($member->currency) === 'usd';
-                                    $balance  = $isUSD
+                                    $balance  = $isUSDPage
                                         ? (float)($member->accountKHUSD?->credit_balance ?? 0)
                                         : (float)($member->accountKH?->credit_balance ?? 0);
-                                    $s        = $stats->get($member->id);
-                                    $turnover = $s ? (float)$s->turnover   : 0;
-                                    $net      = $s ? (float)$s->net_amount : 0;
+                                    $s          = $stats->get($member->id);
+                                    $turnover   = $s ? (float)$s->turnover   : 0;
+                                    $net        = $s ? (float)$s->net_amount : 0;
                                     $compensate = $s ? (float)$s->compensate : 0;
-                                    $winLoss  = $compensate - $net;
-                                    $cur      = strtoupper($member->currency);
-                                    $curClass = $isUSD ? 'badge-usd' : 'badge-vnd';
+                                    $winLoss    = $compensate - $net;
+                                    $cur        = $isUSDPage ? 'USD' : 'VND';
+                                    $curClass   = $isUSDPage ? 'badge-usd' : 'badge-vnd';
                                 @endphp
                                 <tr>
                                     <td class="text-muted" style="font-size:.75rem;">{{ $i + 1 }}</td>
@@ -244,28 +250,40 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
-                                            <button class="btn btn-deposit openCreditModal"
-                                                data-bs-toggle="modal" data-bs-target="#creditModal"
-                                                data-type="deposit"
-                                                data-user-id="{{ encrypt($member->id) }}"
-                                                data-name="{{ $member->name }} ({{ $member->username }})"
-                                                data-balance="{{ $balance }}"
-                                                data-currency="{{ strtolower($member->currency) }}">
-                                                <i class="fas fa-plus-circle me-1"></i>Deposit
+                                        <div class="dropdown">
+                                            <button class="btn act-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Actions
                                             </button>
-                                            <button class="btn btn-withdraw openCreditModal"
-                                                data-bs-toggle="modal" data-bs-target="#creditModal"
-                                                data-type="withdraw"
-                                                data-user-id="{{ encrypt($member->id) }}"
-                                                data-name="{{ $member->name }} ({{ $member->username }})"
-                                                data-balance="{{ $balance }}"
-                                                data-currency="{{ strtolower($member->currency) }}">
-                                                <i class="fas fa-minus-circle me-1"></i>Withdraw
-                                            </button>
-                                            <a href="{{ route('admin.credit-kh.history', $member->id) }}" class="btn btn-history">
-                                                <i class="fas fa-history me-1"></i>History
-                                            </a>
+                                            <ul class="dropdown-menu act-menu">
+                                                <li>
+                                                    <button class="dropdown-item text-success openCreditModal"
+                                                        data-bs-toggle="modal" data-bs-target="#creditModal"
+                                                        data-type="deposit"
+                                                        data-user-id="{{ encrypt($member->id) }}"
+                                                        data-name="{{ $member->name }} ({{ $member->username }})"
+                                                        data-balance="{{ $balance }}"
+                                                        data-currency="{{ strtolower($member->currency) }}">
+                                                        <i class="fas fa-plus-circle"></i>Deposit
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger openCreditModal"
+                                                        data-bs-toggle="modal" data-bs-target="#creditModal"
+                                                        data-type="withdraw"
+                                                        data-user-id="{{ encrypt($member->id) }}"
+                                                        data-name="{{ $member->name }} ({{ $member->username }})"
+                                                        data-balance="{{ $balance }}"
+                                                        data-currency="{{ strtolower($member->currency) }}">
+                                                        <i class="fas fa-minus-circle"></i>Withdraw
+                                                    </button>
+                                                </li>
+                                                <li><hr class="dropdown-divider my-1"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-primary" href="{{ route('admin.credit-kh.history', $member->id) }}">
+                                                        <i class="fas fa-history"></i>History
+                                                    </a>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </td>
                                 </tr>

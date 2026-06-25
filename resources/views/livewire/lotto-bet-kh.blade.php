@@ -37,13 +37,26 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-md p-4 rounded-lg">
+    {{-- ── System tabs ── --}}
+    @php
+        $vnRoute  = auth()->user()?->currency === 'USD' ? 'bet-usd.input' : 'bet.input';
+        $khRoute  = auth()->user()?->currency === 'USD' ? 'bet-kh-usd.input' : 'bet-kh-vnd.input';
+        $curLabel = strtoupper($currency);
+    @endphp
+    <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid #e2e8f0;">
+        <a href="{{ route($vnRoute) }}"
+           style="padding:8px 20px;font-size:.85rem;font-weight:700;text-decoration:none;border-radius:6px 6px 0 0;
+                  background:transparent;color:#64748b;">
+            Lotto Vietnam {{ $curLabel }}
+        </a>
+        <a href="{{ route($khRoute) }}"
+           style="padding:8px 20px;font-size:.85rem;font-weight:700;text-decoration:none;border-radius:6px 6px 0 0;
+                  background:#a17100;color:#fff;border-bottom:2px solid #a17100;margin-bottom:-2px;">
+            Lotto Cambodia {{ $curLabel }}
+        </a>
+    </div>
 
-        {{-- ── System badge ── --}}
-        <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded" style="background:linear-gradient(135deg,#7d5a00 0%,#a17100 100%)">
-            <span class="text-white font-bold text-sm tracking-wide">BET KHMER</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded" style="background:rgba(255,255,255,.22);color:#fff;">{{ strtoupper($currency) }}</span>
-        </div>
+    <div class="bg-white shadow-md p-4 rounded-lg">
 
         {{-- ── Stat cards row ── --}}
         <div class="grid grid-cols-2 gap-2 mb-3 sm:grid-cols-4">
@@ -132,17 +145,6 @@
             </button>
         </div>
 
-        {{-- Chi Chu odds --}}
-        @if(count($packagePrice))
-        <div class="flex pb-2 items-center text-xs">
-            <div class="px-2">Chi Chu:</div>
-            <div>
-                @foreach($packagePrice as $type => $price)
-                    <span class="border border-gray-500 px-1 py-1">{{ $type }} × {{ number_format($price, 2) }}</span>
-                @endforeach
-            </div>
-        </div>
-        @endif
 
         {{-- ── Betting Table ── --}}
         <div x-data="popupHandler()" class="overflow-x-auto">

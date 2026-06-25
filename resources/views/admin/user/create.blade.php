@@ -15,7 +15,7 @@
 
     // Default selected bet type key and its derived currency
     $firstOpt      = $betTypeOptions[0] ?? null;
-    $defaultBt     = old('bet_types.0') ?? ($firstOpt ? $firstOpt['bet_system'].'_'.$firstOpt['currency'] : '');
+    $defaultBt     = old('bet_types.0') ?? ($firstOpt ? $firstOpt['currency'] : '');
     $defaultCur    = old('currency', $firstOpt ? $firstOpt['currency'] : '');
     $backOfficeRoles = $backOfficeRoles ?? ['operator', 'finance', 'support', 'auditor'];
     $backOfficeJson  = json_encode($backOfficeRoles);
@@ -59,7 +59,7 @@
                     {{-- Phone --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="phonenumber" required autocomplete="off"
+                        <input type="text" class="form-control" name="phonenumber" autocomplete="off"
                             value="{{ old('phonenumber') }}">
                         <x-error>phonenumber</x-error>
                     </div>
@@ -131,49 +131,22 @@
                                     Bet Types
                                 </label>
                                 <div class="border rounded p-3 bg-light">
-                                    @if($isAdmin)
-                                        @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
-                                        @foreach($btGroups as $system => $opts)
-                                        <div class="{{ !$loop->last ? 'mb-3' : '' }}">
-                                            <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
-                                                Bet {{ ucfirst($system) }}
-                                            </div>
-                                            <div class="row g-2">
-                                                @foreach($opts as $opt)
-                                                @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                                <div class="col-6 col-md-3">
-                                                    <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                                        <input class="form-check-input" type="radio"
-                                                            name="bet_types[]" value="{{ $key }}"
-                                                            id="bt_create_{{ $key }}"
-                                                            {{ $defaultBt === $key ? 'checked' : '' }}>
-                                                        <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
-                                                            {{ $opt['label'] }}
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                @endforeach
+                                    <div class="row g-2">
+                                        @foreach($betTypeOptions as $opt)
+                                        @php $key = $opt['currency']; @endphp
+                                        <div class="col-6 col-md-4">
+                                            <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                                <input class="form-check-input" type="radio"
+                                                    name="bet_types[]" value="{{ $key }}"
+                                                    id="bt_create_{{ $key }}"
+                                                    {{ (old('bet_types.0', $defaultBt) === $key) ? 'checked' : '' }}>
+                                                <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
+                                                    {{ $opt['label'] }}
+                                                </label>
                                             </div>
                                         </div>
                                         @endforeach
-                                    @else
-                                        <div class="row g-2">
-                                            @foreach($betTypeOptions as $opt)
-                                            @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                            <div class="col-6 col-md-3">
-                                                <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                                    <input class="form-check-input" type="radio"
-                                                        name="bet_types[]" value="{{ $key }}"
-                                                        id="bt_create_{{ $key }}"
-                                                        {{ $defaultBt === $key ? 'checked' : '' }}>
-                                                    <label class="form-check-label fw-semibold" for="bt_create_{{ $key }}">
-                                                        {{ $opt['label'] }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                    </div>
                                 </div>
                                 <x-error>bet_types</x-error>
                             </div>

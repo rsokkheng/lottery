@@ -220,12 +220,12 @@
         @php
             $user             = auth()->user();
             $isAdmin          = $user->hasRole('admin');
-            $sessionBetSystem = session('bet_system', $user->bet_system);
+            $sessionBetSystem = session('bet_system', $user->bet_system ?? 'vietnam');
             $sessionCurrency  = session('currency',   $user->currency);
-            // Only admin sees all systems; master/agent/member use their own bet_system
-            $hasVietnamVND = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-            $hasVietnamUSD = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-            $hasKhmer      = $isAdmin || $user->bet_system === 'khmer';
+            // Access is currency-based: VND gives Vietnam+Khmer VND, USD gives Vietnam+Khmer USD
+            $hasVietnamVND = $isAdmin || $user->currency === 'VND';
+            $hasVietnamUSD = $isAdmin || $user->currency === 'USD';
+            $hasKhmer      = $isAdmin || in_array($user->currency, ['VND', 'USD']);
         @endphp
 
         @if($sessionBetSystem === 'khmer' || ($hasKhmer && !$hasVietnamVND && !$hasVietnamUSD))

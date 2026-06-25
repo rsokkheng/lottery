@@ -9,10 +9,8 @@
     $isSupervisor = $navRoles->intersect(['admin', 'master', 'agent'])->isNotEmpty();
     $initials   = strtoupper(substr($navU->name, 0, 1));
 
-    // Determine Khmer sub-currency (VND or USD) from session or user record
-    $khCurrency = session('currency') && session('bet_system') === 'khmer'
-        ? session('currency')
-        : ($navU->bet_system === 'khmer' ? $navU->currency : 'VND');
+    // Determine KH sub-currency from session (set by middleware when entering /lotto_kh_* routes)
+    $khCurrency = session('currency', $navU->currency ?? 'VND');
     $khPrefix = $khCurrency === 'USD' ? 'bet-kh-usd' : 'bet-kh-vnd';
 
     // Color theme for Bet Khmer — deep amber / gold
@@ -20,13 +18,17 @@
     $navBgDarker = '#6b4c00';
     $hoverBg     = '#fff8e1';
     $hoverText   = '#7d5a00';
+
+    $vnSwitchRoute = $khCurrency === 'USD' ? route('bet-usd.input') : route('bet.input');
 @endphp
 
 @include('layouts._nav_shared', compact(
     'navU','navRoles','navRole','isMember','isAdmin','isMaster','isAgent','isSupervisor','initials',
     'navBg','navBgDarker','hoverBg','hoverText'
 ) + [
-    'currencyLabel' => 'Bet Khmer · ' . ($khCurrency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar'),
+    'currencyLabel' => 'Lotto Cambodia · ' . ($khCurrency === 'VND' ? 'Vietnamese Dong' : 'USD Dollar'),
+    'switchRoute'   => $vnSwitchRoute,
+    'switchLabel'   => '🇻🇳 VN',
     'homeRoute'     => $isMember ? route($khPrefix . '.input') : route($khPrefix . '.receipt-list'),
     'routes' => [
         'bet'         => $khPrefix . '.input',

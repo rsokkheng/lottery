@@ -2,9 +2,10 @@
     $navUser         = Auth::user();
     $navRole         = $navUser->roles->first()?->name ?? 'user';
     $navIsAdmin    = $navUser->hasRole('admin');
-    $navHasVietnam = $navIsAdmin || $navUser->bet_system === 'vietnam';
-    $navHasKhmer   = $navIsAdmin || $navUser->bet_system === 'khmer';
-    $navHasKHR       = $navHasKhmer;
+    // Currency-based: any currency user has access to both Vietnam and Khmer
+    $navHasVietnam = $navIsAdmin || in_array($navUser->currency, ['VND', 'USD']);
+    $navHasKhmer   = $navIsAdmin || in_array($navUser->currency, ['VND', 'USD']);
+    $navHasKHR     = $navHasKhmer;
     $navInitials     = strtoupper(substr($navUser->name, 0, 1));
 @endphp
 
@@ -30,10 +31,10 @@
         {{-- Currency badges --}}
         <li class="nav-item d-none d-md-flex align-items-center" style="gap:5px; margin-right:6px;">
             @if($navHasVietnam)
-                <span class="badge" style="background:#17a2b8; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Vietnam</span>
+                <span class="badge" style="background:#17a2b8; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Lotto Vietnam</span>
             @endif
             @if($navHasKhmer)
-                <span class="badge" style="background:#d4a017; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Bet Khmer</span>
+                <span class="badge" style="background:#d4a017; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Lotto Cambodia</span>
             @endif
         </li>
 

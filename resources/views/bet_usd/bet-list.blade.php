@@ -4,7 +4,7 @@
     <div class="bp-wrap">
         <div class="bp-page-header">
             <div>
-                <span class="bp-badge bp-badge-usd">BET VIETNAM &middot; USD</span>
+                <span class="bp-badge bp-badge-usd">Lotto Vietnam · USD</span>
                 <div class="bp-page-title">{{ __('message.bet_no') }} List</div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                             $totalWinLose    = 0;
                         @endphp
                         @foreach ($data as $row)
-                            @foreach ($row->betNumber as $bet)
+                            @foreach ($row->betNumberUSD as $bet)
                                 @php
                                     $betNumber = $bet;
                                     $betNumberAmount = 0;
@@ -74,7 +74,7 @@
                                     if ($betNumber->roll_parlay_amount > 0){ $betNumberAmount += $betNumber->roll_parlay_amount; $betNumberGame .= 'Roll Parlay'; }
                                     $commission  = $bet->total_amount - ($bet->total_amount * $row['bePackageConfig']?->rate) / 100;
                                     $netAmount   = ($bet->total_amount * $row['bePackageConfig']?->rate) / 100;
-                                    $prizeAmount = $betNumber?->betNumberWin?->betWinning->win_amount ?? 0;
+                                    $prizeAmount = $betNumber?->betNumberWinUSD?->betWinningUSD->win_amount ?? 0;
                                     $totalCommission += $commission;
                                     $totalNetAmount  += $netAmount;
                                     $totalTurnover   += $bet->total_amount;
@@ -82,10 +82,10 @@
                                     $totalWinLose    += $winLose;
                                     $wlStyle = $winLose < 0 ? 'color:#dc2626;' : '';
                                 @endphp
-                                <tr class="{{ $bet->betNumberWin != null ? 'bp-win' : '' }}">
+                                <tr class="{{ $bet->betNumberWinUSD != null ? 'bp-win' : '' }}">
                                     <td class="bp-center">{{ $No++ }}</td>
                                     <td class="bp-center">{{ $row['id'] ?? '' }}</td>
-                                    <td class="bp-center">{{ $row->beReceipt->receipt_no }}</td>
+                                    <td class="bp-center">{{ $row->beReceiptUSD?->receipt_no }}</td>
                                     <td>{{ $row['user']?->name ?? '' }}</td>
                                     <td>{{ $row['created_at'] ?? '' }}</td>
                                     <td class="bp-center">{{ $bet->generated_number }}</td>

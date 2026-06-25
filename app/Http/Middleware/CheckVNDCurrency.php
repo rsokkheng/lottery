@@ -21,8 +21,7 @@ class CheckVNDCurrency
                 return $next($request);
             }
 
-            $hasAccess = $user->bet_system === 'vietnam'
-                      && $user->currency   === strtoupper($currency);
+            $hasAccess = $user->currency === strtoupper($currency);
 
             if (!$hasAccess) {
                 abort(403, 'Access denied. You do not have Bet Vietnam · ' . strtoupper($currency) . ' access.');

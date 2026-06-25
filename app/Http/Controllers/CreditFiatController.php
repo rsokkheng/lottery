@@ -46,9 +46,8 @@ class CreditFiatController extends Controller
 
         $supervisorRoles = ['master', 'agent'];
 
-        // Members with the given currency (bet_system=vietnam, currency matches)
+        // Members with the given currency (access is currency-based, not bet_system)
         $memberQuery = User::with(['manager'])
-            ->where('bet_system', 'vietnam')
             ->where('currency', strtoupper($currency))
             ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', array_merge(['admin'], $supervisorRoles)));
 

@@ -6,10 +6,11 @@
     $isSupervisor = $isAdmin || $isMaster || $isAgent;
     $today         = \Carbon\Carbon::today()->format('Y-m-d');
 
-    $hasVND      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-    $hasUSD      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-    $hasKhmerVND = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'VND');
-    $hasKhmerUSD = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'USD');
+    // Access is currency-based: VND gives Vietnam + Khmer VND; USD gives Vietnam + Khmer USD
+    $hasVND      = $isAdmin || $user->currency === 'VND';
+    $hasUSD      = $isAdmin || $user->currency === 'USD';
+    $hasKhmerVND = $isAdmin || $user->currency === 'VND';
+    $hasKhmerUSD = $isAdmin || $user->currency === 'USD';
     $hasKhmer    = $hasKhmerVND || $hasKhmerUSD;
     $hasKHR      = $hasKhmer;
 
@@ -145,13 +146,13 @@ function btGo(sel) {
 ══════════════════════════════════════════════════ --}}
 <div class="bet-type-grid">
 
-    {{-- ── Bet Vietnam · Vietnamese Dong ── --}}
+    {{-- ── Lotto Vietnam · VND ── --}}
     @if($hasVND)
     <div class="bt-card card bt-vnd">
         <div class="bt-header">
             <div class="bt-icon"><i class="fas fa-money-bill-wave"></i></div>
             <div>
-                <p class="bt-title">Bet Vietnam · Vietnamese Dong</p>
+                <p class="bt-title">Lotto Vietnam · VND</p>
                 <p class="bt-sub">Vietnam Lottery · VND</p>
             </div>
         </div>
@@ -199,13 +200,13 @@ function btGo(sel) {
     </div>
     @endif
 
-    {{-- ── Bet Vietnam · USD Dollar ── --}}
+    {{-- ── Lotto Vietnam · USD ── --}}
     @if($hasUSD)
     <div class="bt-card card bt-usd">
         <div class="bt-header">
             <div class="bt-icon"><i class="fas fa-dollar-sign"></i></div>
             <div>
-                <p class="bt-title">Bet Vietnam · USD Dollar</p>
+                <p class="bt-title">Lotto Vietnam · USD</p>
                 <p class="bt-sub">Vietnam Lottery · USD</p>
             </div>
         </div>
@@ -253,13 +254,13 @@ function btGo(sel) {
     </div>
     @endif
 
-    {{-- ── Bet Khmer · Vietnamese Dong ── --}}
+    {{-- ── Lotto Cambodia · VND ── --}}
     @if($hasKHR && $hasKhmerVND)
     <div class="bt-card card bt-khvnd">
         <div class="bt-header">
             <div class="bt-icon"><i class="fas fa-coins"></i></div>
             <div>
-                <p class="bt-title">Bet Khmer · Vietnamese Dong</p>
+                <p class="bt-title">Lotto Cambodia · VND</p>
                 <p class="bt-sub">Khmer Lottery · VND</p>
             </div>
         </div>
@@ -309,13 +310,13 @@ function btGo(sel) {
     </div>
     @endif
 
-    {{-- ── Bet Khmer · USD Dollar ── --}}
+    {{-- ── Lotto Cambodia · USD ── --}}
     @if($hasKHR && $hasKhmerUSD)
     <div class="bt-card card bt-khusd">
         <div class="bt-header">
             <div class="bt-icon"><i class="fas fa-coins"></i></div>
             <div>
-                <p class="bt-title">Bet Khmer · USD Dollar</p>
+                <p class="bt-title">Lotto Cambodia · USD</p>
                 <p class="bt-sub">Khmer Lottery · USD</p>
             </div>
         </div>

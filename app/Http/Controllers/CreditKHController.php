@@ -37,10 +37,18 @@ class CreditKHController extends Controller
         $roles = $user->roles->pluck('name')->toArray();
         $date  = $request->input('date', Carbon::today()->format('Y-m-d'));
 
-        $supervisorRoles = ['master', 'agent'];
-        $isSupervisor    = !empty(array_intersect($supervisorRoles, $roles));
+        // Determine currency: query param → user's own currency → default vnd
+        $currency = strtolower($request->query('currency', $user->currency ?? 'vnd'));
+        if (!in_array($currency, ['vnd', 'usd'])) {
+            $currency = 'vnd';
+        }
 
-        $memberQuery = User::with(['accountKH', 'accountKHUSD', 'manager'])
+        $supervisorRoles = ['master', 'agent'];
+
+        $eagerLoad = $currency === 'usd' ? ['accountKHUSD', 'manager'] : ['accountKH', 'manager'];
+
+        $memberQuery = User::with($eagerLoad)
+            ->where('currency', strtoupper($currency))
             ->whereDoesntHave('roles', fn($q) => $q->whereIn('name', array_merge(['admin'], $supervisorRoles)));
 
         if (!in_array('admin', $roles)) {
@@ -53,47 +61,32 @@ class CreditKHController extends Controller
 
         $members = $memberQuery->orderBy('name')->get();
 
-        // Per-member win/loss stats for selected date
-        $winSubQuery = DB::table('bet_number_kh_vnd as bn')
-            ->join('bet_winning_kh_vnd as bw', 'bw.bet_number_id', '=', 'bn.id')
+        // Per-member stats for selected date (currency-specific tables)
+        $betTable    = $currency === 'usd' ? 'bet_kh_usd'        : 'bet_kh_vnd';
+        $numTable    = $currency === 'usd' ? 'bet_number_kh_usd'  : 'bet_number_kh_vnd';
+        $winTable    = $currency === 'usd' ? 'bet_winning_kh_usd' : 'bet_winning_kh_vnd';
+
+        $winSubQuery = DB::table("{$numTable} as bn")
+            ->join("{$winTable} as bw", 'bw.bet_number_id', '=', 'bn.id')
             ->select('bn.bet_id', DB::raw('SUM(bw.win_amount) as total_win'))
             ->groupBy('bn.bet_id');
 
-        $statsQuery = DB::table('bet_kh_vnd')
+        $statsQuery = DB::table("{$betTable} as b")
             ->select(
-                'bet_kh_vnd.user_id',
-                DB::raw('SUM(bet_kh_vnd.total_amount) as turnover'),
-                DB::raw('SUM(bet_kh_vnd.total_amount * pkg.rate / 100) as net_amount'),
+                'b.user_id',
+                DB::raw('SUM(b.total_amount) as turnover'),
+                DB::raw('SUM(b.total_amount * pkg.rate / 100) as net_amount'),
                 DB::raw('SUM(IFNULL(win_sub.total_win, 0)) as compensate')
             )
-            ->leftJoinSub($winSubQuery, 'win_sub', fn($j) => $j->on('win_sub.bet_id', '=', 'bet_kh_vnd.id'))
-            ->join('bet_package_configurations as pkg', 'pkg.id', '=', 'bet_kh_vnd.bet_package_config_id')
-            ->whereDate('bet_kh_vnd.bet_date', $date)
-            ->whereIn('bet_kh_vnd.user_id', $members->pluck('id'));
+            ->leftJoinSub($winSubQuery, 'win_sub', fn($j) => $j->on('win_sub.bet_id', '=', 'b.id'))
+            ->join('bet_package_configurations as pkg', 'pkg.id', '=', 'b.bet_package_config_id')
+            ->whereDate('b.bet_date', $date)
+            ->whereIn('b.user_id', $members->pluck('id'))
+            ->groupBy('b.user_id');
 
-        if (!in_array('admin', $roles)) {
-            if (in_array('master', $roles)) {
-                $statsQuery->whereIn('bet_kh_vnd.user_id', function ($sub) use ($user) {
-                    $sub->select('id')->from('users')->where('master_id', $user->id);
-                });
-            } elseif (in_array('agent', $roles)) {
-                $statsQuery->whereIn('bet_kh_vnd.user_id', function ($sub) use ($user) {
-                    $sub->select('id')->from('users')->where('manager_id', $user->id);
-                });
-            }
-        }
+        $stats = $statsQuery->get()->keyBy('user_id');
 
-        $stats = $statsQuery->groupBy('bet_kh_vnd.user_id')->get()->keyBy('user_id');
-
-        // Outstanding: today's unsettled bets (exclude companies that already have results)
-        $settledCompanyIds = DB::table('bet_lottery_results')
-            ->join('bet_lottery_schedules', 'bet_lottery_schedules.id', '=', 'bet_lottery_results.lottery_schedule_id')
-            ->whereDate('bet_lottery_results.draw_date', Carbon::today())
-            ->pluck('bet_lottery_schedules.company_id')
-            ->unique()
-            ->toArray();
-
-        return view('admin.credit-kh.index', compact('members', 'roles', 'date', 'stats'));
+        return view('admin.credit-kh.index', compact('members', 'roles', 'date', 'stats', 'currency'));
     }
 
     public function deposit(Request $request)

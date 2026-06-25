@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\AccountKH;
+use App\Models\AccountKHUSD;
+use App\Models\AccountUSD;
+use App\Models\AccountVND;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +19,21 @@ class ProfileController extends Controller
 
     public function dashboard()
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Ensure both accounts exist for currency-based dual-system access
+        if ($user && $user->currency) {
+            $uid = $user->id;
+            if ($user->currency === 'VND') {
+                AccountVND::firstOrCreate(['user_id' => $uid], ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $uid]);
+                AccountKH::firstOrCreate(['user_id' => $uid],  ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $uid]);
+            } elseif ($user->currency === 'USD') {
+                AccountUSD::firstOrCreate(['user_id' => $uid],    ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $uid]);
+                AccountKHUSD::firstOrCreate(['user_id' => $uid],  ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $uid]);
+            }
+        }
+
         return view('dashboard');
     }
     public function homepage()

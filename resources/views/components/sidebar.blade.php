@@ -14,18 +14,17 @@
 
     $canEnterResult = $user->can('data entry bet result');
 
-    // Betting access flags — only admin sees all systems; master/agent see only their own
-    $hasVND      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'VND');
-    $hasUSD      = $isAdmin || ($user->bet_system === 'vietnam' && $user->currency === 'USD');
-    $hasKhmerVND = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'VND');
-    $hasKhmerUSD = $isAdmin || ($user->bet_system === 'khmer' && $user->currency === 'USD');
+    // Betting access flags — currency-based: VND gives Vietnam + Khmer VND; USD gives Vietnam + Khmer USD
+    $hasVND      = $isAdmin || $user->currency === 'VND';
+    $hasUSD      = $isAdmin || $user->currency === 'USD';
+    $hasKhmerVND = $isAdmin || $user->currency === 'VND';
+    $hasKhmerUSD = $isAdmin || $user->currency === 'USD';
     $hasKhmer    = $hasKhmerVND || $hasKhmerUSD;
     $hasKHR      = $hasKhmer;
 
-    $vndOpen = request()->is('admin/credit/VND*') || request()->is('lotto_vn/*');
-    $usdOpen = request()->is('admin/credit/USD*') || request()->is('lotto_usd/*');
-    $khrOpen = Route::is('admin.credit-kh.*')
-               || Route::is('bet-kh-vnd.*') || Route::is('bet-kh-usd.*')
+    $vndOpen = request()->is('lotto_vn/*');
+    $usdOpen = request()->is('lotto_usd/*');
+    $khrOpen = Route::is('bet-kh-vnd.*') || Route::is('bet-kh-usd.*')
                || request()->is('lotto_kh_vnd/*') || request()->is('lotto_kh_usd/*');
 @endphp
 
@@ -71,6 +70,28 @@
         </li>
         @endif
 
+        {{-- ── Credit Management (supervisors: filtered by currency) ── --}}
+        @if($isSupervisor)
+        @if($hasVND)
+        <li class="nav-item">
+            <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
+               class="nav-link {{ request()->is('admin/credit/VND*') || (Route::is('admin.credit-kh.*') && request()->query('currency','vnd') === 'vnd') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-wallet"></i>
+                <p>Credit VND</p>
+            </a>
+        </li>
+        @endif
+        @if($hasUSD)
+        <li class="nav-item">
+            <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
+               class="nav-link {{ request()->is('admin/credit/USD*') || (Route::is('admin.credit-kh.*') && request()->query('currency') === 'usd') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-wallet"></i>
+                <p>Credit USD</p>
+            </a>
+        </li>
+        @endif
+        @endif
+
         @if($isAdmin)
         <li class="nav-item">
             <a href="{{ route('admin.menu.index') }}"
@@ -101,13 +122,13 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.result.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result.index-mien-*') || Route::is('admin.result.create-mien-*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Vietnam Result</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.result-kh.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Cambodia Result</p>
                     </a>
                 </li>
             </ul>
@@ -116,12 +137,12 @@
 
         {{-- ── Bet Vietnam ── --}}
         @if($hasVND || $hasUSD)
-        <span class="sidebar-section-label">Bet Vietnam</span>
+        <span class="sidebar-section-label">Lotto Vietnam</span>
 
         <li class="nav-item has-treeview {{ $vndOpen || $usdOpen ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ $vndOpen || $usdOpen ? 'active' : '' }}">
                 <i class="nav-icon fas fa-flag"></i>
-                <p>Bet Vietnam <i class="fas fa-angle-left right"></i></p>
+                <p>Lotto Vietnam <i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
 
@@ -133,14 +154,6 @@
                         <p>Vietnamese Dong <i class="fas fa-angle-left right"></i></p>
                     </a>
                     <ul class="nav nav-treeview nav-treeview-vnd">
-                        @if($isSupervisor)
-                        <li class="nav-item">
-                            <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
-                               class="nav-link {{ request()->is('admin/credit/VND*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
-                            </a>
-                        </li>
-                        @endif
                         <li class="nav-item">
                             <a href="{{ url('lotto_vn/receipt-list') }}"
                                class="nav-link {{ request()->is('lotto_vn/receipt-list') ? 'active' : '' }}">
@@ -165,14 +178,6 @@
                         <p>USD Dollar <i class="fas fa-angle-left right"></i></p>
                     </a>
                     <ul class="nav nav-treeview nav-treeview-usd">
-                        @if($isSupervisor)
-                        <li class="nav-item">
-                            <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
-                               class="nav-link {{ request()->is('admin/credit/USD*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
-                            </a>
-                        </li>
-                        @endif
                         <li class="nav-item">
                             <a href="{{ url('lotto_usd/receipt-list') }}"
                                class="nav-link {{ request()->is('lotto_usd/receipt-list') ? 'active' : '' }}">
@@ -195,12 +200,12 @@
 
         {{-- ── Bet Khmer ── --}}
         @if($hasKHR)
-        <span class="sidebar-section-label">Bet Khmer</span>
+        <span class="sidebar-section-label">Lotto Cambodia</span>
 
         <li class="nav-item has-treeview {{ $khrOpen ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ $khrOpen ? 'active' : '' }}">
                 <i class="nav-icon fas fa-coins"></i>
-                <p>Bet Khmer <i class="fas fa-angle-left right"></i></p>
+                <p>Lotto Cambodia <i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
 
@@ -212,14 +217,6 @@
                         <p>Vietnamese Dong <i class="fas fa-angle-left right"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
-                        @if($isSupervisor)
-                        <li class="nav-item">
-                            <a href="{{ route('admin.credit-kh.index') }}"
-                               class="nav-link {{ Route::is('admin.credit-kh.*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
-                            </a>
-                        </li>
-                        @endif
                         <li class="nav-item">
                             <a href="{{ route('bet-kh-vnd.receipt-list') }}"
                                class="nav-link {{ Route::is('bet-kh-vnd.receipt-list') ? 'active' : '' }}">
@@ -250,14 +247,6 @@
                         <p>USD Dollar <i class="fas fa-angle-left right"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
-                        @if($isSupervisor)
-                        <li class="nav-item">
-                            <a href="{{ route('admin.credit-kh.index') }}"
-                               class="nav-link {{ Route::is('admin.credit-kh.*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i><p>Credit Management</p>
-                            </a>
-                        </li>
-                        @endif
                         <li class="nav-item">
                             <a href="{{ route('bet-kh-usd.receipt-list') }}"
                                class="nav-link {{ Route::is('bet-kh-usd.receipt-list') ? 'active' : '' }}">
@@ -297,13 +286,13 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.result.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Vietnam Result</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.result-kh.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Cambodia Result</p>
                     </a>
                 </li>
             </ul>
@@ -312,34 +301,31 @@
 
         {{-- ── Finance: Credit & Transactions ── --}}
         @if($isFinance)
+        @php
+            $finCur     = $user->currency;
+            $finShowVND = !$finCur || $finCur === 'VND';
+            $finShowUSD = !$finCur || $finCur === 'USD';
+        @endphp
         <span class="sidebar-section-label">Finance</span>
 
-        <li class="nav-item has-treeview {{ Route::is('admin.credit-fiat.*') || Route::is('admin.credit-kh.*') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ Route::is('admin.credit-fiat.*') || Route::is('admin.credit-kh.*') ? 'active' : '' }}">
+        @if($finShowVND)
+        <li class="nav-item">
+            <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
+               class="nav-link {{ request()->is('admin/credit/VND*') || (Route::is('admin.credit-kh.*') && request()->query('currency','vnd') === 'vnd') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-wallet"></i>
-                <p>Credit Management <i class="fas fa-angle-left right"></i></p>
+                <p>Credit VND</p>
             </a>
-            <ul class="nav nav-treeview">
-                <li class="nav-item">
-                    <a href="{{ route('admin.credit-fiat.index', 'VND') }}"
-                       class="nav-link {{ request()->is('admin/credit/VND*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Credit VND</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
-                       class="nav-link {{ request()->is('admin/credit/USD*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Credit USD</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route('admin.credit-kh.index') }}"
-                       class="nav-link {{ Route::is('admin.credit-kh.*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Credit Khmer</p>
-                    </a>
-                </li>
-            </ul>
         </li>
+        @endif
+        @if($finShowUSD)
+        <li class="nav-item">
+            <a href="{{ route('admin.credit-fiat.index', 'USD') }}"
+               class="nav-link {{ request()->is('admin/credit/USD*') || (Route::is('admin.credit-kh.*') && request()->query('currency') === 'usd') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-wallet"></i>
+                <p>Credit USD</p>
+            </a>
+        </li>
+        @endif
         @endif
 
         {{-- ── Support: Account & Bet Lookup ── --}}
@@ -368,25 +354,25 @@
                 <li class="nav-item">
                     <a href="{{ route('admin.report.index') }}"
                        class="nav-link {{ Route::is('admin.report.index') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Report</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Vietnam Report</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.report.daily-usd') }}"
                        class="nav-link {{ Route::is('admin.report.daily-usd') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam USD Report</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Vietnam USD Report</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.result.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result.index-mien-*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Vietnam Result History</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Vietnam Result History</p>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ route('admin.result-kh.index-mien-nam') }}"
                        class="nav-link {{ Route::is('admin.result-kh.*') ? 'active' : '' }}">
-                        <i class="far fa-circle nav-icon"></i><p>Bet Khmer Result History</p>
+                        <i class="far fa-circle nav-icon"></i><p>Lotto Cambodia Result History</p>
                     </a>
                 </li>
             </ul>

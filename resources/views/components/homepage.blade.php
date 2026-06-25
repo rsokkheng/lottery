@@ -490,12 +490,12 @@
                     $authUserId = $authUser?->id;
 
                     $authIsAdmin   = $authUser?->hasRole('admin');
-                    $hasVietnamVND = $authIsAdmin || ($authUser?->bet_system === 'vietnam' && $authUser?->currency === 'VND');
-                    $hasVietnamUSD = $authIsAdmin || ($authUser?->bet_system === 'vietnam' && $authUser?->currency === 'USD');
-                    $hasKhmerVND   = $authIsAdmin || ($authUser?->bet_system === 'khmer'   && $authUser?->currency === 'VND');
-                    $hasKhmerUSD   = $authIsAdmin || ($authUser?->bet_system === 'khmer'   && $authUser?->currency === 'USD');
+                    // Access is currency-based: VND gives Vietnam + Khmer VND; USD gives Vietnam + Khmer USD
+                    $hasVietnamVND = $authIsAdmin || $authUser?->currency === 'VND';
+                    $hasVietnamUSD = $authIsAdmin || $authUser?->currency === 'USD';
+                    $hasKhmerVND   = $authIsAdmin || $authUser?->currency === 'VND';
+                    $hasKhmerUSD   = $authIsAdmin || $authUser?->currency === 'USD';
 
-                    // Legacy aliases
                     $hasVND   = $hasVietnamVND;
                     $hasUSD   = $hasVietnamUSD;
                     $hasKhmer = $hasKhmerVND || $hasKhmerUSD;
@@ -532,31 +532,31 @@
                     <tbody>
                         @if($hasVietnamVND)
                         <tr>
-                            <td><span class="currency-badge badge-vnd">VND</span></td>
+                            <td><span class="currency-badge badge-vnd">VN · VND</span></td>
                             <td class="{{ $vndBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $vndBalance > 0 ? number_format($vndBalance, 2) : '0.00' }}
                             </td>
                         </tr>
                         @endif
-                        @if($hasVietnamUSD)
-                        <tr>
-                            <td><span class="currency-badge badge-usd">USD</span></td>
-                            <td class="{{ $usdBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
-                                {{ $usdBalance > 0 ? number_format($usdBalance, 2) : '0.00' }}
-                            </td>
-                        </tr>
-                        @endif
                         @if($hasKhmerVND)
                         <tr>
-                            <td><span class="currency-badge badge-khr">KHR</span></td>
+                            <td><span class="currency-badge badge-khr">KH · VND</span></td>
                             <td class="{{ $khmerVndBal > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $khmerVndBal > 0 ? number_format($khmerVndBal, 2) : '0.00' }}
                             </td>
                         </tr>
                         @endif
+                        @if($hasVietnamUSD)
+                        <tr>
+                            <td><span class="currency-badge badge-usd">VN · USD</span></td>
+                            <td class="{{ $usdBalance > 0 ? 'balance-amt' : 'balance-zero' }}">
+                                {{ $usdBalance > 0 ? number_format($usdBalance, 2) : '0.00' }}
+                            </td>
+                        </tr>
+                        @endif
                         @if($hasKhmerUSD)
                         <tr>
-                            <td><span class="currency-badge badge-usd">KHR·USD</span></td>
+                            <td><span class="currency-badge badge-usd">KH · USD</span></td>
                             <td class="{{ $khmerUsdBal > 0 ? 'balance-amt' : 'balance-zero' }}">
                                 {{ $khmerUsdBal > 0 ? number_format($khmerUsdBal, 2) : '0.00' }}
                             </td>
@@ -634,24 +634,18 @@
                             $isAdmin      = $user->hasRole('admin');
                             $isSupervisor = $user->hasAnyRole(['master', 'agent']);
 
-                            $hasVietnamVND = $user->bet_system === 'vietnam' && $user->currency === 'VND';
-                            $hasVietnamUSD = $user->bet_system === 'vietnam' && $user->currency === 'USD';
-                            $hasKhmerVND   = $user->bet_system === 'khmer'   && $user->currency === 'VND';
-                            $hasKhmerUSD   = $user->bet_system === 'khmer'   && $user->currency === 'USD';
+                            // Access is currency-based: VND → Vietnam + Khmer VND; USD → Vietnam + Khmer USD
+                            $userCurrency = $user->currency;
 
                             $link = null;
 
                             if ($isAdmin || $isSupervisor) {
-                                if ($hasVietnamVND)    { $link = route('bet.receipt-list'); }
-                                elseif ($hasVietnamUSD){ $link = route('bet-usd.receipt-list'); }
-                                elseif ($hasKhmerVND)  { $link = route('bet-kh-vnd.receipt-list'); }
-                                elseif ($hasKhmerUSD)  { $link = route('bet-kh-usd.receipt-list'); }
-                                else                   { $link = route('admin.homepage'); }
+                                if ($userCurrency === 'VND')      { $link = route('bet.receipt-list'); }
+                                elseif ($userCurrency === 'USD')  { $link = route('bet-usd.receipt-list'); }
+                                else                              { $link = route('admin.homepage'); }
                             } else {
-                                if ($hasVietnamVND)    { $link = route('bet.input'); }
-                                elseif ($hasVietnamUSD){ $link = route('bet-usd.input'); }
-                                elseif ($hasKhmerVND)  { $link = route('bet-kh-vnd.input'); }
-                                elseif ($hasKhmerUSD)  { $link = route('bet-kh-usd.input'); }
+                                if ($userCurrency === 'VND')      { $link = route('bet.input'); }
+                                elseif ($userCurrency === 'USD')  { $link = route('bet-usd.input'); }
                             }
                         @endphp
 

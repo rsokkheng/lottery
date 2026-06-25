@@ -20,7 +20,9 @@
     'navU','navRoles','navRole','isMember','isAdmin','isMaster','isAgent','isSupervisor','initials',
     'navBg','navBgDarker','hoverBg','hoverText'
 ) + [
-    'currencyLabel' => 'Bet Vietnam · Vietnamese Dong',
+    'currencyLabel' => 'Lotto Vietnam · Vietnamese Dong',
+    'switchRoute'   => route('bet-kh-vnd.input'),
+    'switchLabel'   => '🇰🇭 KH',
     'homeRoute'     => $isMember ? route('bet.input') : route('bet.receipt-list'),
     'routes' => [
         'bet'         => 'bet.input',

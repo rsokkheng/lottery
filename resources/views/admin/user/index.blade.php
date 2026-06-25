@@ -50,20 +50,20 @@
     .cur-vnd { background:#e0f2fe; color:#0c4a6e; }
     .cur-usd { background:#d1fae5; color:#064e3b; }
 
-    /* ── Action buttons ── */
-    .btn-act { font-size:.73rem; font-weight:600; padding:3px 9px; border-radius:7px; border:1px solid; transition:all .15s; white-space:nowrap; }
-    .btn-edit     { color:#1d4ed8; background:#dbeafe; border-color:#bfdbfe; }
-    .btn-edit:hover { background:#1d4ed8; color:#fff; }
-    .btn-pkg      { color:#065f46; background:#d1fae5; border-color:#a7f3d0; }
-    .btn-pkg:hover  { background:#065f46; color:#fff; }
-    .btn-settings { color:#92400e; background:#fef3c7; border-color:#fde68a; }
-    .btn-settings:hover { background:#92400e; color:#fff; }
-    .btn-pwd      { color:#4b5563; background:#f3f4f6; border-color:#d1d5db; }
-    .btn-pwd:hover { background:#374151; color:#fff; }
-    .btn-suspend  { color:#b45309; background:#fffbeb; border-color:#fde68a; }
-    .btn-suspend:hover { background:#b45309; color:#fff; }
-    .btn-del      { color:#dc2626; background:#fef2f2; border-color:#fecaca; }
-    .btn-del:hover { background:#dc2626; color:#fff; }
+    /* ── Actions dropdown ── */
+    .act-toggle { font-size:.78rem; font-weight:700; padding:4px 12px; border-radius:8px;
+                  background:#f1f5f9; color:#374151; border:1px solid #cbd5e1; transition:all .15s; }
+    .act-toggle:hover, .act-toggle:focus { background:#334155; color:#fff; border-color:#334155; }
+    .act-toggle::after { margin-left:4px; }
+    .act-menu { border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.13); border:1px solid #e2e8f0;
+                padding:4px 0; min-width:160px; }
+    .act-menu .dropdown-item { font-size:.82rem; font-weight:600; padding:7px 14px; display:flex; align-items:center; gap:8px; }
+    .act-menu .dropdown-item:hover { background:#f1f5f9; }
+    .act-menu .dropdown-item.text-danger:hover { background:#fef2f2; }
+    .act-menu .dropdown-item button { background:none; border:none; padding:0; font-size:.82rem;
+                                      font-weight:600; color:#dc2626; width:100%; text-align:left;
+                                      display:flex; align-items:center; gap:8px; }
+    .act-menu .dropdown-item button:hover { background:none; }
 
     /* ── DataTables ── */
     .dataTables_wrapper .dataTables_filter input { border-radius:8px; border:1px solid #d1d8e0; padding:5px 10px; font-size:.82rem; }
@@ -199,9 +199,9 @@
                                     </td>
                                     <td style="font-weight:500;">{{ $user->name }}</td>
                                     <td>
-                                        @if($user->bet_system)
-                                            <span class="role-pill {{ $user->bet_system === 'khmer' ? 'sys-kh' : 'sys-vn' }}" style="margin-bottom:2px;display:inline-flex;">
-                                                {{ ucfirst($user->bet_system) }}
+                                        @if($user->currency)
+                                            <span class="role-pill sys-vn" style="margin-bottom:2px;display:inline-flex;">
+                                                Lotto (Vietnam &amp; Cambodia)
                                             </span>
                                             <span class="role-pill {{ $user->currency === 'USD' ? 'cur-usd' : 'cur-vnd' }}" style="display:inline-flex;">
                                                 {{ $user->currency }}
@@ -240,32 +240,52 @@
                                         @endif
                                     </td>
                                     @if($canManage)
-                                    <td>
-                                        <div class="d-flex flex-wrap justify-content-center gap-1">
-                                            <a href="{{ route('admin.user.edit', encrypt($user->id)) }}" class="btn btn-act btn-edit">
-                                                <i class="fas fa-edit me-1"></i>Edit
-                                            </a>
-                                            @if($auth->hasRole('admin') || $auth->hasRole('master'))
-                                            <a href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}" class="btn btn-act btn-pkg">
-                                                <i class="fas fa-box me-1"></i>Package
-                                            </a>
-                                            @endif
-                                            <a href="{{ route('admin.user.show', $user->id) }}" class="btn btn-act btn-settings">
-                                                <i class="fas fa-sliders-h me-1"></i>Settings
-                                            </a>
-                                            <a href="{{ route('admin.user.change-password', $user->id) }}" class="btn btn-act btn-pwd">
-                                                <i class="fas fa-key me-1"></i>Password
-                                            </a>
-                                            <a href="{{ route('admin.user.suspend', $user->id) }}" class="btn btn-act btn-suspend">
-                                                <i class="fas fa-ban me-1"></i>{{ $user->is_active ? 'Suspend' : 'Activate' }}
-                                            </a>
-                                            <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST"
-                                                  onsubmit="return confirm('Delete {{ addslashes($user->name) }}? This cannot be undone.')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-act btn-del">
-                                                    <i class="fas fa-trash me-1"></i>Delete
-                                                </button>
-                                            </form>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn act-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu act-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('admin.user.edit', encrypt($user->id)) }}">
+                                                        <i class="fas fa-edit text-primary"></i>Edit
+                                                    </a>
+                                                </li>
+                                                @if($auth->hasRole('admin') || $auth->hasRole('master'))
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}">
+                                                        <i class="fas fa-box text-success"></i>Package
+                                                    </a>
+                                                </li>
+                                                @endif
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('admin.user.show', $user->id) }}">
+                                                        <i class="fas fa-sliders-h text-warning"></i>Settings
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('admin.user.change-password', $user->id) }}">
+                                                        <i class="fas fa-key text-secondary"></i>Password
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('admin.user.suspend', $user->id) }}">
+                                                        <i class="fas fa-ban text-warning"></i>{{ $user->is_active ? 'Suspend' : 'Activate' }}
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider my-1"></li>
+                                                <li>
+                                                    <span class="dropdown-item text-danger p-0">
+                                                        <form action="{{ route('admin.user.destroy', encrypt($user->id)) }}" method="POST"
+                                                              onsubmit="return confirm('Delete {{ addslashes($user->name) }}? This cannot be undone.')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit">
+                                                                <i class="fas fa-trash"></i>Delete
+                                                            </button>
+                                                        </form>
+                                                    </span>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </td>
                                     @endif

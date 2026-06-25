@@ -37,13 +37,22 @@
         </div>
     </div>
 
-    <div class="bg-white shadow-md p-4 rounded-lg">
+    {{-- ── System tabs ── --}}
+    @php $khRoute = auth()->user()?->currency === 'USD' ? 'bet-kh-usd.input' : 'bet-kh-vnd.input'; @endphp
+    <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid #e2e8f0;">
+        <a href="{{ route('bet.input') }}"
+           style="padding:8px 20px;font-size:.85rem;font-weight:700;text-decoration:none;border-radius:6px 6px 0 0;
+                  background:#1565c0;color:#fff;border-bottom:2px solid #1565c0;margin-bottom:-2px;">
+            Lotto Vietnam VND
+        </a>
+        <a href="{{ route($khRoute) }}"
+           style="padding:8px 20px;font-size:.85rem;font-weight:700;text-decoration:none;border-radius:6px 6px 0 0;
+                  background:transparent;color:#64748b;">
+            Lotto Cambodia VND
+        </a>
+    </div>
 
-        {{-- ── System badge ── --}}
-        <div class="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded" style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%)">
-            <span class="text-white font-bold text-sm tracking-wide">BET VIETNAM</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded" style="background:rgba(255,255,255,.22);color:#fff;">VND</span>
-        </div>
+    <div class="bg-white shadow-md p-4 rounded-lg">
 
         {{-- ── Stat cards row ── --}}
         <div class="grid grid-cols-2 gap-2 mb-3 sm:grid-cols-4">
@@ -136,39 +145,6 @@
             </button>
         </div>
 
-        {{-- Invoice List --}}
-        @if (count($invoices) > 0)
-        <div class="mb-3">
-            <table class="text-xs border-collapse">
-                <thead>
-                    <tr>
-                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.number') }}</th>
-                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.channel') }}</th>
-                        <th class="border border-gray-500 px-3 py-1 text-left whitespace-nowrap">{{ __('lang.amount') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($invoices as $invoice)
-                        <tr>
-                            <td class="border border-gray-500 px-3 py-1">{{ $invoice['number'] }}</td>
-                            <td class="border border-gray-500 px-3 py-1">{{ implode(', ', $invoice['chanel']) }}</td>
-                            <td class="border border-gray-500 px-3 py-1">{{ implode(',', $invoice['amount']) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        @endif
-
-        {{-- Package prices --}}
-        <div class="flex pb-2 items-center text-xs">
-            <div class="px-2">Chi Chu:</div>
-            <div>
-                @foreach ($packagePrice as $betType => $price)
-                    <span class="border border-gray-500 px-1 py-1">{{ __($betType . ' x ' . $price) }}</span>
-                @endforeach
-            </div>
-        </div>
         <p class="text-xs pb-2 text-center font-bold">{{ __('LƯU Ý: PHIẾU CHỈ CÓ GIÁ TRỊ TRONG 3 NGÀY') }}</p>
 
         {{-- Bet Table --}}

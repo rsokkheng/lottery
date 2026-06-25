@@ -8,7 +8,7 @@
             <div>
                 <span class="bp-badge bp-badge-vn">
                     <svg style="width:12px;height:12px;" fill="currentColor" viewBox="0 0 20 20"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    BET VIETNAM &middot; VND
+                    Lotto Vietnam · VND
                 </span>
                 <div class="bp-page-title">{{ __('message.receipt_no') }} List</div>
             </div>

@@ -68,15 +68,13 @@ class UserController extends Controller
             $roles          = Role::whereIn('name', ['agent', 'member'])->get();
             $betTypeOptions = array_values(array_filter(
                 ManagerBetType::OPTIONS,
-                fn($opt) => $opt['bet_system'] === $creator->bet_system
-                         && $opt['currency']   === $creator->currency
+                fn($opt) => $opt['currency'] === $creator->currency
             )) ?: ManagerBetType::OPTIONS;
         } elseif ($creator->hasRole('agent')) {
             $roles          = Role::where('name', 'member')->get();
             $betTypeOptions = array_values(array_filter(
                 ManagerBetType::OPTIONS,
-                fn($opt) => $opt['bet_system'] === $creator->bet_system
-                         && $opt['currency']   === $creator->currency
+                fn($opt) => $opt['currency'] === $creator->currency
             ));
         } else {
             abort(403);
@@ -97,7 +95,7 @@ class UserController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'username'    => ['required', 'unique:users,username'],
             'password'    => ['required', 'min:6', 'max:255'],
-            'phonenumber' => ['required'],
+            'phonenumber' => ['nullable'],
             'role'        => ['required'],
         ];
         if (! $isBackOffice) {
@@ -111,13 +109,11 @@ class UserController extends Controller
             $betSystem = null;
             $currency  = null;
         } elseif ($creator->hasRole('agent')) {
-            $betSystem = $creator->bet_system;
+            $betSystem = 'vietnam';
             $currency  = $creator->currency;
         } else {
-            $btRaw     = $request->input('bet_types', [])[0] ?? 'vietnam_VND';
-            $btParts   = explode('_', $btRaw, 2);
-            $betSystem = $btParts[0] ?? 'vietnam';
-            $currency  = $btParts[1] ?? 'VND';
+            $currency  = strtoupper($request->input('bet_types', [])[0] ?? 'VND');
+            $betSystem = 'vietnam'; // vietnam is the default primary system
         }
 
         [$managerId, $masterId] = $isBackOffice ? [null, null] : $this->resolveHierarchy($creator, $targetRole);
@@ -138,13 +134,20 @@ class UserController extends Controller
             'created_by'       => $creator->id,
         ]);
 
-        $user->assignRole($targetRole);
+        $user->syncRoles([$targetRole]);
 
         if (! $isBackOffice) {
-            $acctModel = $this->resolveAccountModel($betSystem, $currency);
-            $acctModel::firstOrCreate(
+            // Primary (Vietnam) account gets the initial credit
+            $primaryAcct = $currency === 'USD' ? AccountUSD::class : AccountVND::class;
+            $primaryAcct::firstOrCreate(
                 ['user_id' => $user->id],
                 ['credit_balance' => $request->available_credit ?? 0, 'record_status_id' => 1, 'created_by' => $creator->id]
+            );
+            // Khmer account is created at 0 — admin tops up via credit-kh page
+            $khAcct = $currency === 'USD' ? AccountKHUSD::class : AccountKH::class;
+            $khAcct::firstOrCreate(
+                ['user_id' => $user->id],
+                ['credit_balance' => 0, 'record_status_id' => 1, 'created_by' => $creator->id]
             );
             $this->seedDefaultBetLimits($user->id);
         }
@@ -172,12 +175,11 @@ class UserController extends Controller
 
         $user = User::with('roles')->findOrFail(decrypt($id));
 
-        // Current bet type as a single key string e.g. 'vietnam_VND'
-        $selectedBetTypes = ($user->bet_system && $user->currency)
-            ? [$user->bet_system . '_' . $user->currency]
-            : [];
+        // Current bet type key is just the currency (VND or USD)
+        $selectedBetTypes = $user->currency ? [$user->currency] : [];
 
-        $acctModel = $this->resolveAccountModel($user->bet_system ?? 'vietnam', $user->currency ?? 'VND');
+        // Show primary (Vietnam) account balance in edit form
+        $acctModel = $user->currency === 'USD' ? AccountUSD::class : AccountVND::class;
         $acctRow   = $acctModel::where('user_id', $user->id)->first();
 
         $user->total_bet_credit       = $acctRow?->credit_balance ?? 0;
@@ -195,7 +197,7 @@ class UserController extends Controller
 
         $rules = [
             'name'        => ['required', 'string', 'max:255'],
-            'phonenumber' => ['required'],
+            'phonenumber' => ['nullable'],
             'username'    => ['required', Rule::unique('users')->ignore($user->id)],
             'role'        => ['required', 'string'],
         ];
@@ -213,23 +215,29 @@ class UserController extends Controller
         $user->save();
 
         if (! $isBackOffice) {
-            $btRaw     = $request->input('bet_types', [])[0] ?? ($user->bet_system . '_' . $user->currency);
-            $btParts   = explode('_', $btRaw, 2);
-            $betSystem = $btParts[0] ?? $user->bet_system ?? 'vietnam';
-            $currency  = $btParts[1] ?? $user->currency  ?? 'VND';
+            $currency  = strtoupper($request->input('bet_types', [])[0] ?? $user->currency ?? 'VND');
+            $betSystem = 'vietnam';
 
-            $acctModel = $this->resolveAccountModel($betSystem, $currency);
-            $account   = $acctModel::where('user_id', $user->id)->first();
+            // Update primary (Vietnam) account balance
+            $primaryAcct = $currency === 'USD' ? AccountUSD::class : AccountVND::class;
+            $account = $primaryAcct::where('user_id', $user->id)->first();
             if ($account) {
                 $account->credit_balance = $request->available_credit ?? $account->credit_balance;
                 $account->save();
             } else {
-                $acctModel::create([
+                $primaryAcct::create([
                     'user_id'          => $user->id,
                     'credit_balance'   => $request->available_credit ?? 0,
                     'record_status_id' => 1,
                 ]);
             }
+            // Ensure KH account also exists
+            $khAcct = $currency === 'USD' ? AccountKHUSD::class : AccountKH::class;
+            $khAcct::firstOrCreate(
+                ['user_id' => $user->id],
+                ['credit_balance' => 0, 'record_status_id' => 1]
+            );
+
             $user->bet_system = $betSystem;
             $user->currency   = $currency;
             $user->save();

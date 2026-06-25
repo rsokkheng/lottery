@@ -8,7 +8,7 @@
     <div class="bp-wrap">
         <div class="bp-page-header">
             <div>
-                <span class="bp-badge bp-badge-usd">BET VIETNAM &middot; USD</span>
+                <span class="bp-badge bp-badge-usd">Lotto Vietnam · USD</span>
                 <div class="bp-page-title">{{ __('message.number') }} Detail</div>
             </div>
         </div>

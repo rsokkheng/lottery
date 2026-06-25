@@ -38,7 +38,7 @@
                     {{-- Phone --}}
                     <div class="col-lg-6">
                         <label class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="phonenumber" required
+                        <input type="number" class="form-control" name="phonenumber"
                             value="{{ old('phonenumber', $editedUser->phonenumber) }}">
                         <x-error>phonenumber</x-error>
                     </div>
@@ -89,9 +89,8 @@
 
                     @php
                         $firstEditOpt  = $betTypeOptions[0] ?? null;
-                        $currentBtKey  = old('bet_types.0') ?? ($selectedBetTypes[0] ?? ($firstEditOpt ? $firstEditOpt['bet_system'].'_'.$firstEditOpt['currency'] : ''));
-                        $currentCur    = $currentBtKey ? strtoupper(substr($currentBtKey, strrpos($currentBtKey, '_') + 1)) : ($firstEditOpt ? $firstEditOpt['currency'] : 'VND');
-                        $currentCur    = old('currency', $currentCur);
+                        $currentBtKey  = old('bet_types.0') ?? ($selectedBetTypes[0] ?? ($firstEditOpt ? $firstEditOpt['currency'] : ''));
+                        $currentCur    = old('currency', $currentBtKey ?: ($firstEditOpt ? $firstEditOpt['currency'] : 'VND'));
                     @endphp
                     <input type="hidden" name="currency" id="hidden-currency" value="{{ $currentCur }}">
 
@@ -102,51 +101,22 @@
                             Bet Types
                         </label>
                         <div class="border rounded p-3 bg-light">
-                            @if($isAdmin)
-                                {{-- Admin: grouped by system (Bet Vietnam / Bet Khmer), radio, currency auto-follows --}}
-                                @php $btGroups = collect($betTypeOptions)->groupBy('bet_system'); @endphp
-                                @foreach($btGroups as $system => $opts)
-                                <div class="{{ !$loop->last ? 'mb-3' : '' }}">
-                                    <div class="fw-bold mb-2" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6c757d">
-                                        Bet {{ ucfirst($system) }}
-                                    </div>
-                                    <div class="row g-2">
-                                        @foreach($opts as $opt)
-                                        @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                        <div class="col-6 col-md-3">
-                                            <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                                <input class="form-check-input" type="radio"
-                                                    name="bet_types[]" value="{{ $key }}"
-                                                    id="bt_edit_{{ $key }}"
-                                                    {{ $currentBtKey === $key ? 'checked' : '' }}>
-                                                <label class="form-check-label fw-semibold" for="bt_edit_{{ $key }}">
-                                                    {{ $opt['label'] }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        @endforeach
+                            <div class="row g-2">
+                                @foreach($betTypeOptions as $opt)
+                                @php $key = $opt['currency']; @endphp
+                                <div class="col-6 col-md-4">
+                                    <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
+                                        <input class="form-check-input" type="radio"
+                                            name="bet_types[]" value="{{ $key }}"
+                                            id="bt_edit_{{ $key }}"
+                                            {{ $currentBtKey === $key ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-semibold" for="bt_edit_{{ $key }}">
+                                            {{ $opt['label'] }}
+                                        </label>
                                     </div>
                                 </div>
                                 @endforeach
-                            @else
-                                {{-- Non-admin: flat list, single selection --}}
-                                <div class="row g-2">
-                                    @foreach($betTypeOptions as $opt)
-                                    @php $key = $opt['bet_system'] . '_' . $opt['currency']; @endphp
-                                    <div class="col-6 col-md-3">
-                                        <div class="form-check form-check-lg border rounded p-2 bg-white h-100">
-                                            <input class="form-check-input" type="radio"
-                                                name="bet_types[]" value="{{ $key }}"
-                                                id="bt_edit_{{ $key }}"
-                                                {{ $currentBtKey === $key ? 'checked' : '' }}>
-                                            <label class="form-check-label fw-semibold" for="bt_edit_{{ $key }}">
-                                                {{ $opt['label'] }}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
 

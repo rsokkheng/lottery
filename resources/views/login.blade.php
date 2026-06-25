@@ -425,6 +425,7 @@
                                     onchange="location.href=this.value">
                                 <option value="{{ route('lang.switch','en') }}" {{ app()->getLocale()==='en'?'selected':'' }}>🇺🇸 EN</option>
                                 <option value="{{ route('lang.switch','vi') }}" {{ app()->getLocale()==='vi'?'selected':'' }}>🇻🇳 VI</option>
+                                <option value="{{ route('lang.switch','km') }}" {{ app()->getLocale()==='km'?'selected':'' }}>🇰🇭 KM</option>
                             </select>
                         </div>
 

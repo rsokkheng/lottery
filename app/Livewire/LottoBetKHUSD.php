@@ -11,7 +11,9 @@ use App\Enums\MultiplierKHEnum;
 use App\Enums\MultiplierHNKHEnum;
 use App\Models\BetReceiptKHUSD;
 use App\Models\AccountKHUSD;
+use App\Models\AccountUSD;
 use App\Models\CreditTransactionKHUSD;
+use App\Models\CreditTransactionUSD;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagKHEnum;
@@ -122,7 +124,8 @@ class LottoBetKHUSD extends Component
             ->orderBy('sequence', 'asc')
             ->get(['id', 'code', 'time_close']);
 
-        $this->betAccount = AccountKHUSD::where('user_id', $this->user->id)->value('credit_balance') ?? 0;
+        // USD users share the same AccountUSD balance across Vietnam and Cambodia bets
+        $this->betAccount = AccountUSD::where('user_id', $this->user->id)->value('credit_balance') ?? 0;
 
         $this->totalOutstanding = DB::table('bet_kh_usd')
             ->where('user_id', $this->user->id)
@@ -413,8 +416,9 @@ class LottoBetKHUSD extends Component
     public function handleSave()
     {
         $isCreateBetSuccess = false;
-        $AccountModel = AccountKHUSD::class;
-        $TransactionModel = CreditTransactionKHUSD::class;
+        // USD users share AccountUSD across Vietnam and Cambodia bets
+        $AccountModel = AccountUSD::class;
+        $TransactionModel = CreditTransactionUSD::class;
         $BetModel = BetKHUSD::class;
         $BetNumberModel = BetNumberKHUSD::class;
         $betTable = 'bet_kh_usd';

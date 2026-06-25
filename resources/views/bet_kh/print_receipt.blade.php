@@ -79,6 +79,13 @@
         <p class="title">
         <img src="{{ asset('images/logo-2888.png') }}" style="max-width: 100px; height: auto;" >
         </p>
+        @php $rcptCurrency = strtoupper(session('currency', 'VND')); @endphp
+        <div style="text-align:center;margin:6px 0 10px;">
+            <span style="display:inline-block;background:#92400e;color:#fff;font-size:13px;font-weight:700;
+                         padding:4px 14px;border-radius:20px;letter-spacing:.04em;">
+                🎰 Lotto Cambodia &middot; {{ $rcptCurrency }}
+            </span>
+        </div>
        <!-- Receipt Details with Left & Right Alignment -->
        <div class="details">
             <span>Receipt No: <strong>{{ $receipt_no }}</strong></span>

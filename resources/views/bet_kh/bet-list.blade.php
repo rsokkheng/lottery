@@ -6,7 +6,7 @@
     <div class="bp-wrap">
         <div class="bp-page-header">
             <div>
-                <span class="bp-badge bp-badge-kh">BET KHMER &middot; {{ $currencyLabel }}</span>
+                <span class="bp-badge bp-badge-kh">Lotto Cambodia · {{ $currencyLabel }}</span>
                 <div class="bp-page-title">{{ __('message.bet_no') }} List</div>
             </div>
         </div>
