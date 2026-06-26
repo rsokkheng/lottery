@@ -126,6 +126,20 @@ Route::middleware(['auth', 'verified', 'check.kh:USD'])->prefix('lotto_kh_usd')-
     Route::get('/report/monthly/member/all', [BetReportKHController::class, 'getMonthlyAllMember'])->middleware('role:agent|master')->name('bet-kh-usd.reports.monthly-allmember');
 });
 
+Route::middleware(['auth', 'role:admin'])->get('/switch-system/{system}/{currency?}', function ($system, $currency = 'VND') {
+    $currency = strtoupper($currency);
+    if ($system === 'khmer') {
+        session(['bet_system' => 'khmer', 'currency' => $currency]);
+        return $currency === 'USD'
+            ? redirect()->route('bet-kh-usd.receipt-list')
+            : redirect()->route('bet-kh-vnd.receipt-list');
+    }
+    session(['bet_system' => 'vietnam', 'currency' => $currency]);
+    return $currency === 'USD'
+        ? redirect()->route('bet-usd.receipt-list')
+        : redirect()->route('bet.receipt-list');
+})->name('switch-system');
+
 
 
 

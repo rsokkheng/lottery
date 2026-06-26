@@ -101,9 +101,9 @@
             const start_date = $('#start-date').val();
             const end_date   = $('#end-date').val();
             if (start_date.length || end_date.length) {
-                window.location = url + '?start_date=' + start_date + '&end_date=' + end_date;
+                ajaxLoad(url + '?start_date=' + start_date + '&end_date=' + end_date);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

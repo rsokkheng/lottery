@@ -17,15 +17,13 @@
             </select>
             <input type="text" id="receipt-no" value="{{ $receiptNo }}" style="width:140px;" placeholder="{{ __('message.receipt_no') }}">
             <input type="text" id="number" value="{{ $number }}" style="width:120px;" placeholder="{{ __('message.number') }}">
-            <button class="bp-search-btn" onclick="searchReceipt('{{ route('bet.bet-list') }}')">
+<button class="bp-search-btn" onclick="searchReceipt('{{ route('bet.bet-list') }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
-            @if (count(request()->query()) > 0)
             <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route('bet.bet-list') }}')">
                 {{ __('message.clear') }}
             </button>
-            @endif
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -79,6 +77,7 @@
                                     $totalTurnover   += $bet->total_amount;
                                     $winLose          = $prizeAmount - $netAmount;
                                     $totalWinLose    += $winLose;
+                                    $wlCls            = $winLose < 0 ? 'bp-wl-neg' : 'bp-wl-pos';
                                 @endphp
                                 <tr class="{{ $bet->betNumberWin != null ? 'bp-win' : '' }}">
                                     <td class="bp-center">{{ $No++ }}</td>
@@ -96,7 +95,7 @@
                                     <td class="bp-num">{{ $betNumber->total_amount }}</td>
                                     <td class="bp-num">{{ $commission }}</td>
                                     <td class="bp-num">{{ $netAmount }}</td>
-                                    <td class="bp-num" style="{{ $winLose < 0 ? 'color:#dc2626;' : '' }}">{{ $winLose }}</td>
+                                    <td class="bp-num <?= $wlCls ?>">{{ $winLose }}</td>
                                 </tr>
                             @endforeach
                         @endforeach
@@ -105,7 +104,8 @@
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalTurnover, 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCommission, 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount, 3, '.', '') }}</td>
-                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;{{ $totalWinLose < 0 ? 'color:#dc2626;' : '' }}">{{ number_format($totalWinLose, 3, '.', '') }}</td>
+                            <?php $totalWlCls = $totalWinLose < 0 ? 'bp-wl-neg' : 'bp-wl-pos'; ?>
+                            <td class="bp-num <?= $totalWlCls ?>" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalWinLose, 3, '.', '') }}</td>
                         </tr>
                     @else
                         <tr><td colspan="16" class="bp-empty">
@@ -127,9 +127,9 @@
             const number = $('#number').val();
             const com_id = $('#company').find(":selected").val();
             if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&no=' + no + '&number=' + number + '&com_id=' + com_id;
+                ajaxLoad(url + '?date=' + date + '&no=' + no + '&number=' + number + '&com_id=' + com_id);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

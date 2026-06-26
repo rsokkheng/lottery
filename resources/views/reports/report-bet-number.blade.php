@@ -110,7 +110,7 @@
                 url.searchParams.set('endDate', end);
                 url.searchParams.set('com_id', com_id);
                 url.searchParams.delete('date');
-                window.location.href = url.toString();
+                ajaxLoad(url.toString());
             } else {
                 alert('Please select both start and end dates.');
             }
@@ -121,7 +121,7 @@
             url.searchParams.delete('endDate');
             url.searchParams.delete('com_id');
             url.searchParams.delete('date');
-            window.location.href = url.toString();
+            ajaxLoad(url.toString());
         }
     </script>
 </x-app-layout>

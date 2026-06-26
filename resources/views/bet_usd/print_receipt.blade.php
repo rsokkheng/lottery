@@ -131,11 +131,21 @@
 
 </body>
 <script>
+    @php
+        $user = auth()->user();
+        $backUrl = ($user->hasRole('admin') || $user->hasRole('master'))
+            ? route('bet-usd.receipt-list')
+            : route('bet-usd.input');
+    @endphp
+    var backUrl = '{{ $backUrl }}';
     function handlePrint() {
         window.print();
         window.onafterprint = function () {
-            window.location.href = '{{ route('bet-usd.input') }}';
+            window.location.href = backUrl;
         };
     }
+    window.addEventListener('afterprint', function () {
+        window.location.href = backUrl;
+    });
 </script>
 </html>

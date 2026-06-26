@@ -21,6 +21,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route($khRoutePrefix . '.reports.daily') }}')">
+                {{ __('message.clear') }}
+            </button>
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -103,8 +106,9 @@
             const date   = $('#date').val();
             const com_id = $('#company').find(':selected').val();
             if (date.length) {
-                window.location = url + '?date=' + date + '&com_id=' + com_id;
+                ajaxLoad(url + '?date=' + date + '&com_id=' + com_id);
             }
         }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

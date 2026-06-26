@@ -43,15 +43,13 @@
                 @endforeach
             </select>
             <input type="text" id="number" value="{{ $number }}" style="width:120px;" placeholder="{{ __('message.number') }}">
-            <button class="bp-search-btn" onclick="searchReceipt('{{ $betNumberUrl }}')">
+<button class="bp-search-btn" onclick="searchReceipt('{{ $betNumberUrl }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
-            @if (count(request()->query()) > 0)
             <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ $betNumberUrl }}')">
                 {{ __('message.clear') }}
             </button>
-            @endif
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -84,8 +82,8 @@
                         ?>
                         @foreach ($grouped as $digitKey => $rows)
                             @foreach ($rows as $betNumber)
-                                <?php $wlNc = ($betNumber->win_lose ?? 0) < 0 ? 'bp-neg' : ''; ?>
-                                <tr>
+                                <?php $wlNc = ($betNumber->win_lose ?? 0) < 0 ? 'bp-wl-neg' : 'bp-wl-pos'; ?>
+                                <tr class="<?= ($betNumber->win_lose ?? 0) > 0 ? 'bp-win' : '' ?>">
                                     <td class="bp-center">{{ number_format($rowNum++, 0, '.', '') }}</td>
                                     <td>{{ $betNumber->bet_date ?? '' }}</td>
                                     <td class="bp-center">{{ $betNumber->generated_number ?? '' }}</td>
@@ -98,17 +96,17 @@
                                     <td class="bp-num">{{ $betNumber->number_turnover ?? 0 }}</td>
                                     <td class="bp-num">{{ number_format($betNumber->commission ?? 0, 2) }}</td>
                                     <td class="bp-num">{{ number_format($betNumber->net_amount ?? 0, 2) }}</td>
-                                    <td class="bp-num {{ $wlNc }}">{{ number_format($betNumber->win_lose ?? 0, 2) }}</td>
+                                    <td class="bp-num <?= $wlNc ?>">{{ number_format($betNumber->win_lose ?? 0, 2) }}</td>
                                 </tr>
                             @endforeach
                         @endforeach
-                        <?php $twlNc = $totalNetAmount['win_lose'] < 0 ? 'bp-neg-t' : ''; ?>
+                        <?php $twlNc = $totalNetAmount['win_lose'] < 0 ? 'bp-wl-neg' : 'bp-wl-pos'; ?>
                         <tr>
                             <td colspan="9" style="background:#f8f9fc;border-top:2px solid #e2e8f0;"></td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['turnover'], 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['commission'], 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['net_amount'], 3, '.', '') }}</td>
-                            <td class="bp-num {{ $twlNc }}" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['win_lose'], 3, '.', '') }}</td>
+                            <td class="bp-num <?= $twlNc ?>" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount['win_lose'], 3, '.', '') }}</td>
                         </tr>
                     @else
                         <tr><td colspan="13" class="bp-empty">
@@ -131,10 +129,10 @@
             const digit_type = $('#digit_type').val();
             const com_id     = $('#company').find(":selected").val();
             if (date.length) {
-                window.location = url + '?date=' + date + '&number=' + number +
-                    '&com_id=' + com_id + '&member_id=' + member_id + '&digit_type=' + digit_type;
+                ajaxLoad(url + '?date=' + date + '&number=' + number +
+                    '&com_id=' + com_id + '&member_id=' + member_id + '&digit_type=' + digit_type);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

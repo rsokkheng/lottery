@@ -104,9 +104,9 @@
             const date   = $('#date').val();
             const com_id = $('#company').find(":selected").val();
             if (date.length) {
-                window.location = url + '?date=' + date + '&com_id=' + com_id;
+                ajaxLoad(url + '?date=' + date + '&com_id=' + com_id);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

@@ -13,15 +13,13 @@
             </div>
             <input type="text" id="receipt-no" value="{{ $no }}" style="width:160px;"
                 placeholder="{{ __('message.receipt_no') }}">
-            <button class="bp-search-btn" onclick="searchReceipt('{{ route('bet-usd.receipt-list') }}')">
+<button class="bp-search-btn" onclick="searchReceipt('{{ route('bet-usd.receipt-list') }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
-            @if (count(request()->query()) > 0)
             <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route('bet-usd.receipt-list') }}')">
                 {{ __('message.clear') }}
             </button>
-            @endif
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -98,7 +96,7 @@
                     <h6 style="font-size:.95rem;font-weight:700;color:#1e293b;margin:0;">
                         {{ __('message.receipt_no') }}: <span id="receipt_no" style="color:#059669;"></span>
                     </h6>
-                    <button type="button" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:4px;" onclick="closeReceiptModal()">
+<button type="button" style="background:none;border:none;cursor:pointer;color:#6b7280;padding:4px;" onclick="closeReceiptModal()">
                         <svg style="width:18px;height:18px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                         </svg>
@@ -127,11 +125,11 @@
                     </table>
                 </div>
                 <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
-                    <button id="btn_pay" style="display:none;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;"
+<button id="btn_pay" style="display:none;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;"
                         type="button" onclick="payReceipt()">{{ __('Pay') }}</button>
-                    <button type="button" onclick="printReceipt()"
+<button type="button" onclick="printReceipt()"
                         style="background:#064e3b;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">{{ __('Print') }}</button>
-                    <button type="button" onclick="closeReceiptModal()"
+<button type="button" onclick="closeReceiptModal()"
                         style="background:#e2e8f0;color:#374151;border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;">{{ __('Close') }}</button>
                 </div>
             </div>
@@ -148,10 +146,10 @@
             const date = $('#datepicker-receipt').val();
             const no   = $('#receipt-no').val();
             if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&no=' + no;
+                ajaxLoad(url + '?date=' + date + '&no=' + no);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
 
         function showReceiptModal() {
             const m = document.getElementById('static-modal');

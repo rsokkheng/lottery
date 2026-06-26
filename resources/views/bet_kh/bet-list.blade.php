@@ -19,15 +19,13 @@
             </select>
             <input type="text" id="receipt-no" value="{{ $receiptNo }}" style="width:140px;" placeholder="{{ __('message.receipt_no') }}">
             <input type="text" id="number" value="{{ $number }}" style="width:120px;" placeholder="{{ __('message.number') }}">
-            <button class="bp-search-btn" onclick="searchReceipt('{{ route($khRoutePrefix . '.bet-list') }}')">
+<button class="bp-search-btn" onclick="searchReceipt('{{ route($khRoutePrefix . '.bet-list') }}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
-            @if (count(request()->query()) > 0)
             <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route($khRoutePrefix . '.bet-list') }}')">
                 {{ __('message.clear') }}
             </button>
-            @endif
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -69,9 +67,11 @@
                                     $betNumberGame   = '';
                                     if ($betNumber->a_amount > 0)          { $betNumberAmount += $betNumber->a_amount;           $betNumberGame .= 'A'; }
                                     if ($betNumber->b_amount > 0)          { $betNumberAmount += $betNumber->b_amount;           $betNumberGame .= 'B'; }
-                                    if ($betNumber->ab_amount > 0)         { $betNumberAmount += $betNumber->ab_amount;          $betNumberGame .= 'A+B'; }
+                                    if ($betNumber->c_amount > 0)          { $betNumberAmount += $betNumber->c_amount;           $betNumberGame .= 'C'; }
+                                    if ($betNumber->d_amount > 0)          { $betNumberAmount += $betNumber->d_amount;           $betNumberGame .= 'D'; }
+                                    if ($betNumber->abcd_amount > 0)       { $betNumberAmount += $betNumber->abcd_amount;        $betNumberGame .= 'ABCD'; }
                                     if ($betNumber->roll_amount > 0)       { $betNumberAmount += $betNumber->roll_amount;        $betNumberGame .= 'Roll'; }
-                                    if ($betNumber->roll7_amount > 0)      { $betNumberAmount += $betNumber->roll7_amount;       $betNumberGame .= 'Roll7'; }
+                                    if ($betNumber->roll2_amount > 0)      { $betNumberAmount += $betNumber->roll2_amount;       $betNumberGame .= 'Roll2'; }
                                     if ($betNumber->roll_parlay_amount > 0){ $betNumberAmount += $betNumber->roll_parlay_amount; $betNumberGame .= 'Roll Parlay'; }
                                     $commission  = $bet->total_amount - ($bet->total_amount * $row['bePackageConfig']?->rate) / 100;
                                     $netAmount   = ($bet->total_amount * $row['bePackageConfig']?->rate) / 100;
@@ -81,7 +81,7 @@
                                     $totalTurnover   += $bet->total_amount;
                                     $winLose          = $prizeAmount - $netAmount;
                                     $totalWinLose    += $winLose;
-                                    $wlStyle = $winLose < 0 ? 'color:#dc2626;' : '';
+                                    $wlCls            = $winLose < 0 ? 'bp-wl-neg' : 'bp-wl-pos';
                                 @endphp
                                 <tr class="{{ $bet->betNumberWinKH != null ? 'bp-win' : '' }}">
                                     <td class="bp-center">{{ $No++ }}</td>
@@ -99,17 +99,17 @@
                                     <td class="bp-num">{{ $betNumber->total_amount }}</td>
                                     <td class="bp-num">{{ $commission }}</td>
                                     <td class="bp-num">{{ $netAmount }}</td>
-                                    <td class="bp-num" style="{{ $wlStyle }}">{{ $winLose }}</td>
+                                    <td class="bp-num <?= $wlCls ?>">{{ $winLose }}</td>
                                 </tr>
                             @endforeach
                         @endforeach
-                        @php $twlStyle = $totalWinLose < 0 ? 'color:#dc2626;' : ''; @endphp
                         <tr>
                             <td colspan="12" style="background:#f8f9fc;border-top:2px solid #e2e8f0;"></td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalTurnover, 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalCommission, 3, '.', '') }}</td>
                             <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalNetAmount, 3, '.', '') }}</td>
-                            <td class="bp-num" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;{{ $twlStyle }}">{{ number_format($totalWinLose, 3, '.', '') }}</td>
+                            <?php $totalWlCls = $totalWinLose < 0 ? 'bp-wl-neg' : 'bp-wl-pos'; ?>
+                            <td class="bp-num <?= $totalWlCls ?>" style="background:#f8f9fc;border-top:2px solid #e2e8f0;font-weight:700;">{{ number_format($totalWinLose, 3, '.', '') }}</td>
                         </tr>
                     @else
                         <tr><td colspan="16" class="bp-empty">
@@ -131,9 +131,9 @@
             const number = $('#number').val();
             const com_id = $('#company').find(":selected").val();
             if (date.length || no.length) {
-                window.location = url + '?date=' + date + '&no=' + no + '&number=' + number + '&com_id=' + com_id;
+                ajaxLoad(url + '?date=' + date + '&no=' + no + '&number=' + number + '&com_id=' + com_id);
             }
         }
-        function clearSearch(url) { window.location = url; }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

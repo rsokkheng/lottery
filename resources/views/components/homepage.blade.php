@@ -639,13 +639,20 @@
 
                             $link = null;
 
-                            if ($isAdmin || $isSupervisor) {
-                                if ($userCurrency === 'VND')      { $link = route('bet.receipt-list'); }
-                                elseif ($userCurrency === 'USD')  { $link = route('bet-usd.receipt-list'); }
-                                else                              { $link = route('admin.homepage'); }
+                            if ($isAdmin) {
+                                $sesSystem = session('bet_system', 'vietnam');
+                                $sesCur    = session('currency', $userCurrency ?? 'VND');
+                                if ($sesSystem === 'khmer') {
+                                    $link = $sesCur === 'USD' ? route('bet-kh-usd.receipt-list') : route('bet-kh-vnd.receipt-list');
+                                } else {
+                                    $link = $sesCur === 'USD' ? route('bet-usd.receipt-list') : route('bet.receipt-list');
+                                }
+                            } elseif ($isSupervisor) {
+                                if ($userCurrency === 'VND')     { $link = route('bet.receipt-list'); }
+                                elseif ($userCurrency === 'USD') { $link = route('bet-usd.receipt-list'); }
                             } else {
-                                if ($userCurrency === 'VND')      { $link = route('bet.input'); }
-                                elseif ($userCurrency === 'USD')  { $link = route('bet-usd.input'); }
+                                if ($userCurrency === 'VND')     { $link = route('bet.input'); }
+                                elseif ($userCurrency === 'USD') { $link = route('bet-usd.input'); }
                             }
                         @endphp
 

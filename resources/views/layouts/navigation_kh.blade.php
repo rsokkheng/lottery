@@ -13,11 +13,18 @@
     $khCurrency = session('currency', $navU->currency ?? 'VND');
     $khPrefix = $khCurrency === 'USD' ? 'bet-kh-usd' : 'bet-kh-vnd';
 
-    // Color theme for Bet Khmer — deep amber / gold
-    $navBg       = 'linear-gradient(135deg,#7d5a00 0%,#a17100 100%)';
-    $navBgDarker = '#6b4c00';
-    $hoverBg     = '#fff8e1';
-    $hoverText   = '#7d5a00';
+    // Color theme for Bet Khmer — red for VND, green for USD
+    if ($khCurrency === 'USD') {
+        $navBg       = 'linear-gradient(135deg,#14532d 0%,#16a34a 100%)';
+        $navBgDarker = '#14532d';
+        $hoverBg     = '#dcfce7';
+        $hoverText   = '#15803d';
+    } else {
+        $navBg       = 'linear-gradient(135deg,#7f1d1d 0%,#dc2626 100%)';
+        $navBgDarker = '#7f1d1d';
+        $hoverBg     = '#fee2e2';
+        $hoverText   = '#b91c1c';
+    }
 
     $vnSwitchRoute = $khCurrency === 'USD' ? route('bet-usd.input') : route('bet.input');
 @endphp

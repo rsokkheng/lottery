@@ -20,6 +20,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
                 {{ __('message.search') }}
             </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearSearch('{{ route('bet-usd.reports.summary') }}')">
+                {{ __('message.clear') }}
+            </button>
         </div>
 
         <div class="bp-table-wrap" style="padding:0 0 8px;">
@@ -98,8 +101,9 @@
             const start_date = $('#start-date').val();
             const end_date   = $('#end-date').val();
             if (start_date.length || end_date.length) {
-                window.location = url + '?start_date=' + start_date + '&end_date=' + end_date;
+                ajaxLoad(url + '?start_date=' + start_date + '&end_date=' + end_date);
             }
         }
+        function clearSearch(url) { ajaxLoad(url); }
     </script>
 </x-app-layout>

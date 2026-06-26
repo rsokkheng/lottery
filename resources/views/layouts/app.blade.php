@@ -196,6 +196,8 @@
         .bp-neg     { color:#dc2626; font-weight:700; }
         .bp-neg-t   { color:#dc2626; }
         .bp-row-win { background:#fef2f2; }
+        .bp-wl-neg  { color:#dc2626 !important; }
+        .bp-wl-pos  { color:#1f2937 !important; }
 
         /* Empty state */
         .bp-empty { text-align:center; padding:40px; color:#9ca3af; }
@@ -233,11 +235,32 @@
             $hasKhmer      = $isAdmin || in_array($user->currency, ['VND', 'USD']);
         @endphp
 
+        @if($isAdmin)
+        <?php
+            $sc      = session('currency', '');
+            $sys     = session('bet_system', 'vietnam');
+            $tabBase = 'padding:4px 14px;border-radius:6px;font-size:.75rem;font-weight:700;text-decoration:none;';
+            $tabOff  = $tabBase . 'background:rgba(255,255,255,.08);color:#94a3b8;';
+            $tabVN   = ($sys !== 'khmer' && ($sc === 'VND' || $sc === '')) ? $tabBase . 'background:#2563eb;color:#fff;' : $tabOff;
+            $tabUSD  = ($sys !== 'khmer' && $sc === 'USD') ? $tabBase . 'background:#0891b2;color:#fff;' : $tabOff;
+            $tabKHV  = ($sys === 'khmer'  && $sc === 'VND') ? $tabBase . 'background:#dc2626;color:#fff;' : $tabOff;
+            $tabKHU  = ($sys === 'khmer'  && $sc === 'USD') ? $tabBase . 'background:#16a34a;color:#fff;' : $tabOff;
+        ?>
+        <div style="background:#1e293b;padding:4px 16px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <span style="color:#94a3b8;font-size:.72rem;font-weight:600;margin-right:4px;">SYSTEM:</span>
+            <a href="{{ route('switch-system', ['system'=>'vietnam','currency'=>'VND']) }}" style="<?= $tabVN ?>">🇻🇳 Vietnam VND</a>
+            <a href="{{ route('switch-system', ['system'=>'vietnam','currency'=>'USD']) }}" style="<?= $tabUSD ?>">🇻🇳 Vietnam USD</a>
+            <span style="color:#475569;font-size:.7rem;">|</span>
+            <a href="{{ route('switch-system', ['system'=>'khmer','currency'=>'VND']) }}" style="<?= $tabKHV ?>">🇰🇭 Cambodia VND</a>
+            <a href="{{ route('switch-system', ['system'=>'khmer','currency'=>'USD']) }}" style="<?= $tabKHU ?>">🇰🇭 Cambodia USD</a>
+        </div>
+        @endif
+
         @if($sessionBetSystem === 'khmer' || ($hasKhmer && !$hasVietnamVND && !$hasVietnamUSD))
             @include('layouts.navigation_kh')
         @elseif($sessionBetSystem !== 'khmer' && ($sessionCurrency === 'USD' || ($hasVietnamUSD && !$hasVietnamVND && !$hasKhmer)))
             @include('layouts.navigation_usd')
-        @elseif($sessionBetSystem !== 'khmer' && ($sessionCurrency === 'VND' || ($hasVietnamVND && !$hasVietnamUSD && !$hasKhmer)))
+        @elseif($sessionBetSystem !== 'khmer' && ($isAdmin || $sessionCurrency === 'VND' || ($hasVietnamVND && !$hasVietnamUSD && !$hasKhmer)))
             @include('layouts.navigation')
         @else
             @include('layouts.nonavigation')
@@ -256,5 +279,30 @@
 
     @livewireScripts
     @yield('js')
+    <script>
+    function ajaxLoad(url) {
+        var sel  = '.bp-table-wrap';
+        var wrap = document.querySelector(sel);
+        if (!wrap) { sel = '.w-full.overflow-auto'; wrap = document.querySelector(sel); }
+        if (wrap) wrap.style.opacity = '0.4';
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                var doc   = new DOMParser().parseFromString(html, 'text/html');
+                var fresh = doc.querySelector(sel);
+                var cur   = document.querySelector(sel);
+                if (fresh && cur) {
+                    cur.outerHTML = fresh.outerHTML;
+                } else if (cur) {
+                    cur.style.opacity = '1';
+                }
+                history.pushState({}, '', new URL(url).pathname);
+            })
+            .catch(function() {
+                var cur = document.querySelector(sel);
+                if (cur) cur.style.opacity = '1';
+            });
+    }
+    </script>
 </body>
 </html>

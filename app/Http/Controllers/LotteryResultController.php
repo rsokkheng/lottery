@@ -928,8 +928,7 @@ class LotteryResultController extends Controller
                     'bet_winning.bet_id',
                     'record.bet_number_id',
                     'bet_winning.win_amount as compensate',
-                    DB::raw('COUNT(record.bet_number_id) as count_bet_number'),
-                    'record.bet_number_id',
+                    DB::raw("GROUP_CONCAT(DISTINCT record.win_number ORDER BY record.id SEPARATOR ', ') as win_number"),
                     'pkg_con.bet_type',
                     'pkg_con.rate as net',
                     'pkg_con.price as odds',
@@ -938,14 +937,13 @@ class LotteryResultController extends Controller
                     'bet_numbers.total_amount as turnover',
                     'schedule.province_en',
                     'bet_receipts.receipt_no',
-                    'bet_receipts.receipt_no',
                     'bet_numbers.a_amount',
                     'bet_numbers.b_amount',
                     'bet_numbers.ab_amount',
                     'bet_numbers.roll_amount',
                     'bet_numbers.roll7_amount',
                     'bet_numbers.roll_parlay_amount',
-                    DB::raw('sum(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
+                    DB::raw('MAX(bet_numbers.a_check+bet_numbers.b_check+bet_numbers.ab_check+bet_numbers.roll_check+bet_numbers.roll7_check+bet_numbers.roll_parlay_check) as sum_check'),
                     'users.name as account'
                 )
                 ->join('bet_numbers','bet_numbers.id','=', 'record.bet_number_id')
@@ -1066,7 +1064,7 @@ class LotteryResultController extends Controller
                     ];
                     $commission = $record->turnover - ($record->turnover * $record->net / 100);
                     $netAmount = $record->turnover * $record->net / 100;
-                    $prepareData['win_number'] = $record->generated_number;
+                    $prepareData['win_number'] = $record->win_number ?? '';
                     $prepareData['turnover'] = $record->turnover;
                     $prepareData['commission'] = $commission;
                     $prepareData['net_amount'] = $netAmount;

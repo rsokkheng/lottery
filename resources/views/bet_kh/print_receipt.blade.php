@@ -132,11 +132,21 @@
 
 </body>
 <script>
+    @php
+        $user = auth()->user();
+        $backUrl = ($user->hasRole('admin') || $user->hasRole('master'))
+            ? route($khRoutePrefix . '.receipt-list')
+            : route($khRoutePrefix . '.input');
+    @endphp
+    var backUrl = '{{ $backUrl }}';
     function handlePrint() {
         window.print();
         window.onafterprint = function () {
-            window.location.href = '{{ route($khRoutePrefix . '.input') }}';
+            window.location.href = backUrl;
         };
     }
+    window.addEventListener('afterprint', function () {
+        window.location.href = backUrl;
+    });
 </script>
 </html>

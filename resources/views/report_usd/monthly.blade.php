@@ -1,193 +1,130 @@
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
-    <style>
 
-    </style>
-   <div class="flex-col bg-white rounded-lg px-4 py-4">
-    <div class="flex w-full">
-        <div class="w-full">
-            @php
-                $selectedDate = request()->get('date', 'today'); // fallback to 'today' if nothing is selected
-            @endphp
-
-            <div class="flex flex-wrap gap-4">
-                <!-- Start Date -->
-                <div class="flex-1 min-w-[150px] max-w-[200px]">
-                    <label for="startDate" class="block text-sm text-gray-700">{{ __('message.start_date') }}</label>
-                    <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
-                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                        class="w-full px-4 py-2 border rounded bg-white text-gray-700 shadow">
-                </div>
-
-                <!-- End Date -->
-                <div class="flex-1 min-w-[150px] max-w-[200px]">
-                    <label for="endDate" class="block text-sm text-gray-700">{{ __('message.end_date') }}</label>
-                    <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
-                        datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd"
-                        class="w-full px-4 py-2 border rounded bg-white text-gray-700 shadow">
-                </div>
-
-                <!-- Company -->
-                <div class="flex-1 min-w-[150px] max-w-[200px]">
-                    <label class="block text-sm text-gray-700">{{ __('message.company') }}</label>
-                    <select id="company" class="w-full rounded border px-2 py-2">
-                        @foreach ($company as $val)
-                            <option value="{{ $val['id'] }}" {{ $company_id == $val['id'] ? 'selected' : '' }}>
-                                {{ $val['label'] }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-
-                <!-- Search Button -->
-                <div class="flex items-end">
-                    <button onclick="applyDateFilter()"
-                        class="px-6 py-2 bg-blue-600 text-white rounded shadow w-full sm:w-auto">
-                        {{ __('message.search') }}
-                    </button>
-                </div>
-
-                <!-- Clear Button -->
-                <div class="flex items-end">
-                    <button onclick="clearDateFilter()"
-                        class="px-6 py-2 bg-gray-300 text-gray-800 rounded shadow w-full sm:w-auto">
-                        {{ __('message.clear') }}
-                    </button>
-                </div>
-                
+    <div class="bp-wrap">
+        <div class="bp-filter">
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="startDate" value="{{ $startDate }}" datepicker datepicker-buttons
+                    datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
+                    style="width:145px;" placeholder="{{ __('message.start_date') }}">
             </div>
+            <div class="bp-filter-icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/></svg>
+                <input id="endDate" value="{{ $endDate }}" datepicker datepicker-buttons
+                    datepicker-autoselect-today datepicker-autohide datepicker-format="yyyy-mm-dd" type="text"
+                    style="width:145px;" placeholder="{{ __('message.end_date') }}">
+            </div>
+            <select id="company" style="width:160px;">
+                @foreach ($company as $val)
+                    <option value="{{ $val['id'] }}" {{ $company_id == $val['id'] ? 'selected' : '' }}>{{ $val['label'] }}</option>
+                @endforeach
+            </select>
+            <button class="bp-search-btn" onclick="applyDateFilter()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m16.5 16.5 5 5"/></svg>
+                {{ __('message.search') }}
+            </button>
+            <button class="bp-search-btn" style="background:#6b7280;" onclick="clearDateFilter()">
+                {{ __('message.clear') }}
+            </button>
         </div>
-    </div>
-        <div class="flex w-full">
-            <div class="w-full overflow-auto py-4">
-                <table class="w-full border-collapse border border-gray-600 rounded-lg text-center">
-                    <thead>
-                        <tr class="bg-blue-500 border text-white font-bold text-nowrap">
-                            <th class="py-2 border border-white">{{ __('message.no') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.account') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.invoice') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.turnover') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.commission') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.net_amount') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.compensate') }}</th>
-                            <th class="py-2 border border-white">{{ __('message.win_lose') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (isset($data) && count($data))
-                            @php
-                                $totalInvoice = 0;
-                                $turNover = 0;
-                                $totalCompensate = 0;
-                                $totalCommission = 0;
-                                $totalNetAmount = 0;
-                                $totalWinLose = 0;
-                                $netAmount = 0;
-                                $commission = 0;
-                                $compensate = 0;
-                            @endphp
-                            @foreach ($data as $key => $row)
-                                @php
-                                    $netAmount = $row->net_amount;
-                                    $commission = $row->commission;
-                                    $diff = $row->Compensate - $netAmount;
-                                    $totalInvoice += (float) ($row->total_receipts ?? 0);
-                                    $turNover += (float) ($row->total_amount ?? 0);
-                                    $totalCommission += (float) ($commission ?? 0);
-                                    $totalNetAmount += (float) ($netAmount ?? 0);
-                                    $totalCompensate += (float) ($row->Compensate ?? 0);
-                                    $totalWinLose += $diff;
-                                @endphp
-                                <tr class="border border-gray-300 hover:bg-gray-100">
-                                    <td class="py-2 px-1 border border-gray-300">{{ $key + 1 }}</td>
 
-                                    <td class="py-2 px-1 border border-gray-300">
-                                        <a href="{{ route('bet-usd.reports.monthly-tracking-member', [
-                                        'id' => $row->manager_id,
-                                        'startDate' => $startDate,
-                                        'endDate' => $endDate,
-                                        'com_id' => $company_id
-                                        ]) }}" class="text-blue-600 hover:underline">
-                                            {{ $row->account }}
-                                        </a>
-                                    </td>
-
-                                    <td class="py-2 px-1 border border-gray-300">{{ $row->total_receipts }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">
-                                        {{ number_format($row->total_amount, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">
-                                        {{ number_format($commission, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">
-                                        {{ number_format($netAmount, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">
-                                        {{ number_format($row->Compensate, 3, '.', '') }}</td>
-                                    <td class="text-right py-2 px-1 border border-gray-300">
-                                        <span class="{{ $diff < 0 ? 'text-red-500' : 'text-black' }}">
-                                            {{ number_format($diff, 3, '.', '') }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-
-                            <tr class="border border-gray-300 hover:bg-gray-100 bg-gray-200 font-bold">
-                                <td colspan="2" class="text-center py-2 px-2 border border-gray-300">Total</td>
-                                <td class="text-center py-2 px-2 border border-gray-300">{{ $totalInvoice }}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">
-                                    {{ number_format($turNover, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">
-                                    {{ number_format($totalCommission, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">
-                                    {{ number_format($totalNetAmount, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">
-                                    {{ number_format($totalCompensate, 3, '.', '') }}</td>
-                                <td class="text-right py-2 px-2 border border-gray-300">
-                                    <span class="{{ $totalWinLose < 0 ? 'text-red-500' : 'text-black' }}">
-                                        {{ number_format($totalWinLose, 3, '.', '') }}
-                                    </span>
+        <div class="bp-table-wrap" style="padding:0 0 8px;">
+            <table class="bp-table">
+                <thead>
+                    <tr>
+                        <th>{{ __('message.no') }}</th>
+                        <th>{{ __('message.account') }}</th>
+                        <th class="bp-num">{{ __('message.invoice') }}</th>
+                        <th class="bp-num">{{ __('message.turnover') }}</th>
+                        <th class="bp-num">{{ __('message.commission') }}</th>
+                        <th class="bp-num">{{ __('message.net_amount') }}</th>
+                        <th class="bp-num">{{ __('message.compensate') }}</th>
+                        <th class="bp-num">{{ __('message.win_lose') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isset($data) && count($data))
+                        <?php
+                            $totalInvoice    = 0; $totalTurnover   = 0;
+                            $totalCommission = 0; $totalNetAmt     = 0;
+                            $totalCompensate = 0; $totalWinLose    = 0;
+                        ?>
+                        @foreach ($data as $key => $row)
+                            <?php
+                                $netAmount  = $row->net_amount;
+                                $commission = $row->commission;
+                                $diff       = $row->Compensate - $netAmount;
+                                $totalInvoice    += (float)($row->total_receipts ?? 0);
+                                $totalTurnover   += (float)($row->total_amount ?? 0);
+                                $totalCommission += (float)($commission ?? 0);
+                                $totalNetAmt     += (float)($netAmount ?? 0);
+                                $totalCompensate += (float)($row->Compensate ?? 0);
+                                $totalWinLose    += $diff;
+                                $nc = $diff < 0 ? 'bp-neg' : '';
+                            ?>
+                            <tr>
+                                <td class="bp-center">{{ $key + 1 }}</td>
+                                <td>
+                                    <a href="{{ route('bet-usd.reports.monthly-tracking-member', ['id' => $row->manager_id, 'startDate' => $startDate, 'endDate' => $endDate, 'com_id' => $company_id]) }}"
+                                        style="color:#2563eb;font-weight:600;text-decoration:none;">
+                                        {{ $row->account }}
+                                    </a>
                                 </td>
+                                <td class="bp-num">{{ $row->total_receipts }}</td>
+                                <td class="bp-num">{{ number_format($row->total_amount, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($commission, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($netAmount, 3, '.', '') }}</td>
+                                <td class="bp-num">{{ number_format($row->Compensate, 3, '.', '') }}</td>
+                                <td class="bp-num {{ $nc }}">{{ number_format($diff, 3, '.', '') }}</td>
                             </tr>
-                        @else
-                            <tr class="border border-gray-300 hover:bg-gray-100">
-                                <td class="py-2 px-1 border border-gray-300 text-center" colspan="10">No data</td>
-                            </tr>
-                        @endif
-                    </tbody>
-
-                </table>
-            </div>
+                        @endforeach
+                        <?php $tnc = $totalWinLose < 0 ? 'bp-neg-t' : ''; ?>
+                        <tr style="background:#f8f9fc;font-weight:700;border-top:2px solid #e2e8f0;">
+                            <td colspan="2" class="bp-center">Total</td>
+                            <td class="bp-num">{{ $totalInvoice }}</td>
+                            <td class="bp-num">{{ number_format($totalTurnover, 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalCommission, 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalNetAmt, 3, '.', '') }}</td>
+                            <td class="bp-num">{{ number_format($totalCompensate, 3, '.', '') }}</td>
+                            <td class="bp-num {{ $tnc }}">{{ number_format($totalWinLose, 3, '.', '') }}</td>
+                        </tr>
+                    @else
+                        <tr><td colspan="8" class="bp-empty">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
+                            <p>No data found</p>
+                        </td></tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
-
 
     <script src="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.js') }}"></script>
-    <!-- jQuery -->
     <script src="{{ asset('admin/plugins/jquery/jquery.min.js') }}"></script>
-
     <script>
         function applyDateFilter() {
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
-            const com_id = $('#company').find(":selected").val();
+            const start  = document.getElementById('startDate').value;
+            const end    = document.getElementById('endDate').value;
+            const com_id = $('#company').find(':selected').val();
             if (start && end) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('startDate', start);
                 url.searchParams.set('endDate', end);
-                url.searchParams.set('com_id', com_id); // Add this line
+                url.searchParams.set('com_id', com_id);
                 url.searchParams.delete('date');
-                window.location.href = url.toString();
+                ajaxLoad(url.toString());
             } else {
                 alert('Please select both start and end dates.');
             }
         }
-
         function clearDateFilter() {
             const url = new URL(window.location.href);
             url.searchParams.delete('startDate');
             url.searchParams.delete('endDate');
             url.searchParams.delete('date');
-            url.searchParams.delete('com_id'); // Optional: also clear com_id
-            window.location.href = url.toString();
+            url.searchParams.delete('com_id');
+            ajaxLoad(url.toString());
         }
     </script>
 </x-app-layout>
