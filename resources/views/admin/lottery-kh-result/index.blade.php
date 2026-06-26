@@ -13,10 +13,10 @@
     <div class="tab-content">
         <div class="container tab-pane active"><br>
             <div class="card">
-                <div class="card-header">
-                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-nam')}} (Cambodia)</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-trung')}} (Cambodia)</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-bac')}} (Cambodia)</h3>@endif
+                <div class="card-header" style="background:var(--kh-blue,#032EA1);color:#fff">
+                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2" style="color:#fff">🇰🇭 Bet result of {{__('lang.mien-nam')}} (Cambodia)</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2" style="color:#fff">🇰🇭 Bet result of {{__('lang.mien-trung')}} (Cambodia)</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2" style="color:#fff">🇰🇭 Bet result of {{__('lang.mien-bac')}} (Cambodia)</h3>@endif
 
                     <input type="hidden" id="region_value" value="{{$data['type']??''}}"/>
                     <div class="card-tools">

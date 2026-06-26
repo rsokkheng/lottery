@@ -4,13 +4,13 @@ namespace App\Livewire;
 
 use Carbon\Carbon;
 use App\Models\Bet;
-use DragonCode\Support\Facades\Helpers\Digit;
 use Livewire\Component;
 use App\Models\BetNumber;
 use App\Models\BetReceipt;
 use App\Enums\MultiplierEnum;
 use App\Enums\MultiplierHNEnum;
 use App\Models\AccountVND;
+use App\Models\CreditTransactionVND;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagEnum;
@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNEnum;
 use App\Models\BetLotteryPackageConfiguration;
 use App\Models\UserBetLimit;
-use Illuminate\Support\Facades\Log;
 
 class LottoBet extends Component
 {
@@ -110,15 +109,7 @@ class LottoBet extends Component
         $this->user = Auth::user();
         $userId = $this->user->id;
     
-        // OPTIMIZATION 1: Single query for schedules with both data sets
         $schedulesData = $this->betLotteryScheduleModel
-            ->where('draw_day', $this->currentDay)
-            ->where('time_close', '>=', $this->currentTime)
-            ->orderBy('company_id', 'asc')
-            ->orderBy('sequence', 'asc')
-            ->get(['id', 'code', 'company_id', 'time_close']);
-    
-            $schedulesData = $this->betLotteryScheduleModel
             ->where('draw_day', $this->currentDay)
             ->where('time_close', '>=', $this->currentTime)
             ->orderBy('company_id', 'asc')
@@ -427,13 +418,24 @@ class LottoBet extends Component
                     $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
                 }
-                $newBalance = round( $this->betAccount - $this->totalDue, 2);
+                $newBalance = round((float) $account->credit_balance - $this->totalDue, 2);
                 if ($newBalance < 0) {
                     $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
                     return back();
-                }else{
+                } else {
+                    $balanceBefore = (float) $account->credit_balance;
                     $account->credit_balance -= $this->totalDue;
                     $account->save();
+                    CreditTransactionVND::create([
+                        'user_id'        => auth()->id(),
+                        'type'           => 'bet_debit',
+                        'amount'         => $this->totalDue,
+                        'balance_before' => $balanceBefore,
+                        'balance_after'  => $account->credit_balance,
+                        'note'           => 'Bet placed',
+                        'bet_date'       => $this->currentDate,
+                        'created_by'     => auth()->id(),
+                    ]);
                 }            
                 // generate no invoice
                // generate invoice number: check if exists, increment if exists, else use max(id)+1

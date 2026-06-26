@@ -1,29 +1,29 @@
 <x-app-layout>
     <style>
         .rs-tab { display:inline-block; cursor:pointer; padding:9px 18px; font-weight:700; font-size:.88rem;
-                  color:#065f46; white-space:nowrap; border-radius:8px 8px 0 0; transition:all .15s; }
-        .rs-tab.active { background:#064e3b; color:#fff; }
-        .rs-tab:not(.active):hover { background:#d1fae5; }
+                  color:#92400e; white-space:nowrap; border-radius:8px 8px 0 0; transition:all .15s; }
+        .rs-tab.active { background:#78350f; color:#fff; }
+        .rs-tab:not(.active):hover { background:#fef3c7; }
 
         .rs-wrap { max-width:960px; margin:20px auto; border-radius:12px; overflow:hidden;
                    box-shadow:0 4px 20px rgba(0,0,0,.12); border:1px solid #e2e8f0; }
         .rs-table { width:100%; border-collapse:collapse; text-align:center; }
         .rs-table td { border:1px solid #e5e7eb; vertical-align:middle; padding:0; }
 
-        .rs-head { background:linear-gradient(135deg,#059669 0%,#064e3b 100%); }
-        .rs-head td { border-color:#047857; color:#fff; padding:16px 14px; }
+        .rs-head { background:linear-gradient(135deg,#b45309 0%,#92400e 100%); }
+        .rs-head td { border-color:#c0714a; color:#fff; padding:16px 14px; }
         .rs-date      { font-size:1rem; font-weight:700; letter-spacing:.03em; }
         .rs-prov-name { font-size:1.4rem; font-weight:800; letter-spacing:.01em; }
         .rs-prov-code { font-size:.82rem; opacity:.85; margin-top:2px; }
 
-        .rs-label { width:110px; min-width:110px; background:#f0fdf4;
+        .rs-label { width:110px; min-width:110px; background:#fffbf0;
                     border-right:3px solid #e5e7eb; font-size:.92rem; font-weight:800;
                     color:#374151; padding:16px 10px; letter-spacing:.01em; }
 
         .rs-cell { padding:14px 16px; }
         .rs-row-even { background:#fff; }
         .rs-row-odd  { background:#f9fafb; }
-        .rs-row-even:hover, .rs-row-odd:hover { background:#ecfdf5; }
+        .rs-row-even:hover, .rs-row-odd:hover { background:#fef9ec; }
 
         .wn      { display:block; line-height:2; text-align:center; }
         .wn-red  { color:#dc2626; font-weight:800; font-size:22px; }
@@ -116,7 +116,7 @@
                 <table class="rs-table">
                     <thead class="rs-head">
                         <tr>
-                            <td class="rs-label" style="background:#064e3b;border-color:#064e3b;color:#fff;">
+                            <td class="rs-label" style="background:#7c2d12;border-color:#7c2d12;color:#fff;">
                                 <span class="rs-date">{{ $data['date_show'] }}</span>
                                 <input type="hidden" value="{{ $data['date_show'] }}" id="date_result" name="date_result"/>
                             </td>

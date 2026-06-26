@@ -954,7 +954,7 @@ class LotteryResultController extends Controller
                 ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bets.bet_schedule_id')
                 ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bets.bet_package_config_id')
                 ->where('bets.bet_date', $date)
-                ->when($company, function ($q) use ($company){
+                ->when($company > 0, function ($q) use ($company){
                     $q->when($company == 1, function ($q2){
                         $q2->where('schedule.draw_time', '16:30:00');
                     });
@@ -1074,6 +1074,90 @@ class LotteryResultController extends Controller
 
                 });
             return view('bet.report-winning', compact('data','companies', 'date', 'number', 'company'));
+        } catch (\Exception $exception) {
+            throwException($exception);
+            return $exception->getMessage();
+        }
+    }
+
+    public function checkResult(Request $request)
+    {
+        try {
+            $filterDate = $request->get('date', $this->currentDate);
+            $region     = $request->get('region', HelperEnum::MienNamSlug->value);
+            $currency   = strtoupper($request->get('currency', 'VND'));
+
+            if (!$this->isValidDateRequest($filterDate)) {
+                $filterDate = $this->currentDate;
+            }
+            if (!$this->validateRegion($region)) {
+                $region = HelperEnum::MienNamSlug->value;
+            }
+            if (!in_array($currency, ['VND', 'USD'])) {
+                $currency = 'VND';
+            }
+
+            $dateFormatted = Carbon::createFromFormat('d/m/Y', $filterDate)->format('Y-m-d');
+            $dayName       = Carbon::parse($dateFormatted)->dayName;
+
+            $schedules   = $this->getCurrentScheduleResultFilter($dayName, $region);
+            $scheduleIds = array_column($schedules, 'id');
+
+            $tBet = $currency === 'USD' ? 'bet_usd' : 'bets';
+            $tWin = $currency === 'USD' ? 'bet_winning_usd' : 'bet_winning';
+
+            $betData = [];
+            if (count($scheduleIds)) {
+                $betData = DB::table($tBet)
+                    ->select(
+                        'schedule.id as schedule_id',
+                        'schedule.province',
+                        'schedule.code',
+                        DB::raw("COUNT(DISTINCT {$tBet}.bet_receipt_id) AS total_receipts"),
+                        DB::raw("SUM({$tBet}.total_amount) AS total_amount"),
+                        DB::raw("SUM({$tBet}.total_amount * bet_package_configurations.rate / 100) AS net_amount"),
+                        DB::raw("SUM({$tBet}.total_amount - ({$tBet}.total_amount * bet_package_configurations.rate / 100)) AS commission"),
+                        DB::raw("COALESCE(SUM({$tWin}.win_amount), 0) AS compensate")
+                    )
+                    ->leftJoin($tWin, "{$tWin}.bet_id", '=', "{$tBet}.id")
+                    ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', "{$tBet}.bet_schedule_id")
+                    ->join('bet_package_configurations', 'bet_package_configurations.id', '=', "{$tBet}.bet_package_config_id")
+                    ->whereIn("{$tBet}.bet_schedule_id", $scheduleIds)
+                    ->whereDate("{$tBet}.bet_date", $dateFormatted)
+                    ->groupBy('schedule.id', 'schedule.province', 'schedule.code')
+                    ->orderBy('schedule.province')
+                    ->get()->keyBy('schedule_id');
+            }
+
+            $rows = [];
+            foreach ($schedules as $sch) {
+                $bet         = $betData[$sch['id']] ?? null;
+                $totalAmount = (float)($bet->total_amount ?? 0);
+                $netAmount   = (float)($bet->net_amount   ?? 0);
+                $commission  = (float)($bet->commission   ?? 0);
+                $compensate  = (float)($bet->compensate   ?? 0);
+                $rows[] = [
+                    'province'       => $sch['province'],
+                    'code'           => $sch['code'],
+                    'schedule_id'    => $sch['id'],
+                    'total_receipts' => (int)($bet->total_receipts ?? 0),
+                    'total_amount'   => $totalAmount,
+                    'net_amount'     => $netAmount,
+                    'commission'     => $commission,
+                    'compensate'     => $compensate,
+                    'win_lose'       => $netAmount - $compensate,
+                ];
+            }
+
+            $data = [
+                'type'         => $region,
+                'currency'     => $currency,
+                'current_date' => $filterDate,
+                'rows'         => $rows,
+                'url'          => ['check' => 'admin.result.check-result'],
+            ];
+
+            return view('admin.lottery-result.check-result', compact('data'));
         } catch (\Exception $exception) {
             throwException($exception);
             return $exception->getMessage();

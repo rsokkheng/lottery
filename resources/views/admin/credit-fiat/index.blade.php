@@ -15,7 +15,7 @@
     .cr-stat-value { font-size:1.35rem; font-weight:700; line-height:1.1; }
 
     /* ── Table ── */
-    .cr-table-wrap { border-radius:12px; overflow:hidden; border:1px solid #e8ecf0; }
+    .cr-table-wrap { border-radius:12px; overflow:visible; border:1px solid #e8ecf0; }
     #creditTable { margin-bottom:0 !important; font-size:.845rem; }
     #creditTable thead th {
         background: linear-gradient(135deg, #1e3a5f 0%, #2563a8 100%);
@@ -146,7 +146,7 @@
         @endif
 
         {{-- ── Table Card ── --}}
-        <div class="bg-white rounded-3 shadow-sm" style="border:1px solid #e8ecf0; overflow:hidden;">
+        <div class="bg-white rounded-3 shadow-sm" style="border:1px solid #e8ecf0;">
 
             {{-- Card header --}}
             <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid #e8ecf0; flex-wrap:wrap; gap:10px;">

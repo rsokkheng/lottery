@@ -16,10 +16,10 @@
     <div class="tab-content">
         <div id="element-id-{{\App\Enums\HelperEnum::MienNamSlug->value }}" class="container tab-pane active"><br>
             <div class="card">
-                <div class="card-header">
-                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-nam')}}</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-trung')}}</h3>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2">Bet result of {{__('lang.mien-bac')}}</h3>@endif
+                <div class="card-header" style="background:var(--vn-red,#DA251D);color:#fff">
+                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h3 class="card-title py-2" style="color:#fff">🇻🇳 Bet result of {{__('lang.mien-nam')}}</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h3 class="card-title py-2" style="color:#fff">🇻🇳 Bet result of {{__('lang.mien-trung')}}</h3>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h3 class="card-title py-2" style="color:#fff">🇻🇳 Bet result of {{__('lang.mien-bac')}}</h3>@endif
 
                     <input type="hidden" id="region_value" value="{{$data['type']??''}}"/>
                     <div class="card-tools">

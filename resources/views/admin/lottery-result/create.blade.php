@@ -6,13 +6,13 @@
     <div class="tab-content">
         <div id="content-of-mien-nam-{{$data['type']}}" class="container tab-pane active">
             <div style="width: 100%">
-                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-nam')}}</h4>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-trung')}}</h4>@endif
-                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h4 class="py-2">Entry result of {{__('lang.mien-bac')}}</h4>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)<h4 class="py-2">🇻🇳 Entry result of {{__('lang.mien-nam')}}</h4>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)<h4 class="py-2">🇻🇳 Entry result of {{__('lang.mien-trung')}}</h4>@endif
+                    @if($data['type']===\App\Enums\HelperEnum::MienBacDienToanSlug->value)<h4 class="py-2">🇻🇳 Entry result of {{__('lang.mien-bac')}}</h4>@endif
 
                         <form id="form_submit_result">
                             <table class="table table-bordered rounded-lg text-center table-striped" style="width: 100%">
-                                <thead class="bg-dark">
+                                <thead style="background:var(--vn-red,#DA251D)">
                                     <tr>
                                         <td class="text-white">
                                             {{ $data['current_date'] }}

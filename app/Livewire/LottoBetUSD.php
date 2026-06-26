@@ -11,13 +11,13 @@ use App\Enums\MultiplierEnum;
 use App\Models\BetReceiptUSD;
 use App\Enums\MultiplierHNEnum;
 use App\Models\AccountUSD;
+use App\Models\CreditTransactionUSD;
 use App\Models\BetLotterySchedule;
 use Illuminate\Support\Facades\DB;
 use App\Enums\MultiplierHashtagEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\MultiplierHashtagHNEnum;
 use App\Models\BetLotteryPackageConfiguration;
-use Illuminate\Support\Facades\Log;
 
 class LottoBetUSD extends Component
 {
@@ -417,13 +417,24 @@ class LottoBetUSD extends Component
                     $this->dispatch('bet-saved', message: 'គណនីមិនមានទឹកលុយ សូមបញ្ជូលទឹកលុយទៅគណនីលោកអ្នក!', type: 'error');
                     return back();
                 }
-                $newBalance = round($this->betAccount - $this->totalDue, 2);
+                $newBalance = round((float) $account->credit_balance - $this->totalDue, 2);
                 if ($newBalance < 0) {
                     $this->dispatch('bet-saved', message: 'សូមបញ្ចូលទឹកលុយ', type: 'error');
                     return back();
                 } else {
+                    $balanceBefore = (float) $account->credit_balance;
                     $account->credit_balance -= $this->totalDue;
                     $account->save();
+                    CreditTransactionUSD::create([
+                        'user_id'        => auth()->id(),
+                        'type'           => 'bet_debit',
+                        'amount'         => $this->totalDue,
+                        'balance_before' => $balanceBefore,
+                        'balance_after'  => $account->credit_balance,
+                        'note'           => 'Bet placed',
+                        'bet_date'       => $this->currentDate,
+                        'created_by'     => auth()->id(),
+                    ]);
                 }
                 // generate invoice number: check if exists, increment if exists, else use max(id)+1
                 $lastReceipt = $this->betReceipt->orderByDesc('id')->first();

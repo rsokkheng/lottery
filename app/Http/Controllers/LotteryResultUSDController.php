@@ -940,7 +940,7 @@ class LotteryResultUSDController extends Controller
                 ->join('bet_lottery_schedules as schedule','schedule.id','=', 'bet_usd.bet_schedule_id')
                 ->join('bet_package_configurations as pkg_con','pkg_con.id','=', 'bet_usd.bet_package_config_id')
                 ->where('bet_usd.bet_date', $date)
-                ->when($company, function ($q) use ($company){
+                ->when($company > 0, function ($q) use ($company){
                     $q->when($company == 1, function ($q2){
                         $q2->where('schedule.draw_time', '16:30:00');
                     });

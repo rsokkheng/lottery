@@ -13,8 +13,8 @@
         .row-order  { color:#9ca3af; font-size:11px; padding-right:2px; }
         .kh-date-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
         .kh-date-row input[type=text] { border:1px solid #ced4da; padding:6px 10px; border-radius:4px; font-size:13px; width:130px; }
-        .kh-date-row button { background:#007bff; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; }
-        .kh-date-row button:hover { background:#0056b3; }
+        .kh-date-row button { background:var(--kh-blue,#032EA1); color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; }
+        .kh-date-row button:hover { background:#022881; }
         /* bigger inputs across all cells */
         .kh-win-number { height:42px !important; font-size:16px !important; font-weight:600; text-align:center; padding:2px 4px !important; }
         table.table td { vertical-align:middle; padding:10px 6px; }
@@ -36,11 +36,11 @@
                 </div>
 
                 @if($data['type']===\App\Enums\HelperEnum::MienNamSlug->value)
-                    <h4 class="py-2">Entry result of {{ __('lang.mien-nam') }} (Cambodia)</h4>
+                    <h4 class="py-2">🇰🇭 Entry result of {{ __('lang.mien-nam') }} (Cambodia)</h4>
                 @elseif($data['type']===\App\Enums\HelperEnum::MienTrungSlug->value)
-                    <h4 class="py-2">Entry result of {{ __('lang.mien-trung') }} (Cambodia)</h4>
+                    <h4 class="py-2">🇰🇭 Entry result of {{ __('lang.mien-trung') }} (Cambodia)</h4>
                 @else
-                    <h4 class="py-2">Entry result of {{ __('lang.mien-bac') }} (Cambodia)</h4>
+                    <h4 class="py-2">🇰🇭 Entry result of {{ __('lang.mien-bac') }} (Cambodia)</h4>
                 @endif
 
                 <form id="kh-form-result">
@@ -83,7 +83,7 @@
                     @endphp
 
                     <table class="table table-bordered rounded-lg text-center table-striped" style="width:100%">
-                        <thead class="bg-dark">
+                        <thead style="background:var(--kh-blue,#032EA1)">
                             <tr>
                                 <td class="text-white">{{ $data['current_date'] }}</td>
                                 @foreach($schedule as $sch)
@@ -119,11 +119,12 @@
                                                             @if(!$loop->first)<span class="pair-sep">−</span>@endif
                                                             <input type="text"
                                                                 class="form-control border-0 shadow-none kh-win-number"
-                                                                style="width:{{ $w }}px"
+                                                                style="width:<?= $w ?>px"
                                                                 name="[{{ $pCode }}][{{ $row['p1'] }}][{{ $prov1['schedule_id'] }}][{{ $rr['result_order'] }}]"
                                                                 value="{{ $rr['winning_number'] ?? '' }}"
                                                                 maxlength="{{ $len }}"
                                                                 data-max-length="{{ $len }}"
+                                                                data-required="true"
                                                                 placeholder="{{ str_repeat('0', $len) }}"
                                                                 autocomplete="off">
                                                         @endforeach
@@ -136,11 +137,12 @@
                                                             @if(!$loop->first)<span class="pair-sep">−</span>@endif
                                                             <input type="text"
                                                                 class="form-control border-0 shadow-none kh-win-number"
-                                                                style="width:{{ $w }}px"
+                                                                style="width:<?= $w ?>px"
                                                                 name="[{{ $pCode }}][{{ $row['p2'] }}][{{ $prov2['schedule_id'] }}][{{ $rr['result_order'] }}]"
                                                                 value="{{ $rr['winning_number'] ?? '' }}"
                                                                 maxlength="{{ $len }}"
                                                                 data-max-length="{{ $len }}"
+                                                                data-required="true"
                                                                 placeholder="{{ str_repeat('0', $len) }}"
                                                                 autocomplete="off">
                                                         @endforeach
@@ -156,6 +158,7 @@
                                                     $len2  = $rr2['input_length'] ?? 3;
                                                     $schId = $prov1['schedule_id'] ?? ($sch['id'] ?? '');
                                                     $pCode = $sch['code'];
+                                                    $isOptional = !empty($row['optional']);
                                                 @endphp
                                                 <div class="pair-wrap">
                                                     <input type="text"
@@ -164,7 +167,7 @@
                                                         value="{{ $rr1['winning_number'] ?? '' }}"
                                                         maxlength="{{ $len1 }}"
                                                         data-max-length="{{ $len1 }}"
-                                                        @if(!empty($row['optional'])) data-optional="true" @endif
+                                                        @if($isOptional) data-optional="true" @else data-required="true" @endif
                                                         placeholder="{{ str_repeat('0', $len1) }}"
                                                         autocomplete="off">
                                                     <span class="pair-sep">−</span>
@@ -174,7 +177,7 @@
                                                         value="{{ $rr2['winning_number'] ?? '' }}"
                                                         maxlength="{{ $len2 }}"
                                                         data-max-length="{{ $len2 }}"
-                                                        @if(!empty($row['optional'])) data-optional="true" @endif
+                                                        @if($isOptional) data-optional="true" @else data-required="true" @endif
                                                         placeholder="{{ str_repeat('0', $len2) }}"
                                                         autocomplete="off">
                                                 </div>
@@ -195,12 +198,13 @@
                                                                 @if(!$loop->first)<span class="pair-sep">−</span>@endif
                                                                 <input type="text"
                                                                     class="form-control border-0 shadow-none kh-win-number"
-                                                                    style="width:{{ $w }}px"
+                                                                    style="width:<?= $w ?>px"
                                                                     name="[{{ $prov['province_code'] }}][{{ $row['prize'] }}][{{ $prov['schedule_id'] }}][{{ $rr['result_order'] }}]"
                                                                     value="{{ $rr['winning_number'] ?? '' }}"
                                                                     maxlength="{{ $rr['input_length'] ?? 0 }}"
                                                                     data-max-length="{{ $rr['input_length'] ?? 0 }}"
-                                                                    placeholder="0"
+                                                                    data-required="true"
+                                                                    placeholder="{{ str_repeat('0', $rr['input_length'] ?? 1) }}"
                                                                     autocomplete="off">
                                                             @endforeach
                                                         </div>
@@ -215,7 +219,8 @@
                                                                     value="{{ $rr['winning_number'] ?? '' }}"
                                                                     maxlength="{{ $rr['input_length'] ?? 0 }}"
                                                                     data-max-length="{{ $rr['input_length'] ?? 0 }}"
-                                                                    placeholder="0"
+                                                                    data-required="true"
+                                                                    placeholder="{{ str_repeat('0', $rr['input_length'] ?? 1) }}"
                                                                     autocomplete="off">
                                                             </div>
                                                         @endforeach
@@ -304,14 +309,35 @@
             const indexUrl   = $('#kh-index-url').val();
             let rows = [], isInvalid = false;
 
+            // Validate optional pairs: if either 2D or 3D is filled, both must be filled correctly
+            $('.pair-wrap').each(function () {
+                const $inputs = $(this).find('.kh-win-number');
+                const filled  = $inputs.filter(function () { return $(this).val() !== ''; });
+                if (filled.length > 0 && filled.length < $inputs.length) {
+                    $inputs.each(function () {
+                        if (!$(this).val()) {
+                            $(this).addClass('is-invalid');
+                            isInvalid = true;
+                        }
+                    });
+                }
+            });
+
             $('.kh-win-number').each(function () {
-                const name = $(this).attr('name') || '';
-                const val  = $(this).val();
-                const max  = parseInt($(this).data('max-length')) || 0;
-                const arr  = name.match(/\[(.*?)\]/g)?.map(s => s.replace(/\[|\]/g, '')) || [];
+                const name     = $(this).attr('name') || '';
+                const val      = $(this).val();
+                const max      = parseInt($(this).data('max-length')) || 0;
+                const required = $(this).data('required') === true;
+                const arr      = name.match(/\[(.*?)\]/g)?.map(s => s.replace(/\[|\]/g, '')) || [];
 
                 $(this).removeClass('is-invalid');
-                if (!val) { return; }
+                if (!val) {
+                    if (required) {
+                        $(this).addClass('is-invalid');
+                        isInvalid = true;
+                    }
+                    return;
+                }
                 if (val.length !== max) {
                     $(this).addClass('is-invalid');
                     isInvalid = true;
@@ -328,7 +354,7 @@
             });
 
             if (isInvalid) {
-                toastr.warning('Invalid input');
+                toastr.warning('Please fill in all required fields with the correct number of digits.');
                 $('#btn-kh-save').prop('disabled', false);
                 return;
             }

@@ -3,7 +3,7 @@
     $currencyIcon  = $currency === 'VND' ? 'fas fa-money-bill-wave' : 'fas fa-dollar-sign';
     $depositRoute  = route('admin.credit-fiat.deposit', $currency);
     $indexRoute    = route('admin.credit-fiat.index', $currency);
-    $balance       = (float)($account?->bet_credit ?? 0);
+    $balance       = (float)($account?->credit_balance ?? 0);
 @endphp
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">

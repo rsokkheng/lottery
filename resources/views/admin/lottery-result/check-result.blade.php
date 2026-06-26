@@ -1,13 +1,13 @@
 <x-admin>
-    @section('title', 'KHR Check Result')
-    @include('admin.lottery-kh-result.navbar', ['data' => $data])
+    @section('title', 'VND/USD Check Result')
+    @include('admin.lottery-result.navbar', ['data' => $data])
 
     <link href="{{ asset('admin/plugins/datepicker/css/bootstrap-datepicker-1-7-1.min.css') }}" rel="stylesheet"/>
 
     <div class="tab-content">
         <div class="container tab-pane active"><br>
 
-            {{-- Date + Region filter bar --}}
+            {{-- Filter bar --}}
             <div class="d-flex align-items-center gap-2 mb-3 flex-wrap" style="gap:10px">
                 <span style="font-weight:600;font-size:13px">Date:</span>
                 <input type="text" id="check-date-picker" data-date-format="dd/mm/yyyy"
@@ -29,14 +29,19 @@
                     </option>
                 </select>
 
+                <select id="check-currency" style="border:1px solid #ced4da;padding:6px 10px;border-radius:4px;font-size:13px">
+                    <option value="VND" {{ $data['currency'] === 'VND' ? 'selected' : '' }}>VND</option>
+                    <option value="USD" {{ $data['currency'] === 'USD' ? 'selected' : '' }}>USD</option>
+                </select>
+
                 <button id="btn-check-search" class="btn btn-primary btn-sm">Search</button>
             </div>
 
             {{-- Summary table --}}
             <div class="card">
-                <div class="card-header" style="background:var(--kh-blue,#032EA1);color:#fff">
+                <div class="card-header" style="background:var(--vn-red,#DA251D);color:#fff">
                     <h3 class="card-title py-1" style="color:#fff">
-                        🇰🇭 KHR Check Result —
+                        🇻🇳 {{ $data['currency'] }} Check Result —
                         @if($data['type'] === \App\Enums\HelperEnum::MienNamSlug->value) {{ __('lang.mien-nam') }}
                         @elseif($data['type'] === \App\Enums\HelperEnum::MienTrungSlug->value) {{ __('lang.mien-trung') }}
                         @else {{ __('lang.mien-bac') }}
@@ -46,12 +51,12 @@
                 </div>
                 <div class="card-body p-0">
                     @php
-                        $totReceipts  = 0;
-                        $totAmount    = 0;
-                        $totNet       = 0;
-                        $totComm      = 0;
-                        $totComp      = 0;
-                        $totWinLose   = 0;
+                        $totReceipts = 0;
+                        $totAmount   = 0;
+                        $totNet      = 0;
+                        $totComm     = 0;
+                        $totComp     = 0;
+                        $totWinLose  = 0;
                         foreach ($data['rows'] as $r) {
                             $totReceipts += $r['total_receipts'];
                             $totAmount   += $r['total_amount'];
@@ -135,10 +140,11 @@
         });
 
         $('#btn-check-search').on('click', function () {
-            const date   = $('#check-date-picker').val();
-            const region = $('#check-region').val();
+            const date     = $('#check-date-picker').val();
+            const region   = $('#check-region').val();
+            const currency = $('#check-currency').val();
             if (date) {
-                window.location = '{{ route("admin.result-kh.check-result") }}?date=' + date + '&region=' + region;
+                window.location = '{{ route("admin.result.check-result") }}?date=' + date + '&region=' + region + '&currency=' + currency;
             }
         });
     });

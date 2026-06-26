@@ -812,56 +812,66 @@ class LotteryResultKHController extends Controller
             ->orderBy("{$tNum}.id")
             ->lazy()
             ->each(function ($bet) use (&$getBetWinningNumber, $date) {
-                $getBetRoll = $this->getBetRoll($bet->a_amount, $bet->b_amount, $bet->c_amount, $bet->d_amount, $bet->abcd_amount, $bet->roll2_amount, $bet->roll_amount, $bet->roll_parlay_amount, $bet->bet_type);
-                $getAmount = $this->getBetAmount($bet->a_amount, $bet->b_amount, $bet->c_amount, $bet->d_amount, $bet->abcd_amount, $bet->roll2_amount, $bet->roll_amount, $bet->roll_parlay_amount);
-                if ($bet->region_slug === HelperEnum::MienBacDienToanSlug->value) {
-                    $rollA = $bet->bet_type === '3D' ? $this->HanoiRollA3D : $this->HanoiRollA;
-                    $rollB = $bet->bet_type === '3D' ? $this->HanoiRollB3D : $this->HanoiRollB;
-                    $rollC = $bet->bet_type === '3D' ? $this->HanoiRollC3D : $this->HanoiRollC;
-                    $rollD = $bet->bet_type === '3D' ? $this->HanoiRollD3D : $this->HanoiRollD;
+                $isMienBac = $bet->region_slug === HelperEnum::MienBacDienToanSlug->value;
+                $is3D      = $bet->bet_type === '3D';
 
-                    if ((float)$bet->a_amount)  $getBetRoll = $rollA;
-                    if ((float)$bet->b_amount)  $getBetRoll = $rollB;
-                    if ((float)$bet->c_amount)  $getBetRoll = $rollC;
-                    if ((float)$bet->d_amount)  $getBetRoll = $rollD;
-                    if ((float)$bet->abcd_amount) $getBetRoll = [...$rollA, ...$rollB, ...$rollC, ...$rollD];
-                    // Roll / Roll Parlay already set correctly by getBetRoll above; keep them
+                // Resolve per-region prize-level arrays for each channel
+                if ($isMienBac) {
+                    $rollA = $is3D ? $this->HanoiRollA3D : $this->HanoiRollA;
+                    $rollB = $is3D ? $this->HanoiRollB3D : $this->HanoiRollB;
+                    $rollC = $is3D ? $this->HanoiRollC3D : $this->HanoiRollC;
+                    $rollD = $is3D ? $this->HanoiRollD3D : $this->HanoiRollD;
+                } else {
+                    $rollA = $is3D ? $this->rollA3D : $this->rollA;
+                    $rollB = $is3D ? $this->rollB3D : $this->rollB;
+                    $rollC = $is3D ? $this->rollC3D : $this->rollC;
+                    $rollD = $is3D ? $this->rollD3D : $this->rollD;
                 }
 
-                if((float)$bet->roll2_amount){
-                    $getMatched = $this->matchWinNumberFromResultsRoll2($date, $bet->bet_schedule_id, $bet->generated_number);
-                    if (count($getMatched)) {
-                        $totalAmount = (float)$bet->roll2_amount * (float)$bet->pkg_price;
-                        foreach ($getMatched as $val) {
-                            $getBetWinningNumber[] = [
-                                'bet_id' => $bet->bet_id,
-                                'bet_number_id' => $bet->id,
-                                'receipt_id' => $bet->bet_receipt_id,
-                                'bet_type' => $bet->bet_type,
-                                'win_number' => $val->bet_number,
-                                'result_id' => $val->result_id,
-                                'prize_amount' => $totalAmount
-                            ];
-                        }
+                $addWins = function (array $matched, float $prize) use ($bet, &$getBetWinningNumber) {
+                    foreach ($matched as $val) {
+                        $getBetWinningNumber[] = [
+                            'bet_id'        => $bet->bet_id,
+                            'bet_number_id' => $bet->id,
+                            'receipt_id'    => $bet->bet_receipt_id,
+                            'bet_type'      => $bet->bet_type,
+                            'win_number'    => $val->bet_number,
+                            'result_id'     => $val->result_id,
+                            'prize_amount'  => $prize,
+                        ];
                     }
-                }else{
-                    $getMatched = $this->matchWinNumberFromResults($date, $bet->bet_schedule_id, $bet->generated_number, $getBetRoll);
+                };
+
+                // Roll2: uses dedicated matching function, runs independently of other channels
+                if ((float)$bet->roll2_amount) {
+                    $getMatched = $this->matchWinNumberFromResultsRoll2(
+                        $date, $bet->bet_schedule_id, $bet->generated_number, $bet->region_slug
+                    );
                     if (count($getMatched)) {
-                        $totalAmount = $getAmount * (float)$bet->pkg_price;
-                        foreach ($getMatched as $val) {
-                            $getBetWinningNumber[] = [
-                                'bet_id' => $bet->bet_id,
-                                'bet_number_id' => $bet->id,
-                                'receipt_id' => $bet->bet_receipt_id,
-                                'bet_type' => $bet->bet_type,
-                                'win_number' => $val->bet_number,
-                                'result_id' => $val->result_id,
-                                'prize_amount' => $totalAmount
-                            ];
-                        }
+                        $addWins($getMatched, (float)$bet->roll2_amount * (float)$bet->pkg_price);
                     }
                 }
 
+                // Each regular channel is checked independently so a multi-channel bet
+                // (e.g. a=1 + d=1 + roll2=1) scores all winning channels, not just the last one.
+                $channelDefs = [
+                    [(float)$bet->a_amount,          $rollA],
+                    [(float)$bet->b_amount,          $rollB],
+                    [(float)$bet->c_amount,          $rollC],
+                    [(float)$bet->d_amount,          $rollD],
+                    [(float)$bet->abcd_amount,       [...$rollA, ...$rollB, ...$rollC, ...$rollD]],
+                    [(float)$bet->roll_amount,       $this->rolls],
+                    [(float)$bet->roll_parlay_amount,$this->rollParlay],
+                ];
+                foreach ($channelDefs as [$amount, $rollLevels]) {
+                    if (!$amount || empty($rollLevels)) continue;
+                    $getMatched = $this->matchWinNumberFromResults(
+                        $date, $bet->bet_schedule_id, $bet->generated_number, $rollLevels
+                    );
+                    if (count($getMatched)) {
+                        $addWins($getMatched, $amount * (float)$bet->pkg_price);
+                    }
+                }
             });
 
         return $getBetWinningNumber;
@@ -1026,19 +1036,31 @@ class LotteryResultKHController extends Controller
             ->toArray();
     }
 
-    public function matchWinNumberFromResultsRoll2($date, $scheduleId, $number): array
+    public function matchWinNumberFromResultsRoll2($date, $scheduleId, $number, string $regionSlug = ''): array
     {
-        // KHR Roll2: row 1/A (2D + 3D), row 2, row 3, and row 4 first result only
+        // KHR Roll2: row 1/A (all), row 2 (all), row 3 (all), row 4 first result only
+        $isMienBac = $regionSlug === HelperEnum::MienBacDienToanSlug->value;
+
+        if ($isMienBac) {
+            // MienBac: row1/A = KH_GiaiBay(2D) + KH_GiaiSau(3D), row2 = KH_GiaiNam, row3 = KH_GiaiTu(all), row4 first = KH_GiaiBa
+            $allRows   = ['KH_GiaiBay', 'KH_GiaiSau', 'KH_GiaiNam', 'KH_GiaiTu'];
+            $firstOnly = 'KH_GiaiBa';
+        } else {
+            // MienNam/Trung: row1/A = 1/A(2D) + KH_GiaiBay(3D), row2 = KH_GiaiSau, row3 = KH_GiaiNam, row4 first = KH_GiaiTu
+            $allRows   = ['1/A', 'KH_GiaiBay', 'KH_GiaiSau', 'KH_GiaiNam'];
+            $firstOnly = 'KH_GiaiTu';
+        }
+
         return DB::table('bet_lottery_results')
             ->select('result_id', DB::raw("'$number' as bet_number"))
-            ->where(function ($q) use ($number, $date, $scheduleId) {
-                $q->whereIn('prize_level', ['1/A', 'KH_GiaiBay', 'KH_GiaiSau', 'KH_GiaiNam'])
+            ->where(function ($q) use ($number, $date, $scheduleId, $allRows) {
+                $q->whereIn('prize_level', $allRows)
                     ->where('lottery_schedule_id', $scheduleId)
                     ->where('draw_date', $date)
                     ->where('winning_number', 'like', '%'.$number);
             })
-            ->orWhere(function ($q) use ($number, $date, $scheduleId) {
-                $q->where('prize_level', 'KH_GiaiTu')
+            ->orWhere(function ($q) use ($number, $date, $scheduleId, $firstOnly) {
+                $q->where('prize_level', $firstOnly)
                     ->where('result_order', 1)
                     ->where('lottery_schedule_id', $scheduleId)
                     ->where('draw_date', $date)
@@ -1126,7 +1148,7 @@ class LotteryResultKHController extends Controller
                 ->join('bet_lottery_schedules as schedule', 'schedule.id', '=', "{$tBet}.bet_schedule_id")
                 ->join('bet_package_configurations as pkg_con', 'pkg_con.id', '=', "{$tBet}.bet_package_config_id")
                 ->where("{$tBet}.bet_date", $date)
-                ->when($company, function ($q) use ($company){
+                ->when($company > 0, function ($q) use ($company){
                     $q->when($company == 1, function ($q2){
                         $q2->where('schedule.draw_time', '16:30:00');
                     });
