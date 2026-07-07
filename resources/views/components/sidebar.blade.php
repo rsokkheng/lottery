@@ -29,16 +29,42 @@
 @endphp
 
 <style>
+/* Sidebar active state — clean dark-blue */
 .nav-sidebar .nav-link.active,
 .nav-sidebar .nav-treeview .nav-link.active {
-    background-color: #007bff !important;
+    background: linear-gradient(90deg,#1e3a5f,#2563a8) !important;
     color: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(37,99,168,.35);
 }
 .nav-sidebar .nav-link.active .nav-icon,
 .nav-sidebar .nav-treeview .nav-link.active .nav-icon,
 .nav-sidebar .nav-link.active p,
 .nav-sidebar .nav-treeview .nav-link.active p {
     color: #fff !important;
+}
+/* Sidebar hover */
+.nav-sidebar .nav-link:not(.active):hover {
+    background: rgba(37,99,168,.08) !important;
+    border-radius: 8px !important;
+}
+/* Section labels */
+.sidebar-section-label {
+    display: block;
+    font-size: .62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,.35);
+    padding: 12px 12px 4px;
+    margin-top: 2px;
+}
+/* Smoother sidebar links */
+.nav-sidebar .nav-link {
+    border-radius: 8px !important;
+    margin: 1px 8px !important;
+    transition: background .15s, box-shadow .15s !important;
+    font-size: .82rem !important;
 }
 </style>
 

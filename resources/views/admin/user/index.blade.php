@@ -30,10 +30,10 @@
     .cr-stat-value { font-size:1.4rem; font-weight:700; line-height:1.1; }
 
     /* ── Table ── */
-    .cr-table-wrap { border-radius:12px; overflow:hidden; border:1px solid #e8ecf0; }
+    .cr-table-wrap { border-radius:12px; overflow:visible; border:1px solid #e8ecf0; }
     #userTable { margin-bottom:0 !important; font-size:.845rem; }
     #userTable thead th {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563a8 100%);
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         color:#fff; font-weight:600; font-size:.75rem; text-transform:uppercase;
         letter-spacing:.5px; border:none; padding:11px 12px; white-space:nowrap;
     }
@@ -129,11 +129,11 @@
         </div>
 
         {{-- ── Table Card ── --}}
-        <div class="bg-white rounded-3 shadow-sm" style="border:1px solid #e8ecf0; overflow:hidden;">
+        <div class="bg-white rounded-3 shadow-sm" style="border:1px solid #e8ecf0;">
 
             <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid #e8ecf0;">
                 <div class="d-flex align-items-center gap-2">
-                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#1e3a5f,#2563a8);border-radius:9px;display:flex;align-items:center;justify-content:center;">
+                    <div style="width:36px;height:36px;background:linear-gradient(135deg,#1e293b,#334155);border-radius:9px;display:flex;align-items:center;justify-content:center;">
                         <i class="fas fa-users text-white" style="font-size:.9rem"></i>
                     </div>
                     <div>
@@ -251,7 +251,7 @@
                                                         <i class="fas fa-edit text-primary"></i>Edit
                                                     </a>
                                                 </li>
-                                                @if($auth->hasRole('admin') || $auth->hasRole('master'))
+                                                @if(($auth->hasRole('admin') || $auth->hasRole('master')) && $user->package_id)
                                                 <li>
                                                     <a class="dropdown-item" href="{{ route('admin.user.package-view-lotto', encrypt($user->id)) }}">
                                                         <i class="fas fa-box text-success"></i>Package

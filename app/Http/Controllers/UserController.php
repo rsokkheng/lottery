@@ -393,6 +393,11 @@ class UserController extends Controller
     public function viewPackageLotto($id)
     {
         $package = User::findOrFail(decrypt($id));
+
+        if (! $package->package_id) {
+            return back()->with('error', 'This user has no package assigned.');
+        }
+
         $bpCode  = BetLotteryPackage::findOrFail($package->package_id)->package_code;
 
         $data = BetLotteryPackageConfiguration::select([

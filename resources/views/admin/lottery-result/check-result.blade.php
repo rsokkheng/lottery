@@ -68,7 +68,7 @@
                     @endphp
 
                     <table class="table table-bordered table-striped text-center mb-0" style="font-size:13px">
-                        <thead class="bg-dark text-white">
+                        <thead style="background:linear-gradient(135deg,#DA251D,#9b1b14);color:#fff">
                             <tr>
                                 <th class="py-2 px-2">#</th>
                                 <th class="py-2 px-2">Province</th>

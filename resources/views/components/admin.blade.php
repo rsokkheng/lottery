@@ -36,6 +36,35 @@
 
     @yield('css')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        /* ── Global admin polish ── */
+        .content-wrapper { background: #f0f2f5 !important; }
+        .main-sidebar { box-shadow: 2px 0 12px rgba(0,0,0,.14) !important; }
+
+        /* Content header */
+        .content-header { padding: .75rem 1rem .5rem !important; }
+        .content-header h1 { font-size: 1.1rem !important; font-weight: 700 !important; color: #1e293b !important; }
+        .breadcrumb { background: transparent !important; padding: 0 !important; margin: 0 !important; font-size: .75rem !important; }
+        .breadcrumb-item a { color: #2563a8; }
+        .breadcrumb-item.active { color: #6c757d; }
+        .breadcrumb-item + .breadcrumb-item::before { color: #9ca3af; }
+
+        /* Content section padding */
+        .content { padding: .5rem 1rem 1.5rem !important; }
+
+        /* Cards — rounder, softer */
+        .card { border-radius: 12px !important; border: 1px solid #e8ecf0 !important; box-shadow: 0 2px 10px rgba(0,0,0,.06) !important; }
+        .card-header { border-radius: 12px 12px 0 0 !important; border-bottom: 1px solid rgba(0,0,0,.06) !important; }
+
+        /* Main header navbar */
+        .main-header.navbar { border-bottom: 1px solid #e8ecf0 !important; box-shadow: 0 1px 6px rgba(0,0,0,.06) !important; }
+
+        /* Footer */
+        .main-footer { font-size: .78rem !important; color: #9ca3af !important; border-top: 1px solid #e8ecf0 !important; padding: .6rem 1rem !important; }
+
+        /* Stat card row spacing fix */
+        .row.g-3 { --bs-gutter-x: 1rem; --bs-gutter-y: .75rem; }
+    </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed {{ Auth::user()->mode }}-mode">

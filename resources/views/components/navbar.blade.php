@@ -31,10 +31,10 @@
         {{-- Currency badges --}}
         <li class="nav-item d-none d-md-flex align-items-center" style="gap:5px; margin-right:6px;">
             @if($navHasVietnam)
-                <span class="badge" style="background:#17a2b8; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Lotto Vietnam</span>
+                <span class="badge" style="background:linear-gradient(135deg,#DA251D,#9b1b14); color:#fff; font-size:.68rem; padding:4px 9px; border-radius:6px; letter-spacing:.4px;">🇻🇳 Vietnam</span>
             @endif
             @if($navHasKhmer)
-                <span class="badge" style="background:#d4a017; color:#fff; font-size:.68rem; padding:4px 8px; border-radius:6px; letter-spacing:.4px;">Lotto Cambodia</span>
+                <span class="badge" style="background:linear-gradient(135deg,#032EA1,#02196f); color:#fff; font-size:.68rem; padding:4px 9px; border-radius:6px; letter-spacing:.4px;">🇰🇭 Cambodia</span>
             @endif
         </li>
 
