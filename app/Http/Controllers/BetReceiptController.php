@@ -268,25 +268,20 @@ public function getBetByReceiptId($id)
     
     if(count($items) > 1){
         $grouped = collect($items)
-            // Group by number_format + digit_format + total_amount + created_at (matching SQL GROUP BY)
             ->groupBy(function ($item) {
                 $createdAtTimestamp = \Carbon\Carbon::parse($item['created_at'])->format('Y-m-d H:i');
                 return "{$item['number']}_{$item['digit_format']}_{$item['total_amount']}_{$createdAtTimestamp}";
             })
             ->map(function ($group) {
                 $first = $group->first();
-                
-                // Collect unique company names for this group
-                $companyNames = $group->pluck('company')
-                    ->unique()
-                    ->implode(', ');
+                $companyNames = $group->pluck('company')->unique()->implode(', ');
 
                 return [
                     'number' => $first['number'],
                     'digit_format' => $first['digit_format'],
                     'company' => $companyNames,
                     'amount' => $first['amount'],
-                    'total_amount' => $first['total_amount'],
+                    'total_amount' => $group->sum('total_amount'),
                     'is_win' => $group->contains('is_win', true),
                     'created_at' => $first['created_at'],
                 ];
@@ -362,19 +357,14 @@ public function printReceiptNo($receiptNo)
         })
         ->map(function ($group) {
             $first = $group->first();
-            
-            // Collect unique company names for this group
-            $companyNames = $group->pluck('company')
-                ->unique()
-                ->filter() // Remove null/empty values
-                ->implode(', ');
+            $companyNames = $group->pluck('company')->unique()->filter()->implode(', ');
 
             return [
                 'number' => $first['number'],
                 'digit_format' => $first['digit_format'],
                 'company' => $companyNames,
                 'amount' => $first['amount'],
-                'total_amount' => $first['total_amount'],
+                'total_amount' => $group->sum('total_amount'),
                 'created_at' => $first['created_at'],
             ];
         })

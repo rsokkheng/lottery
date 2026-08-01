@@ -285,7 +285,7 @@ public function getBetByReceiptId($id)
                     'digit_format' => $first['digit_format'],
                     'company' => $companyNames,
                     'amount' => $first['amount'],
-                    'total_amount' => $first['total_amount'],
+                    'total_amount' => $group->sum('total_amount'),
                     'is_win' => $group->contains('is_win', true),
                     'created_at' => $first['created_at'],
                 ];
@@ -372,7 +372,7 @@ public function printReceiptNo($receiptNo)
                     'digit_format' => $first['digit_format'],
                     'company' => $companyNames,
                     'amount' => $first['amount'],
-                    'total_amount' => $first['total_amount'],
+                    'total_amount' => $group->sum('total_amount'),
                     'created_at' => $first['created_at'],
                 ];
             })
