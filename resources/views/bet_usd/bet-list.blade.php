@@ -166,7 +166,7 @@
                                         @php
                                             $hasHash = str_contains($bet->generated_number ?? '', '#');
                                         @endphp
-                                        @if ($isAdmin && (!$hasHash || $canEditAllNumbers))
+                                        @if ( $canEditAllNumbers)
                                             <div class="flex items-center justify-center gap-1 bet-number-cell"
                                                 data-id="{{ $bet->id }}">
                                                 <input type="text" maxlength="{{ $hasHash ? 30 : 4 }}"
