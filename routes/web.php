@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified', 'check.vnd:VND'])->prefix('lotto_vn')->gr
     Route::get('/receipt-list', [BetReceiptController::class, 'index'])->name('bet.receipt-list');
     Route::get('/bet-list', [BetReceiptController::class, 'betList'])->name('bet.bet-list');
     Route::get('/bet-number', [BetController::class, 'getBetNumber'])->name('bet.bet-number');
+    Route::put('/bet-number/{betNumber}', [BetController::class, 'updateBetNumber'])->middleware('role:admin')->name('bet.bet-number.update');
     Route::get('/bet-winning', [LotteryResultController::class, 'getWinningReport'])->name('bet.bet-winning');
     Route::get('/report-summary', [BetReportController::class, 'getSummaryReport'])->name('reports.summary');
     Route::get('/report-daily', [BetReportController::class, 'getDailyReport'])->name('reports.daily');
@@ -66,6 +67,7 @@ Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->g
     Route::get('/receipt-list', [BetReceiptUSDController::class, 'index'])->name('bet-usd.receipt-list');
     Route::get('/bet-list', [BetReceiptUSDController::class, 'betList'])->name('bet-usd.bet-list');
     Route::get('/bet-number', [BetUSDController::class, 'getBetNumber'])->name('bet-usd.bet-number');
+    Route::put('/bet-number/{betNumber}', [BetUSDController::class, 'updateBetNumber'])->middleware('role:admin')->name('bet-usd.bet-number.update');
     Route::get('/bet-winning', [LotteryResultUSDController::class, 'getWinningReport'])->name('bet-usd.bet-winning');
     Route::get('/report-summary', [BetReportUSDController::class, 'getSummaryReport'])->name('bet-usd.reports.summary');
     Route::get('/report-daily', [BetReportUSDController::class, 'getDailyReport'])->name('bet-usd.reports.daily');

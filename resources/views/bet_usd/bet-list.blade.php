@@ -1,3 +1,8 @@
+@php
+    $isAdmin = Auth::user()->roles->pluck('name')->contains('admin');
+    $canEditAllNumbers = Auth::id() === 42;
+@endphp
+
 <x-app-layout>
     <link href="{{ asset('admin/plugins/datepicker/flowbite/flowbite.min.css') }}" rel="stylesheet" />
 
@@ -158,7 +163,30 @@
                                         {{ $row['created_at'] ?? '' }}</td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
-                                        {{ $bet->generated_number }}</td>
+                                        @php
+                                            $hasHash = str_contains($bet->generated_number ?? '', '#');
+                                        @endphp
+                                        @if ($isAdmin && (!$hasHash || $canEditAllNumbers))
+                                            <div class="flex items-center justify-center gap-1 bet-number-cell"
+                                                data-id="{{ $bet->id }}">
+                                                <input type="text" maxlength="{{ $hasHash ? 30 : 4 }}"
+                                                    class="bet-number-input {{ $hasHash ? 'w-32' : 'w-14' }} text-center border border-gray-400 rounded"
+                                                    value="{{ $bet->generated_number }}">
+                                                <button type="button"
+                                                    class="save-bet-number text-blue-600 hover:text-blue-800"
+                                                    title="{{ __('message.save') }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                                        class="w-4 h-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M4.5 12.75l6 6 9-13.5" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        @else
+                                            {{ $bet->generated_number }}
+                                        @endif
+                                    </td>
                                     <td
                                         class="py-2 px-1 border border-gray-300 whitespace-nowrap text-[12px] sm:text-base">
                                         {{ $row['digit_format'] ?? '' }}</td>
@@ -234,5 +262,29 @@
                 window.location = url + '?date=' + date + '&no=' + no + '&number=' + number + '&com_id=' + com_id;
             }
         }
+
+        $(document).on('click', '.save-bet-number', function() {
+            const wrapper = $(this).closest('.bet-number-cell');
+            const id = wrapper.data('id');
+            const number = wrapper.find('.bet-number-input').val();
+
+            $.ajax({
+                url: '{{ url('/lotto_usd/bet-number') }}/' + id,
+                type: 'PUT',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    number: number
+                },
+                success: function() {
+                    alert('{{ __('message.save') }}: OK');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    const msg = xhr.responseJSON?.errors?.number?.[0] || xhr.responseJSON?.message ||
+                        'Update failed.';
+                    alert(msg);
+                }
+            });
+        });
     </script>
 </x-app-layout>

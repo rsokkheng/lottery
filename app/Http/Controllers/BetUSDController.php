@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BetLotteryPackageConfiguration;
+use App\Models\BetNumberUSD;
 use App\Models\BetUSD;
 use App\Models\User;
 use Carbon\Carbon;
@@ -19,6 +20,44 @@ class BetUSDController extends Controller
     {
         $this->betModel = $betModel;
         $this->currentDate = Carbon::today()->format('Y-m-d');
+    }
+
+    public function updateBetNumber(Request $request, BetNumberUSD $betNumber)
+    {
+        $hasHash = str_contains($betNumber->generated_number ?? '', '#');
+
+        if ($hasHash && Auth::id() !== 1) {
+            return response()->json(['message' => 'Roll parlay numbers cannot be edited.'], 422);
+        }
+
+        if ($hasHash) {
+            $partLength = strlen(explode('#', $betNumber->generated_number)[0]);
+            $request->validate([
+                'number' => ['required', 'regex:/^\d{' . $partLength . '}(#\d{' . $partLength . '})+$/'],
+            ]);
+        } else {
+            $bet = BetUSD::find($betNumber->bet_id);
+            $digitFormat = $bet->digit_format ?? null;
+            $expectedLength = match ($digitFormat) {
+                '2D', 'RP2' => 2,
+                '3D', 'RP3', 'RP3X' => 3,
+                '4D' => 4,
+                default => 4,
+            };
+
+            $request->validate([
+                'number' => ['required', 'digits:' . $expectedLength],
+            ]);
+        }
+
+        $betNumber->update([
+            'original_number' => $request->number,
+            'generated_number' => $request->number,
+        ]);
+
+        BetUSD::where('id', $betNumber->bet_id)->update(['number_format' => $request->number]);
+
+        return response()->json(['message' => 'Bet number updated successfully.']);
     }
 
     public function getBetNumber(Request $request)
