@@ -385,8 +385,10 @@ public function printReceiptNo($receiptNo)
         'due_amount' => $sumAmount->net_amount ?? 0,
         'bets' => $grouped,
         'receipt_date' => Carbon::parse($result->date)->format('Y-m-d h:i A'),
-        'expire_date' => Carbon::parse($result->date)->addDays(3)->format('Y-m-d h:i A'),
+        'expire_date' => Carbon::parse($result->date)->addDays(config('pos.validity_days'))->format('Y-m-d h:i A'),
         'receipt_by' => $result?->user?->name,
+        'reprint' => request()->boolean('reprint'),
+        'station' => request()->boolean('station'),
     ]);
 }
 

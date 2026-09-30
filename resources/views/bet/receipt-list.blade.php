@@ -193,13 +193,16 @@
                 </div>
                 <!-- Modal footer -->
                 <div
-                    class="flex justify-content-end justify-items-end justify-end items-end p-4 space-x-2 md:p-5 border-t border-gray-200 rounded-b font-semibold">
+                    class="flex justify-content-end justify-items-end justify-end items-end flex-wrap gap-y-2 p-4 space-x-2 md:p-5 border-t border-gray-200 rounded-b font-semibold">
                     <button id="btn_pay" style="display: none" data-modal-hide="static-modal" type="button"
                         class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 text-center "
                         onclick="payReceipt()">{{ __('Pay') }}</button>
                     <button data-modal-hide="static-modal" type="button"
                         class="text-white bg-blue-800 hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg px-5 py-2.5 text-center "
                         onclick="printReceipt()">{{ __('Print') }}</button>
+                    <button data-modal-hide="static-modal" type="button"
+                        class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 text-center "
+                        onclick="printMiniPos()">{{ __('Print Mini POS') }}</button>
                     <button data-modal-hide="static-modal" type="button"
                         class="text-white bg-sky-400 py-2.5 px-5 ms-3 font-medium focus:outline-none rounded-lg border border-gray-200 hover:bg-sky-500 focus:z-10 focus:ring-4 focus:ring-gray-100 ">{{ __('Close') }}</button>
                 </div>
@@ -271,26 +274,46 @@
                 alert("Receipt number not found!");
                 return;
             }
-            var printWindow = window.open('/lotto_vn/bet_receipt/' + receiptNo, '_blank');
+            // The receipt page prints itself and closes after printing
+            var printWindow = window.open('/lotto_vn/bet_receipt/' + encodeURIComponent(receiptNo) + '?reprint=1', '_blank');
 
             if (!printWindow) {
                 alert('Popup blocked! Please allow popups for this site.');
                 return;
             }
+        }
 
-            printWindow.onload = function() {
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.onafterprint = function() {
-                        printWindow.close();
-                    };
-                }, 500);
-            };
+        // Send the receipt to the Mini POS station (built-in printer)
+        function printMiniPos() {
+            var receiptNo = document.getElementById('receipt_no')?.innerText?.trim();
+            if (!receiptNo) {
+                alert("Receipt number not found!");
+                return;
+            }
+            fetch('{{ route('pos.print-jobs.store') }}', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ receipt_no: receiptNo, currency: 'VND', reprint: true }),
+            })
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    if (ok && data?.success) {
+                        toastr.success('Sent to Mini POS: ' + receiptNo);
+                    } else {
+                        toastr.error(data?.message || 'Send to Mini POS failed!');
+                    }
+                })
+                .catch(() => toastr.error('Send to Mini POS failed!'));
         }
 
         function payReceipt() {
             let receipt_no = $('#receipt_no').text();
-            fetch(`/bet_receipt_pay/${receipt_no}`)
+            fetch(`/lotto_vn/bet_receipt_pay/${encodeURIComponent(receipt_no)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data?.success) {

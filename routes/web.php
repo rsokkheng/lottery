@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BetController;
 use App\Http\Controllers\BetUSDController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\PosPrintController;
 use App\Http\Controllers\BetReportController;
 use App\Http\Controllers\BetReceiptController;
 use App\Http\Controllers\BetReportUSDController;
@@ -87,6 +88,13 @@ Route::middleware(['auth', 'verified', 'check.usd:USD'])->prefix('lotto_usd')->g
 
 
 
+
+// Print from phone to Mini POS (built-in printer)
+Route::middleware(['auth', 'verified'])->prefix('pos')->name('pos.')->group(function () {
+    Route::get('/station', [PosPrintController::class, 'station'])->name('station');
+    Route::get('/station/next', [PosPrintController::class, 'next'])->name('station.next');
+    Route::post('/print-jobs', [PosPrintController::class, 'store'])->name('print-jobs.store');
+});
 
 // Auth routes
 require __DIR__.'/auth.php';
